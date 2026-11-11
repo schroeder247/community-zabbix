@@ -135,17 +135,26 @@ application with a host, the same classes register as services and start and sto
 ### Query the API
 
 `ZabbixClient` has a client for every API object, `zabbix.Hosts`, `zabbix.Items`, and so on. Each takes a lambda for what to read, the
-fields a create requires, and an indexer for one object. `ZabbixItemKeys` declares Zabbix's own keys with their types.
+fields a create requires and a lambda for the rest, and an indexer for one object, which updates it with a lambda too.
+`ZabbixItemKeys` declares Zabbix's own keys with their types.
 
 ```csharp
+using System.Net;
+
 var hosts = await zabbix.Hosts.GetAsync(q =>
 {
     q.Search.VisibleName = "web";
     q.Limit = 10;
 });
 
-ulong groupId = await zabbix.HostGroups.CreateAsync("Linux servers");
-await zabbix.Hosts.CreateAsync("web-02", [groupId]);
+ulong linux = await zabbix.HostGroups.CreateAsync("Linux servers");
+ulong id = await zabbix.Hosts.CreateAsync("web-02", [linux], h =>
+{
+    h.Interfaces = [ZabbixInterface.Agent(IPAddress.Parse("10.0.0.2"))];
+    h.Tags = [("env", "prod")];
+});
+
+await zabbix.Hosts["web-02"].UpdateAsync(h => h.Status = ZabbixHostStatus.Disabled);
 
 double load = await zabbix.Hosts["web-01"].GetLastAsync(ZabbixItemKeys.Cpu.Load());
 ```

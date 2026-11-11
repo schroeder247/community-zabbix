@@ -64,4 +64,27 @@ public class ZabbixHostGroupNode : ZabbixNode
         ZabbixHostGroup group = await GetAsync(cancellationToken).ConfigureAwait(false);
         await Client.HostGroups.DeleteAsync(group.GroupId ?? throw new ZabbixNotFoundException("hostgroup", Name), cancellationToken).ConfigureAwait(false);
     }
+
+    /// <summary>
+    /// Changes the group: reads its id, names it in a <c>hostgroup.update</c> request, and lets <paramref name="configure"/>
+    /// set the fields to change, <c>g =&gt; g.Name = "Linux servers"</c> to rename it.
+    /// </summary>
+    /// <param name="configure">Sets the fields to change.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>A task that completes when the server has changed the group.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="configure"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ZabbixNotFoundException">The group does not exist.</exception>
+    public virtual Task UpdateAsync(Action<ZabbixHostGroupUpdateRequest> configure, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        return UpdateCoreAsync(configure, cancellationToken);
+    }
+
+    private async Task UpdateCoreAsync(Action<ZabbixHostGroupUpdateRequest> configure, CancellationToken cancellationToken)
+    {
+        ZabbixHostGroup group = await GetAsync(cancellationToken).ConfigureAwait(false);
+        var request = new ZabbixHostGroupUpdateRequest(group.GroupId ?? throw new ZabbixNotFoundException("hostgroup", Name));
+        configure(request);
+        await Client.HostGroups.UpdateAsync(request, cancellationToken).ConfigureAwait(false);
+    }
 }

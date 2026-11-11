@@ -372,7 +372,9 @@ API object, every one generated at build time from the checked-in description (`
 the Zabbix 7.0, 7.4 and 8.0 PHP source by `tools/ZabbixApiExtract`): `client.Hosts.GetAsync(parameters)` is
 `host.get` and returns `IReadOnlyList<T>`, `CountAsync` is `host.get` with `countOutput`,
 `CreateAsync`/`UpdateAsync`/`DeleteAsync` return the ids the server names, and the mass verbs and the object's other
-methods are there when the API has them. The records live in `Zabbix.Api`, the clients in `Zabbix.Sdk`; a user who
+methods are there when the API has them. A write takes a lambda as a read does (ADR 0013, section 4): a create takes the
+fields it requires and a lambda for the rest, and a node's `UpdateAsync` builds the request from the node's id and lets a
+lambda set what changes. The records live in `Zabbix.Api`, the clients in `Zabbix.Sdk`; a user who
 needs a method no client names has `client.SendAsync` and `ZabbixJson` for every record. The tree's own
 reads (`item.get`, `history.get`, `host.get`, `hostgroup.get`) go through the same clients. A method or parameter
 missing from the connected version is refused at run time (`ZabbixSupportedAttribute`, `ZabbixVersionException`);

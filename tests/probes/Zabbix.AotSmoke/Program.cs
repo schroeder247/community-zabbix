@@ -33,6 +33,35 @@ catch (HttpRequestException e)
     Console.WriteLine($"api: {e.GetType().Name}");
 }
 
+// A write as callers shape it: the record a create's constructor builds and its lambda fills, with a host's interfaces
+// (the first of each type the main one) and a tag from a pair, written by the generated JSON context; then sent, as a create
+// and as a node's update.
+var write = new ZabbixHostCreateRequest("smoke", [1UL]) { Interfaces = [ZabbixInterface.Agent(IPAddress.Loopback), ZabbixInterface.Agent("smoke.example")] };
+write.Tags = [("env", "smoke")];
+string written = JsonSerializer.Serialize(write, (System.Text.Json.Serialization.Metadata.JsonTypeInfo<ZabbixHostCreateRequest>)ZabbixJson.Options.GetTypeInfo(typeof(ZabbixHostCreateRequest)));
+if (!written.Contains("""{"type":1,"ip":"127.0.0.1","dns":"","port":"10050","useip":1,"main":1}""", StringComparison.Ordinal)
+    || !written.Contains("\"main\":0", StringComparison.Ordinal) || !written.Contains("""[{"tag":"env","value":"smoke"}]""", StringComparison.Ordinal))
+{
+    Console.WriteLine($"aot smoke: a host's create wrote {written}");
+    return 1;
+}
+try
+{
+    await client.Hosts.CreateAsync("smoke", [1UL], h => h.Tags = [("env", "smoke")]).ConfigureAwait(false);
+}
+catch (HttpRequestException e)
+{
+    Console.WriteLine($"create: {e.GetType().Name}");
+}
+try
+{
+    await client.Items[1].UpdateAsync(i => i.Delay = "5m").ConfigureAwait(false);
+}
+catch (HttpRequestException e)
+{
+    Console.WriteLine($"update: {e.GetType().Name}");
+}
+
 // The API client its builder binds from configuration, on a container of its own: the generated binder (its Resilience
 // subsection retries at once), the options' validator and the same HTTP pipeline as the registered client's, read with a token
 // passed by position.

@@ -59,21 +59,14 @@ Add this to the program. It creates a host group, a host in it, and a trapper it
 string hostName = "gs-web-01";
 ulong groupId = await zabbix.HostGroups.CreateAsync("Getting started");
 ulong hostId = await zabbix.Hosts.CreateAsync(hostName, [groupId]);
-await zabbix.Items.CreateAsync(new ZabbixItemCreateRequest
-{
-    HostId = hostId,
-    Name = "Requests",
-    Key = "app.requests",
-    Type = ZabbixItemType.Trapper,
-    ValueType = ZabbixItemValueType.Unsigned,
-    TrapperHosts = "0.0.0.0/0,::/0",                  // who may send to it
-});
+await zabbix.Items.CreateAsync(hostId, "Requests", ZabbixItemType.Trapper, "app.requests", ZabbixItemValueType.Unsigned, item =>
+    item.TrapperHosts = "0.0.0.0/0,::/0");             // who may send to it
 Console.WriteLine($"created {hostName} ({hostId})");
 ```
 
 - `ZabbixClient` has one client per API object, 68 in all: `zabbix.Hosts`, `zabbix.Items`, and so on.
-- `CreateAsync` takes the fields the API requires, or a request with any of the others, and returns the new id. An item needs more
-  than its required fields here, so this one takes a request. The request's `required` members are the fields the API requires.
+- `CreateAsync` takes the fields the API requires, and returns the new id. An item needs more than its required fields here, so a
+  lambda sets the others.
 - `TrapperHosts` lists who may send to the item. `0.0.0.0/0,::/0` accepts everyone, so use it only on a lab server. On 8.0, an item
   created through the API accepts only localhost unless you set this.
 

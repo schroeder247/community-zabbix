@@ -140,6 +140,29 @@ public class ZabbixHostNode : ZabbixNode, IAsyncEnumerable<ZabbixItemNode>
         await Client.Hosts.DeleteAsync(host.HostId ?? throw new ZabbixNotFoundException("host", Name), cancellationToken).ConfigureAwait(false);
     }
 
+    /// <summary>
+    /// Changes the host: reads its id, names it in a <c>host.update</c> request, and lets <paramref name="configure"/> set
+    /// the fields to change. What it leaves unset isn't sent, so the server keeps it.
+    /// </summary>
+    /// <param name="configure">Sets the fields to change: <c>h =&gt; h.Status = ZabbixHostStatus.Disabled</c>.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>A task that completes when the server has changed the host.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="configure"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ZabbixNotFoundException">The host does not exist.</exception>
+    public virtual Task UpdateAsync(Action<ZabbixHostUpdateRequest> configure, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        return UpdateCoreAsync(configure, cancellationToken);
+    }
+
+    private async Task UpdateCoreAsync(Action<ZabbixHostUpdateRequest> configure, CancellationToken cancellationToken)
+    {
+        ZabbixHost host = await GetAsync(cancellationToken).ConfigureAwait(false);
+        var request = new ZabbixHostUpdateRequest(host.HostId ?? throw new ZabbixNotFoundException("host", Name));
+        configure(request);
+        await Client.Hosts.UpdateAsync(request, cancellationToken).ConfigureAwait(false);
+    }
+
     /// <summary>One item of this host, by key; no call is made until it is asked.</summary>
     /// <param name="key">The item key.</param>
     /// <returns>The item's node.</returns>

@@ -37,6 +37,29 @@ public class ZabbixItemNode : ZabbixNode
     }
 
     /// <summary>
+    /// Changes the item: reads its id, names it in an <c>item.update</c> request, and lets <paramref name="configure"/> set
+    /// the fields to change. What it leaves unset isn't sent, so the server keeps it.
+    /// </summary>
+    /// <param name="configure">Sets the fields to change: <c>i =&gt; i.Status = ZabbixItemStatus.Disabled</c>.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>A task that completes when the server has changed the item.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="configure"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ZabbixNotFoundException">The host, or the item, does not exist.</exception>
+    public virtual Task UpdateAsync(Action<ZabbixItemUpdateRequest> configure, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        return UpdateCoreAsync(configure, cancellationToken);
+    }
+
+    private async Task UpdateCoreAsync(Action<ZabbixItemUpdateRequest> configure, CancellationToken cancellationToken)
+    {
+        ZabbixItem item = await GetAsync(cancellationToken).ConfigureAwait(false);
+        var request = new ZabbixItemUpdateRequest(item.ItemId ?? throw new ZabbixNotFoundException(HostName, Key));
+        configure(request);
+        await Client.Items.UpdateAsync(request, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// The item's last value (<c>lastvalue</c>), or <see langword="null"/> when the item exists and has never collected.
     /// An item that does not exist is not a missing value, so it throws.
     /// </summary>

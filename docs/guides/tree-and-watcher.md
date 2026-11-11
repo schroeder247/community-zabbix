@@ -35,8 +35,9 @@ await foreach (ZabbixValue value in zabbix.Hosts["web-01"].GetLatestAsync())
   `Item(string)` throws `FormatException` for text that isn't an item key.
 - Building a node makes no call.
 - A host reached through its group is read only while it's in the group.
-- A host's or a group's node reads its object with `GetAsync`, or `FindAsync` for `null` when there's none, and deletes it with
-  `DeleteAsync`.
+- A host's or a group's node reads its object with `GetAsync`, or `FindAsync` for `null` when there's none, changes it with
+  `UpdateAsync(h => h.Status = ZabbixHostStatus.Disabled)`, and deletes it with `DeleteAsync`. An item's node reads and changes
+  its item the same way.
 - The level you call a read at is both the scope of the request and the size of its reply. `client.GetLatestAsync()` reads every item
   on the server.
 

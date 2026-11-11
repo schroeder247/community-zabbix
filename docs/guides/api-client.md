@@ -142,7 +142,7 @@ internal sealed class VaultCredential(IVault vault) : ZabbixCredential
   server refused the token before running the method and the next `GetTokenAsync` will give a different token. The request then goes
   once more, so answering `true` for another error could run a write twice.
 
-## Read and change objects
+## Read objects
 
 `ZabbixClient` holds one client per API object: `zabbix.Hosts`, `zabbix.Items`, `zabbix.HostGroups`, and 65 more. Each has the
 object's methods, with typed records.
@@ -154,16 +154,6 @@ long webHosts = await zabbix.Hosts.CountAsync(q => q.Search.VisibleName = "web")
 ZabbixHost host = await zabbix.Hosts["web-01"].GetAsync();         // one host, by name
 ZabbixItem item = await zabbix.Items[itemId].GetAsync();           // one object of any client, by id
 await zabbix.Items[itemId].DeleteAsync();
-
-ulong groupId = await zabbix.HostGroups.CreateAsync("Linux servers");
-ulong hostId = await zabbix.Hosts.CreateAsync("web-02", [groupId]);   // what the API requires
-
-await zabbix.Hosts.CreateAsync(new ZabbixHostCreateRequest            // or any field of the request
-{
-    TechnicalName = "web-03",
-    VisibleName = "Web 3",
-    Groups = [groupId],
-});
 ```
 
 | Method | What it does | What it returns |
@@ -173,14 +163,13 @@ await zabbix.Hosts.CreateAsync(new ZabbixHostCreateRequest            // or any 
 | `CountAsync` | Counts objects, with the same parameters | The count |
 | `CreateAsync`, `UpdateAsync` | Changes one object or several | The ids the server answered |
 | `DeleteAsync` | Deletes one object or several | For several, the ids the server answered. For one, nothing. |
-| `this[id]` | One object: `GetAsync`, `FindAsync`, and `DeleteAsync` where the API deletes it. It makes no call until you ask. | A node |
+| `this[id]` | One object: `GetAsync`, `FindAsync`, and `UpdateAsync` and `DeleteAsync` where the API changes and deletes it. It makes no call until you ask. | A node |
 
-- `Hosts["web-01"]` takes a host's name, and `HostGroups["Linux servers"]` a group's. Each node reads, finds, and deletes its object,
-  and a group's reaches its hosts: `HostGroups["Linux servers"].Hosts["web-01"]`. See [The tree and the watcher](tree-and-watcher.md).
+- `Hosts["web-01"]` takes a host's name, and `HostGroups["Linux servers"]` a group's. Each node reads, finds, updates, and deletes its
+  object, and a group's reaches its hosts: `HostGroups["Linux servers"].Hosts["web-01"]`. See
+  [The tree and the watcher](tree-and-watcher.md).
 - Every method takes a `CancellationToken` last: `await zabbix.Hosts.GetAsync(cancellationToken)`. A method with several forms has
   each one with a token and without one.
-- A request's `required` members are the fields the API requires. A request that's only an id converts from that id, so
-  `Groups = [groupId]` needs no wrapper.
 
 The parameters of a get:
 
@@ -200,6 +189,48 @@ The parameters of a get:
   `result`.
 - `ZabbixJson.Options`, and its `TypeInfoResolver`, are the contract the SDK reads and writes the API with: ids as strings and enums as
   their numbers. `JsonSerializer.Serialize(host, ZabbixJson.Options)` writes a record as the API takes it.
+
+## Create and update objects
+
+A create takes the fields the API requires, and a lambda that sets any of the others. A node changes its object with a lambda, and
+fills in the object's id.
+
+```csharp
+using System.Net;
+
+ulong linux = await zabbix.HostGroups.CreateAsync("Linux servers");
+ulong id = await zabbix.Hosts.CreateAsync("web-02", [linux], h =>
+{
+    h.Interfaces = [ZabbixInterface.Agent(IPAddress.Parse("10.0.0.2"))];
+    h.Tags = [("env", "prod")];
+});
+
+await zabbix.Hosts["web-02"].UpdateAsync(h => h.Status = ZabbixHostStatus.Disabled);
+await zabbix.Items[itemId].UpdateAsync(i => i.Delay = "5m");
+await zabbix.HostGroups["Linux servers"].UpdateAsync(g => g.Name = "Linux");
+```
+
+- A request's required fields are `required` members, and its constructor takes them in the order the create does. Its other fields
+  have setters, which the lambda sets. What you leave unset isn't sent, so an update changes only what you set.
+- A create also takes the request itself, which a target-typed `new` builds:
+  `await zabbix.Hosts.CreateAsync(new("web-03", [linux]) { VisibleName = "Web 3" })`. Several requests go in one call as a list.
+- A node by name reads its object's id first, and throws `ZabbixNotFoundException` when there's none. A node by id sends the update
+  without reading. The lambda can't change the id: a request's required members are set once.
+- A value nested in a request needs no `new`:
+
+| Value | How you write it |
+| --- | --- |
+| A group, a template, or another object named by its id | The id: `Groups = [linux]` |
+| A tag | A pair: `Tags = [("env", "prod")]` |
+| A user macro | A pair: `Macros = [("{$SNMP_COMMUNITY}", "public")]` |
+| A host's interface | `ZabbixInterface.Agent`, `Snmp`, `Ipmi`, or `Jmx`, at an `IPAddress` or a DNS name, on the port Zabbix uses for the kind unless you pass one |
+
+- The first interface of each type in a host's list is its main one, unless you mark another with
+  `with { Main = ZabbixInterfacePriority.Primary }`. Zabbix needs one main interface of each type a host has.
+- `ZabbixInterface.Snmp` makes an SNMPv2c interface whose community is the `{$SNMP_COMMUNITY}` macro. Pass a community, or a
+  `ZabbixHostInterfaceDetailRequest` for SNMPv1 or SNMPv3.
+- To add an interface to a host that exists, pass one with the host's id:
+  `await zabbix.HostInterfaces.CreateAsync(hostId, ZabbixInterface.Snmp(IPAddress.Parse("10.0.0.2")))`.
 
 ## Check what the server's version supports
 

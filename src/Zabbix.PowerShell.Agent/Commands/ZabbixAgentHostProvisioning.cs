@@ -1,6 +1,5 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
-using System.Globalization;
 using System.Management.Automation;
 using System.Net;
 
@@ -64,42 +63,14 @@ internal static class ZabbixAgentHostProvisioning
             bool interfaceCreated = false;
             if (interfaceId is null)
             {
-                AgentInterface agent = AgentInterface.Of(interfaceAddress, interfacePort);
-                ulong created = await client.HostInterfaces.CreateAsync(new ZabbixHostInterfaceCreateRequest
-                {
-                    HostId = hostId,
-                    Type = ZabbixInterfaceType.Agent,
-                    Ip = agent.Ip,
-                    Dns = agent.Dns,
-                    Port = agent.Port,
-                    UseIp = agent.UseIp,
-                    Main = ZabbixInterfacePriority.Primary,
-                }, cancellationToken).ConfigureAwait(false);
-                interfaceId = created;
+                interfaceId = await client.HostInterfaces.CreateAsync(hostId, AgentInterface(interfaceAddress, interfacePort), cancellationToken).ConfigureAwait(false);
                 interfaceCreated = true;
             }
             return new ZabbixAgentHostRecord(hostId, hostName, interfaceId, hostCreated: false, interfaceCreated);
         }
 
         ulong groupId = await EnsureGroupAsync(client, hostGroup, cancellationToken).ConfigureAwait(false);
-        AgentInterface reached = AgentInterface.Of(interfaceAddress, interfacePort);
-        ulong createdHostId = await client.Hosts.CreateAsync(new ZabbixHostCreateRequest
-        {
-            TechnicalName = hostName,
-            Groups = [new ZabbixHostGroupRequest { GroupId = groupId }],
-            Interfaces =
-            [
-                new ZabbixHostInterfaceRequest
-                {
-                    Type = ZabbixInterfaceType.Agent,
-                    Ip = reached.Ip,
-                    Dns = reached.Dns,
-                    Port = reached.Port,
-                    UseIp = reached.UseIp,
-                    Main = ZabbixInterfacePriority.Primary,
-                },
-            ],
-        }, cancellationToken).ConfigureAwait(false);
+        ulong createdHostId = await client.Hosts.CreateAsync(hostName, [groupId], host => host.Interfaces = [AgentInterface(interfaceAddress, interfacePort)], cancellationToken).ConfigureAwait(false);
 
         IReadOnlyList<ZabbixHostInterface> interfaces = await client.HostInterfaces.GetAsync(
             new ZabbixHostInterfaceGetParameters { HostIds = [createdHostId] }, cancellationToken).ConfigureAwait(false);
@@ -115,7 +86,7 @@ internal static class ZabbixAgentHostProvisioning
         }, cancellationToken).ConfigureAwait(false);
         if (existing.Count > 0) return existing[0].GroupId!.Value;
 
-        return await client.HostGroups.CreateAsync(new ZabbixHostGroupCreateRequest { Name = name }, cancellationToken).ConfigureAwait(false);
+        return await client.HostGroups.CreateAsync(name, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -227,18 +198,10 @@ internal static class ZabbixAgentHostProvisioning
         return new ZabbixAgentHostStatus(host, items);
     }
 
-    // An agent interface's address fields: an IP address is polled as one (useip 1), anything else as a DNS name the
-    // server resolves (useip 0, ip empty), as the frontend's host form sends them.
-    private readonly record struct AgentInterface(string Ip, string Dns, string Port, ZabbixHostInterfaceUseIp UseIp)
-    {
-        public static AgentInterface Of(string address, int port)
-        {
-            string text = port.ToString(CultureInfo.InvariantCulture);
-            return IPAddress.TryParse(address, out _)
-                ? new AgentInterface(address, string.Empty, text, ZabbixHostInterfaceUseIp.Ip)
-                : new AgentInterface(string.Empty, address, text, ZabbixHostInterfaceUseIp.Dns);
-        }
-    }
+    // An agent interface: an IP address is polled as one (useip 1), anything else as a DNS name the server resolves
+    // (useip 0, ip empty), as the frontend's host form sends them. The first of its type on a host is the main one.
+    private static ZabbixHostInterfaceRequest AgentInterface(string address, int port)
+        => IPAddress.TryParse(address, out IPAddress? ip) ? ZabbixInterface.Agent(ip, port) : ZabbixInterface.Agent(address, port);
 
     /// <summary>A readable item name from a key: <c>ops.queue.depth</c> -&gt; <c>Ops queue depth</c>.</summary>
     private static string DeriveName(string key)

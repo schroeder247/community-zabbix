@@ -307,19 +307,27 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
     }
 
     // What the members a record declares feed the steps after them: the wire names its serialization guard knows, the
-    // text form's members and the equality's members.
-    private sealed record RecordMembers(List<string> Wires, List<(string Member, string Kind, bool Secret, bool Obsolete, bool Optional)> Printed, List<(string Member, string Type, string Kind, bool Obsolete)> Compared);
+    // text form's members, the equality's members and the required members its constructor takes.
+    private sealed record RecordMembers(List<string> Wires, List<(string Member, string Kind, bool Secret, bool Obsolete, bool Optional)> Printed, List<(string Member, string Type, string Kind, bool Obsolete)> Compared, List<(string Member, string Type, FieldDescription Field)> Required);
 
-    // One record: its declaration, its members, its bag and the guard on it, its text form, its equality and, on a get's
-    // parameters, the field sets the API validates.
+    // One record: its declaration, its constructors, its members, its conversions, its bag and the guard on it, its text
+    // form, its equality and, on a get's parameters, the field sets the API validates.
     private string EmitRecord(TypeDescription t)
     {
         string name = Prefixed(t.Name);
         RecordShape shape = RecordShape.Of(t);
         var code = new StringBuilder(Header(api.Range, Doc(t.Summary, t.Name)));
         EmitRecordDeclaration(code, t, name, shape);
-        RecordMembers members = EmitRecordFields(code, t, name, shape);
-        if (shape.Request) EmitIdConversion(code, t, name);
+        // the members first, so the constructors take exactly the required members the record declares
+        var fields = new StringBuilder();
+        RecordMembers members = EmitRecordFields(fields, t, name, shape);
+        EmitConstructors(code, t, name, members.Required);
+        code.Append(fields);
+        if (shape.Request)
+        {
+            EmitIdConversion(code, t, name, members.Required);
+            EmitTupleConversion(code, t, name, members.Required);
+        }
         if (shape.HasBag) EmitAdditionalFields(code, t, name, shape);
         if (shape.SendableBag) EmitSerializingGuard(code, name, members.Wires);
         EmitPrintMembers(code, members.Printed, shape.HasBag);
@@ -330,15 +338,103 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
     }
 
     // A request that is only an id reads as the id: Groups = [groupId], as a caller would write it.
-    private static void EmitIdConversion(StringBuilder code, TypeDescription t, string name)
+    private static void EmitIdConversion(StringBuilder code, TypeDescription t, string name, List<(string Member, string Type, FieldDescription Field)> required)
     {
-        if (t.Fields.Length != 1 || t.Fields[0] is not { Required: true, Kind: "id" } field) return;
-        string member = Member(field.Name);
+        if (t.Fields.Length != 1 || t.Fields[0] is not { Required: true, Kind: "id" } || required.Count != 1) return;
         code.Append("    /// <summary>Converts an id to the request that names it.</summary>\n    /// <param name=\"id\">The id to name.</param>\n    /// <returns>The request.</returns>\n");
         code.Append("    public static implicit operator ").Append(name).Append("(ulong id) => FromUInt64(id);\n\n");
         code.Append("    /// <summary>The request that names an id.</summary>\n    /// <param name=\"id\">The id to name.</param>\n    /// <returns>The request.</returns>\n");
-        code.Append("    public static ").Append(name).Append(" FromUInt64(ulong id) => new() { ").Append(member).Append(" = id };\n\n");
+        code.Append("    public static ").Append(name).Append(" FromUInt64(ulong id) => new(id);\n\n");
     }
+
+    /// <summary>
+    /// A record's constructors, when it has required members: one that takes them, in the order a short create takes the
+    /// fields (<see cref="ShortCreateOrder"/>: a list last, so a name comes first), marked <c>SetsRequiredMembers</c>; and
+    /// one that takes nothing, for an initializer that sets them, which the compiler checks. The Azure SDK's options shape,
+    /// required values in the constructor and the rest settable, and the C# reference's own example of
+    /// <c>required</c> members, which keeps both constructors.
+    /// </summary>
+    private static void EmitConstructors(StringBuilder code, TypeDescription t, string name, List<(string Member, string Type, FieldDescription Field)> required)
+    {
+        if (required.Count == 0) return;
+        string what = t.Role switch
+        {
+            "get" => "the parameters",
+            "request" => "the request",
+            _ => "the record",
+        };
+        string from = t.Role is "request" or "get" && t.Method is { } method ? "the fields <c>" + method + "</c> requires" : "the fields it requires";
+        code.Append("    /// <summary>Initializes ").Append(what).Append(" with no field set; an initializer sets its <c>required</c> members.</summary>\n");
+        code.Append("    public ").Append(name).Append("()\n    {\n    }\n\n");
+        code.Append("    /// <summary>Initializes ").Append(what).Append(" from ").Append(from).Append(".</summary>\n");
+        List<(string Member, string Type, FieldDescription Field)> ordered = ShortCreateOrder(required);
+        foreach ((string member, _, FieldDescription field) in ordered)
+            code.Append("    /// <param name=\"").Append(Local(member).TrimStart('@')).Append("\">").Append(Doc(DocSentences.Field(field.Summary, member, field.Wire), field.Wire)).Append("</param>\n");
+        code.Append("    [global::System.Diagnostics.CodeAnalysis.SetsRequiredMembers]\n");
+        if (ordered.Any(r => r.Field.Kind == "string" && r.Member.Contains("Url")))
+            code.Append("    ").Append(Suppress("Design", "CA1054:URI-like parameters should not be strings", "The API takes this field as text: it may hold a macro, which isn't a URI."));
+        // a flag is bool? on the record, so a converter can read an absent one; the constructor takes the value it requires
+        code.Append("    public ").Append(name).Append('(').Append(string.Join(", ", ordered.Select(r => (r.Field.Kind is "bool" or "apibool" ? "bool" : r.Type) + " " + Local(r.Member)))).Append(")\n    {\n");
+        foreach ((string member, _, _) in ordered) code.Append("        ").Append(member).Append(" = ").Append(Local(member)).Append(";\n");
+        code.Append("    }\n\n");
+    }
+
+    // The order a short create and a record's constructor take the required fields in: as the description lists them, a
+    // list after the rest, so CreateAsync("web-02", [groupId]) reads in the order a caller says it.
+    private static List<T> ShortCreateOrder<T>(IEnumerable<T> required, Func<T, string> kind)
+        => [.. required.OrderBy(r => kind(r).StartsWith("list:", StringComparison.Ordinal))];
+
+    private static List<(string Member, string Type, FieldDescription Field)> ShortCreateOrder(List<(string Member, string Type, FieldDescription Field)> required)
+        => ShortCreateOrder(required, r => r.Field.Kind);
+
+    /// <summary>
+    /// A tag or a user macro from a pair, as a caller writes one: <c>Tags = [("env", "prod")]</c>,
+    /// <c>Macros = [("{$SNMP_COMMUNITY}", "public")]</c>, with the named alternative CA2225 asks for. A record nested in a
+    /// request whose fields are a tag's (<c>tag</c> and <c>value</c>, the tag required) or a user macro's (<c>macro</c> and
+    /// <c>value</c> beside its own attributes, nothing else required) converts from a pair; a tag filter, whose operator
+    /// changes what the pair means, and a discovery filter's condition on a macro don't.
+    /// </summary>
+    private static void EmitTupleConversion(StringBuilder code, TypeDescription t, string name, List<(string Member, string Type, FieldDescription Field)> required)
+    {
+        if (t.Role != "nested-request" || TuplePair(t) is not { } pair) return;
+        FieldDescription first = pair.First;
+        FieldDescription value = pair.Value;
+        string firstMember = Member(first.Name);
+        string valueMember = Member(value.Name);
+        string tuple = "(string " + firstMember + ", string " + valueMember + ")";
+        string parameter = first.Wire;
+        string noun = first.Wire == "tag" ? "a tag and its value" : "a user macro and its value";
+        string verb = first.Wire == "tag" ? "sets them" : "sets it";
+        // the pair's required members go through the constructor, in its order; the others through the initializer
+        List<(string Member, string Type, FieldDescription Field)> ordered = ShortCreateOrder(required);
+        string arguments = string.Join(", ", ordered.Select(r => parameter + "." + (r.Field == first ? firstMember : valueMember)));
+        string[] initialized = [.. new[] { first, value }.Where(f => !ordered.Any(r => r.Field == f)).Select(f => (f == first ? firstMember : valueMember) + " = " + parameter + "." + (f == first ? firstMember : valueMember))];
+        string creation = "new(" + arguments + ")" + (initialized.Length > 0 ? " { " + string.Join(", ", initialized) + " }" : string.Empty);
+        code.Append("    /// <summary>Converts ").Append(noun).Append(" to the record that ").Append(verb).Append(".</summary>\n");
+        code.Append("    /// <param name=\"").Append(parameter).Append("\">The ").Append(first.Wire == "tag" ? "tag" : "macro").Append("'s name and value.</param>\n    /// <returns>The record.</returns>\n");
+        code.Append("    public static implicit operator ").Append(name).Append('(').Append(tuple).Append(' ').Append(parameter).Append(") => FromValueTuple(").Append(parameter).Append(");\n\n");
+        code.Append("    /// <summary>The record that sets ").Append(noun).Append(".</summary>\n");
+        code.Append("    /// <param name=\"").Append(parameter).Append("\">The ").Append(first.Wire == "tag" ? "tag" : "macro").Append("'s name and value.</param>\n    /// <returns>The record.</returns>\n");
+        code.Append("    public static ").Append(name).Append(" FromValueTuple(").Append(tuple).Append(' ').Append(parameter).Append(") => ").Append(creation).Append(";\n\n");
+    }
+
+    // The two fields a pair converts to, or null: a tag's name and value, or a user macro's.
+    private static (FieldDescription First, FieldDescription Value)? TuplePair(TypeDescription t)
+    {
+        FieldDescription? value = t.Fields.FirstOrDefault(f => f.Wire == "value" && f.Kind == "string");
+        if (value is null) return null;
+        if (t.Fields.Length == 2 && t.Fields.FirstOrDefault(f => f.Wire == "tag" && f.Kind == "string" && f.Required) is { } tag)
+            return (tag, value);
+        if (t.Fields.FirstOrDefault(f => f.Wire == "macro" && f.Kind == "string") is { } macro
+            && t.Fields.All(f => f == macro || f == value || s_macroAttributes.Contains(f.Wire))
+            && t.Fields.Where(f => f.Required).All(f => f == macro || f == value))
+            return (macro, value);
+        return null;
+    }
+
+    // What a user macro carries beside its name and value: its id, an update's; its type; its description; whether
+    // discovery set it; and a template's configuration of it.
+    private static readonly HashSet<string> s_macroAttributes = new(StringComparer.Ordinal) { "hostmacroid", "globalmacroid", "type", "description", "automatic", "config" };
 
     private static void EmitRecordDeclaration(StringBuilder code, TypeDescription t, string name, RecordShape shape)
     {
@@ -364,7 +460,7 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
     private RecordMembers EmitRecordFields(StringBuilder code, TypeDescription t, string name, RecordShape shape)
     {
         var seen = new HashSet<string>(StringComparer.Ordinal);
-        var members = new RecordMembers([], [], []);
+        var members = new RecordMembers([], [], [], []);
         foreach (FieldDescription field in t.Fields)
         {
             string member = Member(t.Role == "get" && s_commonGetOptions.TryGetValue(field.Wire, out string? common) ? common : field.Name);
@@ -391,13 +487,17 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
 
     private static void EmitRecordField(StringBuilder code, TypeDescription t, FieldDescription field, string member, string type, bool request, RecordMembers members)
     {
-        if (field.Nanoseconds is not null)
-        {
-            EmitClockPair(code, field, member, members);
-            return;
-        }
         // a request's required field, and a .get's own (hostdashboard.get's hostids): the record cannot be built without it
         bool required = (request || t.Role == "get") && field.Required;
+        if (required) members.Required.Add((member, type, field));
+        string setter = Setter(t, required);
+        if (field.Nanoseconds is not null)
+        {
+            EmitClockPair(code, field, member, setter, members);
+            return;
+        }
+        // a host's interfaces: the first of each type that leaves Main unset is the main one (ZabbixInterface.MarkMain)
+        bool marksMain = setter == "set" && field.Kind == MainMarkedInterfaces;
         // a flag stays bool? even when required: its converters are JsonConverter<bool?>
         string nullable = field.Kind is "bool" or "apibool" ? "?" : string.Empty;
         // an option whose null is a request of its own (history.get's maxValueSize): absent, null or a value
@@ -405,6 +505,8 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         if (optional) type = "global::Community.Zabbix.ZabbixOptional<" + type + ">";
         code.Append("    /// <summary>").Append(Doc(DocSentences.Field(field.Summary, member, field.Wire), field.Wire)).Append("</summary>\n");
         if (field.Json is not null) code.Append("    /// <remarks>Untyped JSON: ").Append(Doc(field.Json, "untyped")).Append(".</remarks>\n");
+        if (marksMain)
+            code.Append("    /// <remarks>An interface that leaves <c>Main</c> unset, as <see cref=\"global::Community.Zabbix.ZabbixInterface\"/>'s factories do, is the main one if it's the first of its type and no other of its type is marked main, and otherwise isn't.</remarks>\n");
         code.Append("    [global::System.Text.Json.Serialization.JsonPropertyName(").Append(Lit(field.Wire)).Append(")]\n");
         string? converter = field.Kind switch
         {
@@ -443,11 +545,26 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         if (type == "string") code.Append(UrlSuppression(member, "    "));
         members.Printed.Add((member, field.Kind, field.Secret, field.Deprecated is not null, optional));
         members.Compared.Add((member, type + (required ? nullable : optional ? string.Empty : "?"), field.Kind, field.Deprecated is not null));
-        // a get's parameters are filled in a lambda: GetAsync(q => q.Limit = 10)
-        string accessors = t.Role == "get" ? " { get; set; }\n\n" : " { get; init; }\n\n";
+        string accessors = marksMain
+            ? " { get; set => field = global::Community.Zabbix.ZabbixInterface.MarkMain(value); }\n\n"
+            : " { get; " + setter + "; }\n\n";
         code.Append("    public ").Append(required ? "required " : string.Empty).Append(type).Append(required ? nullable + " " : optional ? " " : "? ").Append(member).Append(accessors);
         members.Wires.Add(field.Wire);
     }
+
+    /// <summary>
+    /// A member's setter: <c>set</c> where a lambda fills the record, <c>init</c> elsewhere. A get's parameters are filled
+    /// in a lambda, <c>GetAsync(q =&gt; q.Limit = 10)</c>, and so are a request's optional fields,
+    /// <c>CreateAsync("web-02", [groupId], h =&gt; h.Status = …)</c>, as the Azure SDK's options are: a value the request
+    /// requires is set once, by its constructor or an initializer, so a node's <c>UpdateAsync</c> lambda can't change the
+    /// id it updates. A record nested in a request, and what a read returns, are values: <c>with</c> makes a changed copy.
+    /// </summary>
+    private static string Setter(TypeDescription t, bool required)
+        => t.Role == "get" || (t.Role == "request" && !required) ? "set" : "init";
+
+    // The interfaces a host's create and update hold: the records ZabbixInterface's factories make, whose Main the list
+    // decides when they leave it unset (ZabbixInterface.MarkMain).
+    private const string MainMarkedInterfaces = "list:object:HostInterfaceRequest";
 
     // A get's filter or search: never null, so q.Filter.Status = [...] needs no new, over the dictionary the wire carries,
     // which is absent when nothing is set.
@@ -475,7 +592,7 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
     // and writes, so the record says one time and the wire keeps its two fields. An internal member keeps the exact
     // instant for the SDK's own reads, which page by it. The nanoseconds are checked as they are read (0 to 999,999,999),
     // so the member never throws.
-    private static void EmitClockPair(StringBuilder code, FieldDescription field, string member, RecordMembers members)
+    private static void EmitClockPair(StringBuilder code, FieldDescription field, string member, string setter, RecordMembers members)
     {
         string seconds = member.TrimStart('@') + "Seconds";
         string nanoseconds = member.TrimStart('@') + "Nanoseconds";
@@ -486,14 +603,14 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         code.Append(Versioning(field.Since, field.Removed, field.Replacement is null ? null : "use " + field.Replacement, "    "));
         code.Append("    public global::System.DateTimeOffset? ").Append(member).Append("\n    {\n");
         code.Append("        get => ").Append(Fields).Append(".Time(").Append(seconds).Append(", ").Append(nanoseconds).Append(");\n");
-        code.Append("        init => (").Append(seconds).Append(", ").Append(nanoseconds).Append(") = ").Append(Fields).Append(".Split(value);\n    }\n\n");
+        code.Append("        ").Append(setter).Append(" => (").Append(seconds).Append(", ").Append(nanoseconds).Append(") = ").Append(Fields).Append(".Split(value);\n    }\n\n");
         code.Append("    internal global::Community.Zabbix.ZabbixClock? ").Append(member.TrimStart('@')).Append("Exact => ").Append(Fields).Append(".Join(").Append(seconds).Append(", ").Append(nanoseconds).Append(");\n\n");
         code.Append("    [global::System.Text.Json.Serialization.JsonInclude]\n");
         code.Append("    [global::System.Text.Json.Serialization.JsonPropertyName(").Append(Lit(field.Wire)).Append(")]\n");
-        code.Append("    internal long? ").Append(seconds).Append(" { get; init; }\n\n");
+        code.Append("    internal long? ").Append(seconds).Append(" { get; ").Append(setter).Append("; }\n\n");
         code.Append("    [global::System.Text.Json.Serialization.JsonInclude]\n");
         code.Append("    [global::System.Text.Json.Serialization.JsonPropertyName(").Append(Lit(field.Nanoseconds!)).Append(")]\n");
-        code.Append("    internal int? ").Append(nanoseconds).Append(" { get; init => field = ").Append(Fields).Append(".Nanoseconds(value, ").Append(Lit(field.Nanoseconds!)).Append("); }\n\n");
+        code.Append("    internal int? ").Append(nanoseconds).Append(" { get; ").Append(setter).Append(" => field = ").Append(Fields).Append(".Nanoseconds(value, ").Append(Lit(field.Nanoseconds!)).Append("); }\n\n");
         members.Printed.Add((member, field.Kind, false, false, false));
         members.Compared.Add((member.TrimStart('@') + "Exact", "global::Community.Zabbix.ZabbixClock?", field.Kind, false));
         members.Wires.Add(field.Wire);
@@ -894,36 +1011,62 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
     private void EmitShortCreate(StringBuilder code, MethodDescription m, string record, string request)
     {
         if (!_types.TryGetValue(record, out TypeDescription? t)) return;
-        FieldDescription[] required = [.. t.Fields.Where(f => f.Required).OrderBy(f => f.Kind.StartsWith("list:", StringComparison.Ordinal))];
-        if (required.Length is 0 or > 5 || required.Any(f => f.Secret || f.Kind is "bool" or "apibool")) return;
+        List<FieldDescription> required = ShortCreateOrder(t.Fields.Where(f => f.Required), f => f.Kind);
+        if (required.Count is 0 or > 5 || required.Any(f => f.Secret || f.Kind is "bool" or "apibool")) return;
         if (required is [{ Kind: var only }] && only.StartsWith("list:", StringComparison.Ordinal)) return;
         var parameters = new List<string>();
         var names = new List<string>();
-        var assignments = new List<string>();
-        int start = code.Length;
-        code.Append("\n    /// <summary><c>").Append(m.Api).Append("</c> from the fields it requires").Append(Traits(m)).Append(" To set more, pass a <see cref=\"").Append(request).Append("\"/>.</summary>\n");
+        var fieldDocs = new StringBuilder();
         foreach (FieldDescription field in required)
         {
             string? type = ClrType(field.Kind, t.Name, field.Wire);
             if (type is null) return;
             string member = Member(field.Name);
             string local = Local(member);
-            code.Append("    /// <param name=\"").Append(local.TrimStart('@')).Append("\">").Append(Doc(DocSentences.Field(field.Summary, member, field.Wire), field.Wire)).Append("</param>\n");
+            fieldDocs.Append("    /// <param name=\"").Append(local.TrimStart('@')).Append("\">").Append(Doc(DocSentences.Field(field.Summary, member, field.Wire), field.Wire)).Append("</param>\n");
             parameters.Add(type + " " + local);
             names.Add(local);
-            assignments.Add(member + " = " + local);
         }
+        string fields = string.Join(", ", parameters);
+        string arguments = string.Join(", ", names);
         string returns = "    /// <returns>The id the server answered in <c>" + m.Result[4..] + "</c>: the object the call created.</returns>\n";
         string attributes = Versioning(m.Since, m.Removed, m.Replacement, "    ");
         if (required.Any(f => f.Kind == "string" && Member(f.Name).Contains("Url")))
             attributes += "    " + Suppress("Design", "CA1054:URI-like parameters should not be strings", "The API takes this field as text: it may hold a macro, which isn't a URI.") + "\n";
-        string summary = code.ToString(start, code.Length - start);
-        code.Append(returns).Append(attributes);
-        code.Append("    public global::System.Threading.Tasks.Task<ulong> CreateAsync(").Append(string.Join(", ", parameters)).Append(")\n");
-        code.Append("        => CreateAsync(").Append(string.Join(", ", names)).Append(", ").Append(Token).Append(".None);\n");
+        string summary = "\n    /// <summary><c>" + m.Api + "</c> from the fields it requires" + Traits(m) + " To set more, pass a lambda that sets them, or a <see cref=\"" + request + "\"/>.</summary>\n" + fieldDocs;
+        code.Append(summary).Append(returns).Append(attributes);
+        code.Append("    public global::System.Threading.Tasks.Task<ulong> CreateAsync(").Append(fields).Append(")\n");
+        code.Append("        => CreateAsync(").Append(arguments).Append(", ").Append(Token).Append(".None);\n");
         code.Append(summary).Append(TokenDoc).Append(returns).Append(attributes);
-        code.Append("    public virtual global::System.Threading.Tasks.Task<ulong> CreateAsync(").Append(string.Join(", ", parameters)).Append(", ").Append(Token).Append(" cancellationToken)\n");
-        code.Append("        => CreateAsync(new ").Append(request).Append(" { ").Append(string.Join(", ", assignments)).Append(" }, cancellationToken);\n");
+        code.Append("    public virtual global::System.Threading.Tasks.Task<ulong> CreateAsync(").Append(fields).Append(", ").Append(Token).Append(" cancellationToken)\n");
+        code.Append("        => CreateAsync(new ").Append(request).Append('(').Append(arguments).Append("), cancellationToken);\n");
+        EmitConfiguredCreate(code, m, request, fieldDocs.ToString(), fields, arguments, names, returns, attributes);
+    }
+
+    /// <summary>
+    /// A create from the fields it requires and a lambda for the rest, <c>CreateAsync("web-02", [groupId], h =&gt; h.Status =
+    /// …)</c>, as a read takes one for its parameters: the request is built from the required values, the lambda sets the
+    /// others, and the request's own overload sends it, so a test double that overrides that one serves this too. Its
+    /// <see cref="CancellationToken"/> is last, beside an overload without it (ADR 0013, section 6).
+    /// </summary>
+    private static void EmitConfiguredCreate(StringBuilder code, MethodDescription m, string request, string fieldDocs, string fields, string arguments, List<string> names, string returns, string attributes)
+    {
+        string action = "global::System.Action<" + request + ">";
+        string summary = "\n    /// <summary><c>" + m.Api + "</c> from the fields it requires, with the others <paramref name=\"configure\"/> sets" + Traits(m) + "</summary>\n"
+            + fieldDocs + "    /// <param name=\"configure\">Sets the request's other fields.</param>\n";
+        const string NullConfigure = "    /// <exception cref=\"global::System.ArgumentNullException\"><paramref name=\"configure\"/> is <see langword=\"null\"/>.</exception>\n";
+        // the request's local can't be named as a required field's parameter is (task.create requires a request)
+        string local = "request";
+        while (names.Contains("@" + local)) local = "configured" + local[0].ToString().ToUpperInvariant() + local[1..];
+        code.Append(summary).Append(returns).Append(NullConfigure).Append(attributes);
+        code.Append("    public global::System.Threading.Tasks.Task<ulong> CreateAsync(").Append(fields).Append(", ").Append(action).Append(" configure)\n");
+        code.Append("        => CreateAsync(").Append(arguments).Append(", configure, ").Append(Token).Append(".None);\n");
+        code.Append(summary).Append(TokenDoc).Append(returns).Append(NullConfigure).Append(attributes);
+        code.Append("    public virtual global::System.Threading.Tasks.Task<ulong> CreateAsync(").Append(fields).Append(", ").Append(action).Append(" configure, ").Append(Token).Append(" cancellationToken)\n    {\n");
+        code.Append("        global::System.ArgumentNullException.ThrowIfNull(configure);\n");
+        code.Append("        var ").Append(local).Append(" = new ").Append(request).Append('(').Append(arguments).Append(");\n");
+        code.Append("        configure(").Append(local).Append(");\n");
+        code.Append("        return CreateAsync(").Append(local).Append(", cancellationToken);\n    }\n");
     }
 
     // The single-object form of a write that answers ids: the one id, checked to be one.
@@ -965,6 +1108,10 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         ImmutableArray<FieldDescription> gatedFields = parameterType is not null && (parameterName == "request" || parameterName == "requests") ? RefusedFields(m) : [];
         string details = "    /// <returns>" + result.Returns + "</returns>\n" + Throws(m.Api, gated && m.Emulation is null, gatedFields)
             + Remarks(m, gated && m.Emulation is not null) + Versioning(m.Since, m.Removed, m.Replacement, "    ");
+        // A target-typed request, CreateAsync(new("web-02", [groupId]) { … }), converts to every parameter type there is, the
+        // several's list and a short create's first field among them, so the one request's overloads go first: the
+        // compiler's tie-break for an overload added beside others (OverloadResolutionPriorityAttribute).
+        if (overloaded && parameterName == "request") details += "    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(1)]\n";
         // One, several and the one-id delete overload one verb, so each takes its CancellationToken as a required last
         // parameter, and an overload without it calls it (ADR 0013, section 6). A verb of one overload keeps the token optional.
         if (overloaded)
@@ -1189,10 +1336,23 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         code.Append("        ").Append(result).Append(" found = await GetAsync(new ").Append(parameters).Append(" { ").Append(Member(ids.Name)).Append(" = [id] }, cancellationToken).ConfigureAwait(false);\n");
         code.Append("        return found.Count > 0 ? found[0] : null;\n    }\n");
         bool deletes = service.Methods.Any(d => d.Name == "DeleteAsync" && d.Parameters == "list:id" && d.Result.StartsWith("ids:", StringComparison.Ordinal));
-        string node = "global::Community.Zabbix." + (deletes ? "ZabbixDeletableObjectNode<" : "ZabbixObjectNode<") + element + ">";
+        string? update = deletes ? UpdateById(service) : null;
+        string node = "global::Community.Zabbix." + (update is not null ? "ZabbixUpdatableObjectNode<" + element + ", " + update + ">" : deletes ? "ZabbixDeletableObjectNode<" + element + ">" : "ZabbixObjectNode<" + element + ">");
         code.Append("\n    /// <summary>One <c>").Append(service.Object).Append("</c>, by its id; no call is made until it's asked.</summary>\n");
         code.Append("    /// <param name=\"id\">The object's id.</param>\n    /// <returns>The object's node.</returns>\n");
-        code.Append("    public virtual ").Append(node).Append(" this[ulong id] => new(id, ").Append(Lit(service.Object)).Append(", FindAsync").Append(deletes ? ", DeleteAsync" : string.Empty).Append(");\n");
+        code.Append("    public virtual ").Append(node).Append(" this[ulong id] => new(id, ").Append(Lit(service.Object)).Append(", FindAsync").Append(deletes ? ", DeleteAsync" : string.Empty);
+        // the node fills in its id and sends the request through UpdateAsync, so a test double that overrides it serves the node too
+        if (update is not null) code.Append(", static objectId => new ").Append(update).Append("(objectId), UpdateAsync");
+        code.Append(");\n");
+    }
+
+    // The request a node of this client updates its object with, when the update takes several and requires only the
+    // object's id: the node's UpdateAsync builds it from the id and a lambda sets the rest.
+    private string? UpdateById(ServiceDescription service)
+    {
+        if (service.Methods.FirstOrDefault(u => u.Name == "UpdateAsync" && u.Batch && u.Parameters.StartsWith("list:object:", StringComparison.Ordinal) && u.Result.StartsWith("ids:", StringComparison.Ordinal)) is not { } method) return null;
+        if (!_types.TryGetValue(method.Parameters[12..], out TypeDescription? request)) return null;
+        return request.Fields.Where(f => f.Required).ToArray() is [{ Kind: "id" }] ? "global::Community.Zabbix." + Prefixed(request.Name) : null;
     }
 
     // ----- aggregate and context ----------------------------------------------------------------------------

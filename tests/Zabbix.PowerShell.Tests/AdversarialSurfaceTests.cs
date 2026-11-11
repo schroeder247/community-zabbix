@@ -56,7 +56,7 @@ public sealed class AdversarialSurfaceTests
     [Theory]
     [InlineData("[Community.Zabbix.ZabbixHostCreateRequest]@{ Host = 'x'; Groups = 'not a list of groups' }", "$.groups")]
     [InlineData("[Community.Zabbix.ZabbixHostCreateRequest]@{ Host = @{ nested = 1 } }", "$.host")]
-    [InlineData("[Community.Zabbix.ZabbixHostCreateRequest]@{ Status = 'sideways' }", "'sideways' is not a ZabbixHostStatus")]
+    [InlineData("[Community.Zabbix.ZabbixHostCreateRequest]@{ Host = 'x'; Groups = @(@{ groupid = 1 }); Status = 'sideways' }", "'sideways' is not a ZabbixHostStatus")]
     [InlineData("[Community.Zabbix.ZabbixHostGetParameters]@{ Limit = 'many' }", "$.limit")]
     public void A_record_cast_with_a_wrong_type_is_a_conversion_error_naming_the_field(string cast, string named)
     {

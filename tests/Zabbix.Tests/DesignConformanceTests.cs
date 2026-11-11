@@ -464,7 +464,8 @@ public sealed partial class DesignConformanceTests
             .Where(type => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Action<>))
             .Select(type => type.GetGenericArguments()[0])
             .Where(type => type is { IsClass: true, IsAbstract: false, ContainsGenericParameters: false } && type.GetConstructor(Type.EmptyTypes) is not null)
-            .Where(type => !type.Name.EndsWith("Parameters", StringComparison.Ordinal));          // a get's parameters are one call's request, not options
+            // a get's parameters, and a create's or an update's request, are one call's request, not options (ADR 0013, section 4)
+            .Where(type => !type.Name.EndsWith("Parameters", StringComparison.Ordinal) && !type.Name.EndsWith("Request", StringComparison.Ordinal));
         return [.. taken.Concat(configured).Concat(configuredByCallback).Where(options => !options.IsGenericParameter && Libraries.Contains(options.Assembly))];
     }
 

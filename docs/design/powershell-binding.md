@@ -5,7 +5,7 @@ License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2
 # PowerShell binding: the native seams for a typed SDK module
 
 The `Community.Zabbix` PowerShell module wraps a typed SDK in which every request and parameters type is a C# `record` with
-`init` properties and System.Text.Json source-generated metadata (wire-name remap, converters, `IReadOnlyList<T>`
+`init` or settable properties and System.Text.Json source-generated metadata (wire-name remap, converters, `IReadOnlyList<T>`
 nested lists, an `AdditionalFields` extension bag), about 700 records in all. A shell user writes hashtables,
 `[pscustomobject]`s and arrays of them. This document surveys the seams PowerShell itself offers for turning one into
 the other and back, with a verdict per seam, and closes with [what the module does](#what-the-module-does).

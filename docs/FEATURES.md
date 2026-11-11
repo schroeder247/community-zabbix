@@ -11,8 +11,11 @@ What each package and module does. To choose one, see [Key concepts](../README.m
 ### `Community.Zabbix.Sdk`: the API client
 
 - Every method of the Zabbix 7.0, 7.4 and 8.0 API, 244 methods on 68 objects, as typed clients (`zabbix.Hosts`,
-  `zabbix.Items`, …), read with a lambda (`zabbix.Hosts.GetAsync(q => q.Search.VisibleName = "web")`), and created from the
-  fields they require (`zabbix.Hosts.CreateAsync("web-02", [groupId])`).
+  `zabbix.Items`, …), read with a lambda (`zabbix.Hosts.GetAsync(q => q.Search.VisibleName = "web")`), created from the
+  fields they require and a lambda for the rest (`zabbix.Hosts.CreateAsync("web-02", [groupId], h => h.Tags = [("env", "prod")])`),
+  and changed through a node's lambda (`zabbix.Hosts["web-02"].UpdateAsync(h => h.Status = ZabbixHostStatus.Disabled)`).
+- Requests whose required fields the compiler checks, and nested values without `new`: a group by its id, a tag or a user
+  macro as a pair, and a host's interface from `ZabbixInterface.Agent(address)`, `Snmp`, `Ipmi` or `Jmx`.
 - A model generated from each Zabbix version's own source: a method or field the connected server's version does not
   have is refused before anything is sent.
 - API tokens, or a user name and password whose session is renewed when the server ends it.

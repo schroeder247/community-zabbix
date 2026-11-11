@@ -15,15 +15,8 @@ Console.WriteLine($"Zabbix API {await zabbix.GetApiVersionAsync()}");
 string hostName = prefix + "gs-web-01";
 ulong groupId = await zabbix.HostGroups.CreateAsync(prefix + "Getting started");
 ulong hostId = await zabbix.Hosts.CreateAsync(hostName, [groupId]);
-await zabbix.Items.CreateAsync(new ZabbixItemCreateRequest
-{
-    HostId = hostId,
-    Name = "Requests",
-    Key = "app.requests",
-    Type = ZabbixItemType.Trapper,
-    ValueType = ZabbixItemValueType.Unsigned,
-    TrapperHosts = "0.0.0.0/0,::/0",                  // who may send to it
-});
+await zabbix.Items.CreateAsync(hostId, "Requests", ZabbixItemType.Trapper, "app.requests", ZabbixItemValueType.Unsigned, item =>
+    item.TrapperHosts = "0.0.0.0/0,::/0");             // who may send to it
 Console.WriteLine($"created {hostName} ({hostId})");
 
 try

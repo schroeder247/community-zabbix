@@ -28,8 +28,17 @@ using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder()
 `TLSPSKFile` holds. To set the same options yourself, assign `Connection.Tls`, as the next example does.
 
 The server must accept the same identity and key for the host it receives values for. In the host's encryption settings,
-"Connections from host" must include PSK. In the API, those settings are `tls_accept`, `tls_psk_identity`, and `tls_psk`, which
-`ZabbixHostUpdateRequest` and `Set-ZbxHost` set.
+"Connections from host" must include PSK. In the API, those settings are `tls_accept`, `tls_psk_identity`, and `tls_psk`, which a
+host's node sets with the [API client](api-client.md), and `Set-ZbxHost` too:
+
+```csharp
+await zabbix.Hosts["web-01"].UpdateAsync(h =>
+{
+    h.TlsAccept = ZabbixTlsAcceptModes.Psk;
+    h.TlsPskIdentity = "web-01";
+    h.TlsPsk = Convert.ToHexString(key);
+});
+```
 
 ## Connect with certificates
 

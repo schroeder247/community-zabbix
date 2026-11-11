@@ -35,13 +35,22 @@ its package (`Community.Zabbix.Sdk.dll`), and the namespaces and telemetry names
   `ZabbixItemKeys` is the typed catalogue of Zabbix's own keys. Sends, reads, polls and agents' answers take them.
 - **A fluent API** ([ADR 0012](docs/adr/0012-typed-bcl-fluent-api.md)). `zabbix.Hosts.GetAsync(q => q.Search.VisibleName = "web")`,
   `zabbix.Hosts.CreateAsync("web-02", [groupId])`, `zabbix.Items[id].DeleteAsync()`, `zabbix.Hosts["web-01"].GetAsync()` and
-  `zabbix.HostGroups["Linux"].Hosts["web-01"]`. Every asynchronous member takes its `CancellationToken` last:
-  `zabbix.Hosts.GetAsync(stoppingToken)` passes it by position, and a member with several forms has each one with a token and
-  without one ([ADR 0013](docs/adr/0013-builders-verbs-and-typed-values.md)). Public signatures use BCL types: `ulong` ids,
+  `zabbix.HostGroups["Linux"].Hosts["web-01"]`. Writes take a lambda, as reads do
+  ([ADR 0013](docs/adr/0013-builders-verbs-and-typed-values.md)): a create from the fields it requires also takes one for the
+  rest, `zabbix.Hosts.CreateAsync("web-02", [groupId], h => h.Tags = [("env", "prod")])`, and every node of an object the API
+  updates, by name or by id, has `UpdateAsync(h => h.Status = ZabbixHostStatus.Disabled)`, which fills in the object's id. A
+  request's required fields are `required` members, which its constructor takes, so `CreateAsync(new("web-02", [groupId]) { … })`
+  works too, and its other fields have setters; an update's id is required, `graph.update`'s and `graphprototype.update`'s
+  included. Nested values need no `new`: a tag or a user macro converts from a pair, and `ZabbixInterface.Agent`, `Snmp`, `Ipmi`
+  and `Jmx` make a host's interfaces from an `IPAddress` or a DNS name, the first of each type the main one.
+  `zabbix.HostInterfaces.CreateAsync(hostId, ZabbixInterface.Snmp(address))` adds one to a host that exists. Every
+  asynchronous member takes its `CancellationToken` last: `zabbix.Hosts.GetAsync(stoppingToken)` passes it by position, and a
+  member with several forms has each one with a token and without one
+  ([ADR 0013](docs/adr/0013-builders-verbs-and-typed-values.md)). Public signatures use BCL types: `ulong` ids,
   `DateTimeOffset` times, `DnsEndPoint` nodes, `Func` callbacks, and `NetworkCredential` for a login.
 - **The tree and the watcher.** `zabbix.Hosts["web-01"].Item("key")` and host groups answer `GetLatestAsync`,
-  `GetHistoryAsync` and `Watch`; a group's node (`zabbix.HostGroups["Linux"]`) also reads and deletes the group, and reaches
-  its hosts by name; `IZabbixWatcher` streams the history collected since its last read.
+  `GetHistoryAsync` and `Watch`; a group's node (`zabbix.HostGroups["Linux"]`) also reads, updates and deletes the group, and
+  reaches its hosts by name; `IZabbixWatcher` streams the history collected since its last read.
 - **The framed-TCP wire** (`Community.Zabbix.Wire`, a package of its own: an API consumer takes no TLS stack). `ZabbixWireClient`
   sends values, reads an item from an agent and asks a server, with PSK and certificate TLS and the HA node walk.
   `new ZabbixWireClient("zbx-server-01")` takes a server; `ZabbixWireClient.CreateBuilder()` sets more (`AddServer`, `WithToken`,

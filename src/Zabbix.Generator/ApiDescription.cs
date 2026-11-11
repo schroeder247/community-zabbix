@@ -72,8 +72,9 @@ internal sealed record ApiDescription(
                 IdReference.ReadAll(root, problems),
                 CmdletDescription.Read(root, problems));
             // Named by their words once, here, for every emitter (ZabbixNames, schema/words.json): the fields, then the
-            // records and enums; after validation, so a repeated name is reported, not renamed around.
-            ApiDescription valid = DescriptionValidator.Validate(read, problems);
+            // records and enums; after validation, so a repeated name is reported, not renamed around. An update's id is
+            // required before then, by the names the description gives its methods' records (ZabbixUpdateIds).
+            ApiDescription valid = ZabbixUpdateIds.Require(DescriptionValidator.Validate(read, problems));
             return ZabbixNames.Rename(valid with { Types = [.. valid.Types.Select(ZabbixNames.Rename).Select(ZabbixClockPairs.Fold)] });
         }
         catch (JsonException exception)

@@ -106,7 +106,7 @@ public sealed class FluentApiTests
     {
         using Fluent fluent = Build(api => api.On("host.create", """{"hostids":["1"]}"""));
 
-        await fluent.Zabbix.Hosts.CreateAsync(new ZabbixHostCreateRequest { TechnicalName = "web-03", Groups = [42UL, 43UL], VisibleName = "Web 3" }, TestContext.Current.CancellationToken);
+        await fluent.Zabbix.Hosts.CreateAsync(new("web-03", [42UL, 43UL]) { VisibleName = "Web 3" }, TestContext.Current.CancellationToken);
 
         JsonElement sent = fluent.Api.ParamsOf("host.create").Single();
         Assert.Equal(2, sent.GetProperty("groups").GetArrayLength());
