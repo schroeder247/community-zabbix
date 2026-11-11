@@ -140,7 +140,12 @@ jobs:
           global-json-file: global.json
       - name: Pester 5.7.1
         shell: pwsh
-        run: Install-Module Pester -RequiredVersion 5.7.1 -Force -Scope CurrentUser -SkipPublisherCheck
+        # The PowerShell Gallery has short outages (a download that fails after five minutes): three tries, a minute apart.
+        run: |
+          foreach ($attempt in 1..3) {
+            try { Install-Module Pester -RequiredVersion 5.7.1 -Force -Scope CurrentUser -SkipPublisherCheck -ErrorAction Stop; break }
+            catch { if ($attempt -eq 3) { throw }; Write-Warning "Installing Pester failed ($attempt of 3): $_"; Start-Sleep -Seconds 60 }
+          }
       - name: Start Zabbix ${{ matrix.version }} and the EF store's PostgreSQL
         env:
           ZBX_LAB_STATE: ${{ runner.temp }}/zbxlab
