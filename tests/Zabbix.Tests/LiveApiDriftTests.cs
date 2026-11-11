@@ -103,8 +103,9 @@ public sealed class LiveApiDriftTests(ITestOutputHelper output)
                         option.SetValue(parameters, extend);
                     if (option.Name == "Limit") option.SetValue(parameters, 5);
                 }
-                if (parameters is ZabbixHistoryGetParameters) parametersType.GetProperty("History")!.SetValue(parameters, ZabbixItemValueType.Float);
-                if (parameters is ZabbixServiceGetParameters) parametersType.GetProperty("SelectStatusTimeline")!.SetValue(parameters, null);
+                // Typed, not by name: a renamed member breaks the build here instead of this test on a live server.
+                if (parameters is ZabbixHistoryGetParameters history) history.ValueType = ZabbixItemValueType.Float;
+                if (parameters is ZabbixServiceGetParameters service) service.SelectStatusTimeline = null;
                 try
                 {
                     var task = (Task)get.Invoke(apiClient, [parameters, CancellationToken.None])!;
