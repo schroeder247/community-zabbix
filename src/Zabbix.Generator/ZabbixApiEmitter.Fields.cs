@@ -5,12 +5,13 @@ using System.Text;
 namespace Community.Zabbix.Generator;
 
 /// <summary>
-/// The typed side of a <c>.get</c>'s field grammar. <c>filter</c>, <c>search</c>, <c>output</c> and <c>sortfield</c> take
-/// wire field names, and the description already knows each object's fields, their C# names and their types, so per
-/// object it emits: <c>Zabbix{Model}Fields</c>, the wire name of every field of the read record under its C# name (for
-/// <c>output</c> and <c>sortfield</c>); <c>Zabbix{Object}GetFilter</c>, one typed list per field <c>filter</c> accepts;
-/// and <c>Zabbix{Object}GetSearch</c>, one text per field <c>search</c> accepts. The filter and the search are
-/// <c>ZabbixGetConditions</c>, whose indexer sets a field they do not type, by its wire name.
+/// The typed side of a <c>.get</c>'s field grammar. <c>filter</c>, <c>search</c>, <c>output</c>, the <c>select</c>
+/// options and <c>sortfield</c> take wire field names, and the description already knows each object's fields, their C#
+/// names and their types, so it emits: <c>Zabbix{Record}Fields</c>, every field of each record an output, a select or a
+/// sort names, as a <c>ZabbixField&lt;ZabbixRecord&gt;</c> under its C# name; <c>Zabbix{Object}GetFilter</c>, one typed
+/// list per field <c>filter</c> accepts; and <c>Zabbix{Object}GetSearch</c>, one text per field <c>search</c> accepts.
+/// The filter and the search are <c>ZabbixGetConditions</c>, whose indexer sets a field they do not type, by its wire
+/// name.
 /// </summary>
 internal sealed partial class ZabbixApiEmitter
 {
@@ -67,20 +68,33 @@ internal sealed partial class ZabbixApiEmitter
             "ulong" => ("ulong", Entries + ".Of(" + local + ", static value => value.ToString(global::System.Globalization.CultureInfo.InvariantCulture))"),
             "double" => ("double", Entries + ".Of(" + local + ", static value => value.ToString(\"R\", global::System.Globalization.CultureInfo.InvariantCulture))"),
             "bool" or "apibool" => ("bool", Entries + ".Of(" + local + ", static value => value ? 1L : 0L)"),
+            // an interval or a port as the record types it, sent as Zabbix spells it; the hosts a trapper allows, as text
+            ZabbixTypedFields.Interval => ("global::Community.Zabbix.ZabbixInterval", Entries + ".Of(" + local + ", static value => value.ToString())"),
+            ZabbixTypedFields.Port => ("global::Community.Zabbix.ZabbixPort", Entries + ".Of(" + local + ", static value => value.ToString())"),
+            ZabbixTypedFields.Duration => ("global::Community.Zabbix.ZabbixDuration", Entries + ".Of(" + local + ", static value => value.ToString())"),
+            ZabbixTypedFields.Peers => ("string", Entries + ".Of(" + local + ")"),
             _ when kind.StartsWith("enum:", StringComparison.Ordinal) && _enums.ContainsKey(kind[5..])
                 => ("global::Community.Zabbix." + Prefixed(kind[5..]), Entries + ".Of(" + local + ", static value => (long)value)"),
             _ => null,
         };
     }
 
-    // The files of the typed field grammar, one set per get whose object has a read record.
+    // The files of the typed field grammar: the fields of every record an output, a select or a sort names, in the order
+    // the description first names each, and a filter and a search per get whose object has a read record.
     private IEnumerable<GeneratedSource> EmitFieldGrammar()
     {
-        var models = new HashSet<string>(StringComparer.Ordinal);
+        var named = new HashSet<string>(StringComparer.Ordinal);
+        foreach (FieldDescription field in api.Types.SelectMany(t => t.Fields))
+        {
+            string target = field.Kind.StartsWith(ZabbixTypedFields.Output, StringComparison.Ordinal) ? field.Kind[ZabbixTypedFields.Output.Length..]
+                : field.Kind.StartsWith(ZabbixTypedFields.SortFields, StringComparison.Ordinal) ? field.Kind[ZabbixTypedFields.SortFields.Length..]
+                : string.Empty;
+            if (target.StartsWith("object:", StringComparison.Ordinal) && _types.TryGetValue(target[7..], out TypeDescription? record) && named.Add(record.Name))
+                yield return new(Prefixed(record.Name) + "Fields.g.cs", EmitFieldNames(record));
+        }
         foreach (TypeDescription get in api.Types.Where(t => t.Role == "get" && t.GetParameters && t.Name.EndsWith("GetParameters", StringComparison.Ordinal)))
         {
             if (ModelOf(get) is not { } model) continue;
-            if (models.Add(model.Name)) yield return new(Prefixed(model.Name) + "Fields.g.cs", EmitFieldNames(model));
             string stem = Prefixed(get.Name[..^"Parameters".Length]);
             if (EmitFieldValues(get, model, stem + "Filter", search: false) is { } filter) yield return new(stem + "Filter.g.cs", filter);
             if (EmitFieldValues(get, model, stem + "Search", search: true) is { } search) yield return new(stem + "Search.g.cs", search);
@@ -96,20 +110,29 @@ internal sealed partial class ZabbixApiEmitter
         return ConditionMembers(get, model, name, search).Count > 0 ? "global::Community.Zabbix." + name : Untyped;
     }
 
+    // A record's fields, each a ZabbixField<TRecord> under its member's name; a clock folded with its nanoseconds
+    // (ZabbixClockPairs) has a field for each of its two wire fields, so an output or a sort can name both.
     private string EmitFieldNames(TypeDescription model)
     {
         string record = Prefixed(model.Name);
         string name = record + "Fields";
+        string type = "global::Community.Zabbix.ZabbixField<global::Community.Zabbix." + record + ">";
+        string first = Member(model.Fields.Length > 0 ? model.Fields[0].Name : "Id");
         var code = new StringBuilder(Header(api.Range,
-            "The wire names of <see cref=\"" + record + "\"/>'s fields, under their C# names, for a get's <c>output</c> and <c>sortfield</c>: <c>Output = ZabbixOutput.Of(" + name + "." + Member(model.Fields.Length > 0 ? model.Fields[0].Name : "Id") + ")</c>."));
+            "The fields of <see cref=\"" + record + "\"/>, under their C# names, for a get's <c>output</c>, a <c>select</c> option that returns the record, and its sort: <c>Output = [" + name + "." + first + "]</c>."));
         code.Append("public static class ").Append(name).Append("\n{\n");
         var seen = new HashSet<string>(StringComparer.Ordinal);
         foreach (FieldDescription field in model.Fields)
         {
             string member = Member(field.Name);
             if (member == name || !seen.Add(member)) continue;
-            code.Append("    /// <summary>The wire name of <see cref=\"").Append(record).Append('.').Append(member.TrimStart('@')).Append("\"/>: <c>").Append(Doc(field.Wire, field.Wire)).Append("</c>.</summary>\n");
-            code.Append("    public const string ").Append(member).Append(" = ").Append(Lit(field.Wire)).Append(";\n\n");
+            string cref = record + "." + member.TrimStart('@');
+            code.Append("    /// <summary>Represents <c>").Append(Doc(field.Wire, field.Wire)).Append("</c>, the field <see cref=\"").Append(cref).Append("\"/> holds.</summary>\n");
+            code.Append("    public static readonly ").Append(type).Append(' ').Append(member).Append(" = new(").Append(Lit(field.Wire)).Append(");\n\n");
+            string nanoseconds = member.TrimStart('@') + "Nanoseconds";
+            if (field.Nanoseconds is null || model.Fields.Any(f => Member(f.Name) == nanoseconds) || !seen.Add(nanoseconds)) continue;
+            code.Append("    /// <summary>Represents <c>").Append(Doc(field.Nanoseconds, field.Nanoseconds)).Append("</c>, the nanoseconds <see cref=\"").Append(cref).Append("\"/> holds beside its seconds.</summary>\n");
+            code.Append("    public static readonly ").Append(type).Append(' ').Append(nanoseconds).Append(" = new(").Append(Lit(field.Nanoseconds)).Append(");\n\n");
         }
         while (code.Length > 1 && code[^1] == '\n' && code[^2] == '\n') code.Length--;
         return code.Append("}\n").ToString();
@@ -131,7 +154,8 @@ internal sealed partial class ZabbixApiEmitter
             if (s_dictionaryMembers.Contains(member)) member += "Value";
             if (search)
             {
-                if (field.Kind != "string" || !seen.Add(member)) continue;
+                // a search is a substring of the field's text, the text of an interval, a port and a trapper's hosts too
+                if (field.Kind is not ("string" or ZabbixTypedFields.Interval or ZabbixTypedFields.Duration or ZabbixTypedFields.Port or ZabbixTypedFields.Peers) || !seen.Add(member)) continue;
                 members.Add((member, wire, "string", "global::Community.Zabbix.ZabbixFieldValue.FromString(" + Local(member) + ")", field, Prefixed(owner.Name) + "." + Member(field.Name).TrimStart('@')));
             }
             else if (FilterShape(field.Kind, member) is { } shape && seen.Add(member))

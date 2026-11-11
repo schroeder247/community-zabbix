@@ -52,7 +52,7 @@ public sealed class CallerScenarioTests
         }, cancellationToken);
         await zabbix.Hosts.CreateAsync(new("web-03", [groupId]) { VisibleName = "Web 3" }, cancellationToken);
         await zabbix.Hosts["web-02"].UpdateAsync(h => h.Status = ZabbixHostStatus.Disabled, cancellationToken);
-        await zabbix.Items[itemId].UpdateAsync(i => i.Delay = "5m", cancellationToken);
+        await zabbix.Items[itemId].UpdateAsync(i => i.Delay = TimeSpan.FromMinutes(5), cancellationToken);
         await zabbix.HostGroups["Linux"].UpdateAsync(g => g.Name = "Linux servers", cancellationToken);
         await zabbix.Hosts["web-02"].DeleteAsync(cancellationToken);
         await zabbix.Items[itemId].DeleteAsync(cancellationToken);

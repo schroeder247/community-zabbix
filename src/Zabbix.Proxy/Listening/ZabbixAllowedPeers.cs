@@ -1,37 +1,41 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 
 namespace Community.Zabbix.Listening;
 
 /// <summary>
-/// Represents Zabbix's <c>Server=</c> / <c>AllowedPeers</c> list: the IP addresses, CIDR blocks and DNS names that may
-/// connect, read as upstream reads it (<c>zbx_validate_peer_list</c> and <c>zbx_tcp_check_allowed_peers_info</c> in
-/// <c>src/libs/zbxcomms/comms.c</c>).
+/// Matches a peer against Zabbix's <c>Server=</c> / <c>AllowedPeers</c> list: the IP addresses, CIDR blocks and DNS names
+/// that may connect, read as upstream reads it (<c>zbx_validate_peer_list</c> and <c>zbx_tcp_check_allowed_peers_info</c>
+/// in <c>src/libs/zbxcomms/comms.c</c>). What the listeners admit by; the public face of an entry is <see cref="ZabbixPeer"/>,
+/// which reads each one, and <see cref="ZabbixListenerOptions.ParseAllowedPeers"/> the list.
 /// </summary>
 /// <remarks>
 /// <para>Standard, IPv4-compatible and IPv4-mapped forms are the same peer. An empty list is an error, as upstream's
-/// check fails for one: "everyone" is said explicitly (<c>0.0.0.0/0,::/0</c>), never by omission. Blocks are
-/// <see cref="IPNetwork"/>; the list's split is the only parsing owned here, each entry going to the BCL parser for it
-/// (<see cref="IPAddress"/>, <see cref="IPNetwork"/>, <see cref="Uri.CheckHostName"/> for a name).</para>
+/// check fails for one: "everyone" is said explicitly (<c>0.0.0.0/0,::/0</c>), never by omission. A configuration line
+/// resolves no macro, so an entry that is one is refused. The list's split at its commas is the only parsing owned here;
+/// each entry is a <see cref="ZabbixPeer"/>, its blocks <see cref="IPNetwork"/>.</para>
 /// <para>Names are resolved on every check, asynchronously (<see cref="Dns.GetHostAddressesAsync(string, CancellationToken)"/>),
 /// and an unresolved name matches nothing. They are not cached: the BCL does not expose a record's TTL, so a cache
 /// would invent a lifetime; the OS resolver caches with the TTL, as it does for upstream's per-check <c>getaddrinfo</c>.</para>
 /// </remarks>
-public sealed class ZabbixAllowedPeers : ISpanParsable<ZabbixAllowedPeers>
+internal sealed class ZabbixAllowedPeers : ISpanParsable<ZabbixAllowedPeers>
 {
     private readonly IPNetwork[] _networks;
     private readonly string[] _names;
 
-    private ZabbixAllowedPeers(string[] entries, IPNetwork[] networks, string[] names)
+    private ZabbixAllowedPeers(ZabbixPeer[] peers, IPNetwork[] networks, string[] names)
     {
-        Entries = entries;
+        Peers = peers;
+        Entries = [.. peers.Select(peer => peer.ToString())];
         _networks = networks;
         _names = names;
     }
+
+    /// <summary>The entries, in order.</summary>
+    public IReadOnlyList<ZabbixPeer> Peers { get; }
 
     /// <summary>The entries as written, trimmed, in order.</summary>
     public IReadOnlyList<string> Entries { get; }
@@ -112,47 +116,23 @@ public sealed class ZabbixAllowedPeers : ISpanParsable<ZabbixAllowedPeers>
             error = "the allowed-peer list is empty; Zabbix refuses an empty list (fail closed): name the peers, or say 0.0.0.0/0,::/0 for everyone";
             return false;
         }
-        var entries = new List<string>();
+        var peers = new List<ZabbixPeer>();
         var networks = new List<IPNetwork>();
         var names = new List<string>();
         foreach (Range range in s.Split(','))
         {
             ReadOnlySpan<char> entry = s[range].Trim();
-            if (!TryEntry(entry, networks, names))
+            if (!ZabbixPeer.TryParse(entry, out ZabbixPeer peer) || (peer.Network is null && peer.HostName is null))
             {
                 error = $"\"{entry}\" is not an IP address, a CIDR block or a DNS name";
                 return false;
             }
-            entries.Add(entry.ToString());
+            if (peer.Network is { } network) networks.Add(network);
+            else if (peer.HostName is { } name) names.Add(name);
+            peers.Add(peer);
         }
-        result = new ZabbixAllowedPeers([.. entries], [.. networks], [.. names]);
+        result = new ZabbixAllowedPeers([.. peers], [.. networks], [.. names]);
         error = null;
-        return true;
-    }
-
-    private static bool TryEntry(ReadOnlySpan<char> entry, List<IPNetwork> networks, List<string> names)
-    {
-        int slash = entry.IndexOf('/');
-        if (slash >= 0)
-        {
-            // upstream validate_cidr: an IP, then a prefix of digits within the family's width. CIDR is for IPs only.
-            ReadOnlySpan<char> prefixText = entry[(slash + 1)..];
-            if (!IPAddress.TryParse(entry[..slash], out IPAddress? address)
-                || prefixText.IsEmpty || !int.TryParse(prefixText, NumberStyles.None, CultureInfo.InvariantCulture, out int prefix)
-                || prefix > (address.AddressFamily == AddressFamily.InterNetwork ? 32 : 128)
-                || !IPNetwork.TryParse(string.Create(CultureInfo.InvariantCulture, $"{address}/{prefix}"), out IPNetwork network))
-                return false;
-            networks.Add(network);
-            return true;
-        }
-        if (IPAddress.TryParse(entry, out IPAddress? host))
-        {
-            networks.Add(Host(host));
-            return true;
-        }
-        string name = entry.ToString();
-        if (Uri.CheckHostName(name) != UriHostNameType.Dns) return false;
-        names.Add(name);
         return true;
     }
 

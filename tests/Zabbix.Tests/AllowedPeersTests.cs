@@ -64,6 +64,28 @@ public sealed class AllowedPeersTests
     }
 
     [Fact]
+    public void The_options_read_their_list_as_the_peers_each_entry_is()
+    {
+        var options = new ZabbixListenerOptions { AllowedPeers = { "127.0.0.1", " 10.1.2.3/8 ", "zbx_proxy.example" } };
+
+        IReadOnlyList<ZabbixPeer> peers = options.ParseAllowedPeers();
+
+        Assert.Equal<ZabbixPeer>([IPAddress.Loopback, ZabbixPeer.Parse("10.1.2.3/8"), ZabbixPeer.Parse("zbx_proxy.example")], peers);
+        Assert.Equal(IPNetwork.Parse("10.0.0.0/8"), peers[1].Network);
+        Assert.Equal("zbx_proxy.example", peers[2].HostName);
+    }
+
+    [Theory]
+    [InlineData("{$ALLOWED_PEERS}")]
+    [InlineData("{HOST.HOST}")]
+    [InlineData("127.0.0.1,{HOST.CONN}")]
+    public void A_macro_is_refused_where_nothing_resolves_it(string list)
+    {
+        Assert.False(ZabbixAllowedPeers.TryParse(list, null, out _));
+        Assert.Throws<FormatException>(() => new ZabbixListenerOptions { AllowedPeers = { list } }.ParseAllowedPeers());
+    }
+
+    [Fact]
     public async Task A_name_is_resolved_on_the_check()
     {
         ZabbixAllowedPeers peers = ZabbixAllowedPeers.Parse("localhost", null);

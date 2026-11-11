@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading.Channels;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +26,11 @@ await using ServiceProvider provider = services.BuildServiceProvider();
 ZabbixClient client = provider.GetRequiredService<IZabbixClientFactory>().Create("smoke");
 try
 {
-    var hosts = await client.Hosts.GetAsync(new ZabbixHostGetParameters { Output = ZabbixOutput.Of("hostid", "name") }).ConfigureAwait(false);
+    var hosts = await client.Hosts.GetAsync(q =>
+    {
+        q.Output = [ZabbixHostFields.HostId, ZabbixHostFields.VisibleName];
+        q.Sort = [ZabbixHostFields.VisibleName.Descending(), ZabbixHostFields.HostId];
+    }).ConfigureAwait(false);
     Console.WriteLine($"hosts: {hosts.Count}");
 }
 catch (HttpRequestException e)
@@ -55,12 +60,44 @@ catch (HttpRequestException e)
 }
 try
 {
-    await client.Items[1].UpdateAsync(i => i.Delay = "5m").ConfigureAwait(false);
+    await client.Items[1].UpdateAsync(i => i.Delay = TimeSpan.FromMinutes(5)).ConfigureAwait(false);
 }
 catch (HttpRequestException e)
 {
     Console.WriteLine($"update: {e.GetType().Name}");
 }
+
+// The typed values as the generated JSON context writes and reads them: a get's fields and its sort, an item's interval, its
+// history and its allowed hosts, an interface's port from a macro, and an agent's schedule for an interval.
+string queried = JsonSerializer.Serialize(
+    new ZabbixHostGetParameters { Output = [ZabbixHostFields.HostId, ZabbixHostFields.VisibleName], Sort = [ZabbixHostFields.VisibleName.Descending(), ZabbixHostFields.HostId] },
+    TypeInfo<ZabbixHostGetParameters>());
+string itemWritten = JsonSerializer.Serialize(
+    new ZabbixItemCreateRequest(1UL, "smoke", ZabbixItemType.Trapper, "smoke.key", ZabbixItemValueType.Unsigned)
+    {
+        Delay = ZabbixInterval.Parse("1m;10s/1-5,09:00-18:00"),
+        History = TimeSpan.FromDays(90),
+        TrapperHosts = [IPNetwork.Parse("10.0.0.0/8"), IPAddress.IPv6Loopback, ZabbixPeer.Parse("{HOST.CONN}")],
+    },
+    TypeInfo<ZabbixItemCreateRequest>());
+string portWritten = JsonSerializer.Serialize(ZabbixInterface.Agent(IPAddress.Loopback) with { Port = ZabbixPort.Parse("{$AGENT_PORT}") }, TypeInfo<ZabbixHostInterfaceRequest>());
+ZabbixItem itemRead = JsonSerializer.Deserialize("""{"itemid":"7","delay":"{$DELAY}","history":"90d","trapper_hosts":"10.0.0.0/8, ::1"}""", TypeInfo<ZabbixItem>())!;
+ZabbixHostGetParameters sortRead = JsonSerializer.Deserialize("""{"sortfield":["name","hostid"],"sortorder":["DESC"]}""", TypeInfo<ZabbixHostGetParameters>())!;
+if (!queried.Contains("""{"output":["hostid","name"],"sortfield":["name","hostid"],"sortorder":["DESC","ASC"]}""", StringComparison.Ordinal)
+    || !itemWritten.Contains("\"delay\":\"1m;10s/1-5,09:00-18:00\"", StringComparison.Ordinal)
+    || !itemWritten.Contains("\"history\":\"90d\"", StringComparison.Ordinal)
+    || !itemWritten.Contains("\"trapper_hosts\":\"10.0.0.0/8,::1,{HOST.CONN}\"", StringComparison.Ordinal)
+    || !portWritten.Contains("\"port\":\"{$AGENT_PORT}\"", StringComparison.Ordinal)
+    || itemRead.Delay?.ToString() != "{$DELAY}" || itemRead.History?.Length != TimeSpan.FromDays(90)
+    || itemRead.TrapperHosts is not [{ Network: { } block }, { Network: { } loopback }] || block != IPNetwork.Parse("10.0.0.0/8") || loopback != IPNetwork.Parse("::1/128")
+    || sortRead.Sort is not [{ Direction: System.ComponentModel.ListSortDirection.Descending } name, { Direction: System.ComponentModel.ListSortDirection.Ascending } hostId]
+    || name.Field != ZabbixHostFields.VisibleName || hostId.Field != ZabbixHostFields.HostId
+    || ZabbixInterval.Parse("1h;10s/1-5,09:00-18:00").GetNextCheck(DateTimeOffset.Parse("2026-09-23T08:30:00Z", System.Globalization.CultureInfo.InvariantCulture), TimeZoneInfo.Utc) != DateTimeOffset.Parse("2026-09-23T09:00:00Z", System.Globalization.CultureInfo.InvariantCulture))
+{
+    Console.WriteLine($"aot smoke: typed values wrote {queried}, {itemWritten}, {portWritten}");
+    return 1;
+}
+Console.WriteLine("typed values: written and read");
 
 // The API client its builder binds from configuration, on a container of its own: the generated binder (its Resilience
 // subsection retries at once), the options' validator and the same HTTP pipeline as the registered client's, read with a token
@@ -284,6 +321,9 @@ Console.WriteLine($"bundled: {keys.Length} keys answered");
 
 Console.WriteLine("aot smoke: ok");
 return 0;
+
+// The generated JSON context's contract for one of its types, as ZabbixJson.Options resolves it.
+static JsonTypeInfo<T> TypeInfo<T>() => (JsonTypeInfo<T>)ZabbixJson.Options.GetTypeInfo(typeof(T));
 
 // One request in Zabbix's framing (ZBXD, flags 1, a little-endian length and four reserved bytes), and the one reply.
 static async Task<string> AskAsync(IPEndPoint endPoint, string request)

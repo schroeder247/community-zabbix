@@ -99,8 +99,8 @@ public sealed class LiveApiDriftTests(ITestOutputHelper output)
                     bool current = option.GetCustomAttribute<ObsoleteAttribute>() is null
                         && (option.GetCustomAttribute<ZabbixSupportedAttribute>() is not { } s || version >= Version.Parse(s.Version))
                         && (option.GetCustomAttribute<ZabbixUnsupportedAttribute>() is not { } r || version < Version.Parse(r.Version));
-                    if (option.Name == "Output" || (current && option.Name.StartsWith("Select", StringComparison.Ordinal) && option.PropertyType == typeof(ZabbixOutput)))
-                        option.SetValue(parameters, ZabbixOutput.Extend);
+                    if (Extend(option.PropertyType) is { } extend && (option.Name == "Output" || (current && option.Name.StartsWith("Select", StringComparison.Ordinal))))
+                        option.SetValue(parameters, extend);
                     if (option.Name == "Limit") option.SetValue(parameters, 5);
                 }
                 if (parameters is ZabbixHistoryGetParameters) parametersType.GetProperty("History")!.SetValue(parameters, ZabbixItemValueType.Float);
@@ -129,6 +129,12 @@ public sealed class LiveApiDriftTests(ITestOutputHelper output)
         foreach (string failure in failures) output.WriteLine(failure);
         Assert.Empty(failures);
     }
+
+    // ZabbixOutput.Extend as the output of the option's own record, what the keyword converts to; null for another type.
+    private static object? Extend(Type option)
+        => option.IsGenericType && option.GetGenericTypeDefinition() == typeof(ZabbixOutput<>)
+            ? option.GetMethod(nameof(ZabbixOutput<object>.FromZabbixOutput))!.Invoke(null, [ZabbixOutput.Extend])
+            : null;
 
     /// <summary>
     /// The model's shapes that the server's source defines, round-tripped on every live
@@ -173,10 +179,10 @@ public sealed class LiveApiDriftTests(ITestOutputHelper output)
                     TlsPsk = "0123456789abcdef0123456789abcdef",
                     Interfaces =
                     [
-                        new ZabbixHostInterfaceRequest { Type = ZabbixInterfaceType.Agent, Main = ZabbixInterfacePriority.Primary, UseIp = ZabbixHostInterfaceUseIp.Ip, Ip = "127.0.0.1", Dns = "", Port = "10050" },
+                        new ZabbixHostInterfaceRequest { Type = ZabbixInterfaceType.Agent, Main = ZabbixInterfacePriority.Primary, UseIp = ZabbixHostInterfaceUseIp.Ip, Ip = "127.0.0.1", Dns = "", Port = 10050 },
                         new ZabbixHostInterfaceRequest
                         {
-                            Type = ZabbixInterfaceType.Snmp, Main = ZabbixInterfacePriority.Primary, UseIp = ZabbixHostInterfaceUseIp.Ip, Ip = "127.0.0.1", Dns = "", Port = "161",
+                            Type = ZabbixInterfaceType.Snmp, Main = ZabbixInterfacePriority.Primary, UseIp = ZabbixHostInterfaceUseIp.Ip, Ip = "127.0.0.1", Dns = "", Port = 161,
                             Details = new ZabbixHostInterfaceDetailRequest
                             {
                                 Version = ZabbixSnmpVersion.V3, Bulk = true, SecurityName = "zbx", SecurityLevel = ZabbixSnmpSecurityLevel.AuthPriv,
@@ -256,7 +262,7 @@ public sealed class LiveApiDriftTests(ITestOutputHelper output)
                 Assert.Equal(["+15550100"], user.Medias!.Single(m => m.MediaTypeId == sms[0]).SendTo);
 
                 // A map with an image element, a shape and a url; its update adds a shape and keeps the first
-                ulong icon = Assert.Single(await client.Images.GetAsync(new ZabbixImageGetParameters { Output = ZabbixOutput.Of("imageid"), Filter = new() { ["imagetype"] = new(JsonSerializer.SerializeToElement(1)) }, Limit = 1 }, ct)).ImageId!.Value;
+                ulong icon = Assert.Single(await client.Images.GetAsync(new ZabbixImageGetParameters { Output = [ZabbixImageFields.ImageId], Filter = new() { ["imagetype"] = new(JsonSerializer.SerializeToElement(1)) }, Limit = 1 }, ct)).ImageId!.Value;
                 IReadOnlyList<ulong> maps = [await client.Maps.CreateAsync(new ZabbixMapCreateRequest
                 {
                     Name = prefix + "-map",
@@ -357,7 +363,7 @@ public sealed class LiveApiDriftTests(ITestOutputHelper output)
                 await client.Hosts.MassUpdateAsync(new ZabbixHostMassUpdateRequest { Hosts = [.. hosts.Select(h => new ZabbixHostMassHostRequest { HostId = h })], Status = ZabbixHostStatus.Disabled }, TestContext.Current.CancellationToken);
                 await client.HostGroups.MassUpdateAsync(new ZabbixHostGroupMassUpdateRequest { Groups = [new ZabbixHostGroupMassGroupRequest { GroupId = groups[1] }], Hosts = [new ZabbixHostGroupMassHostRequest { HostId = hosts[0] }] }, TestContext.Current.CancellationToken);
 
-                IReadOnlyList<ZabbixHost> read = await client.Hosts.GetAsync(new ZabbixHostGetParameters { HostIds = hosts, Output = ZabbixOutput.Of("hostid", "status"), SelectHostGroups = ZabbixOutput.Of("groupid") }, TestContext.Current.CancellationToken);
+                IReadOnlyList<ZabbixHost> read = await client.Hosts.GetAsync(new ZabbixHostGetParameters { HostIds = hosts, Output = [ZabbixHostFields.HostId, ZabbixHostFields.Status], SelectHostGroups = [ZabbixHostGroupFields.GroupId] }, TestContext.Current.CancellationToken);
                 Assert.All(read, h => Assert.Equal(ZabbixHostStatus.Disabled, h.Status));
                 Assert.Equal([groups[0], groups[1]], read.Single(h => h.HostId == hosts[0]).HostGroups!.Select(g => g.GroupId!.Value).Order());
                 Assert.Equal([groups[0]], read.Single(h => h.HostId == hosts[1]).HostGroups!.Select(g => g.GroupId!.Value));

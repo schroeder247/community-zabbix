@@ -186,8 +186,8 @@ public sealed class ZabbixProxyConfig
             {
                 if (Id(row, "itemid") is not { } itemId || Id(row, "hostid") is not { } hostId || Text(row, "key_") is not { } key) continue;
                 Items[itemId] = new ZabbixProxyConfigItem(itemId, hostId, key, (ZabbixProxyItemType)(Long(row, "type") ?? 0), (ZabbixProxyItemStatus)(Long(row, "status") ?? 0),
-                    Text(row, "trapper_hosts") ?? string.Empty, Long(row, "allow_traps") == 1, Text(row, "delay") ?? string.Empty,
-                    Text(row, "timeout") ?? string.Empty);
+                    [.. ZabbixPeer.FromReply(Text(row, "trapper_hosts") ?? string.Empty)], Long(row, "allow_traps") == 1, ZabbixInterval.FromReply(Text(row, "delay") ?? string.Empty),
+                    Text(row, "timeout") is { Length: > 0 } timeout ? ZabbixDuration.FromReply(timeout) : null);
             }
         }
 

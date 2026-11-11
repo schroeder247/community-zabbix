@@ -2,7 +2,7 @@
 
 Zabbix agents in a .NET application, built with their builders or registered as hosted services on the generic host, with the same
 verbs: `ZabbixPushAgent` with its poll source and its send loop (retry, backoff, HA failover at connect), `ZabbixActiveAgent`
-(Zabbix's `active checks`, each item on its own `ZabbixItemDelay`), items answered by delegates and providers, the agent health
+(Zabbix's `active checks`, each item on its own update interval, a `ZabbixInterval`), items answered by delegates and providers, the agent health
 check; and the store every agent and proxy buffers in: `ZabbixStore<T>` (a
 `ChannelWriter<T>` and an `IAsyncEnumerable<T>` with an acknowledged face), `ZabbixMemoryStore<T>` and `ZabbixPersistentStore<T>`,
 the base of a durable store (`Community.Zabbix.Agent.Storage.EntityFrameworkCore` is one on EF Core).

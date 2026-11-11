@@ -101,16 +101,8 @@ internal sealed class ZabbixItemSet
         _ => 900,
     };
 
-    /// <summary>A duration in Zabbix's time suffixes (<c>30</c>, <c>30s</c>, <c>5m</c>, <c>1h</c>, <c>2d</c>, <c>1w</c>), or <see langword="null"/> when it is not one.</summary>
-    public static TimeSpan? Duration(string text)
-    {
-        if (text.Length == 0) return null;
-        long unit = text[^1] switch { 's' => 1, 'm' => 60, 'h' => 3600, 'd' => 86400, 'w' => 604800, _ => 0 };
-        string digits = unit == 0 ? text : text[..^1];
-        return ulong.TryParse(digits, NumberStyles.None, CultureInfo.InvariantCulture, out ulong value) && value <= long.MaxValue / 604800
-            ? TimeSpan.FromSeconds((long)value * (unit == 0 ? 1 : unit))
-            : null;
-    }
+    /// <summary>A duration in Zabbix's time suffixes (<c>30</c>, <c>30s</c>, <c>5m</c>, <c>1h</c>, <c>2d</c>, <c>1w</c>), read as <see cref="ZabbixDuration"/> reads one, or <see langword="null"/> when it is not one.</summary>
+    public static TimeSpan? Duration(string text) => ZabbixDuration.TryParse(text, out ZabbixDuration duration) ? duration.Length : null;
 
     /// <summary>An unsigned integer, as Zabbix's agent writes one.</summary>
     public static string Integer(ulong value) => value.ToString(CultureInfo.InvariantCulture);

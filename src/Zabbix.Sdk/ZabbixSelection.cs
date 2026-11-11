@@ -11,8 +11,13 @@ namespace Community.Zabbix;
 /// <param name="Key">Only this item.</param>
 internal sealed record ZabbixSelection(string? Group = null, string? Host = null, ZabbixItemKey? Key = null)
 {
-    private static readonly ZabbixOutput s_itemFields = ZabbixOutput.Of("itemid", "hostid", "key_", "name", "delay", "value_type", "lastvalue", "lastclock", "lastns");
-    private static readonly ZabbixOutput s_hostFields = ZabbixOutput.Of("hostid", "host");
+    private static readonly ZabbixOutput<ZabbixItem> s_itemFields =
+    [
+        ZabbixItemFields.ItemId, ZabbixItemFields.HostId, ZabbixItemFields.Key, ZabbixItemFields.Name, ZabbixItemFields.Delay, ZabbixItemFields.ValueType,
+        ZabbixItemFields.LastValue, ZabbixItemFields.LastClock, ZabbixItemFields.LastClockNanoseconds,
+    ];
+
+    private static readonly ZabbixOutput<ZabbixHost> s_hostFields = [ZabbixHostFields.HostId, ZabbixHostFields.TechnicalName];
 
     /// <summary>The items this selection's key might be, however the server's item writes its parameters: every key of that name on the host.</summary>
     public ZabbixItemGetParameters ToKeySearch() => ToItemGet() with
@@ -30,7 +35,7 @@ internal sealed record ZabbixSelection(string? Group = null, string? Host = null
         Group = Group,
         Filter = Key is { } key ? new() { ["key_"] = key.ToString() } : null,
         SelectHosts = s_hostFields,
-        SortField = ["itemid"],
+        Sort = [ZabbixItemFields.ItemId],
     };
 
     /// <summary>The depth this selection is, for telemetry: <c>server</c>, <c>group</c>, <c>host</c> or <c>item</c>.</summary>

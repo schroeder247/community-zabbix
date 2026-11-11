@@ -79,7 +79,7 @@ public sealed class IdSelectionTests
             {
                 Filter = ids.Count == 0 ? null : new() { ["groupid"] = ids.ToArray() },
             },
-            selection => new ZabbixHostGroupGetParameters { Output = selection.Output, Filter = new(selection.Filter), Search = new(selection.Search), SearchByAny = selection.SearchByAny, StartSearch = selection.StartSearch, SearchWildcardsEnabled = selection.SearchWildcardsEnabled, Limit = selection.Limit });
+            selection => new ZabbixHostGroupGetParameters { Output = selection.Output is { } output ? [.. output.Select(static name => new ZabbixField<ZabbixHostGroup>(name))] : null, Filter = new(selection.Filter), Search = new(selection.Search), SearchByAny = selection.SearchByAny, StartSearch = selection.StartSearch, SearchWildcardsEnabled = selection.SearchWildcardsEnabled, Limit = selection.Limit });
 
         IZabbixGetParameters built = shape.BuildIdSelection([5, 6]);
         var parameters = Assert.IsType<ZabbixHostGroupGetParameters>(built);

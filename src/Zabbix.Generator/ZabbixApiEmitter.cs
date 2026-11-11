@@ -145,8 +145,14 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
                 return "bool";
             case "json":
                 return "global::System.Text.Json.JsonElement";
-            case "output":
-                return "global::Community.Zabbix.ZabbixOutput";
+            case ZabbixTypedFields.Interval:
+                return "global::Community.Zabbix.ZabbixInterval";
+            case ZabbixTypedFields.Duration:
+                return "global::Community.Zabbix.ZabbixDuration";
+            case ZabbixTypedFields.Port:
+                return "global::Community.Zabbix.ZabbixPort";
+            case "peer":
+                return "global::Community.Zabbix.ZabbixPeer";
             case "filter":
                 return "global::System.Collections.Generic.IReadOnlyDictionary<string, global::Community.Zabbix.ZabbixFieldValue>";
             default:
@@ -165,6 +171,17 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
             if (_types.ContainsKey(name)) return "global::Community.Zabbix." + Prefixed(name);
             _problems.Add(new(ZabbixDiagnostics.Undeclared, $"'{kind}' names a record the description does not declare", record, wire));
             return null;
+        }
+        // what a get's output, select or sort names: the fields of the record the rest of the kind names
+        if (kind.StartsWith(ZabbixTypedFields.Output, StringComparison.Ordinal))
+        {
+            string? target = ClrType(kind[ZabbixTypedFields.Output.Length..], record, wire);
+            return target is null ? null : "global::Community.Zabbix.ZabbixOutput<" + target + ">";
+        }
+        if (kind.StartsWith("field:", StringComparison.Ordinal))
+        {
+            string? target = ClrType(kind[6..], record, wire);
+            return target is null ? null : "global::Community.Zabbix.ZabbixField<" + target + ">";
         }
         if (kind.StartsWith("list:", StringComparison.Ordinal))
         {
@@ -436,15 +453,28 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
     // discovery set it; and a template's configuration of it.
     private static readonly HashSet<string> s_macroAttributes = new(StringComparer.Ordinal) { "hostmacroid", "globalmacroid", "type", "description", "automatic", "config" };
 
-    private static void EmitRecordDeclaration(StringBuilder code, TypeDescription t, string name, RecordShape shape)
+    private void EmitRecordDeclaration(StringBuilder code, TypeDescription t, string name, RecordShape shape)
     {
         code.Append("public sealed partial record ").Append(name);
         List<string> bases = [];
-        if (t.GetParameters) bases.Add("global::Community.Zabbix.IZabbixGetParameters");
+        // a get whose output and sort name one record's fields takes them as that record's: IZabbixGetParameters<ZabbixHost>
+        if (t.GetParameters)
+            bases.Add(QueriedRecord(t) is { } queried ? "global::Community.Zabbix.IZabbixGetParameters<" + queried + ">" : "global::Community.Zabbix.IZabbixGetParameters");
         if (shape.ReadBag) bases.Add("global::Community.Zabbix.IZabbixAdditionalFields");
         if (shape.SendableBag) bases.Add("global::System.Text.Json.Serialization.IJsonOnSerializing");
         if (bases.Count > 0) code.Append(" : ").Append(string.Join(", ", bases));
         code.Append("\n{\n");
+    }
+
+    // The record a queryable get's output and sort both name the fields of, as a C# type; null when they don't name one
+    // record's.
+    private string? QueriedRecord(TypeDescription get)
+    {
+        string? output = get.Fields.FirstOrDefault(f => f.Wire == "output")?.Kind;
+        string? sort = get.Fields.FirstOrDefault(f => f.Wire == "sortfield")?.Kind;
+        if (output is null || sort is null || !output.StartsWith(ZabbixTypedFields.Output + "object:", StringComparison.Ordinal)) return null;
+        string target = output[ZabbixTypedFields.Output.Length..];
+        return sort == ZabbixTypedFields.SortFields + target ? ClrType(target, get.Name, "output") : null;
     }
 
     // Where a human names the field: its entry in schema/overlay.json, as a JSON pointer (RFC 6901). The description is
@@ -474,10 +504,16 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
                 _problems.Add(new(ZabbixDiagnostics.FieldCollision, $"field '{field.Wire}' would be named {member}, which another field of {t.Name} already is; name it at {OverlayField(t, field)}", t.Name, field.Wire));
                 continue;
             }
+            // a typed sort is one member over the sortfield and sortorder lists the wire keeps in step
+            FieldDescription? sortOrder = t.Role == "get" ? t.Fields.FirstOrDefault(f => f.Wire == "sortorder") : null;
+            bool sorted = sortOrder is not null && t.Fields.Any(f => f.Wire == "sortfield" && f.Kind.StartsWith(ZabbixTypedFields.SortFields, StringComparison.Ordinal));
+            if (sorted && field == sortOrder) continue;
             // the get grammar's sortorder is a closed pair of words, the BCL's ListSortDirection
             string? type = t.Role == "get" && field.Wire == "sortorder" ? SortDirections : ClrType(field.Kind, t.Name, field.Wire);
             if (type is null) continue;
-            if (t.Role == "get" && field.Kind == "filter" && field.Wire is "filter" or "search")
+            if (sorted && field.Wire == "sortfield")
+                EmitSort(code, field, type, members);
+            else if (t.Role == "get" && field.Kind == "filter" && field.Wire is "filter" or "search")
                 EmitConditions(code, t, field, member, ConditionsType(t, field.Wire == "search"), members);
             else
                 EmitRecordField(code, t, field, member, type, shape.Request, members);
@@ -517,6 +553,11 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
             // PHP answers some text lists as one string on some rows (a user's media sendto: an array for e-mail, a
             // string for SMS, CUser.php 8.0:3540): a read list of text reads either
             "list:string" when t.IsRead => "global::Community.Zabbix.ZabbixTextListConverter",
+            // the hosts that may send to a trapper are one comma-separated text on the wire
+            ZabbixTypedFields.Peers => "global::Community.Zabbix.ZabbixPeerListConverter",
+            // a generic value's converter is named for its record: System.Text.Json's generator takes only a closed one
+            _ when field.Kind.StartsWith(ZabbixTypedFields.Output, StringComparison.Ordinal) => "global::Community.Zabbix.ZabbixOutputConverter<" + TypeArgument(type) + ">",
+
             // an instant the API writes as Unix seconds, a number or its text
             "clock" => "global::Community.Zabbix.ZabbixUnixTimeConverter",
             // a date the API writes as YYYY-MM-DD (API_DATE)
@@ -562,6 +603,9 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
     private static string Setter(TypeDescription t, bool required)
         => t.Role == "get" || (t.Role == "request" && !required) ? "set" : "init";
 
+    // The type argument of a generic type's name: ZabbixOutput<ZabbixHost> gives ZabbixHost.
+    private static string TypeArgument(string type) => type[(type.IndexOf('<') + 1)..^1];
+
     // The interfaces a host's create and update hold: the records ZabbixInterface's factories make, whose Main the list
     // decides when they leave it unset (ZabbixInterface.MarkMain).
     private const string MainMarkedInterfaces = "list:object:HostInterfaceRequest";
@@ -586,6 +630,40 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         members.Printed.Add((wire, "conditions", false, false, false));
         members.Compared.Add((wire, Dictionary + "?", "filter", false));
         members.Wires.Add(field.Wire);
+    }
+
+    /// <summary>
+    /// A get's sort: one list of <c>ZabbixSort&lt;TRecord&gt;</c>, each a field and its direction, over the two lists the
+    /// wire keeps in step, <c>sortfield</c> and <c>sortorder</c> (<c>ZabbixSortWire</c>), as a clock pair is one member over
+    /// two. A caller writes <c>q.Sort = [ZabbixHostFields.VisibleName.Descending(), ZabbixHostFields.HostId]</c>, and a
+    /// direction can't fall out of step with its field. The public member carries the wire name <c>sortfield</c>, as a
+    /// filter's does, for what binds a record by its wire names (the PowerShell module).
+    /// </summary>
+    private static void EmitSort(StringBuilder code, FieldDescription sortField, string fieldsType, RecordMembers members)
+    {
+        string record = TypeArgument(TypeArgument(fieldsType));
+        string sort = "global::System.Collections.Generic.IReadOnlyList<global::Community.Zabbix.ZabbixSort<" + record + ">>";
+        const string Wire = "global::Community.Zabbix.ZabbixSortWire";
+        code.Append("    /// <summary>").Append(Doc(DocSentences.Field(sortField.Summary, "Sort", sortField.Wire), sortField.Wire))
+            .Append(" Each field sorts ascending unless it's <c>Descending()</c>; the directions go as <c>sortorder</c>.</summary>\n");
+        code.Append("    [global::System.Text.Json.Serialization.JsonIgnore]\n");
+        code.Append("    [global::System.Text.Json.Serialization.JsonPropertyName(").Append(Lit(sortField.Wire)).Append(")]\n");
+        code.Append(Versioning(sortField.Since, sortField.Removed, sortField.Replacement is null ? null : "use " + sortField.Replacement, "    "));
+        code.Append("    public ").Append(sort).Append("? Sort\n    {\n");
+        code.Append("        get => ").Append(Wire).Append(".Join(SortFieldWire, SortOrderWire);\n");
+        code.Append("        set => (SortFieldWire, SortOrderWire) = ").Append(Wire).Append(".Split(value);\n    }\n\n");
+        code.Append("    [global::System.Text.Json.Serialization.JsonInclude]\n");
+        code.Append("    [global::System.Text.Json.Serialization.JsonPropertyName(").Append(Lit(sortField.Wire)).Append(")]\n");
+        code.Append("    [global::System.Text.Json.Serialization.JsonConverter(typeof(global::Community.Zabbix.ZabbixFieldListConverter<").Append(record).Append(">))]\n");
+        code.Append("    internal ").Append(fieldsType).Append("? SortFieldWire { get; set; }\n\n");
+        code.Append("    [global::System.Text.Json.Serialization.JsonInclude]\n");
+        code.Append("    [global::System.Text.Json.Serialization.JsonPropertyName(\"sortorder\")]\n");
+        code.Append("    internal ").Append(SortDirections).Append("? SortOrderWire { get; set; }\n\n");
+        members.Printed.Add(("Sort", "list:sort", false, false, false));
+        // compared as the one sort, so a sortorder that leaves its last fields ascending equals one that says so
+        members.Compared.Add(("Sort", sort + "?", "list:sort", false));
+        members.Wires.Add(sortField.Wire);
+        members.Wires.Add("sortorder");
     }
 
     // A clock and its nanoseconds (clock and ns): one DateTimeOffset member over two wire members the JSON contract reads
@@ -1407,6 +1485,8 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         Root("global::System.Collections.Generic.IEnumerable<string>");
         Root("global::System.Collections.Generic.IReadOnlyList<ulong>");
         Root("global::System.Collections.Generic.IEnumerable<ulong>");
+        // a member holds a list of peers, written by its own converter, so one peer has a contract only as a root
+        Root("global::Community.Zabbix.ZabbixPeer");
         var code = new StringBuilder(Header(api.Range, "The JSON serializer context for the API: every record, request and parameter set, source-generated."));
         code.Append("[global::System.Text.Json.Serialization.JsonSourceGenerationOptions(\n    DefaultIgnoreCondition = global::System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,\n    NumberHandling = global::System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString,\n    Converters = new[] { typeof(global::Community.Zabbix.ZabbixIdConverter), typeof(global::Community.Zabbix.ZabbixFiniteDoubleConverter), typeof(global::Community.Zabbix.ZabbixSortDirectionConverter) },\n    GenerationMode = global::System.Text.Json.Serialization.JsonSourceGenerationMode.Default)]\n");
         foreach (KeyValuePair<string, string> root in _jsonRoots.OrderBy(r => r.Value, StringComparer.Ordinal))

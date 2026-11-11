@@ -155,8 +155,7 @@ public sealed class LiveServerFactTests
             History = ZabbixItemValueType.Unsigned,
             ItemIds = [host["zbxtest.u"].ItemId],
             TimeFrom = DateTimeOffset.FromUnixTimeSeconds(second),
-            SortField = ["clock", "ns"],
-            SortOrder = [System.ComponentModel.ListSortDirection.Ascending],
+            Sort = [ZabbixHistoryRecordFields.Clock, ZabbixHistoryRecordFields.ClockNanoseconds],
             Output = ZabbixOutput.Extend,
         }, Cancel);
 

@@ -81,12 +81,13 @@ public sealed partial class ZabbixProxyAdmission
         foreach (ZabbixProxyConfigItem item in config.Items.Values)
         {
             if (item.Type is not (ZabbixProxyItemType.Trapper or ZabbixProxyItemType.HttpAgent)) continue;
-            if (item.TrapperHosts.Length == 0 && !strict)
+            if (item.TrapperHosts.Count == 0 && !strict)
             {
                 peers[item.ItemId] = PeerList.Everyone;
                 continue;
             }
-            string resolved = config.Hosts.TryGetValue(item.HostId, out ZabbixProxyConfigHost? host) ? ResolveMacros(item.TrapperHosts, host, config) : item.TrapperHosts;
+            string written = string.Join(',', item.TrapperHosts);
+            string resolved = config.Hosts.TryGetValue(item.HostId, out ZabbixProxyConfigHost? host) ? ResolveMacros(written, host, config) : written;
             if (!byText.TryGetValue(resolved, out PeerList? list))
             {
                 list = await PeerList.ParseAsync(resolved, resolve, cancellationToken).ConfigureAwait(false);
@@ -133,7 +134,7 @@ public sealed partial class ZabbixProxyAdmission
         }
         return _peers.TryGetValue(item.ItemId, out PeerList? allowed) && allowed.Contains(peer)
             ? null
-            : $"connection from \"{peer}\" rejected, allowed hosts: \"{item.TrapperHosts}\"";
+            : $"connection from \"{peer}\" rejected, allowed hosts: \"{string.Join(',', item.TrapperHosts)}\"";
     }
 
     /// <summary>
@@ -205,15 +206,15 @@ public sealed partial class ZabbixProxyAdmission
 
         public static PeerList Everyone { get; } = new([], everyone: true);
 
+        // Each entry of the resolved text: an address or a block as itself, anything else a name resolved now; an entry
+        // a macro left as it was resolves to no one.
         public static async ValueTask<PeerList> ParseAsync(string text, ZabbixPeerResolverCallback resolve, CancellationToken cancellationToken)
         {
             var networks = new List<IPNetwork>();
-            foreach (string entry in text.Split(','))
+            foreach (ZabbixPeer entry in ZabbixPeer.FromReply(text))
             {
-                if (entry.Length == 0) continue;
-                if (entry.Contains('/', StringComparison.Ordinal) && IPNetwork.TryParse(entry, out IPNetwork block)) networks.Add(Normalise(block));
-                else if (IPAddress.TryParse(entry, out IPAddress? address)) networks.Add(Single(address));
-                else foreach (IPAddress resolved in await resolve(entry, cancellationToken).ConfigureAwait(false)) networks.Add(Single(resolved));
+                if (entry.Network is { } block) networks.Add(Normalise(block));
+                else if (entry.ToString() is { Length: > 0 } name) foreach (IPAddress resolved in await resolve(name, cancellationToken).ConfigureAwait(false)) networks.Add(Single(resolved));
             }
             return new PeerList([.. networks], everyone: false);
         }

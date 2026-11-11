@@ -93,7 +93,7 @@ internal static class ZabbixEntityShape
                 var byName = new Dictionary<string, ZabbixFieldValue>(StringComparer.Ordinal) { [nameField] = names.ToArray() };
                 TParameters parameters = materialize(new ZabbixGetSelection
                 {
-                    Output = new[] { idField, nameField },
+                    Output = [idField, nameField],
                     Filter = names.Count == 0 || searchable ? null : byName,
                     Search = names.Count == 0 || !searchable ? null : byName,
                     SearchWildcardsEnabled = names.Count > 0 && searchable ? true : null,
@@ -118,7 +118,7 @@ internal static class ZabbixEntityShape
                 // it is case-insensitive as -Name is; a '*' is the API's own wildcard. The answer is bounded by limit.
                 TParameters parameters = materialize(new ZabbixGetSelection
                 {
-                    Output = new[] { idField, nameField },
+                    Output = [idField, nameField],
                     Search = text.Length == 0 ? null : new Dictionary<string, ZabbixFieldValue>(StringComparer.Ordinal) { [nameField] = new[] { text } },
                     StartSearch = text.Length == 0 ? null : true,
                     SearchWildcardsEnabled = text.Contains('*', StringComparison.Ordinal) ? true : null,

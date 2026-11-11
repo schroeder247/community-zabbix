@@ -228,8 +228,8 @@ public sealed class ExportZbxConfigurationCommand : ZabbixServerCmdlet
         return [.. templates.Select(template => template.TemplateId!.Value)];
     }
 
-    private static readonly ZabbixOutput s_hostIdField = ZabbixOutput.Of("hostid");
-    private static readonly ZabbixOutput s_templateIdField = ZabbixOutput.Of("templateid");
+    private static readonly ZabbixOutput<ZabbixHost> s_hostIdField = [ZabbixHostFields.HostId];
+    private static readonly ZabbixOutput<ZabbixTemplate> s_templateIdField = [ZabbixTemplateFields.TemplateId];
 
     /// <summary>The named ids and the groups' members, each once; <see langword="null"/> (the option omitted) when both are empty.</summary>
     internal static IReadOnlyList<ulong>? Union(IReadOnlyList<ulong>? named, IReadOnlyList<ulong> members)

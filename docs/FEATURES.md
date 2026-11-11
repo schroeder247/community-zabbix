@@ -16,6 +16,11 @@ What each package and module does. To choose one, see [Key concepts](../README.m
   and changed through a node's lambda (`zabbix.Hosts["web-02"].UpdateAsync(h => h.Status = ZabbixHostStatus.Disabled)`).
 - Requests whose required fields the compiler checks, and nested values without `new`: a group by its id, a tag or a user
   macro as a pair, and a host's interface from `ZabbixInterface.Agent(address)`, `Snmp`, `Ipmi` or `Jmx`.
+- Types where the API takes text: a get's output, select and sort fields are the record's own (`ZabbixField<TRecord>`), so a
+  host's field doesn't compile in an item's query, and its sort is one list of fields, each ascending or `Descending()`. An
+  item's update interval converts from a `TimeSpan` (`ZabbixInterval`), as do its history, trends and timeout
+  (`ZabbixDuration`); an interface's port from an `int` (`ZabbixPort`); and a trapper item's allowed hosts from an `IPAddress`
+  or an `IPNetwork` (`ZabbixPeer`). Each has a `Parse` that takes Zabbix's spelling, macros included.
 - A model generated from each Zabbix version's own source: a method or field the connected server's version does not
   have is refused before anything is sent.
 - API tokens, or a user name and password whose session is renewed when the server ends it.

@@ -138,9 +138,9 @@ internal static class ZabbixProxyPaging
                 // Delay and timeout with the host's user macros resolved, as zbx_dc_expand_user_and_func_macros does; an
                 // item without its own timeout carries the proxy's agent timeout (dbconfig.c timeout_orig), and none is
                 // sent only while the server has sent none (the agent's own Timeout then applies).
-                string delay = ZabbixProxyAdmission.ResolveMacros(item.Delay, found, config);
-                string held = item.Timeout.Length > 0 ? item.Timeout : config.AgentTimeout;
-                string? timeout = held.Length > 0 ? ZabbixProxyAdmission.ResolveMacros(held, found, config) : null;
+                ZabbixInterval delay = ZabbixInterval.FromReply(ZabbixProxyAdmission.ResolveMacros(item.Delay.ToString(), found, config));
+                string held = item.Timeout?.ToString() ?? config.AgentTimeout;
+                ZabbixDuration? timeout = held.Length > 0 ? ZabbixDuration.FromReply(ZabbixProxyAdmission.ResolveMacros(held, found, config)) : null;
                 assignments.Add(new ZabbixItemAssignment(item.ItemId, item.Key, delay, timeout));
             }
         }

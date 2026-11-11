@@ -12,8 +12,9 @@ namespace Community.Zabbix;
 /// </summary>
 public abstract class ZabbixNode : IZabbixNode
 {
-    private static readonly ZabbixOutput s_hostIdField = ZabbixOutput.Of("hostid");
-    private static readonly ZabbixOutput s_groupIdField = ZabbixOutput.Of("groupid");
+    private static readonly ZabbixOutput<ZabbixItem> s_itemHostIdField = [ZabbixItemFields.HostId];
+    private static readonly ZabbixOutput<ZabbixHost> s_hostIdField = [ZabbixHostFields.HostId];
+    private static readonly ZabbixOutput<ZabbixHostGroup> s_groupIdField = [ZabbixHostGroupFields.GroupId];
 
     // Null only in a node built for mocking, whose members are overridden.
     private readonly ZabbixClient? _client;
@@ -72,7 +73,7 @@ public abstract class ZabbixNode : IZabbixNode
     {
         if (Selection.Key is { } itemKey)
         {
-            foreach (ZabbixItem _ in await Client.Items.GetAsync(Selection.ToItemGet() with { Output = s_hostIdField, SelectHosts = null, Limit = 1 }, cancellationToken).ConfigureAwait(false))
+            foreach (ZabbixItem _ in await Client.Items.GetAsync(Selection.ToItemGet() with { Output = s_itemHostIdField, SelectHosts = null, Limit = 1 }, cancellationToken).ConfigureAwait(false))
                 return true;
             return itemKey.Parameters.Count > 0 && (await SameKeyAsync(itemKey, cancellationToken).ConfigureAwait(false)).Count > 0;
         }

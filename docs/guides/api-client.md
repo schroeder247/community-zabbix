@@ -177,11 +177,26 @@ The parameters of a get:
 | --- | --- |
 | `Filter` | Matches by equality: `q.Filter.Status = [ZabbixHostStatus.Enabled]` |
 | `Search` | Matches a substring: `q.Search.VisibleName = "web"` |
-| `Output` | Names the fields that come back: the `Zabbix*Fields` constants, or `ZabbixOutput.Extend` for every field |
+| `Output` | Names the fields that come back: the record's `Zabbix*Fields`, or `ZabbixOutput.Extend` for every field |
+| `Select*` | Adds related objects, and names their fields the same way: `q.SelectInterfaces = ZabbixOutput.Extend` |
+| `Sort` | Orders by fields of the record, each ascending unless it says `Descending()`: `q.Sort = [ZabbixHostFields.VisibleName]` |
 | `Limit` | Caps the objects that come back |
 
+```csharp
+var hosts = await zabbix.Hosts.GetAsync(q =>
+{
+    q.Output = [ZabbixHostFields.HostId, ZabbixHostFields.VisibleName];
+    q.SelectInterfaces = [ZabbixHostInterfaceFields.Ip, ZabbixHostInterfaceFields.Port];
+    q.Sort = [ZabbixHostFields.VisibleName.Descending(), ZabbixHostFields.HostId];
+});
+```
+
+- `Output`, each `Select*`, and `Sort` take the fields of the record they return, a `ZabbixField<TRecord>`, so a host's field
+  doesn't compile in an item's query. `ZabbixOutput.Extend` and `ZabbixOutput.Count` fit any output or select.
+- `Sort` is one list: the API's `sortfield` and `sortorder`, a direction for each field.
 - `Filter` and `Search` are never `null`, and only what you set is sent.
-- For a field the SDK doesn't name yet, use the wire name: `q.Filter["a_new_field"] = "x"`.
+- For a field the SDK doesn't name yet, use the wire name: `q.Filter["a_new_field"] = "x"`, and
+  `q.Output = [new ZabbixField<ZabbixHost>("a_new_field")]`.
 - A reply is read whole, up to `ZabbixOptions.MaxResponseContentBytes` (1 GiB). The API has no paging, so narrow a large read with the
   parameters.
 - A field the server sends that a record doesn't model is kept in its `AdditionalFields` (`IZabbixAdditionalFields`).
@@ -206,7 +221,7 @@ ulong id = await zabbix.Hosts.CreateAsync("web-02", [linux], h =>
 });
 
 await zabbix.Hosts["web-02"].UpdateAsync(h => h.Status = ZabbixHostStatus.Disabled);
-await zabbix.Items[itemId].UpdateAsync(i => i.Delay = "5m");
+await zabbix.Items[itemId].UpdateAsync(i => i.Delay = TimeSpan.FromMinutes(5));
 await zabbix.HostGroups["Linux servers"].UpdateAsync(g => g.Name = "Linux");
 ```
 
@@ -224,6 +239,10 @@ await zabbix.HostGroups["Linux servers"].UpdateAsync(g => g.Name = "Linux");
 | A tag | A pair: `Tags = [("env", "prod")]` |
 | A user macro | A pair: `Macros = [("{$SNMP_COMMUNITY}", "public")]` |
 | A host's interface | `ZabbixInterface.Agent`, `Snmp`, `Ipmi`, or `Jmx`, at an `IPAddress` or a DNS name, on the port Zabbix uses for the kind unless you pass one |
+| An item's update interval | A `TimeSpan`: `Delay = TimeSpan.FromMinutes(5)` sends `5m`. For a macro or a flexible interval, `ZabbixInterval.Parse("1m;10s/1-5,09:00-18:00")` |
+| How long an item's history and trends are kept, and its timeout | A `TimeSpan`: `History = TimeSpan.FromDays(90)` sends `90d`. For a macro, `ZabbixDuration.Parse("{$HISTORY}")` |
+| An interface's port | A number: `Port = 10050`. For a macro, `ZabbixPort.Parse("{$AGENT_PORT}")`, which a factory's interface takes with `with { Port = … }` |
+| The hosts that may send to a trapper item | Addresses and blocks: `TrapperHosts = [IPNetwork.Parse("10.0.0.0/8"), IPAddress.IPv6Loopback]`. For a DNS name or a macro, `ZabbixPeer.Parse("monitor.example")`, and for Zabbix's list, `ZabbixPeer.ParseList("10.0.0.0/8, ::1")` |
 
 - The first interface of each type in a host's list is its main one, unless you mark another with
   `with { Main = ZabbixInterfacePriority.Primary }`. Zabbix needs one main interface of each type a host has.
@@ -231,6 +250,9 @@ await zabbix.HostGroups["Linux servers"].UpdateAsync(g => g.Name = "Linux");
   `ZabbixHostInterfaceDetailRequest` for SNMPv1 or SNMPv3.
 - To add an interface to a host that exists, pass one with the host's id:
   `await zabbix.HostInterfaces.CreateAsync(hostId, ZabbixInterface.Snmp(IPAddress.Parse("10.0.0.2")))`.
+- An interval, a length, a port, and a trapper's hosts read back as the server wrote them, and `ToString()` gives that text.
+  `item.Delay?.UpdateInterval` and `item.History?.Length` are `TimeSpan` values, and `null` for a macro. An empty list of trapper
+  hosts lets any host send.
 
 ## Check what the server's version supports
 

@@ -136,7 +136,7 @@ public sealed class ActiveAgentTests
             .SelectMany(type => type.GetConstructors())
             .Where(constructor => constructor.GetParameters().Any(parameter => parameter.IsOptional))
             .Select(constructor => constructor.ToString()!)];
-        var log = new ZabbixItemAssignment(7UL, "log[/var/log/app]", "1m", null);
+        var log = new ZabbixItemAssignment(7UL, "log[/var/log/app]", TimeSpan.FromMinutes(1), null);
 
         Assert.Empty(defaulted);
         Assert.Equal((0L, 0), (log.LastLogSize, log.Mtime));

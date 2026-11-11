@@ -350,7 +350,7 @@ internal sealed class ZabbixActiveAgentDestination : IHostedLifecycleService, IA
     // ----- the checks ------------------------------------------------------------------------------------------
 
     /// <summary>A check's next due instant, kept across a refresh for as long as its key and delay do not change.</summary>
-    private readonly record struct Due(string Key, string Delay, DateTimeOffset At);
+    private readonly record struct Due(string Key, ZabbixInterval Delay, DateTimeOffset At);
 
     /// <summary>An assigned item ready to collect.</summary>
     private sealed record Check(ulong ItemId, ZabbixItemKey Key, ZabbixItemDelay Delay, TimeSpan Timeout, ZabbixItemAssignment Assignment);
@@ -396,13 +396,13 @@ internal sealed class ZabbixActiveAgentDestination : IHostedLifecycleService, IA
                 Admit(assignment.ItemId, "Invalid item key format.", supported: false, now);
                 continue;
             }
-            if (!ZabbixItemDelay.TryParse(assignment.Delay, out ZabbixItemDelay? delay, out string? error))
+            if (!ZabbixItemDelay.TryParse(assignment.Delay.ToString(), out ZabbixItemDelay? delay, out string? error))
             {
                 AgentLog.ItemDelayInvalid(_logger, _name, assignment.ItemId, assignment.Key, error);
                 Admit(assignment.ItemId, error, supported: false, now);
                 continue;
             }
-            TimeSpan timeout = ZabbixItemDelay.TryParseTimeSuffix(assignment.Timeout.AsSpan(), out int seconds) && seconds > 0 ? TimeSpan.FromSeconds(seconds) : _options.CheckTimeout;
+            TimeSpan timeout = assignment.Timeout?.Length is { } length && length > TimeSpan.Zero ? length : _options.CheckTimeout;
             var check = new Check(assignment.ItemId, key, delay, timeout, assignment);
             // Upstream (add_check): an unchanged item keeps its schedule; a new one is collected at once, unless its
             // delay is a scheduling one, which waits for its first instant.

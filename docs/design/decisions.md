@@ -53,7 +53,7 @@ ADRs: a lower document may add to a higher one and never contradicts it. Where t
   the vocabulary.
 - **`GetAsync(parameters)` reads, `FindAsync(id)` reads one object or `null` (as `DbSet<T>.FindAsync` does),
   `CreateAsync`/`UpdateAsync`/`DeleteAsync` write; one request answers one id, several answer the list.** The parameters are the wire's own
-  words (`Filter`, `Search`, `SortField`, `Output`, `Limit`): `Output` is not `Select`, because the API returns fields,
+  words (`Filter`, `Search`, `Sort`, `Output`, `Limit`): `Output` is not `Select`, because the API returns fields,
   it does not project. There is no LINQ-style query provider over them (ADR 0006): it would compile the same small
   grammar a second way, and the typed parameters already serve every consumer.
 - **`As*` is lazy, `To*` materialises, `Try*` never throws.**
@@ -81,14 +81,16 @@ ADRs: a lower document may add to a higher one and never contradicts it. Where t
 | HA node list (`commshigh.c`) | `ZabbixNodeLink`: connect-phase failover, sticky node, walked over the declared node list as upstream walks it | owned |
 | `;` HA nodes versus `,` destinations (`cfg.c`) | Text, as Zabbix writes it; `ZabbixEndPoint.ParseServerActive` reads it | BCL |
 | item key `name[p,"q",[a,b]]` (`expr.c`) | `ZabbixItemKey`: the verbatim text is the identity, parameters a view | owned |
-| item delay, flexible and scheduling (`interval.c`) | `ZabbixItemDelay` + a due `PriorityQueue` on `TimeProvider` | owned |
+| item delay, flexible and scheduling (`interval.c`) | `ZabbixInterval`, one grammar for the API, the agent and the proxy; an agent's schedule (`GetNextCheck`) + a due `PriorityQueue` on `TimeProvider` | owned |
+| a length of time (`API_TIME_UNIT`: an item's history, trends and timeout) | `ZabbixDuration`, from a `TimeSpan` or a macro | owned (a `TimeSpan` holds no macro) |
+| an interface's port (`API_PORT`) | `ZabbixPort`, from an `int` or a macro | owned (an `int` holds no macro) |
 | clock + ns | `DateTimeOffset` in every public signature, with an internal exact instant behind it; every `(clock, ns)` pair of a record is one member and every Unix time a `DateTimeOffset` of its second (`DesignConformanceTests.Clocks`) | BCL |
 | a date (`API_DATE`, `YYYY-MM-DD`) | `DateOnly` | mated |
 | a time of day (seconds after midnight, a `start_time`) | `TimeOnly` | mated |
 | object id (`bigint unsigned`; the API's decimal string, the framed protocol's number; `0` for none) | `ulong(ulong)`: `ISpanParsable`, `IUtf8SpanParsable`, `ISpanFormattable`, `IUtf8SpanFormattable`; one type on the API's records, the wire's rows and the hosts' assignments; `0UL` is `0`; a CUID id (`auditid`, `recordsetid`, `ha_nodeid`: a 25-character string, `ZBX_TYPE_CUID`) is a `string`, never a `ulong` | owned (a `ulong` carries the number but neither JSON form nor the one name across packages) |
 | API version | `System.Version`; methods gated by `ZabbixSupportedAttribute`, refused with `ZabbixVersionException` | mated |
 | proxy and server component version | `ZabbixComponentVersion` over `System.Version`, upstream's parse rules | owned parse, mated value |
-| allowed peers / `Server=` / `trapper_hosts` | `ZabbixAllowedPeers`: `IPNetwork` for blocks, names resolved per check, empty refused | owned |
+| allowed peers / `Server=` / `trapper_hosts` | `ZabbixPeer` per entry, `IPNetwork` for an address or a block; a listener's list names resolved per check, empty refused | owned |
 | TLS certificate mode (`tls_openssl.c`) | `SslStream` + `CertificateChainPolicy` + `CustomRootTrust`; revocation from `TLSCRLFile` only | mated |
 | certificate issuer/subject pins | `ZabbixCertificateName` over `EnumerateRelativeDistinguishedNames` and `AsnReader` | owned |
 | TLS-PSK | BouncyCastle: upstream's TLS 1.3 pair and six TLS 1.2 suites, P-256 only; `ZabbixTlsAcceptor` server side | owned (no PSK in .NET) |
@@ -126,10 +128,12 @@ AND across fields into OR. There are no comparison operators. *Consequence:* the
 the API; the typed `*GetParameters` record is the query, and a field it does not name goes nowhere. The field names are
 typed too, from the same description: `Zabbix{Object}GetFilter` holds one list per field `filter` accepts, typed as the
 read record types the field (`Status = [ZabbixHostStatus.Enabled]`), `Zabbix{Object}GetSearch` one text per field
-`search` accepts, and `Zabbix{Record}Fields` the wire name of every read field under its C# name, for `output` and
-`sortfield`. *Why a filter is a dictionary:* `Filter` and `Search` stay `IReadOnlyDictionary<string, ZabbixFieldValue>`,
-which the typed records implement, so a typed filter is assigned where a dictionary was, and a field the record does not
-type (one the API accepts but the description cannot place) is still sent through a dictionary.
+`search` accepts, and `Zabbix{Record}Fields` every field of a record an `output`, a `select` or a `sortfield` names, as a
+`ZabbixField<TRecord>` under its C# name, so a host's field doesn't compile in an item's query. A get's sort is one list
+of fields with their directions (`Sort`), sent as the `sortfield` and `sortorder` lists in step. *Why a filter is a
+dictionary:* `Filter` and `Search` stay `IReadOnlyDictionary<string, ZabbixFieldValue>`, which the typed records
+implement, so a typed filter is assigned where a dictionary was, and a field the record does not type (one the API
+accepts but the description cannot place) is still sent through a dictionary.
 
 ### The Zabbix source is the model's authority
 
@@ -469,7 +473,7 @@ JSON by `JsonElement.DeepEquals`; absent is not empty. The generator emits them;
 `init`): the property would still be typed `IReadOnlyList<T>`, so a caller's own list (a collection expression, an array)
 would keep reference equality unless every `init` copied it into the wrapper, which costs an allocation per member and
 leaks a library type through `GetType()`; equality written beside the record keeps the caller's list as given and is the
-shape `ZabbixOutput` and `ZabbixFieldValue` have. *Consequence:* `DesignConformanceTests` builds every public
+shape `ZabbixOutput<TRecord>` and `ZabbixFieldValue` have. *Consequence:* `DesignConformanceTests` builds every public
 record twice from equal, separately allocated values and requires them equal with equal hashes, and `GeneratedApiTests`
 requires the emitted equality on every record with such a member.
 
@@ -763,7 +767,7 @@ one deletes its line in the same commit, and follows the compatibility rules abo
 | --- | --- | --- |
 | public constructors of `Zabbix.Agent` and `Zabbix.Proxy` take default arguments: `ZabbixAgentHealthCheck`, `ZabbixMemoryStore<T>`, `ZabbixPersistentStore<T>`, `ZabbixStore<T>`, `ZabbixPassiveCheckResponder`, `ZabbixTrapper`, `ZabbixTrapperSource`, `ZabbixProxyUplink` (the agent and proxy classes and `ZabbixItemAssignment` take overloads) | "DO use member overloading rather than defining members with default arguments" and "DO make only the longest overload virtual" ([member overloading](https://learn.microsoft.com/dotnet/standard/design-guidelines/member-overloading)); a default is compiled into the caller | each constructor's shorter forms become overloads that call the longest, and `Zabbix.Agent` and `Zabbix.Proxy` join the libraries `No_public_constructor_of_a_client_library_takes_a_default_argument` reads |
 | `*GetParameters.Filter` and `.Search` are the generated `Zabbix*GetFilter` and `Zabbix*GetSearch`, never `null`, so `q.Filter.TechnicalName = ["web-01"]` binds, and the indexer sets a field they do not name. |
-| `ZabbixItemAssignment.Key`/`.Delay`/`.Timeout` and `ZabbixItem.Key`/`.Delay` are `string` beside `ZabbixItemKey` and `ZabbixItemDelay` | a value with a parsed form is exposed as its type, not as text the caller parses (the reasoning of [CA1056](https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1056), "URI properties should not be strings", applied to the SDK's own value types) | an assignment's key and delay are parsed when the agent schedules the item, so one it cannot read is that item's "not supported" and never a refusal of the whole list (upstream's agent answers it so). The typed property needs a form that holds an unparsable text and says so (`ZabbixItemKey.TryParse` kept beside the raw text, or a `ZabbixItemKey?` with the text alongside), then the hosts read the typed member; `ZabbixItem.Key`/`.Delay` follow through the overlay's `fieldKinds` (a `key` and a `delay` kind with their converters) |
+| `ZabbixItemAssignment.Key` and `ZabbixItem.Key` are `string` beside `ZabbixItemKey` | a value with a parsed form is exposed as its type, not as text the caller parses (the reasoning of [CA1056](https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1056), "URI properties should not be strings", applied to the SDK's own value types) | an assignment's key is parsed when the agent schedules the item, so one it cannot read is that item's "not supported" and never a refusal of the whole list (upstream's agent answers it so), as its delay is: a `ZabbixInterval` keeps text it can't read, and the schedule refuses that item alone. The typed key needs the same form (`ZabbixItemKey.TryParse` kept beside the raw text, or a `ZabbixItemKey?` with the text alongside), then the hosts read the typed member; `ZabbixItem.Key` follows through the generator's table of typed fields (`ZabbixTypedFields`), with a `key` kind and its converter |
 | the wire counts failovers and redirects as `zabbix.wire.failovers`/`zabbix.wire.redirects` beside the span events `zabbix.wire.failover`/`zabbix.wire.redirect`; the instrument, tag and event names are internal constants on each layer's telemetry type (the trapper's on `ZabbixTrapper`), not on the public `ZabbixTelemetryNames` | use the OpenTelemetry naming guidelines, and give a consumer the names it filters by ([creating metrics, best practices](https://learn.microsoft.com/dotnet/core/diagnostics/metrics-instrumentation#best-practices)) | one name per concept (the counter and its event under one word, the counter's `{failover}` unit saying what it counts) and nested `ZabbixTelemetryNames.Instruments`/`.Events`/`.Tags` with every public name, each layer's telemetry reading them; the trapper's in `Zabbix.Proxy` move in the same change |
 | the agent's, the proxy's, the listener's and the PowerShell modules' activity sources, and the store's and the trapper's own meters, carry no version; the wire's, the API's and the tree's sources and every `ZabbixLayerTelemetry` meter carry the library's | an instrumentation scope names its library and version, so a backend tells which release emitted a span or a metric ([ActivitySource](https://learn.microsoft.com/dotnet/api/system.diagnostics.activitysource.-ctor), [MeterOptions.Version](https://learn.microsoft.com/dotnet/api/system.diagnostics.metrics.meteroptions.version)) | create each with `ZabbixLayerTelemetry.ScopeVersion(typeof(T).Assembly)` as the wire's are, and a conformance test that every `ActivitySource` and `Meter` the libraries create has a version |
 | 36 `InternalsVisibleTo` pairs, nine of them between NuGet packages that version separately (`Zabbix.Abstractions` to `Zabbix.Api`, `Zabbix.Sdk`, `Zabbix.Wire`, `Zabbix.Agent` and `Zabbix.Proxy`; `Zabbix.Api` to `Zabbix.Sdk`; `Zabbix.Wire` to `Zabbix.Agent` and `Zabbix.Proxy`; `Zabbix.Agent` to `Zabbix.Proxy`) | internal members seen through `InternalsVisibleTo` "can introduce breaking changes" ([version and update considerations](https://learn.microsoft.com/dotnet/csharp/whats-new/version-update-considerations#introducing-breaking-changes-in-your-libraries)) | make the shared plumbing public (reviewed surface) or shared source compiled into each package. Until then the family's versions are pinned exactly at pack time: the `ZabbixExactFamilyVersions` target in `Directory.Build.targets` rewrites every `ProjectReference` dependency as `[version]` after NuGet's `_GetProjectReferenceVersions`, so no NuGet consumer resolves a mixed set (the PowerShell modules are the row below; [ADR 0004](../adr/0004-conventions.md), amendment). `Zabbix.Api` to `Zabbix.Sdk` cannot become shared source: the SDK's System.Text.Json source-generated context instantiates the API's converters named by the records' `[JsonConverter]` attributes, and a second copy of a converter in the SDK is a second type of the same name (`CS0436`) |

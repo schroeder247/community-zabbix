@@ -136,7 +136,7 @@ internal static class ZabbixAgentHostProvisioning
                 Key = key,
                 InterfaceId = type == ZabbixItemType.Zabbix ? interfaceId : null,
                 ValueType = ValueTypeOf(key, valueType),
-                Delay = "1m",
+                Delay = TimeSpan.FromMinutes(1),
                 // master_itemid is an id reference: Zabbix 7.0 accepts "0" (unset) but rejects "" ("a number is
                 // expected"), unlike url/snmp_oid, which are plain text fields.
                 MasterItemId = 0UL,

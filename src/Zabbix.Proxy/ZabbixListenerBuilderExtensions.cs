@@ -13,7 +13,8 @@ namespace Community.Zabbix;
 /// </summary>
 /// <remarks>
 /// The options keep the text that configuration spells, Zabbix's <c>Server=</c> line for who may connect and a key as hex
-/// digits, so a configuration section can fill them. The verbs take the .NET types and write that text.
+/// digits, so a configuration section can fill them. The verbs take the .NET types and write that text, each peer as its
+/// <see cref="ZabbixPeer"/> spells it.
 /// </remarks>
 [SuppressMessage("Design", "CA1034:Nested types should not be visible",
     Justification = "The extension block is C# 14 syntax for extension members; the type the compiler emits for it is not one a caller names.")]
@@ -27,7 +28,7 @@ public static class ZabbixListenerBuilderExtensions
         /// </summary>
         /// <param name="network">The network: <c>IPNetwork.Parse("10.0.0.0/8")</c>.</param>
         /// <returns>The builder.</returns>
-        public TBuilder AllowPeer(IPNetwork network) => builder.AllowPeerText(network.ToString());
+        public TBuilder AllowPeer(IPNetwork network) => builder.AllowPeerText(ZabbixPeer.FromIPNetwork(network).ToString());
 
         /// <summary>Lets <paramref name="address"/> connect, as an address on Zabbix's <c>Server=</c> line does.</summary>
         /// <param name="address">The peer's address. An IPv4 address also matches its IPv4-mapped IPv6 form.</param>
@@ -36,7 +37,7 @@ public static class ZabbixListenerBuilderExtensions
         public TBuilder AllowPeer(IPAddress address)
         {
             ArgumentNullException.ThrowIfNull(address);
-            return builder.AllowPeerText(address.ToString());
+            return builder.AllowPeerText(ZabbixPeer.FromIPAddress(address).ToString());
         }
 
         /// <summary>
@@ -50,9 +51,9 @@ public static class ZabbixListenerBuilderExtensions
         public TBuilder AllowPeer(string hostName)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(hostName);
-            if (Uri.CheckHostName(hostName) != UriHostNameType.Dns)
+            if (!ZabbixPeer.TryParse(hostName, out ZabbixPeer peer) || peer.HostName is not { } name)
                 throw new ArgumentException($"\"{hostName}\" isn't a DNS name: pass an IPAddress or an IPNetwork for an address.", nameof(hostName));
-            return builder.AllowPeerText(hostName);
+            return builder.AllowPeerText(name);
         }
 
         /// <summary>

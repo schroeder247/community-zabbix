@@ -19,7 +19,7 @@ Community.Zabbix.Hosting.ZabbixDelivery.Rejected = 1 -> Community.Zabbix.Hosting
 Community.Zabbix.Hosting.ZabbixDelivery.Retried = 2 -> Community.Zabbix.Hosting.ZabbixDelivery
 Community.Zabbix.Hosting.ZabbixItemAssignment
 Community.Zabbix.Hosting.ZabbixItemAssignment.<Clone>$() -> Community.Zabbix.Hosting.ZabbixItemAssignment!
-Community.Zabbix.Hosting.ZabbixItemAssignment.Delay.get -> string!
+Community.Zabbix.Hosting.ZabbixItemAssignment.Delay.get -> Community.Zabbix.ZabbixInterval
 Community.Zabbix.Hosting.ZabbixItemAssignment.Delay.init -> void
 Community.Zabbix.Hosting.ZabbixItemAssignment.Equals(Community.Zabbix.Hosting.ZabbixItemAssignment? other) -> bool
 Community.Zabbix.Hosting.ZabbixItemAssignment.ItemId.get -> ulong
@@ -30,10 +30,10 @@ Community.Zabbix.Hosting.ZabbixItemAssignment.LastLogSize.get -> long
 Community.Zabbix.Hosting.ZabbixItemAssignment.LastLogSize.init -> void
 Community.Zabbix.Hosting.ZabbixItemAssignment.Mtime.get -> int
 Community.Zabbix.Hosting.ZabbixItemAssignment.Mtime.init -> void
-Community.Zabbix.Hosting.ZabbixItemAssignment.Timeout.get -> string?
+Community.Zabbix.Hosting.ZabbixItemAssignment.Timeout.get -> Community.Zabbix.ZabbixDuration?
 Community.Zabbix.Hosting.ZabbixItemAssignment.Timeout.init -> void
-Community.Zabbix.Hosting.ZabbixItemAssignment.ZabbixItemAssignment(ulong itemId, string! key, string! delay, string? timeout) -> void
-Community.Zabbix.Hosting.ZabbixItemAssignment.ZabbixItemAssignment(ulong itemId, string! key, string! delay, string? timeout, long lastLogSize, int mtime) -> void
+Community.Zabbix.Hosting.ZabbixItemAssignment.ZabbixItemAssignment(ulong itemId, string! key, Community.Zabbix.ZabbixInterval delay, Community.Zabbix.ZabbixDuration? timeout) -> void
+Community.Zabbix.Hosting.ZabbixItemAssignment.ZabbixItemAssignment(ulong itemId, string! key, Community.Zabbix.ZabbixInterval delay, Community.Zabbix.ZabbixDuration? timeout, long lastLogSize, int mtime) -> void
 Community.Zabbix.Hosting.ZabbixPoll
 Community.Zabbix.Hosting.ZabbixSendLoop
 Community.Zabbix.Hosting.ZabbixSendLoopOptions
@@ -221,6 +221,10 @@ Community.Zabbix.ZabbixComponent.StopAsync(System.Threading.CancellationToken ca
 Community.Zabbix.ZabbixComponent.StopTimeout.get -> System.TimeSpan
 Community.Zabbix.ZabbixComponent.StopTimeout.set -> void
 Community.Zabbix.ZabbixComponent.ZabbixComponent(string? name, Microsoft.Extensions.Logging.ILoggerFactory? loggers, System.TimeProvider? time) -> void
+Community.Zabbix.ZabbixIntervalExtensions
+Community.Zabbix.ZabbixIntervalExtensions.extension(Community.Zabbix.ZabbixInterval)
+Community.Zabbix.ZabbixIntervalExtensions.extension(Community.Zabbix.ZabbixInterval).GetNextCheck(System.DateTimeOffset now, System.TimeZoneInfo! zone) -> System.DateTimeOffset?
+Community.Zabbix.ZabbixIntervalExtensions.extension(Community.Zabbix.ZabbixInterval).GetNextCheck(System.DateTimeOffset now, System.TimeZoneInfo! zone, long seed) -> System.DateTimeOffset?
 Community.Zabbix.ZabbixItemBuilderExtensions
 Community.Zabbix.ZabbixItemBuilderExtensions.extension<TBuilder>(TBuilder)
 Community.Zabbix.ZabbixItemBuilderExtensions.extension<TBuilder>(TBuilder).AddItem(string! keyName, System.Func<Community.Zabbix.ZabbixItemKey, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<Community.Zabbix.ZabbixAgentAnswer!>>! answer) -> TBuilder
@@ -231,15 +235,6 @@ Community.Zabbix.ZabbixItemBuilderExtensions.extension<TBuilder>(TBuilder).AddIt
 Community.Zabbix.ZabbixItemBuilderExtensions.extension<TBuilder>(TBuilder).AddItem<T>(Community.Zabbix.ZabbixItemKey<T> key, System.Func<Community.Zabbix.ZabbixItemKey, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<T>>! answer) -> TBuilder
 Community.Zabbix.ZabbixItemBuilderExtensions.extension<TBuilder>(TBuilder).AddItem<T>(Community.Zabbix.ZabbixItemKey<T> key, System.Func<Community.Zabbix.ZabbixItemKey, T>! answer) -> TBuilder
 Community.Zabbix.ZabbixItemBuilderExtensions.extension<TBuilder>(TBuilder).AddItem<T>(Community.Zabbix.ZabbixItemKey<T> key, System.Func<T>! answer) -> TBuilder
-Community.Zabbix.ZabbixItemDelay
-Community.Zabbix.ZabbixItemDelay.Equals(Community.Zabbix.ZabbixItemDelay? other) -> bool
-Community.Zabbix.ZabbixItemDelay.GetNextCheck(System.DateTimeOffset now, System.TimeZoneInfo! zone) -> System.DateTimeOffset?
-Community.Zabbix.ZabbixItemDelay.GetNextCheck(System.DateTimeOffset now, System.TimeZoneInfo! zone, long seed) -> System.DateTimeOffset?
-Community.Zabbix.ZabbixItemDelay.IsScheduling.get -> bool
-Community.Zabbix.ZabbixItemDelay.Text.get -> string!
-Community.Zabbix.ZabbixItemDelay.ToString(string? format, System.IFormatProvider? formatProvider) -> string!
-Community.Zabbix.ZabbixItemDelay.TryFormat(System.Span<char> destination, out int charsWritten, System.ReadOnlySpan<char> format, System.IFormatProvider? provider) -> bool
-Community.Zabbix.ZabbixItemDelay.UpdateInterval.get -> System.TimeSpan
 Community.Zabbix.ZabbixItemDictionary
 Community.Zabbix.ZabbixItemDictionary.Add(Community.Zabbix.ZabbixItemProvider! provider) -> Community.Zabbix.ZabbixItemDictionary!
 Community.Zabbix.ZabbixItemDictionary.Add(string! keyName, System.Func<Community.Zabbix.ZabbixItemKey, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<Community.Zabbix.ZabbixAgentAnswer!>>! handler) -> Community.Zabbix.ZabbixItemDictionary!
@@ -421,9 +416,6 @@ override Community.Zabbix.Storage.ZabbixStoreServices.GetHashCode() -> int
 override Community.Zabbix.Storage.ZabbixStoreServices.ToString() -> string!
 override Community.Zabbix.ZabbixActiveAgent.Dispose(bool disposing) -> void
 override Community.Zabbix.ZabbixActiveAgent.DisposeAsyncCore() -> System.Threading.Tasks.ValueTask
-override Community.Zabbix.ZabbixItemDelay.Equals(object? obj) -> bool
-override Community.Zabbix.ZabbixItemDelay.GetHashCode() -> int
-override Community.Zabbix.ZabbixItemDelay.ToString() -> string!
 override Community.Zabbix.ZabbixKeyRules.ToString() -> string!
 override Community.Zabbix.ZabbixPushAgent.Dispose(bool disposing) -> void
 override Community.Zabbix.ZabbixPushAgent.DisposeAsyncCore() -> System.Threading.Tasks.ValueTask
@@ -470,6 +462,8 @@ static Community.Zabbix.ZabbixActiveAgentBuilderExtensions.Bind<TBuilder>(this T
 static Community.Zabbix.ZabbixActiveAgentBuilderExtensions.Configure<TBuilder>(this TBuilder builder, System.Action<Community.Zabbix.ZabbixActiveAgentOptions!>! configure) -> TBuilder
 static Community.Zabbix.ZabbixActiveAgentServiceCollectionExtensions.AddZabbixActiveAgent(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string! name) -> Community.Zabbix.IZabbixActiveAgentBuilder!
 static Community.Zabbix.ZabbixAgentsServiceCollectionExtensions.AddZabbixAgents(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, Microsoft.Extensions.Configuration.IConfiguration! document) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static Community.Zabbix.ZabbixIntervalExtensions.GetNextCheck(this Community.Zabbix.ZabbixInterval interval, System.DateTimeOffset now, System.TimeZoneInfo! zone) -> System.DateTimeOffset?
+static Community.Zabbix.ZabbixIntervalExtensions.GetNextCheck(this Community.Zabbix.ZabbixInterval interval, System.DateTimeOffset now, System.TimeZoneInfo! zone, long seed) -> System.DateTimeOffset?
 static Community.Zabbix.ZabbixItemBuilderExtensions.AddItem<TBuilder, T, TService>(this TBuilder builder, Community.Zabbix.ZabbixItemKey<T> key, System.Func<TService, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<T>>! answer) -> TBuilder
 static Community.Zabbix.ZabbixItemBuilderExtensions.AddItem<TBuilder, T, TService>(this TBuilder builder, Community.Zabbix.ZabbixItemKey<T> key, System.Func<TService, T>! answer) -> TBuilder
 static Community.Zabbix.ZabbixItemBuilderExtensions.AddItem<TBuilder, T>(this TBuilder builder, Community.Zabbix.ZabbixItemKey<T> key, System.Func<Community.Zabbix.ZabbixItemKey, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<T>>! answer) -> TBuilder
@@ -478,10 +472,6 @@ static Community.Zabbix.ZabbixItemBuilderExtensions.AddItem<TBuilder, T>(this TB
 static Community.Zabbix.ZabbixItemBuilderExtensions.AddItem<TBuilder>(this TBuilder builder, string! keyName, System.Func<Community.Zabbix.ZabbixItemKey, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<Community.Zabbix.ZabbixAgentAnswer!>>! answer) -> TBuilder
 static Community.Zabbix.ZabbixItemBuilderExtensions.AddItem<TBuilder>(this TBuilder builder, string! keyName, System.Func<Community.Zabbix.ZabbixItemKey, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<string!>>! answer) -> TBuilder
 static Community.Zabbix.ZabbixItemBuilderExtensions.AddItem<TBuilder>(this TBuilder builder, string! keyName, System.Func<Community.Zabbix.ZabbixItemKey, string!>! answer) -> TBuilder
-static Community.Zabbix.ZabbixItemDelay.Parse(System.ReadOnlySpan<char> s, System.IFormatProvider? provider) -> Community.Zabbix.ZabbixItemDelay!
-static Community.Zabbix.ZabbixItemDelay.Parse(string! s, System.IFormatProvider? provider) -> Community.Zabbix.ZabbixItemDelay!
-static Community.Zabbix.ZabbixItemDelay.TryParse(System.ReadOnlySpan<char> s, System.IFormatProvider? provider, out Community.Zabbix.ZabbixItemDelay! result) -> bool
-static Community.Zabbix.ZabbixItemDelay.TryParse(string? s, System.IFormatProvider? provider, out Community.Zabbix.ZabbixItemDelay! result) -> bool
 static Community.Zabbix.ZabbixItemDictionary.BuiltIn(string! hostname) -> Community.Zabbix.ZabbixItemDictionary!
 static Community.Zabbix.ZabbixKeyRules.Default.get -> Community.Zabbix.ZabbixKeyRules!
 static Community.Zabbix.ZabbixKeyRules.Parse(System.Collections.Generic.IEnumerable<string!>! rules) -> Community.Zabbix.ZabbixKeyRules!

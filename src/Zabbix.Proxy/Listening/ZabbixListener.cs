@@ -502,7 +502,7 @@ public sealed class ZabbixListener : IHostedLifecycleService, IAsyncDisposable, 
     {
         public Admission(ZabbixListenerOptions options, ILogger logger, TimeProvider time)
         {
-            Allowed = options.ParseAllowedPeers();
+            Allowed = options.Allowed();
             Acceptor = new ZabbixTlsAcceptor(options, logger, time);
             Global = new ConcurrencyLimiter(new ConcurrencyLimiterOptions { PermitLimit = options.MaxConcurrentConnections, QueueLimit = options.MaxConcurrentConnections, QueueProcessingOrder = QueueProcessingOrder.OldestFirst });
             int perPeer = options.MaxConnectionsPerPeer;

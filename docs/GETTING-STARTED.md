@@ -37,6 +37,7 @@ see [Use your own build](INSTALL.md#use-your-own-build).
 Replace `Program.cs` with this program. It takes the frontend's address, the token file, and the server's trapper address.
 
 ```csharp
+using System.Net;
 using Community.Zabbix;
 
 var endpoint = new Uri(args[0]);                               // https://zabbix.example/
@@ -60,15 +61,16 @@ string hostName = "gs-web-01";
 ulong groupId = await zabbix.HostGroups.CreateAsync("Getting started");
 ulong hostId = await zabbix.Hosts.CreateAsync(hostName, [groupId]);
 await zabbix.Items.CreateAsync(hostId, "Requests", ZabbixItemType.Trapper, "app.requests", ZabbixItemValueType.Unsigned, item =>
-    item.TrapperHosts = "0.0.0.0/0,::/0");             // who may send to it
+    item.TrapperHosts = [IPNetwork.Parse("0.0.0.0/0"), IPNetwork.Parse("::/0")]);   // who may send to it
 Console.WriteLine($"created {hostName} ({hostId})");
 ```
 
 - `ZabbixClient` has one client per API object, 68 in all: `zabbix.Hosts`, `zabbix.Items`, and so on.
 - `CreateAsync` takes the fields the API requires, and returns the new id. An item needs more than its required fields here, so a
   lambda sets the others.
-- `TrapperHosts` lists who may send to the item. `0.0.0.0/0,::/0` accepts everyone, so use it only on a lab server. On 8.0, an item
-  created through the API accepts only localhost unless you set this.
+- `TrapperHosts` lists who may send to the item: an `IPAddress` or an `IPNetwork` each, or `ZabbixPeer.Parse` for a DNS name. The two
+  blocks here accept everyone, so use them only on a lab server. On 8.0, an item created through the API accepts only localhost unless
+  you set this.
 
 ## Read it back
 

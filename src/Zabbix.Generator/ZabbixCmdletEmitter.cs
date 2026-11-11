@@ -212,8 +212,9 @@ internal sealed partial class ZabbixCmdletEmitter(ApiDescription api)
     // common options the selection carries, plus every option the record requires, at its empty value; a required
     // option always has a mandatory parameter (EmitGetFilterParameter) whose value replaces it
     // before the request is sent.
+    // The selection names its output's fields by the API's names, and the factory makes them the entity's fields.
     private static string Materialize(EntityInfo e, string parametersType)
-        => "selection => new " + parametersType + " { Output = selection.Output, Filter = new(selection.Filter), Search = new(selection.Search), SearchByAny = selection.SearchByAny, StartSearch = selection.StartSearch, SearchWildcardsEnabled = selection.SearchWildcardsEnabled, Limit = selection.Limit" + RequiredEmpties(e) + " }";
+        => "selection => new " + parametersType + " { Output = selection.Output is { } output ? [.. global::System.Linq.Enumerable.Select(output, static name => new global::Community.Zabbix.ZabbixField<global::Community.Zabbix." + Prefixed(e.Read.Name) + ">(name))] : null, Filter = new(selection.Filter), Search = new(selection.Search), SearchByAny = selection.SearchByAny, StartSearch = selection.StartSearch, SearchWildcardsEnabled = selection.SearchWildcardsEnabled, Limit = selection.Limit" + RequiredEmpties(e) + " }";
 
     // Every option the entity's *GetParameters requires, at its empty value, as object-initializer members (", HostIds = []"):
     // what every generated construction of the record must carry to compile; the mandatory parameter's value replaces it.
@@ -308,8 +309,8 @@ internal sealed partial class ZabbixCmdletEmitter(ApiDescription api)
             "global::Community.Zabbix." + Prefixed(entity.Read.Name),
             "global::Community.Zabbix." + Prefixed(entity.GetParameters.Name),
             GetFilters(entity),
-            // Every selectX option (kind "output", wire "select...").
-            [.. fields.Where(f => f.Kind == "output" && f.Wire != "output")],
+            // Every selectX option (an output kind, wire "select...").
+            [.. fields.Where(f => f.Kind.StartsWith(ZabbixTypedFields.Output, StringComparison.Ordinal) && f.Wire != "output")],
             // The get options taken as switches (cmdlets.getSwitches: -Editable, usermacro.get's -Global, problem.get's
             // -Recent), each where the entity's .get parameters carry it: not every .get has them, so they are not among
             // the common options IZabbixGetParameters carries.
@@ -469,16 +470,15 @@ internal sealed partial class ZabbixCmdletEmitter(ApiDescription api)
     }
 
     // ApplyEntityFilters always overrides (not just when the entity has its own -Select*/-Editable): folding
-    // SortField/SortOrder/Search/SearchByAny/StartSearch/ExcludeSearch/SearchWildcardsEnabled/CountOutput onto an
+    // the sort (-SortField and -SortOrder)/Search/SearchByAny/StartSearch/ExcludeSearch/SearchWildcardsEnabled/CountOutput onto an
     // existing parameters instance needs `with`, which only compiles against the concrete record type this generated
     // class knows (TParameters is generic in the base — see ZabbixGetCmdlet's doc comment on ApplyEntityFilters).
-    // SortOrderWire()/SearchDictionary() are the base's plain helpers.
+    // SortWire()/SearchDictionary() are the base's plain helpers.
     private void EmitApplyEntityFilters(StringBuilder code, GetShape get)
     {
         string parametersType = get.ParametersType;
         code.Append("    /// <inheritdoc/>\n    protected override ").Append(parametersType).Append(" ApplyEntityFilters(").Append(parametersType).Append(" parameters)\n    {\n");
-        code.Append("        if (SortField is { Length: > 0 }) parameters = parameters with { SortField = SortField };\n");
-        code.Append("        if (SortOrderWire() is { } sortOrder) parameters = parameters with { SortOrder = sortOrder };\n");
+        code.Append("        if (SortWire(parameters.Sort) is { } sort) parameters = parameters with { Sort = sort };\n");
         code.Append("        if (SearchDictionary() is { } search) parameters = parameters with { Search = new(search) };\n");
         code.Append("        if (SearchByAny.IsPresent) parameters = parameters with { SearchByAny = true };\n");
         code.Append("        if (StartSearch.IsPresent) parameters = parameters with { StartSearch = true };\n");
@@ -740,7 +740,7 @@ internal sealed partial class ZabbixCmdletEmitter(ApiDescription api)
         code.Append("        var shorthand = new global::Community.Zabbix.ZabbixHostInterfaceRequest\n        {\n");
         code.Append("            Type = type,\n            Main = global::Community.Zabbix.ZabbixInterfacePriority.Primary,\n            UseIp = useIp ? global::Community.Zabbix.ZabbixHostInterfaceUseIp.Ip : global::Community.Zabbix.ZabbixHostInterfaceUseIp.Dns,\n");
         code.Append("            Ip = InterfaceIp ?? (useIp ? \"127.0.0.1\" : string.Empty),\n            Dns = InterfaceDns ?? string.Empty,\n");
-        code.Append("            Port = InterfacePort ?? (type == global::Community.Zabbix.ZabbixInterfaceType.Snmp ? \"161\" : \"10050\"),\n");
+        code.Append("            Port = InterfacePort is null ? (type == global::Community.Zabbix.ZabbixInterfaceType.Snmp ? 161 : 10050) : global::Community.Zabbix.ZabbixPort.Parse(InterfacePort),\n");
         code.Append("        };\n");
         code.Append("        return interfaces is null ? [shorthand] : [.. interfaces, shorthand];\n    }\n");
     }
@@ -842,7 +842,8 @@ internal sealed partial class ZabbixCmdletEmitter(ApiDescription api)
     private static string Singular(FieldDescription field)
     {
         string name = field.Name;
-        if (!field.Kind.StartsWith("list:", StringComparison.Ordinal)) return name;
+        // the hosts a trapper allows are one text in the shell, as Zabbix writes them, so their parameter keeps the plural
+        if (!field.Kind.StartsWith("list:", StringComparison.Ordinal) || field.Kind == ZabbixTypedFields.Peers) return name;
         if (name.EndsWith("ies", StringComparison.Ordinal)) return name.Substring(0, name.Length - 3) + "y";
         if (name.EndsWith("sses", StringComparison.Ordinal) || name.EndsWith("xes", StringComparison.Ordinal) || name.EndsWith("ches", StringComparison.Ordinal)) return name.Substring(0, name.Length - 2);
         if (name.EndsWith("Children", StringComparison.Ordinal)) return name.Substring(0, name.Length - 3);
@@ -990,7 +991,7 @@ internal sealed partial class ZabbixCmdletEmitter(ApiDescription api)
     // hashtable-of-name-to-value shape binds too, beside the already-working typed array.
     // Json: an untyped JSON field (kind "json"), which the shell gives as a hashtable, an object, an array or JSON text —
     // the parameter gets the ZabbixJsonAttribute transform, because PowerShell has no conversion to JsonElement.
-    private sealed record ParamInfo(string Type, bool Secret, bool IsId, bool IsStruct, ReferenceListInfo? Reference = null, bool Flags = false, string? PairName = null, bool Json = false, bool Clock = false, bool TimeOfDay = false);
+    private sealed record ParamInfo(string Type, bool Secret, bool IsId, bool IsStruct, ReferenceListInfo? Reference = null, bool Flags = false, string? PairName = null, bool Json = false, bool Clock = false, bool TimeOfDay = false, string? Parse = null);
 
     /// <summary>A nested single-id request record recognized as a reference to an entity the generated entity table already knows.</summary>
     /// <param name="EntityObject">The entity's API object name (<c>hostgroup</c>).</param>
@@ -1048,6 +1049,12 @@ internal sealed partial class ZabbixCmdletEmitter(ApiDescription api)
             case "double": return new("double?", false, false, true);
             case "bool" or "apibool": return new("bool?", false, false, true);
             case "json": return new("global::System.Text.Json.JsonElement?", false, false, true, Json: true);
+            // a field of a typed grammar keeps the text Zabbix spells it in, as the shell writes it (-TrapperHosts
+            // '10.0.0.0/8,::1'), and the record's type parses it
+            case ZabbixTypedFields.Interval: return new("string?", false, false, false, Parse: "global::Community.Zabbix.ZabbixInterval.Parse");
+            case ZabbixTypedFields.Port: return new("string?", false, false, false, Parse: "global::Community.Zabbix.ZabbixPort.Parse");
+            case ZabbixTypedFields.Duration: return new("string?", false, false, false, Parse: "global::Community.Zabbix.ZabbixDuration.Parse");
+            case ZabbixTypedFields.Peers: return new("string?", false, false, false, Parse: "global::Community.Zabbix.ZabbixPeer.ParseList");
         }
         if (field.Kind.StartsWith("enum:", StringComparison.Ordinal))
         {
@@ -1113,6 +1120,9 @@ internal sealed partial class ZabbixCmdletEmitter(ApiDescription api)
             return info.IsId ? prop + " ?? 0UL" : prop + " ?? string.Empty";
         }
         bool bang = field.Required && field.Kind is not ("bool" or "apibool");
+        // the text a typed field's parameter takes, parsed; a required one that's unbound has the placeholder below
+        if (info.Parse is { } parse)
+            return prop + " is null ? " + (!bang ? "null" : field.Kind == ZabbixTypedFields.Peers ? "[]" : "default") + " : " + parse + "(" + prop + ")";
         // On a generated New-/Set- (serviceObject not null), a required field's own parameter is not Mandatory
         // (EmitParameter) — -AdditionalProperty can always supply it instead (as for New-ZbxProxy -OperatingMode) — so the value here can genuinely be unbound (null) even though the
         // record's own member is `required`. EmitRequiredFieldValidation (called before this expression runs) is
@@ -1211,6 +1221,7 @@ internal sealed partial class ZabbixCmdletEmitter(ApiDescription api)
             return prop + " is null ? null : [.. global::System.Linq.Enumerable.Select(" + prop + ", reference => new global::Community.Zabbix." + Prefixed(info.Reference.RecordType)
                 + " { " + info.Reference.RecordIdMember + " = reference.RequireId(\"" + prop + "\") })]";
         if (info.IsId) return prop + (required ? " ?? 0UL" : string.Empty);
+        if (info.Parse is { } parse) return prop + " is null ? null : " + parse + "(" + prop + ")";
         if (info.Secret) return prop + " is null ? null : new global::System.Net.NetworkCredential(string.Empty, " + prop + ").Password";
         if (!required) return prop;
         if (info.IsStruct) return prop + " ?? default";

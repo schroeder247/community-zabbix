@@ -9,7 +9,7 @@ namespace Community.Zabbix;
 /// </summary>
 public class ZabbixHostScope : ZabbixNode, IAsyncEnumerable<ZabbixHostNode>
 {
-    private static readonly ZabbixOutput s_hostFields = ZabbixOutput.Of("hostid", "host");
+    private static readonly ZabbixOutput<ZabbixHost> s_hostFields = [ZabbixHostFields.HostId, ZabbixHostFields.TechnicalName];
 
     /// <summary>Initializes a scope for mocking; every member of a scope built this way is to be overridden.</summary>
     protected ZabbixHostScope()

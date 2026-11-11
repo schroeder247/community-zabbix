@@ -41,8 +41,9 @@ public class ZabbixListenerOptions : IValidatableObject
 
     /// <summary>
     /// Who may connect: IP addresses, CIDR blocks and DNS names, one per entry or comma-separated as Zabbix's
-    /// <c>Server=</c> line writes them (see <see cref="ZabbixAllowedPeers"/>). <b>Required</b>: an empty list fails
-    /// validation, as upstream refuses it; say <c>0.0.0.0/0</c> and <c>::/0</c> to allow everyone.
+    /// <c>Server=</c> line writes them, each a <see cref="ZabbixPeer"/> (<see cref="ParseAllowedPeers"/> reads them).
+    /// <b>Required</b>: an empty list fails validation, as upstream refuses it; say <c>0.0.0.0/0</c> and <c>::/0</c> to
+    /// allow everyone.
     /// </summary>
     public IList<string> AllowedPeers { get; } = [];
 
@@ -81,8 +82,13 @@ public class ZabbixListenerOptions : IValidatableObject
     /// <summary>The endpoint the options describe.</summary>
     public IPEndPoint ToEndPoint() => new(IPAddress.Parse(Address), Port);
 
-    /// <summary>The allowed peers, parsed; <see cref="FormatException"/> when the list is empty or an entry is not a peer.</summary>
-    public ZabbixAllowedPeers ParseAllowedPeers() => ZabbixAllowedPeers.Parse(string.Join(',', AllowedPeers), null);
+    /// <summary>Reads <see cref="AllowedPeers"/> as the listener does: each entry an address, a CIDR block or a DNS name.</summary>
+    /// <returns>The entries, in order.</returns>
+    /// <exception cref="FormatException">The list is empty, or an entry is neither an address, a CIDR block nor a DNS name.</exception>
+    public IReadOnlyList<ZabbixPeer> ParseAllowedPeers() => Allowed().Peers;
+
+    // The list the listener matches a peer against.
+    internal ZabbixAllowedPeers Allowed() => ZabbixAllowedPeers.Parse(string.Join(',', AllowedPeers), null);
 
     /// <summary>
     /// The rules the attributes cannot say: a parseable address, a non-empty allowed-peer list, a known accept set, and

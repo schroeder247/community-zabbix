@@ -300,11 +300,19 @@ internal static class ZabbixJsonBinder
         return type.GetGenericArguments()[0];
     }
 
-    private static Dictionary<string, PropertyInfo> WireMap(Type t) => s_wirePropertiesByType.GetOrAdd(t, static type => type
-        .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-        .Select(p => (Property: p, Wire: p.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name))
-        .Where(p => p.Wire is not null)
-        .ToDictionary(p => p.Wire!, p => p.Property, StringComparer.OrdinalIgnoreCase));
+    // The public properties by wire name, then the wire members the contract includes that no public property names: a
+    // get's sortorder, which its public Sort sends with sortfield.
+    private static Dictionary<string, PropertyInfo> WireMap(Type t) => s_wirePropertiesByType.GetOrAdd(t, static type =>
+    {
+        Dictionary<string, PropertyInfo> map = type
+            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Select(p => (Property: p, Wire: p.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name))
+            .Where(p => p.Wire is not null)
+            .ToDictionary(p => p.Wire!, p => p.Property, StringComparer.OrdinalIgnoreCase);
+        foreach (PropertyInfo included in type.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance).Where(p => p.GetCustomAttribute<JsonIncludeAttribute>() is not null))
+            if (WireName(included) is { } wire) map.TryAdd(wire, included);
+        return map;
+    });
 
     private static string? WireName(PropertyInfo property) => property.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name;
 }

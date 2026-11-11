@@ -31,7 +31,7 @@ public sealed partial class LiveFrontendTests
         // stock item, trigger, graph or rule.
         ZabbixPageTarget template = First(await api.Templates.GetAsync(new ZabbixTemplateGetParameters { Filter = new() { ["host"] = "Linux by Zabbix agent" } }, Cancel));
         ZabbixPageTarget server = First(await api.Hosts.GetAsync(new ZabbixHostGetParameters { Filter = new() { ["host"] = "Zabbix server" } }, Cancel));
-        string[] hostContext = ["hostid", "status"];
+        ZabbixOutput<ZabbixHost> hostContext = [ZabbixHostFields.HostId, ZabbixHostFields.Status];
         var pages = new List<(string What, ZabbixPageTarget Target, ZabbixPageView View)>
         {
             ("host", First(await api.Hosts.GetAsync(new ZabbixHostGetParameters { HostIds = [fixtures.Host] }, Cancel)), ZabbixPageView.Default),
@@ -42,16 +42,16 @@ public sealed partial class LiveFrontendTests
             ("host group problems", new ZabbixPageTarget(ZabbixPageKind.HostGroup, fixtures.Group), ZabbixPageView.Problems),
             ("template", template, ZabbixPageView.Default),
             ("template group", First(await api.TemplateGroups.GetAsync(new ZabbixTemplateGroupGetParameters { Filter = new() { ["name"] = "Templates/Operating systems" } }, Cancel)), ZabbixPageView.Default),
-            ("item on a host", First(await api.Items.GetAsync(new ZabbixItemGetParameters { HostIds = [server.Id], SortField = ["itemid"], Limit = 1, SelectHosts = hostContext }, Cancel)), ZabbixPageView.Default),
-            ("item on a template", First(await api.Items.GetAsync(new ZabbixItemGetParameters { TemplateIds = [template.Id], SortField = ["itemid"], Limit = 1, SelectHosts = hostContext }, Cancel)), ZabbixPageView.Default),
-            ("item latest", First(await api.Items.GetAsync(new ZabbixItemGetParameters { HostIds = [server.Id], SortField = ["itemid"], Limit = 1, SelectHosts = hostContext }, Cancel)), ZabbixPageView.Latest),
-            ("item graph", First(await api.Items.GetAsync(new ZabbixItemGetParameters { HostIds = [server.Id], SortField = ["itemid"], Limit = 1 }, Cancel)), ZabbixPageView.Graph),
-            ("item values", First(await api.Items.GetAsync(new ZabbixItemGetParameters { HostIds = [server.Id], SortField = ["itemid"], Limit = 1 }, Cancel)), ZabbixPageView.Values),
-            ("trigger on a host", First(await api.Triggers.GetAsync(new ZabbixTriggerGetParameters { HostIds = [server.Id], SortField = ["triggerid"], Limit = 1, SelectHosts = hostContext }, Cancel)), ZabbixPageView.Default),
-            ("trigger on a template", First(await api.Triggers.GetAsync(new ZabbixTriggerGetParameters { TemplateIds = [template.Id], SortField = ["triggerid"], Limit = 1, SelectHosts = hostContext }, Cancel)), ZabbixPageView.Default),
-            ("trigger problems", First(await api.Triggers.GetAsync(new ZabbixTriggerGetParameters { HostIds = [server.Id], SortField = ["triggerid"], Limit = 1 }, Cancel)), ZabbixPageView.Problems),
-            ("graph on a template", First(await api.Graphs.GetAsync(new ZabbixGraphGetParameters { TemplateIds = [template.Id], SortField = ["graphid"], Limit = 1, SelectHosts = hostContext }, Cancel)), ZabbixPageView.Default),
-            ("discovery rule on a template", First(await api.DiscoveryRules.GetAsync(new ZabbixDiscoveryRuleGetParameters { TemplateIds = [template.Id], SortField = ["itemid"], Limit = 1, SelectHosts = hostContext }, Cancel)), ZabbixPageView.Default),
+            ("item on a host", First(await api.Items.GetAsync(new ZabbixItemGetParameters { HostIds = [server.Id], Sort = [ZabbixItemFields.ItemId], Limit = 1, SelectHosts = hostContext }, Cancel)), ZabbixPageView.Default),
+            ("item on a template", First(await api.Items.GetAsync(new ZabbixItemGetParameters { TemplateIds = [template.Id], Sort = [ZabbixItemFields.ItemId], Limit = 1, SelectHosts = hostContext }, Cancel)), ZabbixPageView.Default),
+            ("item latest", First(await api.Items.GetAsync(new ZabbixItemGetParameters { HostIds = [server.Id], Sort = [ZabbixItemFields.ItemId], Limit = 1, SelectHosts = hostContext }, Cancel)), ZabbixPageView.Latest),
+            ("item graph", First(await api.Items.GetAsync(new ZabbixItemGetParameters { HostIds = [server.Id], Sort = [ZabbixItemFields.ItemId], Limit = 1 }, Cancel)), ZabbixPageView.Graph),
+            ("item values", First(await api.Items.GetAsync(new ZabbixItemGetParameters { HostIds = [server.Id], Sort = [ZabbixItemFields.ItemId], Limit = 1 }, Cancel)), ZabbixPageView.Values),
+            ("trigger on a host", First(await api.Triggers.GetAsync(new ZabbixTriggerGetParameters { HostIds = [server.Id], Sort = [ZabbixTriggerFields.TriggerId], Limit = 1, SelectHosts = hostContext }, Cancel)), ZabbixPageView.Default),
+            ("trigger on a template", First(await api.Triggers.GetAsync(new ZabbixTriggerGetParameters { TemplateIds = [template.Id], Sort = [ZabbixTriggerFields.TriggerId], Limit = 1, SelectHosts = hostContext }, Cancel)), ZabbixPageView.Default),
+            ("trigger problems", First(await api.Triggers.GetAsync(new ZabbixTriggerGetParameters { HostIds = [server.Id], Sort = [ZabbixTriggerFields.TriggerId], Limit = 1 }, Cancel)), ZabbixPageView.Problems),
+            ("graph on a template", First(await api.Graphs.GetAsync(new ZabbixGraphGetParameters { TemplateIds = [template.Id], Sort = [ZabbixGraphFields.GraphId], Limit = 1, SelectHosts = hostContext }, Cancel)), ZabbixPageView.Default),
+            ("discovery rule on a template", First(await api.DiscoveryRules.GetAsync(new ZabbixDiscoveryRuleGetParameters { TemplateIds = [template.Id], Sort = [ZabbixDiscoveryRuleFields.ItemId], Limit = 1, SelectHosts = hostContext }, Cancel)), ZabbixPageView.Default),
             ("web scenario", First(await api.HttpTests.GetAsync(new ZabbixHttpTestGetParameters { HttpTestIds = [fixtures.WebScenario], SelectHosts = hostContext }, Cancel)), ZabbixPageView.Default),
             ("dashboard", First(await api.Dashboards.GetAsync(new ZabbixDashboardGetParameters { Filter = new() { ["name"] = "Global view" } }, Cancel)), ZabbixPageView.Default),
             ("map", First(await api.Maps.GetAsync(new ZabbixMapGetParameters { Filter = new() { ["name"] = "Local network" } }, Cancel)), ZabbixPageView.Default),

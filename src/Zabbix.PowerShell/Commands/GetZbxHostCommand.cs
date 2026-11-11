@@ -149,8 +149,7 @@ public sealed class GetZbxHostCommand : ZabbixGetCmdlet<ZabbixHost, ZabbixHostGe
     /// <inheritdoc/>
     protected override ZabbixHostGetParameters ApplyEntityFilters(ZabbixHostGetParameters parameters)
     {
-        if (SortField is { Length: > 0 }) parameters = parameters with { SortField = SortField };
-        if (SortOrderWire() is { } sortOrder) parameters = parameters with { SortOrder = sortOrder };
+        if (SortWire(parameters.Sort) is { } sort) parameters = parameters with { Sort = sort };
         if (SearchDictionary() is { } search) parameters = parameters with { Search = new(search) };
         if (SearchByAny.IsPresent) parameters = parameters with { SearchByAny = true };
         if (StartSearch.IsPresent) parameters = parameters with { StartSearch = true };

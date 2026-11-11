@@ -399,6 +399,9 @@ public sealed class PipelineMatrixTests
             private static string Dummy(string kind) => kind switch
             {
                 "string" => "'zbx-x'",
+                // a typed grammar's text: what the record's type reads (ZabbixTypedFields)
+                "port" => "'10050'",
+                "interval" or "duration" => "'1m'",
                 "int" or "long" or "double" or "bool" => "0",
                 "id" => "'1'",
                 _ when kind.StartsWith("enum:", StringComparison.Ordinal) => "0",

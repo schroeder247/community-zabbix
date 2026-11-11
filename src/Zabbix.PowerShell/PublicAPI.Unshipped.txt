@@ -5387,7 +5387,6 @@ Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.SearchWildcard
 Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.Selection() -> TParameters
 Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.SortOrder.get -> Community.Zabbix.PowerShell.ZabbixSortOrder[]?
 Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.SortOrder.set -> void
-Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.SortOrderWire() -> System.ComponentModel.ListSortDirection[]?
 Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.StartSearch.get -> System.Management.Automation.SwitchParameter
 Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.StartSearch.set -> void
 Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.ZabbixGetCmdlet() -> void
@@ -6268,3 +6267,4 @@ virtual Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.ApplyR
 virtual Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.HasReferenceFilters.get -> bool
 virtual Community.Zabbix.PowerShell.ZabbixNewCmdlet<TEntity>.CreatedName.get -> string?
 virtual Community.Zabbix.PowerShell.ZabbixSetCmdlet<TEntity, TRequest>.PrepareRequestAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.SortWire(System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixSort<TEntity>>? current) -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixSort<TEntity>>?

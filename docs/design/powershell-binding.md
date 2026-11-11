@@ -213,7 +213,7 @@ subset above and fail loudly on anything else.
 
 - `ConvertTo-Json` is implemented on Newtonsoft Json.NET, a different JSON stack from the SDK's source-generated
   System.Text.Json contract. It writes C# property names, ignores `JsonPropertyName`, cannot see the records'
-  converters (flags, ids, `ZabbixOutput`), and `ConvertFrom-Json` turns an ISO-looking string into a `DateTime` the
+  converters (flags, ids, `ZabbixOutput<TRecord>`, `ZabbixInterval`), and `ConvertFrom-Json` turns an ISO-looking string into a `DateTime` the
   server never sent. A typed record nested in a hashtable and serialized through it is written with the wrong names
   (measured: `CreateMissing` instead of `createMissing`, which the wire contract then drops).
   https://learn.microsoft.com/powershell/module/microsoft.powershell.utility/convertto-json?view=powershell-7.6

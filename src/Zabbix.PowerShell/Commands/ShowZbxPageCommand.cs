@@ -21,11 +21,12 @@ namespace Community.Zabbix.PowerShell.Commands;
 [OutputType(typeof(Uri))]
 public sealed class ShowZbxPageCommand : ZabbixServerCmdlet
 {
-    private static readonly ZabbixOutput s_hostsAndStatus = new[] { "hostid", "status" };
-    private static readonly ZabbixOutput s_itemFields = new[] { "itemid", "hostid", "name" };
-    private static readonly ZabbixOutput s_triggerFields = new[] { "triggerid", "description" };
-    private static readonly ZabbixOutput s_graphFields = new[] { "graphid", "name" };
-    private static readonly ZabbixOutput s_webScenarioFields = new[] { "httptestid", "hostid", "name" };
+    private static readonly ZabbixOutput<ZabbixHost> s_hostsAndStatus = [ZabbixHostFields.HostId, ZabbixHostFields.Status];
+    private static readonly ZabbixOutput<ZabbixItem> s_itemFields = [ZabbixItemFields.ItemId, ZabbixItemFields.HostId, ZabbixItemFields.Name];
+    private static readonly ZabbixOutput<ZabbixDiscoveryRule> s_discoveryRuleFields = [ZabbixDiscoveryRuleFields.ItemId, ZabbixDiscoveryRuleFields.HostId, ZabbixDiscoveryRuleFields.Name];
+    private static readonly ZabbixOutput<ZabbixTrigger> s_triggerFields = [ZabbixTriggerFields.TriggerId, ZabbixTriggerFields.Description];
+    private static readonly ZabbixOutput<ZabbixGraph> s_graphFields = [ZabbixGraphFields.GraphId, ZabbixGraphFields.Name];
+    private static readonly ZabbixOutput<ZabbixHttpTest> s_webScenarioFields = [ZabbixHttpTestFields.HttpTestId, ZabbixHttpTestFields.HostId, ZabbixHttpTestFields.Name];
 
     private ZabbixFrontend? _frontend;
 
@@ -148,13 +149,13 @@ public sealed class ShowZbxPageCommand : ZabbixServerCmdlet
     {
         ZabbixClient api = ZabbixClient;
         ulong[] ids = [id];
-        ZabbixOutput hosts = s_hostsAndStatus;
+        ZabbixOutput<ZabbixHost> hosts = s_hostsAndStatus;
         object? record = kind switch
         {
             ZabbixPageKind.Item => FirstOf(await ListAsync(api.Items.GetAsync(
                 new ZabbixItemGetParameters { ItemIds = ids, Output = s_itemFields, SelectHosts = hosts }, cancellationToken), cancellationToken).ConfigureAwait(false)),
             ZabbixPageKind.DiscoveryRule => FirstOf(await ListAsync(api.DiscoveryRules.GetAsync(
-                new ZabbixDiscoveryRuleGetParameters { ItemIds = ids, Output = s_itemFields, SelectHosts = hosts }, cancellationToken), cancellationToken).ConfigureAwait(false)),
+                new ZabbixDiscoveryRuleGetParameters { ItemIds = ids, Output = s_discoveryRuleFields, SelectHosts = hosts }, cancellationToken), cancellationToken).ConfigureAwait(false)),
             ZabbixPageKind.Trigger => FirstOf(await ListAsync(api.Triggers.GetAsync(
                 new ZabbixTriggerGetParameters { TriggerIds = ids, Output = s_triggerFields, SelectHosts = hosts }, cancellationToken), cancellationToken).ConfigureAwait(false)),
             ZabbixPageKind.Graph => FirstOf(await ListAsync(api.Graphs.GetAsync(

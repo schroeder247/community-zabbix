@@ -214,11 +214,11 @@ On the server, `web-01` must have items of type "Zabbix agent (active)" with the
 - **The item list.** Every `RefreshInterval`, the agent asks for its item list. When the list changes, the new schedule replaces
   the old, and an item whose key and delay didn't change keeps its next due time. A refused request is logged (event 3201), and a
   list that can't be refreshed is kept (event 3202).
-- **The schedule.** Each item is collected on its own `delay`, read by `ZabbixItemDelay` as Zabbix reads it: an update interval
+- **The schedule.** Each item is collected on its own `delay`, a `ZabbixInterval` read as Zabbix reads it: an update interval
   (`30s`), flexible intervals (`50s;10s/1-5,09:00-18:00`), and scheduling intervals (`0;wd1-5h9m30`), in the agent's local time
   zone, with items of the same delay spread by their id. A delay that doesn't parse makes the item not supported (event 3205).
   When the wall clock is stepped back, the schedule moves with it (event 3209).
-  `ZabbixItemDelay.Parse(text, null).GetNextCheck(now, zone)` gives the same answer to your own code.
+  `ZabbixInterval.Parse(text).GetNextCheck(now, zone)` gives the same answer to your own code.
 - **The checks.** The agent's items answer them, and the [rules every key follows](items.md#the-rules-every-key-follows) apply.
   Up to `MaxConcurrentChecks` checks run at once, each bounded by the item's timeout or `CheckTimeout`.
 - **The upload.** Values go through an in-memory store per destination and the send loop, as `agent data`. A reply other than

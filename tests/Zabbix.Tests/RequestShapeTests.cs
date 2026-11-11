@@ -149,7 +149,7 @@ public sealed class RequestShapeTests
         using Api api = Build(script => script.On("item.update", """{"itemids":["7"]}"""));
 
         ZabbixUpdatableObjectNode<ZabbixItem, ZabbixItemUpdateRequest> item = api.Zabbix.Items[7];
-        await item.UpdateAsync(i => i.Delay = "5m", TestContext.Current.CancellationToken);
+        await item.UpdateAsync(i => i.Delay = TimeSpan.FromMinutes(5), TestContext.Current.CancellationToken);
 
         Assert.Empty(api.Script.ParamsOf("item.get"));
         Assert.Equal("""{"itemid":"7","delay":"5m"}""", api.Script.ParamsOf("item.update").Single().GetRawText());
@@ -287,7 +287,7 @@ public sealed class RequestShapeTests
     {
         using Api api = Build(script => script.On("hostinterface.create", """{"interfaceids":["31"]}"""));
 
-        ArgumentException refused = await Assert.ThrowsAsync<ArgumentException>(() => api.Zabbix.HostInterfaces.CreateAsync(10084, new ZabbixHostInterfaceRequest { Port = "10050" }, TestContext.Current.CancellationToken));
+        ArgumentException refused = await Assert.ThrowsAsync<ArgumentException>(() => api.Zabbix.HostInterfaces.CreateAsync(10084, new ZabbixHostInterfaceRequest { Port = 10050 }, TestContext.Current.CancellationToken));
 
         Assert.Equal("hostInterface", refused.ParamName);
         Assert.Empty(api.Script.Calls);

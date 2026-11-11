@@ -1,5 +1,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+using System.Net;
 using Community.Zabbix;
 
 // The program docs/GETTING-STARTED.md builds step by step. It creates and deletes objects, so run it against a lab server.
@@ -16,7 +17,7 @@ string hostName = prefix + "gs-web-01";
 ulong groupId = await zabbix.HostGroups.CreateAsync(prefix + "Getting started");
 ulong hostId = await zabbix.Hosts.CreateAsync(hostName, [groupId]);
 await zabbix.Items.CreateAsync(hostId, "Requests", ZabbixItemType.Trapper, "app.requests", ZabbixItemValueType.Unsigned, item =>
-    item.TrapperHosts = "0.0.0.0/0,::/0");             // who may send to it
+    item.TrapperHosts = [IPNetwork.Parse("0.0.0.0/0"), IPNetwork.Parse("::/0")]);   // who may send to it
 Console.WriteLine($"created {hostName} ({hostId})");
 
 try

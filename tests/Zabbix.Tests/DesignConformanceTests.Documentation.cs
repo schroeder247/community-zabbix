@@ -26,7 +26,7 @@ public sealed partial class DesignConformanceTests
     [Fact]
     public void Terse_parameter_documentation_in_the_client_packages_only_falls()
     {
-        const int Ceiling = 133;
+        const int Ceiling = 118;
         int terse = Libraries.All.Where(library => ClientPackages.Contains(library.GetName().Name))
             .SelectMany(library => XDocument.Load(Path.ChangeExtension(library.Location, ".xml")).Descendants("param"))
             .Count(param => string.Join(' ', param.Value.Split((char[])[' ', '\n', '\r', '\t'], StringSplitOptions.RemoveEmptyEntries)).Split(' ').Length <= 2);

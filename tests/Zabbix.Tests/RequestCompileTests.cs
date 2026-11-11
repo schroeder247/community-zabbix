@@ -75,6 +75,49 @@ public sealed class RequestCompileTests
         Assert.Equal("CS8852", refused.Id);
     }
 
+    [Fact]
+    public void Typed_fields_values_and_a_field_the_sdk_does_not_know_compile_where_a_caller_writes_them()
+        => Assert.Empty(Errors("""
+            var hosts = new ZabbixHostGetParameters
+            {
+                Output = [ZabbixHostFields.HostId, ZabbixHostFields.VisibleName, new ZabbixField<ZabbixHost>("a_new_field")],
+                SelectInterfaces = ZabbixOutput.Extend,
+                SelectTags = [ZabbixTagFields.Tag, ZabbixTagFields.Value],
+                SelectItems = ZabbixOutput.Count,
+                Sort = [ZabbixHostFields.VisibleName.Descending(), ZabbixHostFields.HostId],
+            };
+            NewestFirst(hosts, ZabbixHostFields.HostId);
+            await zabbix.Items.CreateAsync(1UL, "Requests", ZabbixItemType.Trapper, "app.requests", ZabbixItemValueType.Unsigned, i =>
+            {
+                i.TrapperHosts = [IPNetwork.Parse("10.0.0.0/8"), IPAddress.IPv6Loopback, ZabbixPeer.Parse("{HOST.CONN}")];
+                i.History = TimeSpan.FromDays(90);
+                i.Trends = TimeSpan.Zero;
+            });
+            await zabbix.Items[itemId].UpdateAsync(i =>
+            {
+                i.Delay = ZabbixInterval.Parse("1m;10s/1-5,09:00-18:00");
+                i.Timeout = ZabbixDuration.Parse("{$AGENT.TIMEOUT}");
+            });
+            await zabbix.HostInterfaces.CreateAsync(10084, ZabbixInterface.Agent(IPAddress.Parse("10.0.0.2")) with { Port = ZabbixPort.Parse("{$AGENT_PORT}") });
+            ZabbixHostInterfaceRequest snmp = ZabbixInterface.Snmp(IPAddress.Parse("10.0.0.2")) with { Port = 1161 };
+
+            static void NewestFirst<TRecord>(IZabbixGetParameters<TRecord> parameters, ZabbixField<TRecord> field) => parameters.Sort = [field.Descending()];
+            """));
+
+    // Each refusal is the compiler's "cannot convert": a field converts only to its own record's output and sort, and text
+    // only through Parse.
+    [Theory]
+    [InlineData("""var q = new ZabbixItemGetParameters { Output = [ZabbixHostFields.HostId] };""")]
+    [InlineData("""var q = new ZabbixItemGetParameters { Sort = [ZabbixHostFields.HostId] };""")]
+    [InlineData("""var q = new ZabbixItemGetParameters { Sort = [ZabbixHostFields.HostId.Descending()] };""")]
+    [InlineData("""var q = new ZabbixHostGetParameters { SelectInterfaces = [ZabbixHostFields.HostId] };""")]
+    [InlineData("""var q = new ZabbixHostGetParameters { Output = ["hostid"] };""")]
+    [InlineData("""await zabbix.Items[itemId].UpdateAsync(i => i.Delay = "5m");""")]
+    [InlineData("""await zabbix.Items[itemId].UpdateAsync(i => i.TrapperHosts = "10.0.0.0/8");""")]
+    [InlineData("""ZabbixHostInterfaceRequest agent = ZabbixInterface.Agent(IPAddress.Loopback) with { Port = "10050" };""")]
+    public void A_field_of_another_record_or_text_where_a_typed_value_goes_does_not_compile(string statement)
+        => Assert.Equal("CS0029", Assert.Single(Errors(statement)).Id);
+
     public static TheoryData<string, string> Writes => new()
     {
         {
@@ -96,11 +139,11 @@ public sealed class RequestCompileTests
         { """await zabbix.Hosts.CreateAsync([new("web-02", [linux]), new("web-03", [linux])]);""", "ZabbixHostClient.CreateAsync(IEnumerable<ZabbixHostCreateRequest>)" },
         { """await zabbix.HostGroups.CreateAsync(new("Linux servers") { Uuid = "6f1ed29f0b1a4b4e8c3a8c4b2e5d7a90" });""", "ZabbixHostGroupClient.CreateAsync(ZabbixHostGroupCreateRequest)" },
         { """await zabbix.HostGroups.CreateAsync("Linux servers", g => g.Uuid = "6f1ed29f0b1a4b4e8c3a8c4b2e5d7a90");""", "ZabbixHostGroupClient.CreateAsync(string, Action<ZabbixHostGroupCreateRequest>)" },
-        { """await zabbix.Items.CreateAsync(1UL, "Requests", ZabbixItemType.Trapper, "app.requests", ZabbixItemValueType.Unsigned, i => { i.TrapperHosts = "10.0.0.0/8"; i.Delay = "0"; });""", "ZabbixItemClient.CreateAsync(ulong, string, ZabbixItemType, string, ZabbixItemValueType, Action<ZabbixItemCreateRequest>)" },
+        { """await zabbix.Items.CreateAsync(1UL, "Requests", ZabbixItemType.Trapper, "app.requests", ZabbixItemValueType.Unsigned, i => { i.TrapperHosts = [IPNetwork.Parse("10.0.0.0/8"), IPAddress.IPv6Loopback]; i.Delay = TimeSpan.Zero; });""", "ZabbixItemClient.CreateAsync(ulong, string, ZabbixItemType, string, ZabbixItemValueType, Action<ZabbixItemCreateRequest>)" },
         { """await zabbix.Hosts.UpdateAsync(new(10084) { Status = ZabbixHostStatus.Disabled });""", "ZabbixHostClient.UpdateAsync(ZabbixHostUpdateRequest)" },
         { """await zabbix.Hosts["web-02"].UpdateAsync(h => h.Status = ZabbixHostStatus.Disabled);""", "ZabbixHostNode.UpdateAsync(Action<ZabbixHostUpdateRequest>, CancellationToken)" },
         { """await zabbix.Hosts[10084UL].UpdateAsync(h => { h.Status = ZabbixHostStatus.Disabled; h.Tags = [("env", "prod")]; });""", "ZabbixUpdatableObjectNode<ZabbixHost, ZabbixHostUpdateRequest>.UpdateAsync(Action<ZabbixHostUpdateRequest>, CancellationToken)" },
-        { """await zabbix.Items[itemId].UpdateAsync(i => i.Delay = "5m");""", "ZabbixUpdatableObjectNode<ZabbixItem, ZabbixItemUpdateRequest>.UpdateAsync(Action<ZabbixItemUpdateRequest>, CancellationToken)" },
+        { """await zabbix.Items[itemId].UpdateAsync(i => i.Delay = TimeSpan.FromMinutes(5));""", "ZabbixUpdatableObjectNode<ZabbixItem, ZabbixItemUpdateRequest>.UpdateAsync(Action<ZabbixItemUpdateRequest>, CancellationToken)" },
         { """await zabbix.HostGroups["Linux"].UpdateAsync(g => g.Name = "Linux servers");""", "ZabbixHostGroupNode.UpdateAsync(Action<ZabbixHostGroupUpdateRequest>, CancellationToken)" },
         { """await zabbix.Hosts["web-01"].Item("agent.ping").UpdateAsync(i => i.Status = ZabbixItemStatus.Disabled);""", "ZabbixItemNode.UpdateAsync(Action<ZabbixItemUpdateRequest>, CancellationToken)" },
         { """await zabbix.HostInterfaces.CreateAsync(10084, ZabbixInterface.Snmp(IPAddress.Parse("10.0.0.2")));""", "ZabbixHostInterfaceClient.CreateAsync(ulong, ZabbixHostInterfaceRequest)" },

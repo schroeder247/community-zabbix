@@ -24,9 +24,8 @@ internal static class ZabbixHistoryRead
     /// </summary>
     internal const int PageSize = 5000;
 
-    private static readonly ZabbixOutput s_output = ZabbixOutput.Of("itemid", "clock", "ns", "value");
-    private static readonly IReadOnlyList<string> s_sort = ["clock", "ns"];
-    private static readonly IReadOnlyList<System.ComponentModel.ListSortDirection> s_ascending = [System.ComponentModel.ListSortDirection.Ascending];
+    private static readonly ZabbixOutput<ZabbixHistoryRecord> s_output = [ZabbixHistoryRecordFields.ItemId, ZabbixHistoryRecordFields.Clock, ZabbixHistoryRecordFields.ClockNanoseconds, ZabbixHistoryRecordFields.Value];
+    private static readonly IReadOnlyList<ZabbixSort<ZabbixHistoryRecord>> s_sort = [ZabbixHistoryRecordFields.Clock, ZabbixHistoryRecordFields.ClockNanoseconds];
 
     /// <summary>The first version whose <c>history.get</c> cuts binary and JSON values unless told not to (<c>CHistory.php</c> 8.0:120).</summary>
     private static readonly Version s_uncutFrom = new(8, 0);
@@ -42,8 +41,7 @@ internal static class ZabbixHistoryRead
         Output = s_output,
         TimeFrom = DateTimeOffset.FromUnixTimeSeconds(from),
         TimeTill = till is long t ? DateTimeOffset.FromUnixTimeSeconds(t) : null,
-        SortField = s_sort,
-        SortOrder = s_ascending,
+        Sort = s_sort,
         Limit = limit,
     };
 

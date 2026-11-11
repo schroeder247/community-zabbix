@@ -14,40 +14,40 @@ public sealed class ZabbixJsonTests
     [Fact]
     public void Outputs_are_equal_when_their_keyword_or_fields_are()
     {
-        Assert.Equal(ZabbixOutput.Of("a", "b"), ZabbixOutput.Of("a", "b"));
-        Assert.Equal(ZabbixOutput.Of("a", "b").GetHashCode(), ZabbixOutput.Of("a", "b").GetHashCode());
-        Assert.Equal(ZabbixOutput.Extend, (ZabbixOutput)"extend");
-        Assert.Equal(ZabbixOutput.Of("hostid"), (ZabbixOutput)"hostid");
-        Assert.NotEqual(ZabbixOutput.Of("a", "b"), ZabbixOutput.Of("b", "a"));
-        Assert.NotEqual(ZabbixOutput.Count, ZabbixOutput.Of("count"));
+        ZabbixOutput<ZabbixHost> both = [ZabbixHostFields.HostId, ZabbixHostFields.VisibleName];
+
+        Assert.Equal(both, ZabbixOutput.Of(ZabbixHostFields.HostId, ZabbixHostFields.VisibleName));
+        Assert.Equal(both.GetHashCode(), ZabbixOutput.Of(ZabbixHostFields.HostId, ZabbixHostFields.VisibleName).GetHashCode());
+        Assert.Equal(ZabbixOutput<ZabbixHost>.FromZabbixOutput(ZabbixOutput.Extend), (ZabbixOutput<ZabbixHost>)ZabbixOutput.Extend);
+        Assert.NotEqual(both, ZabbixOutput.Of(ZabbixHostFields.VisibleName, ZabbixHostFields.HostId));
+        Assert.NotEqual((ZabbixOutput<ZabbixHost>)ZabbixOutput.Count, ZabbixOutput.Of(new ZabbixField<ZabbixHost>("count")));
     }
 
     [Fact]
     public void A_collection_expression_is_an_output_of_its_fields()
     {
-        ZabbixOutput output = ["hostid", "name"];
-        var parameters = new ZabbixHostGetParameters { Output = ["hostid"] };
+        ZabbixOutput<ZabbixHost> output = [ZabbixHostFields.HostId, ZabbixHostFields.VisibleName];
+        var parameters = new ZabbixHostGetParameters { Output = [ZabbixHostFields.HostId] };
 
-        Assert.Equal(ZabbixOutput.Of("hostid", "name"), output);
-        Assert.Equal("""["hostid","name"]""", JsonSerializer.Serialize(output, ZabbixApiJson.Default.ZabbixOutput));
-        Assert.Equal(ZabbixOutput.Of("hostid"), parameters.Output);
-        string[] fields = [.. output];
-        string[] none = [.. ZabbixOutput.Extend];
-        Assert.Equal(["hostid", "name"], fields);
+        Assert.Equal("""{"output":["hostid","name"]}""", JsonSerializer.Serialize(new ZabbixHostGetParameters { Output = output }, ZabbixApiJson.Default.ZabbixHostGetParameters));
+        Assert.Equal(ZabbixOutput.Of(ZabbixHostFields.HostId), parameters.Output);
+        ZabbixField<ZabbixHost>[] fields = [.. output];
+        ZabbixField<ZabbixHost>[] none = [.. (ZabbixOutput<ZabbixHost>)ZabbixOutput.Extend];
+        Assert.Equal([ZabbixHostFields.HostId, ZabbixHostFields.VisibleName], fields);
         Assert.Empty(none);
     }
 
     [Fact]
     public void A_sort_direction_is_written_and_read_as_the_api_words()
     {
-        var parameters = new ZabbixHostGetParameters { SortField = ["name", "hostid"], SortOrder = [System.ComponentModel.ListSortDirection.Descending, System.ComponentModel.ListSortDirection.Ascending] };
+        var parameters = new ZabbixHostGetParameters { Sort = [ZabbixHostFields.HostId, ZabbixHostFields.VisibleName.Descending()] };
 
         string json = JsonSerializer.Serialize(parameters, ZabbixApiJson.Default.ZabbixHostGetParameters);
-        ZabbixHostGetParameters read = JsonSerializer.Deserialize("""{"sortorder":["desc","ASC"]}""", ZabbixApiJson.Default.ZabbixHostGetParameters)!;
+        ZabbixHostGetParameters read = JsonSerializer.Deserialize("""{"sortfield":["name","hostid"],"sortorder":["desc","ASC"]}""", ZabbixApiJson.Default.ZabbixHostGetParameters)!;
 
-        Assert.Contains("\"sortorder\":[\"DESC\",\"ASC\"]", json, StringComparison.Ordinal);
-        Assert.Equal([System.ComponentModel.ListSortDirection.Descending, System.ComponentModel.ListSortDirection.Ascending], read.SortOrder!);
-        Assert.Throws<JsonException>(() => JsonSerializer.Deserialize("""{"sortorder":["UP"]}""", ZabbixApiJson.Default.ZabbixHostGetParameters));
+        Assert.Equal("""{"sortfield":["hostid","name"],"sortorder":["ASC","DESC"]}""", json);
+        Assert.Equal([ZabbixHostFields.VisibleName.Descending(), ZabbixHostFields.HostId.Ascending()], read.Sort!);
+        Assert.Throws<JsonException>(() => JsonSerializer.Deserialize("""{"sortfield":["name"],"sortorder":["UP"]}""", ZabbixApiJson.Default.ZabbixHostGetParameters));
     }
 
     [Fact]

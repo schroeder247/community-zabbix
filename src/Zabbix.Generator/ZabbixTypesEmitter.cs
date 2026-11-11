@@ -201,7 +201,7 @@ internal static class ZabbixTypesEmitter
         if (view is { Count: > 0 })
             return [.. view.Select(wire => type.Fields.FirstOrDefault(f => f.Wire == wire)).Where(f => f is not null).Select(f => f!)];
         static bool Scalar(FieldDescription f) => !f.Kind.StartsWith("list:", StringComparison.Ordinal)
-            && !f.Kind.StartsWith("object:", StringComparison.Ordinal) && f.Kind is not ("json" or "output");
+            && !f.Kind.StartsWith("object:", StringComparison.Ordinal) && !f.Kind.StartsWith(ZabbixTypedFields.Output, StringComparison.Ordinal) && f.Kind != "json";
         FieldDescription? id = type.Role == "read" && type.Object is { } apiObject && services.TryGetValue(apiObject, out ServiceDescription? service)
             ? ZabbixCmdletEmitter.EntityIdField(service, type)
             : type.Fields.FirstOrDefault(f => f.Kind == "id");

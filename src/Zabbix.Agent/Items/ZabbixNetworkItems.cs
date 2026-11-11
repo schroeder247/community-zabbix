@@ -309,12 +309,12 @@ public sealed partial class ZabbixNetworkItems : ZabbixItemProvider
 
         public bool Any => _network is null;
 
+        // An address or a CIDR block, read as a ZabbixPeer reads one; a name is not an address here.
         public static AddressFilter Parse(string text, int index)
         {
             if (text.Length == 0) return new AddressFilter(null);
-            if (IPNetwork.TryParse(text, out IPNetwork network)) return new AddressFilter(network);
-            return IPAddress.TryParse(text, out IPAddress? address)
-                ? new AddressFilter(new IPNetwork(address, address.AddressFamily == AddressFamily.InterNetwork ? 32 : 128))
+            return ZabbixPeer.TryParse(text, out ZabbixPeer peer) && peer.Network is { } network
+                ? new AddressFilter(network)
                 : throw ZabbixItemException.InvalidParameter(index);
         }
 

@@ -48,6 +48,22 @@ its package (`Community.Zabbix.Sdk.dll`), and the namespaces and telemetry names
   member with several forms has each one with a token and without one
   ([ADR 0013](docs/adr/0013-builders-verbs-and-typed-values.md)). Public signatures use BCL types: `ulong` ids,
   `DateTimeOffset` times, `DnsEndPoint` nodes, `Func` callbacks, and `NetworkCredential` for a login.
+- **Typed values where the API takes text** ([ADR 0013](docs/adr/0013-builders-verbs-and-typed-values.md)). A get's `Output`, its `Select*`
+  options and its `Sort` take the fields of the record they return, a `ZabbixField<TRecord>`, so
+  `q.Output = [ZabbixHostFields.HostId]` doesn't compile in an item's query; `ZabbixOutput.Extend` and `ZabbixOutput.Count` fit
+  every output and select, `new ZabbixField<ZabbixHost>("a_new_field")` names a field the SDK doesn't know, and a
+  `Zabbix*Fields` class holds the fields of every record an output, a select or a sort names. The sort is one list, each field
+  ascending unless it says otherwise, `q.Sort = [ZabbixHostFields.VisibleName.Descending(), ZabbixHostFields.HostId]`, sent as
+  `sortfield` and `sortorder`. An item's, an item prototype's and a discovery rule's update interval is a `ZabbixInterval`,
+  which converts from a `TimeSpan` (`Delay = TimeSpan.FromMinutes(5)` sends `5m`) and parses macros and flexible and
+  scheduling intervals; so is the interval an active agent is assigned (`ZabbixItemAssignment.Delay`) and the one a proxy's
+  configuration holds (`ZabbixProxyConfigItem.Delay`), and `GetNextCheck` answers when an agent checks it. An item's history,
+  trends and timeout, and a discovery rule's timeout, are a `ZabbixDuration`, from a `TimeSpan` (`History = TimeSpan.FromDays(90)`
+  sends `90d`) or a macro. An interface's port is a `ZabbixPort`, from an `int` or a macro. A trapper item's allowed hosts are
+  a list of `ZabbixPeer`, each from an `IPAddress`, an `IPNetwork`, a DNS name or a macro, sent as Zabbix's comma-separated
+  text, and `ZabbixListenerOptions.ParseAllowedPeers()` reads a listener's list as the same entries. Each reads back what the
+  server sends. The PowerShell modules keep their text parameters (`-Delay 5m`, `-History 90d`, `-InterfacePort 10050`,
+  `-TrapperHosts '10.0.0.0/8,::1'`, `-SortField` and `-SortOrder`) and parse them.
 - **The tree and the watcher.** `zabbix.Hosts["web-01"].Item("key")` and host groups answer `GetLatestAsync`,
   `GetHistoryAsync` and `Watch`; a group's node (`zabbix.HostGroups["Linux"]`) also reads, updates and deletes the group, and
   reaches its hosts by name; `IZabbixWatcher` streams the history collected since its last read.
@@ -74,7 +90,7 @@ its package (`Community.Zabbix.Sdk.dll`), and the namespaces and telemetry names
   `UseMemoryStore` and `UseEntityFrameworkStore` choose the store; `AddHealthCheck` is on all three. `UseLogging`,
   `UseTimeProvider` and `UseMeterFactory` are on the standalone builders. An active and a passive agent of one name answer
   the same items. A send loop with a store between collection and delivery, Zabbix's `ServerActive` grammar with HA
-  failover, flexible and scheduling item intervals (`ZabbixItemDelay`). The classes keep the `()`, `(options)` and
+  failover, flexible and scheduling item intervals (`ZabbixInterval`). The classes keep the `()`, `(options)` and
   `(options, loggers, time, meters)` constructors for an application that sets the options itself.
 - **Listeners** (`Community.Zabbix.Proxy`) on Kestrel's socket transport: the trapper, the passive agent
   (`ZabbixPassiveAgent`), the active and passive proxy (`ZabbixActiveProxy`, `ZabbixPassiveProxy`), and the connector

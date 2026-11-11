@@ -186,7 +186,7 @@ public sealed class GeneratedApiTests
         {
             Output = ZabbixOutput.Extend,
             Filter = new() { ["host"] = new[] { "web-01", "web-02" } },
-            SelectInterfaces = ZabbixOutput.Of("ip", "port"),
+            SelectInterfaces = [ZabbixHostInterfaceFields.Ip, ZabbixHostInterfaceFields.Port],
             MonitoredHosts = true,
             Limit = 5,
         }, TestContext.Current.CancellationToken);
@@ -440,8 +440,8 @@ public sealed class GeneratedApiTests
     {
         JsonTypeInfo<ZabbixHostGetParameters> info = ZabbixApiJson.Default.ZabbixHostGetParameters;
 
-        Assert.Equal("""{"output":"count"}""", JsonSerializer.Serialize(new ZabbixHostGetParameters { Output = "count" }, info));
-        Assert.Equal("""{"output":["hostid","host"]}""", JsonSerializer.Serialize(new ZabbixHostGetParameters { Output = new[] { "hostid", "host" } }, info));
+        Assert.Equal("""{"output":"count"}""", JsonSerializer.Serialize(new ZabbixHostGetParameters { Output = ZabbixOutput.Count }, info));
+        Assert.Equal("""{"output":["hostid","host"]}""", JsonSerializer.Serialize(new ZabbixHostGetParameters { Output = [ZabbixHostFields.HostId, ZabbixHostFields.TechnicalName] }, info));
         Assert.Equal("""{"filter":{"status":1,"host":"a","flags":[0,4]}}""", JsonSerializer.Serialize(new ZabbixHostGetParameters { Filter = new() { ["status"] = 1L, ["host"] = "a", ["flags"] = new long[] { 0, 4 } } }, info));
     }
 
@@ -454,17 +454,17 @@ public sealed class GeneratedApiTests
             Output = ZabbixOutput.Of(ZabbixHostFields.HostId, ZabbixHostFields.VisibleName),
             Filter = new ZabbixHostGetFilter { TechnicalName = ["web-01", "web-02"], Status = [ZabbixHostStatus.Disabled], Ip = ["10.0.0.1"] },
             Search = new ZabbixHostGetSearch { VisibleName = "web" },
-            SortField = [ZabbixHostFields.VisibleName],
+            Sort = [ZabbixHostFields.VisibleName],
         };
 
         Assert.Equal(
-            """{"filter":{"host":["web-01","web-02"],"ip":["10.0.0.1"],"status":[1]},"search":{"name":"web"},"output":["hostid","name"],"sortfield":["name"]}""",
+            """{"filter":{"host":["web-01","web-02"],"ip":["10.0.0.1"],"status":[1]},"search":{"name":"web"},"output":["hostid","name"],"sortfield":["name"],"sortorder":["ASC"]}""",
             JsonSerializer.Serialize(parameters, info));
         Assert.Equal(parameters, parameters with
         {
             Filter = new() { ["host"] = new[] { "web-01", "web-02" }, ["ip"] = new[] { "10.0.0.1" }, ["status"] = new long[] { 1 } },
         });
-        Assert.Equal("host", ZabbixHostFields.TechnicalName);
+        Assert.Equal("host", ZabbixHostFields.TechnicalName.Name);
     }
 
     [Fact]
@@ -860,7 +860,7 @@ public sealed class GeneratedApiTests
         IReadOnlyList<ulong> ids = await client.HostInterfaces.ReplaceHostInterfacesAsync(new ZabbixHostInterfaceReplaceHostInterfacesRequest
         {
             HostId = 1,
-            Interfaces = [new ZabbixHostInterfaceReplaceHostInterfacesInterfaceRequest { Type = ZabbixInterfaceType.Agent, Main = ZabbixInterfacePriority.Primary, UseIp = ZabbixHostInterfaceUseIp.Ip, Ip = "127.0.0.1", Dns = "", Port = "10050" }],
+            Interfaces = [new ZabbixHostInterfaceReplaceHostInterfacesInterfaceRequest { Type = ZabbixInterfaceType.Agent, Main = ZabbixInterfacePriority.Primary, UseIp = ZabbixHostInterfaceUseIp.Ip, Ip = "127.0.0.1", Dns = "", Port = 10050 }],
         }, TestContext.Current.CancellationToken);
 
         Assert.Equal<ulong>([30], ids);
@@ -1393,8 +1393,11 @@ public sealed class GeneratedApiTests
         string[] shapes = ["global::System.Collections.Generic.IReadOnlyList<", "global::System.Collections.Generic.IReadOnlyDictionary<", "global::System.Collections.Generic.IDictionary<", "global::System.Text.Json.JsonElement"];
 
         EquatableArray<GeneratedSource> models = emitter.Emit(ZabbixApiPart.Models, TestContext.Current.CancellationToken).Files;
+        // the member's own type, not a type argument of one: a ZabbixOutput<JsonElement> compares by its own equality
         List<string> records = [.. models.Where(file => file.Code.Contains("partial record", StringComparison.Ordinal))
-            .Where(file => file.Code.Split('\n').Any(line => line.Contains("{ get;", StringComparison.Ordinal) && shapes.Any(shape => line.Contains(shape, StringComparison.Ordinal))))
+            .Where(file => file.Code.Split('\n').Any(line => line.Contains("{ get;", StringComparison.Ordinal)
+                && shapes.Any(shape => line.Replace("required ", string.Empty, StringComparison.Ordinal) is var member
+                    && (member.Contains("public " + shape, StringComparison.Ordinal) || member.Contains("internal " + shape, StringComparison.Ordinal)))))
             .Select(file => file.Name)];
         List<string> without = [.. models.Where(file => records.Contains(file.Name) && !file.Code.Contains("    public bool Equals(", StringComparison.Ordinal)).Select(file => file.Name)];
 

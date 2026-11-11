@@ -123,7 +123,7 @@ public sealed class ConnectZbxServerCommand : ZabbixCmdlet, IZabbixTlsParameters
     {
         try
         {
-            await client.Users.GetAsync(new ZabbixUserGetParameters { Output = ZabbixOutput.Of(ZabbixUserFields.UserId), Limit = 1 }, cancellationToken).ConfigureAwait(false);
+            await client.Users.GetAsync(new ZabbixUserGetParameters { Output = [ZabbixUserFields.UserId], Limit = 1 }, cancellationToken).ConfigureAwait(false);
         }
         catch (ZabbixApiException answered) when (!IsRefusal(answered.Kind))
         {

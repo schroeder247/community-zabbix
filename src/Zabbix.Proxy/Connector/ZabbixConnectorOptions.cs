@@ -17,8 +17,8 @@ public sealed class ZabbixConnectorOptions
     public string? BearerToken { get; set; }
 
     /// <summary>
-    /// The addresses, CIDR blocks and DNS names that may post, as a listener's <c>AllowedPeers</c> takes them (see
-    /// <see cref="Listening.ZabbixAllowedPeers"/>); a request from anywhere else is answered 403.
+    /// The addresses, CIDR blocks and DNS names that may post, as a listener's <c>AllowedPeers</c> takes them, each a
+    /// <see cref="ZabbixPeer"/>; a request from anywhere else is answered 403.
     /// </summary>
     public IList<string> AllowedPeers { get; } = [];
 

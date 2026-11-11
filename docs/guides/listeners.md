@@ -214,7 +214,7 @@ Console.WriteLine(listener.LocalEndPoint);
 | `ZabbixProxyAdmission` | `BuildAsync(config, protocol)` builds the admission rule for a configuration, and `Refusal` says why a value is refused. |
 | `ZabbixProxyDataProviders` | Asks providers for pages and merges them. |
 | `ZabbixComponentVersion` | Reads Zabbix's version strings, `8.0.0rc1` included. |
-| `ZabbixAllowedPeers` | `Parse("10.0.0.0/8,zbx.example", null)` reads a list as the listeners read it, so you can check a list before you use it. `ContainsAsync(address)` answers for one peer. |
+| `ZabbixListenerOptions.ParseAllowedPeers()` | Reads `AllowedPeers` as the listeners read it, so you can check a list before you use it. Each entry is a `ZabbixPeer`: its `Network` is an address or a block as an `IPNetwork`, and its `HostName` a name the listener resolves at each connection. |
 
 ## In an application with a host
 

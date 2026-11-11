@@ -10,19 +10,18 @@ Community.Zabbix.IZabbixGetParameters.ExcludeSearch.set -> void
 Community.Zabbix.IZabbixGetParameters.Filter.get -> Community.Zabbix.ZabbixGetConditions!
 Community.Zabbix.IZabbixGetParameters.Limit.get -> int?
 Community.Zabbix.IZabbixGetParameters.Limit.set -> void
-Community.Zabbix.IZabbixGetParameters.Output.get -> Community.Zabbix.ZabbixOutput?
-Community.Zabbix.IZabbixGetParameters.Output.set -> void
 Community.Zabbix.IZabbixGetParameters.Search.get -> Community.Zabbix.ZabbixGetConditions!
 Community.Zabbix.IZabbixGetParameters.SearchByAny.get -> bool?
 Community.Zabbix.IZabbixGetParameters.SearchByAny.set -> void
 Community.Zabbix.IZabbixGetParameters.SearchWildcardsEnabled.get -> bool?
 Community.Zabbix.IZabbixGetParameters.SearchWildcardsEnabled.set -> void
-Community.Zabbix.IZabbixGetParameters.SortField.get -> System.Collections.Generic.IReadOnlyList<string!>?
-Community.Zabbix.IZabbixGetParameters.SortField.set -> void
-Community.Zabbix.IZabbixGetParameters.SortOrder.get -> System.Collections.Generic.IReadOnlyList<System.ComponentModel.ListSortDirection>?
-Community.Zabbix.IZabbixGetParameters.SortOrder.set -> void
 Community.Zabbix.IZabbixGetParameters.StartSearch.get -> bool?
 Community.Zabbix.IZabbixGetParameters.StartSearch.set -> void
+Community.Zabbix.IZabbixGetParameters<TRecord>
+Community.Zabbix.IZabbixGetParameters<TRecord>.Output.get -> Community.Zabbix.ZabbixOutput<TRecord>?
+Community.Zabbix.IZabbixGetParameters<TRecord>.Output.set -> void
+Community.Zabbix.IZabbixGetParameters<TRecord>.Sort.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixSort<TRecord>>?
+Community.Zabbix.IZabbixGetParameters<TRecord>.Sort.set -> void
 Community.Zabbix.IZabbixItemRegistry
 Community.Zabbix.IZabbixItemRegistry.Register(System.Action<Community.Zabbix.IZabbixItemsBuilder!>! configure) -> Community.Zabbix.IZabbixItemRegistry!
 Community.Zabbix.IZabbixItemsBuilder
@@ -93,6 +92,17 @@ Community.Zabbix.ZabbixConfigurationSections
 Community.Zabbix.ZabbixCredential
 Community.Zabbix.ZabbixCredential.ZabbixCredential() -> void
 Community.Zabbix.ZabbixDataClassifications
+Community.Zabbix.ZabbixDuration
+Community.Zabbix.ZabbixDuration.Equals(Community.Zabbix.ZabbixDuration other) -> bool
+Community.Zabbix.ZabbixDuration.Length.get -> System.TimeSpan?
+Community.Zabbix.ZabbixDuration.ZabbixDuration() -> void
+Community.Zabbix.ZabbixField<TRecord>
+Community.Zabbix.ZabbixField<TRecord>.Ascending() -> Community.Zabbix.ZabbixSort<TRecord>
+Community.Zabbix.ZabbixField<TRecord>.Descending() -> Community.Zabbix.ZabbixSort<TRecord>
+Community.Zabbix.ZabbixField<TRecord>.Equals(Community.Zabbix.ZabbixField<TRecord> other) -> bool
+Community.Zabbix.ZabbixField<TRecord>.Name.get -> string!
+Community.Zabbix.ZabbixField<TRecord>.ZabbixField() -> void
+Community.Zabbix.ZabbixField<TRecord>.ZabbixField(string! name) -> void
 Community.Zabbix.ZabbixFieldValue
 Community.Zabbix.ZabbixFieldValue.Element.get -> System.Text.Json.JsonElement
 Community.Zabbix.ZabbixFieldValue.Equals(Community.Zabbix.ZabbixFieldValue other) -> bool
@@ -114,6 +124,10 @@ Community.Zabbix.ZabbixGetFields
 Community.Zabbix.ZabbixGetFields.Equals(Community.Zabbix.ZabbixGetFields? other) -> bool
 Community.Zabbix.ZabbixGetFields.ZabbixGetFields() -> void
 Community.Zabbix.ZabbixGetFields.ZabbixGetFields(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string!, Community.Zabbix.ZabbixFieldValue>>? fields) -> void
+Community.Zabbix.ZabbixInterval
+Community.Zabbix.ZabbixInterval.Equals(Community.Zabbix.ZabbixInterval other) -> bool
+Community.Zabbix.ZabbixInterval.UpdateInterval.get -> System.TimeSpan?
+Community.Zabbix.ZabbixInterval.ZabbixInterval() -> void
 Community.Zabbix.ZabbixItemDefinition
 Community.Zabbix.ZabbixItemDefinition.<Clone>$() -> Community.Zabbix.ZabbixItemDefinition!
 Community.Zabbix.ZabbixItemDefinition.Description.get -> string!
@@ -297,11 +311,18 @@ Community.Zabbix.ZabbixOptions.Timeouts.get -> System.Collections.Generic.IDicti
 Community.Zabbix.ZabbixOptions.Validate(System.ComponentModel.DataAnnotations.ValidationContext! validationContext) -> System.Collections.Generic.IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult!>!
 Community.Zabbix.ZabbixOptions.ZabbixOptions() -> void
 Community.Zabbix.ZabbixOutput
-Community.Zabbix.ZabbixOutput.<Clone>$() -> Community.Zabbix.ZabbixOutput!
-Community.Zabbix.ZabbixOutput.Equals(Community.Zabbix.ZabbixOutput? other) -> bool
-Community.Zabbix.ZabbixOutput.Fields.get -> System.Collections.Generic.IReadOnlyList<string!>?
-Community.Zabbix.ZabbixOutput.GetEnumerator() -> System.Collections.Generic.IEnumerator<string!>!
-Community.Zabbix.ZabbixOutput.Keyword.get -> string?
+Community.Zabbix.ZabbixOutput.Keyword.get -> string!
+Community.Zabbix.ZabbixOutput<TRecord>
+Community.Zabbix.ZabbixOutput<TRecord>.<Clone>$() -> Community.Zabbix.ZabbixOutput<TRecord>!
+Community.Zabbix.ZabbixOutput<TRecord>.Equals(Community.Zabbix.ZabbixOutput<TRecord>? other) -> bool
+Community.Zabbix.ZabbixOutput<TRecord>.Fields.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixField<TRecord>>?
+Community.Zabbix.ZabbixOutput<TRecord>.GetEnumerator() -> System.Collections.Generic.IEnumerator<Community.Zabbix.ZabbixField<TRecord>>!
+Community.Zabbix.ZabbixOutput<TRecord>.Keyword.get -> string?
+Community.Zabbix.ZabbixPeer
+Community.Zabbix.ZabbixPeer.Equals(Community.Zabbix.ZabbixPeer other) -> bool
+Community.Zabbix.ZabbixPeer.HostName.get -> string?
+Community.Zabbix.ZabbixPeer.Network.get -> System.Net.IPNetwork?
+Community.Zabbix.ZabbixPeer.ZabbixPeer() -> void
 Community.Zabbix.ZabbixPeerTextAttribute
 Community.Zabbix.ZabbixPeerTextAttribute.ZabbixPeerTextAttribute() -> void
 Community.Zabbix.ZabbixPeerTextRedactor
@@ -334,6 +355,15 @@ Community.Zabbix.ZabbixSessionCredential.LoginBackoff.init -> void
 Community.Zabbix.ZabbixSessionCredential.Username.get -> string!
 Community.Zabbix.ZabbixSessionCredential.ZabbixSessionCredential(string! username, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<string!>>! password) -> void
 Community.Zabbix.ZabbixSessionCredential.ZabbixSessionCredential(string! username, string! password) -> void
+Community.Zabbix.ZabbixSort<TRecord>
+Community.Zabbix.ZabbixSort<TRecord>.Deconstruct(out Community.Zabbix.ZabbixField<TRecord> Field, out System.ComponentModel.ListSortDirection Direction) -> void
+Community.Zabbix.ZabbixSort<TRecord>.Direction.get -> System.ComponentModel.ListSortDirection
+Community.Zabbix.ZabbixSort<TRecord>.Direction.init -> void
+Community.Zabbix.ZabbixSort<TRecord>.Equals(Community.Zabbix.ZabbixSort<TRecord> other) -> bool
+Community.Zabbix.ZabbixSort<TRecord>.Field.get -> Community.Zabbix.ZabbixField<TRecord>
+Community.Zabbix.ZabbixSort<TRecord>.Field.init -> void
+Community.Zabbix.ZabbixSort<TRecord>.ZabbixSort() -> void
+Community.Zabbix.ZabbixSort<TRecord>.ZabbixSort(Community.Zabbix.ZabbixField<TRecord> Field, System.ComponentModel.ListSortDirection Direction) -> void
 Community.Zabbix.ZabbixTokenRequestContext
 Community.Zabbix.ZabbixTokenRequestContext.Deconstruct(out Community.Zabbix.IZabbixTransport! Transport, out string! Method, out System.TimeProvider! Time) -> void
 Community.Zabbix.ZabbixTokenRequestContext.Equals(Community.Zabbix.ZabbixTokenRequestContext other) -> bool
@@ -396,6 +426,10 @@ override Community.Zabbix.ZabbixApiTokenCredential.GetTokenAsync(Community.Zabbi
 override Community.Zabbix.ZabbixApiTokenCredential.ToString() -> string!
 override Community.Zabbix.ZabbixComponentVersion.GetHashCode() -> int
 override Community.Zabbix.ZabbixComponentVersion.ToString() -> string!
+override Community.Zabbix.ZabbixDuration.GetHashCode() -> int
+override Community.Zabbix.ZabbixDuration.ToString() -> string!
+override Community.Zabbix.ZabbixField<TRecord>.GetHashCode() -> int
+override Community.Zabbix.ZabbixField<TRecord>.ToString() -> string!
 override Community.Zabbix.ZabbixFieldValue.GetHashCode() -> int
 override Community.Zabbix.ZabbixFieldValue.ToString() -> string!
 override Community.Zabbix.ZabbixGetConditions.Equals(object? obj) -> bool
@@ -405,6 +439,8 @@ override Community.Zabbix.ZabbixGetFields.<Clone>$() -> Community.Zabbix.ZabbixG
 override Community.Zabbix.ZabbixGetFields.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixGetFields.GetHashCode() -> int
 override Community.Zabbix.ZabbixGetFields.ToString() -> string!
+override Community.Zabbix.ZabbixInterval.GetHashCode() -> int
+override Community.Zabbix.ZabbixInterval.ToString() -> string!
 override Community.Zabbix.ZabbixItemDefinition.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixItemDefinition.GetHashCode() -> int
 override Community.Zabbix.ZabbixItemDefinition.ToString() -> string!
@@ -415,15 +451,20 @@ override Community.Zabbix.ZabbixItemKey<T>.GetHashCode() -> int
 override Community.Zabbix.ZabbixItemKey<T>.ToString() -> string!
 override Community.Zabbix.ZabbixItemKeyRedactor.GetRedactedLength(System.ReadOnlySpan<char> input) -> int
 override Community.Zabbix.ZabbixItemKeyRedactor.Redact(System.ReadOnlySpan<char> source, System.Span<char> destination) -> int
-override Community.Zabbix.ZabbixOutput.Equals(object? obj) -> bool
-override Community.Zabbix.ZabbixOutput.GetHashCode() -> int
 override Community.Zabbix.ZabbixOutput.ToString() -> string!
+override Community.Zabbix.ZabbixOutput<TRecord>.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixOutput<TRecord>.GetHashCode() -> int
+override Community.Zabbix.ZabbixOutput<TRecord>.ToString() -> string!
+override Community.Zabbix.ZabbixPeer.GetHashCode() -> int
+override Community.Zabbix.ZabbixPeer.ToString() -> string!
 override Community.Zabbix.ZabbixPeerTextRedactor.GetRedactedLength(System.ReadOnlySpan<char> input) -> int
 override Community.Zabbix.ZabbixPeerTextRedactor.Redact(System.ReadOnlySpan<char> source, System.Span<char> destination) -> int
 override Community.Zabbix.ZabbixSample<T>.GetHashCode() -> int
 override Community.Zabbix.ZabbixSessionCredential.GetTokenAsync(Community.Zabbix.ZabbixTokenRequestContext context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<string?>
 override Community.Zabbix.ZabbixSessionCredential.Invalidate(string! token, Community.Zabbix.ZabbixApiException! refusal) -> bool
 override Community.Zabbix.ZabbixSessionCredential.ToString() -> string!
+override Community.Zabbix.ZabbixSort<TRecord>.GetHashCode() -> int
+override Community.Zabbix.ZabbixSort<TRecord>.ToString() -> string!
 override Community.Zabbix.ZabbixTokenRequestContext.GetHashCode() -> int
 override Community.Zabbix.ZabbixValue.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixValue.GetHashCode() -> int
@@ -451,6 +492,16 @@ static Community.Zabbix.ZabbixDataClassifications.ItemKey.get -> Microsoft.Exten
 static Community.Zabbix.ZabbixDataClassifications.PeerText.get -> Microsoft.Extensions.Compliance.Classification.DataClassification
 static Community.Zabbix.ZabbixDataClassifications.Personal.get -> Microsoft.Extensions.Compliance.Classification.DataClassification
 static Community.Zabbix.ZabbixDataClassifications.Secret.get -> Microsoft.Extensions.Compliance.Classification.DataClassification
+static Community.Zabbix.ZabbixDuration.FromTimeSpan(System.TimeSpan length) -> Community.Zabbix.ZabbixDuration
+static Community.Zabbix.ZabbixDuration.implicit operator Community.Zabbix.ZabbixDuration(System.TimeSpan length) -> Community.Zabbix.ZabbixDuration
+static Community.Zabbix.ZabbixDuration.operator !=(Community.Zabbix.ZabbixDuration left, Community.Zabbix.ZabbixDuration right) -> bool
+static Community.Zabbix.ZabbixDuration.operator ==(Community.Zabbix.ZabbixDuration left, Community.Zabbix.ZabbixDuration right) -> bool
+static Community.Zabbix.ZabbixDuration.Parse(string! s) -> Community.Zabbix.ZabbixDuration
+static Community.Zabbix.ZabbixDuration.Parse(System.ReadOnlySpan<char> s) -> Community.Zabbix.ZabbixDuration
+static Community.Zabbix.ZabbixDuration.TryParse(string? s, out Community.Zabbix.ZabbixDuration result) -> bool
+static Community.Zabbix.ZabbixDuration.TryParse(System.ReadOnlySpan<char> s, out Community.Zabbix.ZabbixDuration result) -> bool
+static Community.Zabbix.ZabbixField<TRecord>.operator !=(Community.Zabbix.ZabbixField<TRecord> left, Community.Zabbix.ZabbixField<TRecord> right) -> bool
+static Community.Zabbix.ZabbixField<TRecord>.operator ==(Community.Zabbix.ZabbixField<TRecord> left, Community.Zabbix.ZabbixField<TRecord> right) -> bool
 static Community.Zabbix.ZabbixFieldValue.FromInt64(long value) -> Community.Zabbix.ZabbixFieldValue
 static Community.Zabbix.ZabbixFieldValue.FromInt64Array(long[]! values) -> Community.Zabbix.ZabbixFieldValue
 static Community.Zabbix.ZabbixFieldValue.FromString(string! value) -> Community.Zabbix.ZabbixFieldValue
@@ -469,6 +520,14 @@ static Community.Zabbix.ZabbixGetConditions.operator !=(Community.Zabbix.ZabbixG
 static Community.Zabbix.ZabbixGetConditions.operator ==(Community.Zabbix.ZabbixGetConditions? left, Community.Zabbix.ZabbixGetConditions? right) -> bool
 static Community.Zabbix.ZabbixGetFields.operator !=(Community.Zabbix.ZabbixGetFields? left, Community.Zabbix.ZabbixGetFields? right) -> bool
 static Community.Zabbix.ZabbixGetFields.operator ==(Community.Zabbix.ZabbixGetFields? left, Community.Zabbix.ZabbixGetFields? right) -> bool
+static Community.Zabbix.ZabbixInterval.FromTimeSpan(System.TimeSpan interval) -> Community.Zabbix.ZabbixInterval
+static Community.Zabbix.ZabbixInterval.implicit operator Community.Zabbix.ZabbixInterval(System.TimeSpan interval) -> Community.Zabbix.ZabbixInterval
+static Community.Zabbix.ZabbixInterval.operator !=(Community.Zabbix.ZabbixInterval left, Community.Zabbix.ZabbixInterval right) -> bool
+static Community.Zabbix.ZabbixInterval.operator ==(Community.Zabbix.ZabbixInterval left, Community.Zabbix.ZabbixInterval right) -> bool
+static Community.Zabbix.ZabbixInterval.Parse(string! s) -> Community.Zabbix.ZabbixInterval
+static Community.Zabbix.ZabbixInterval.Parse(System.ReadOnlySpan<char> s) -> Community.Zabbix.ZabbixInterval
+static Community.Zabbix.ZabbixInterval.TryParse(string? s, out Community.Zabbix.ZabbixInterval result) -> bool
+static Community.Zabbix.ZabbixInterval.TryParse(System.ReadOnlySpan<char> s, out Community.Zabbix.ZabbixInterval result) -> bool
 static Community.Zabbix.ZabbixItemDefinition.operator !=(Community.Zabbix.ZabbixItemDefinition? left, Community.Zabbix.ZabbixItemDefinition? right) -> bool
 static Community.Zabbix.ZabbixItemDefinition.operator ==(Community.Zabbix.ZabbixItemDefinition? left, Community.Zabbix.ZabbixItemDefinition? right) -> bool
 static Community.Zabbix.ZabbixItemKey.Create(string! name, params System.ReadOnlySpan<string!> parameters) -> Community.Zabbix.ZabbixItemKey
@@ -658,15 +717,28 @@ static Community.Zabbix.ZabbixItemsBuilderExtensions.AddItems<TProvider>(this Co
 static Community.Zabbix.ZabbixOptions.GetApiEndpoint(System.Uri! address) -> System.Uri!
 static Community.Zabbix.ZabbixOutput.Count.get -> Community.Zabbix.ZabbixOutput!
 static Community.Zabbix.ZabbixOutput.Extend.get -> Community.Zabbix.ZabbixOutput!
-static Community.Zabbix.ZabbixOutput.FromString(string! keywordOrField) -> Community.Zabbix.ZabbixOutput!
-static Community.Zabbix.ZabbixOutput.FromStringArray(string![]! fields) -> Community.Zabbix.ZabbixOutput!
-static Community.Zabbix.ZabbixOutput.Of(params System.ReadOnlySpan<string!> fields) -> Community.Zabbix.ZabbixOutput!
-static Community.Zabbix.ZabbixOutput.implicit operator Community.Zabbix.ZabbixOutput!(string! keywordOrField) -> Community.Zabbix.ZabbixOutput!
-static Community.Zabbix.ZabbixOutput.implicit operator Community.Zabbix.ZabbixOutput!(string![]! fields) -> Community.Zabbix.ZabbixOutput!
-static Community.Zabbix.ZabbixOutput.operator !=(Community.Zabbix.ZabbixOutput? left, Community.Zabbix.ZabbixOutput? right) -> bool
-static Community.Zabbix.ZabbixOutput.operator ==(Community.Zabbix.ZabbixOutput? left, Community.Zabbix.ZabbixOutput? right) -> bool
+static Community.Zabbix.ZabbixOutput.Of<TRecord>(params System.ReadOnlySpan<Community.Zabbix.ZabbixField<TRecord>> fields) -> Community.Zabbix.ZabbixOutput<TRecord>!
+static Community.Zabbix.ZabbixOutput<TRecord>.FromZabbixOutput(Community.Zabbix.ZabbixOutput? keyword) -> Community.Zabbix.ZabbixOutput<TRecord>?
+static Community.Zabbix.ZabbixOutput<TRecord>.implicit operator Community.Zabbix.ZabbixOutput<TRecord>?(Community.Zabbix.ZabbixOutput? keyword) -> Community.Zabbix.ZabbixOutput<TRecord>?
+static Community.Zabbix.ZabbixOutput<TRecord>.operator !=(Community.Zabbix.ZabbixOutput<TRecord>? left, Community.Zabbix.ZabbixOutput<TRecord>? right) -> bool
+static Community.Zabbix.ZabbixOutput<TRecord>.operator ==(Community.Zabbix.ZabbixOutput<TRecord>? left, Community.Zabbix.ZabbixOutput<TRecord>? right) -> bool
+static Community.Zabbix.ZabbixPeer.FromIPAddress(System.Net.IPAddress! address) -> Community.Zabbix.ZabbixPeer
+static Community.Zabbix.ZabbixPeer.FromIPNetwork(System.Net.IPNetwork network) -> Community.Zabbix.ZabbixPeer
+static Community.Zabbix.ZabbixPeer.implicit operator Community.Zabbix.ZabbixPeer(System.Net.IPAddress! address) -> Community.Zabbix.ZabbixPeer
+static Community.Zabbix.ZabbixPeer.implicit operator Community.Zabbix.ZabbixPeer(System.Net.IPNetwork network) -> Community.Zabbix.ZabbixPeer
+static Community.Zabbix.ZabbixPeer.operator !=(Community.Zabbix.ZabbixPeer left, Community.Zabbix.ZabbixPeer right) -> bool
+static Community.Zabbix.ZabbixPeer.operator ==(Community.Zabbix.ZabbixPeer left, Community.Zabbix.ZabbixPeer right) -> bool
+static Community.Zabbix.ZabbixPeer.Parse(string! s) -> Community.Zabbix.ZabbixPeer
+static Community.Zabbix.ZabbixPeer.Parse(System.ReadOnlySpan<char> s) -> Community.Zabbix.ZabbixPeer
+static Community.Zabbix.ZabbixPeer.ParseList(string! s) -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixPeer>!
+static Community.Zabbix.ZabbixPeer.TryParse(string? s, out Community.Zabbix.ZabbixPeer result) -> bool
+static Community.Zabbix.ZabbixPeer.TryParse(System.ReadOnlySpan<char> s, out Community.Zabbix.ZabbixPeer result) -> bool
 static Community.Zabbix.ZabbixSample<T>.operator !=(Community.Zabbix.ZabbixSample<T> left, Community.Zabbix.ZabbixSample<T> right) -> bool
 static Community.Zabbix.ZabbixSample<T>.operator ==(Community.Zabbix.ZabbixSample<T> left, Community.Zabbix.ZabbixSample<T> right) -> bool
+static Community.Zabbix.ZabbixSort<TRecord>.FromZabbixField(Community.Zabbix.ZabbixField<TRecord> field) -> Community.Zabbix.ZabbixSort<TRecord>
+static Community.Zabbix.ZabbixSort<TRecord>.implicit operator Community.Zabbix.ZabbixSort<TRecord>(Community.Zabbix.ZabbixField<TRecord> field) -> Community.Zabbix.ZabbixSort<TRecord>
+static Community.Zabbix.ZabbixSort<TRecord>.operator !=(Community.Zabbix.ZabbixSort<TRecord> left, Community.Zabbix.ZabbixSort<TRecord> right) -> bool
+static Community.Zabbix.ZabbixSort<TRecord>.operator ==(Community.Zabbix.ZabbixSort<TRecord> left, Community.Zabbix.ZabbixSort<TRecord> right) -> bool
 static Community.Zabbix.ZabbixTokenRequestContext.operator !=(Community.Zabbix.ZabbixTokenRequestContext left, Community.Zabbix.ZabbixTokenRequestContext right) -> bool
 static Community.Zabbix.ZabbixTokenRequestContext.operator ==(Community.Zabbix.ZabbixTokenRequestContext left, Community.Zabbix.ZabbixTokenRequestContext right) -> bool
 static Community.Zabbix.ZabbixValue.From<T>(string! host, Community.Zabbix.ZabbixItemKey<T> item, T value, System.DateTimeOffset time) -> Community.Zabbix.ZabbixValue!
@@ -677,9 +749,14 @@ virtual Community.Zabbix.ZabbixGetConditions.EqualityContract.get -> System.Type
 virtual Community.Zabbix.ZabbixGetConditions.Equals(Community.Zabbix.ZabbixGetConditions? other) -> bool
 virtual Community.Zabbix.ZabbixGetConditions.PrintMembers(System.Text.StringBuilder! builder) -> bool
 ~override Community.Zabbix.ZabbixComponentVersion.Equals(object obj) -> bool
+~override Community.Zabbix.ZabbixDuration.Equals(object obj) -> bool
+~override Community.Zabbix.ZabbixField<TRecord>.Equals(object obj) -> bool
 ~override Community.Zabbix.ZabbixFieldValue.Equals(object obj) -> bool
+~override Community.Zabbix.ZabbixInterval.Equals(object obj) -> bool
 ~override Community.Zabbix.ZabbixItemKey<T>.Equals(object obj) -> bool
+~override Community.Zabbix.ZabbixPeer.Equals(object obj) -> bool
 ~override Community.Zabbix.ZabbixSample<T>.Equals(object obj) -> bool
 ~override Community.Zabbix.ZabbixSample<T>.ToString() -> string
+~override Community.Zabbix.ZabbixSort<TRecord>.Equals(object obj) -> bool
 ~override Community.Zabbix.ZabbixTokenRequestContext.Equals(object obj) -> bool
 ~override Community.Zabbix.ZabbixTokenRequestContext.ToString() -> string

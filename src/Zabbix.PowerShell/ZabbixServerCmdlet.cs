@@ -226,7 +226,7 @@ public abstract class ZabbixServerCmdlet : ZabbixCmdlet
         if (Connected.Trapper is { Count: > 0 } configured) return configured;
         var active = new ZabbixHaNodeGetParameters
         {
-            Output = new[] { "address", "port", "status" },
+            Output = [ZabbixHaNodeFields.Address, ZabbixHaNodeFields.Port, ZabbixHaNodeFields.Status],
             Filter = new() { ["status"] = (long)ZabbixHaNodeStatus.Active },
         };
         foreach (ZabbixHaNode ha in await ListAsync(ZabbixClient.HaNodes.GetAsync(active, cancellationToken), cancellationToken).ConfigureAwait(false))

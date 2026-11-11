@@ -35,7 +35,7 @@ internal sealed class ZabbixDurationAttribute : ArgumentTransformationAttribute
             sbyte or byte or short or ushort or int or uint or long or ulong or float or double or decimal
                 => TimeSpan.FromSeconds(Convert.ToDouble(input, CultureInfo.InvariantCulture)),
             string text when double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out double seconds) => TimeSpan.FromSeconds(seconds),
-            string text when TryParseTimeSuffix(text.Trim(), out TimeSpan suffixed) => suffixed,
+            string text when ZabbixDuration.TryParse(text.Trim(), out ZabbixDuration suffixed) && suffixed.Length is { } length => length,
             string text when TimeSpan.TryParse(text, CultureInfo.InvariantCulture, out TimeSpan parsed) => parsed,
             _ => null,
         };
@@ -46,25 +46,5 @@ internal sealed class ZabbixDurationAttribute : ArgumentTransformationAttribute
         if ((MinimumSeconds > 0 && value < TimeSpan.FromSeconds(MinimumSeconds)) || (MaximumSeconds > 0 && value > TimeSpan.FromSeconds(MaximumSeconds)))
             throw new ArgumentTransformationMetadataException(string.Create(CultureInfo.InvariantCulture, $"'{input}' is not a duration of {MinimumSeconds} to {MaximumSeconds} seconds."));
         return value;
-    }
-
-    // Zabbix's time suffix (zbx_is_time_suffix): digits and one unit letter, nothing else; a bare number is seconds and
-    // is read above.
-    private static bool TryParseTimeSuffix(string text, out TimeSpan duration)
-    {
-        duration = default;
-        if (text.Length < 2 || !long.TryParse(text.AsSpan(0, text.Length - 1), NumberStyles.None, CultureInfo.InvariantCulture, out long count)) return false;
-        long unit = text[^1] switch
-        {
-            's' => 1,
-            'm' => 60,
-            'h' => 3600,
-            'd' => 86400,
-            'w' => 604800,
-            _ => 0,
-        };
-        if (unit == 0 || count > TimeSpan.MaxValue.TotalSeconds / unit) return false;
-        duration = TimeSpan.FromSeconds(count * unit);
-        return true;
     }
 }

@@ -128,8 +128,7 @@ internal static class LiveFixtures
                 History = item.Type,
                 ItemIds = [item.ItemId],
                 Output = ZabbixOutput.Extend,
-                SortField = ["clock", "ns"],
-                SortOrder = [System.ComponentModel.ListSortDirection.Ascending],
+                Sort = [ZabbixHistoryRecordFields.Clock, ZabbixHistoryRecordFields.ClockNanoseconds],
             }, TestContext.Current.CancellationToken);
             return rows.Count >= count ? rows : null;
         }, $"{count} value(s) of {item.Key} in history.get", budget);

@@ -3,16 +3,14 @@
 namespace Community.Zabbix;
 
 /// <summary>
-/// Represents the parameters every <c>.get</c> accepts, whatever the object: the eleven parameters every queryable
-/// <c>.get</c> parameter record shares.
-/// The generated <c>Zabbix*GetParameters</c> records implement it, which is what lets one generic reader (the PowerShell
+/// Represents the parameters every <c>.get</c> accepts, whatever the object: eight of the eleven parameters every
+/// queryable <c>.get</c> parameter record shares. The other three, <c>output</c>, <c>sortfield</c> and <c>sortorder</c>,
+/// name the fields of the object's record, so they're on <see cref="IZabbixGetParameters{TRecord}"/>, which the generated
+/// <c>Zabbix*GetParameters</c> records implement. This interface is what lets one generic reader (the PowerShell
 /// module's <c>Get-</c> cmdlets) fill the common options of any of them.
 /// </summary>
 public interface IZabbixGetParameters
 {
-    /// <summary><c>output</c>: which fields come back.</summary>
-    ZabbixOutput? Output { get; set; }
-
     /// <summary><c>filter</c>: exact matches, any of a list.</summary>
     ZabbixGetConditions Filter { get; }
 
@@ -33,12 +31,6 @@ public interface IZabbixGetParameters
 
     /// <summary><c>limit</c>: at most this many.</summary>
     int? Limit { get; set; }
-
-    /// <summary><c>sortfield</c>: the fields to order by.</summary>
-    IReadOnlyList<string>? SortField { get; set; }
-
-    /// <summary><c>sortorder</c>: the direction per sort field, written <c>ASC</c> or <c>DESC</c>.</summary>
-    IReadOnlyList<System.ComponentModel.ListSortDirection>? SortOrder { get; set; }
 
     /// <summary><c>countOutput</c>: return how many instead of which.</summary>
     bool? CountOutput { get; set; }

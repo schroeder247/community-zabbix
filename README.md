@@ -144,6 +144,7 @@ using System.Net;
 var hosts = await zabbix.Hosts.GetAsync(q =>
 {
     q.Search.VisibleName = "web";
+    q.Output = [ZabbixHostFields.HostId, ZabbixHostFields.VisibleName];   // a host's fields only
     q.Limit = 10;
 });
 

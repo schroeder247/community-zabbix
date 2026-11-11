@@ -193,7 +193,7 @@ public sealed class PassiveAgentTests
             .Build();
 
         Assert.Equal(["192.0.2.10", "10.0.0.0/8", "fd00::/8", "zbx-01.example"], agent.Options.AllowedPeers);
-        Assert.Equal(4, agent.Options.ParseAllowedPeers().Entries.Count);
+        Assert.Equal(4, agent.Options.ParseAllowedPeers().Count);
     }
 
     [Theory]

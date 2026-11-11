@@ -1,6 +1,5 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
-using System.Globalization;
 using System.Net;
 
 namespace Community.Zabbix;
@@ -15,6 +14,8 @@ namespace Community.Zabbix;
 /// <see cref="ZabbixHostInterfaceRequest.Main"/> unset, and the host's list decides it: the first interface of a type is
 /// the main one, unless another of that type is marked main, and Zabbix needs one main interface of each type a host has.
 /// To mark one yourself, use <c>with</c>: <c>ZabbixInterface.Agent(address) with { Main = ZabbixInterfacePriority.Primary }</c>.
+/// A factory takes a port's number; for a port a macro holds, use <c>with</c> too:
+/// <c>ZabbixInterface.Agent(address) with { Port = ZabbixPort.Parse("{$AGENT_PORT}") }</c>.
 /// </para>
 /// <para>
 /// To add an interface to a host that exists, pass one to <c>zabbix.HostInterfaces.CreateAsync(hostId, ZabbixInterface.Snmp(address))</c>.
@@ -239,12 +240,12 @@ public static class ZabbixInterface
         return new() { Type = type, UseIp = ZabbixHostInterfaceUseIp.Dns, Ip = string.Empty, Dns = dnsName, Port = Port(port) };
     }
 
-    // The port as the API takes it, which also takes a user macro.
-    private static string Port(int port)
+    // The port, checked here so the exception names the factory's own parameter.
+    private static ZabbixPort Port(int port)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(port);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(port, IPEndPoint.MaxPort);
-        return port.ToString(CultureInfo.InvariantCulture);
+        return port;
     }
 
     private static ZabbixHostInterfaceDetailRequest V2c(string community)

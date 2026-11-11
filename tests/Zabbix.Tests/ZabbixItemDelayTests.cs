@@ -216,6 +216,30 @@ public sealed class ZabbixItemDelayTests
         Assert.Equal(delay, ZabbixItemDelay.Parse("50s;10s/1-5,09:00-18:00", CultureInfo.InvariantCulture));
     }
 
+    [Fact]
+    public void An_interval_s_next_check_is_the_agent_s_schedule()
+    {
+        ZabbixInterval interval = ZabbixInterval.Parse("1h;10s/1-5,09:00-18:00");
+        ZabbixItemDelay delay = ZabbixItemDelay.Parse("1h;10s/1-5,09:00-18:00", CultureInfo.InvariantCulture);
+        DateTimeOffset now = Instant("2026-09-23 08:30:00 +00:00");
+
+        Assert.Equal(Instant("2026-09-23 09:00:00 +00:00"), interval.GetNextCheck(now, TimeZoneInfo.Utc));
+        Assert.Equal(delay.GetNextCheck(now, TimeZoneInfo.Utc, 1000), interval.GetNextCheck(now, TimeZoneInfo.Utc, 1000));
+        Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(1702944123L), ((ZabbixInterval)TimeSpan.FromDays(1)).GetNextCheck(DateTimeOffset.Parse("2023-12-18T14:30:00Z", CultureInfo.InvariantCulture), TimeZoneInfo.Utc, 123));
+    }
+
+    [Theory]
+    [InlineData("{$DELAY}", "Invalid update interval \"{$DELAY}\".")]
+    [InlineData("1m;10s/{$OFFICE_HOURS}", "Invalid flexible interval \"10s/{$OFFICE_HOURS}\".")]
+    [InlineData("1w", "Invalid update interval \"1w\".")]
+    [InlineData("0", "Invalid update interval \"0\".")]
+    public void An_interval_an_agent_does_not_schedule_fails_in_upstream_s_words(string text, string message)
+        => Assert.Equal(message, Assert.Throws<FormatException>(() => ZabbixInterval.Parse(text).GetNextCheck(DateTimeOffset.UnixEpoch, TimeZoneInfo.Utc)).Message);
+
+    [Fact]
+    public void An_interval_s_next_check_needs_a_zone()
+        => Assert.Equal("zone", Assert.Throws<ArgumentNullException>(() => ((ZabbixInterval)TimeSpan.FromMinutes(1)).GetNextCheck(DateTimeOffset.UnixEpoch, null!)).ParamName);
+
     private static DateTimeOffset Instant(string text) => DateTimeOffset.ParseExact(text, "yyyy-MM-dd HH:mm:ss zzz", CultureInfo.InvariantCulture);
 
     /// <summary>An IANA zone, or a POSIX <c>NAMEh:mm</c> fixed zone (hours west of UTC, as <c>TZ=ZBX1:30</c> means).</summary>

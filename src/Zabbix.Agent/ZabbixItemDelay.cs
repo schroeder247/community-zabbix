@@ -1,35 +1,39 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
 using System.Diagnostics.CodeAnalysis;
+using Filter = Community.Zabbix.ZabbixIntervalGrammar.Filter;
+using Level = Community.Zabbix.ZabbixIntervalGrammar.Level;
+using Period = Community.Zabbix.ZabbixIntervalGrammar.Period;
+using Schedule = Community.Zabbix.ZabbixIntervalGrammar.Schedule;
 
 namespace Community.Zabbix;
 
 /// <summary>
-/// Represents an item's update interval, as Zabbix writes it and schedules it. <c>30s</c> is a plain update interval;
+/// Schedules an item by its update interval, as an agent does: <c>30s</c> is a plain update interval;
 /// <c>50s;10s/1-5,09:00-18:00</c> adds a flexible interval (every 10 s on weekdays in office hours); <c>0;wd1-5h9m30</c>
-/// is a scheduling interval (weekdays at 09:30, and nothing else). <see cref="GetNextCheck(DateTimeOffset, TimeZoneInfo, long)"/> answers when the item is due.
+/// is a scheduling interval (weekdays at 09:30, and nothing else). <see cref="GetNextCheck(DateTimeOffset, TimeZoneInfo, long)"/>
+/// answers when the item is due. The public face is <see cref="ZabbixInterval"/> and its <c>GetNextCheck</c>
+/// (<see cref="ZabbixIntervalExtensions"/>); this is what the agent's due queue holds once it has read an interval.
 /// </summary>
 /// <remarks>
-/// <para>The grammar and the schedule mirror Zabbix's own C (<c>src/libs/zbxexpr/interval.c</c>, identical in 7.0, 7.4
-/// and 8.0; <c>zbx_is_time_suffix</c> in <c>src/libs/zbxtime/time.c</c>), because an agent that disagrees collects at
-/// instants the server does not expect; the golden tests are upstream's <c>tests/libs/zbxexpr/*.yaml</c>. User macros
-/// are resolved by the server before an agent sees the delay.</para>
+/// <para>The grammar is <see cref="ZabbixInterval"/>'s, read once (<see cref="ZabbixIntervalGrammar"/>); an agent adds
+/// upstream's own rules and the schedule, which mirror Zabbix's C (<c>src/libs/zbxexpr/interval.c</c>, identical in 7.0,
+/// 7.4 and 8.0), because an agent that disagrees collects at instants the server does not expect; the golden tests are
+/// upstream's <c>tests/libs/zbxexpr/*.yaml</c>. User macros are resolved by the server before an agent sees the delay, so
+/// one an agent sees is refused.</para>
 /// <para>No BCL type parses or schedules this grammar, and the cron libraries cannot express a flexible interval and
-/// resolve a daylight-saving gap or overlap differently from Zabbix's <c>mktime</c> <c>tm_isdst</c> hint. Only the parser
-/// and the next-check arithmetic are owned; time zones, calendars and the clock are the BCL's.</para>
+/// resolve a daylight-saving gap or overlap differently from Zabbix's <c>mktime</c> <c>tm_isdst</c> hint. Only the
+/// next-check arithmetic is owned here; time zones, calendars and the clock are the BCL's.</para>
 /// </remarks>
-public sealed class ZabbixItemDelay : IEquatable<ZabbixItemDelay>, ISpanParsable<ZabbixItemDelay>, ISpanFormattable
+internal sealed class ZabbixItemDelay : IEquatable<ZabbixItemDelay>, ISpanParsable<ZabbixItemDelay>, ISpanFormattable
 {
-    private const int SecondsPerMinute = 60;
-    private const int SecondsPerHour = 3600;
     private const int SecondsPerDay = 86400;
-    private const int SecondsPerWeek = 7 * SecondsPerDay;
     private const long SecondsPerYear = 365L * SecondsPerDay;
 
     private readonly Flexible[] _flexible;
-    private readonly Scheduling[] _scheduling;
+    private readonly Schedule[] _scheduling;
 
-    private ZabbixItemDelay(string text, int updateInterval, Flexible[] flexible, Scheduling[] scheduling)
+    private ZabbixItemDelay(string text, int updateInterval, Flexible[] flexible, Schedule[] scheduling)
     {
         Text = text;
         UpdateSeconds = updateInterval;
@@ -145,9 +149,11 @@ public sealed class ZabbixItemDelay : IEquatable<ZabbixItemDelay>, ISpanParsable
         => TryParse(s, out result, out _);
 
     /// <summary>
-    /// Parses <paramref name="s"/> and, when it is not a delay, says why in upstream's words
+    /// Parses <paramref name="s"/> and, when it is not a delay an agent schedules, says why in upstream's words
     /// (<c>Invalid update interval "…".</c>, <c>Invalid flexible interval "…".</c>, <c>Invalid scheduling interval "…".</c>),
-    /// which is what an agent reports as the item's not-supported reason.
+    /// which is what an agent reports as the item's not-supported reason. The grammar is <see cref="ZabbixInterval"/>'s;
+    /// an agent adds upstream's rules (<c>zbx_interval_preproc</c>): no macro, an update interval of at most a day and of 0
+    /// only beside a custom interval, and a flexible interval of 0 only beside an update interval that isn't.
     /// </summary>
     /// <param name="s">The text.</param>
     /// <param name="result">The delay.</param>
@@ -156,111 +162,54 @@ public sealed class ZabbixItemDelay : IEquatable<ZabbixItemDelay>, ISpanParsable
     internal static bool TryParse(ReadOnlySpan<char> s, [MaybeNullWhen(false)] out ZabbixItemDelay result, [NotNullWhen(false)] out string? error)
     {
         result = null;
-        ReadOnlySpan<char> segment = s;
-        int delimiter = s.IndexOf(';');
-        if (!TryParseTimeSuffix(delimiter < 0 ? s : s[..delimiter], out int simple))
+        if (!ZabbixIntervalGrammar.TryParse(s, out ZabbixIntervalGrammar.Parts? parts, out ZabbixIntervalGrammar.Failure failure, out string segment))
         {
-            error = Invalid("update", delimiter < 0 ? s : s[..delimiter]);
+            error = Invalid(failure switch { ZabbixIntervalGrammar.Failure.Update => "update", ZabbixIntervalGrammar.Failure.Flexible => "flexible", _ => "scheduling" }, segment);
+            return false;
+        }
+        if (parts.UpdateSeconds is not { } simple)
+        {
+            error = Invalid("update", parts.Update);
             return false;
         }
 
         var flexible = new List<Flexible>();
-        var scheduling = new List<Scheduling>();
-        ReadOnlySpan<char> rest = s;
-        while (delimiter >= 0)
+        var scheduling = new List<Schedule>();
+        foreach (ZabbixIntervalGrammar.Custom custom in parts.Customs)
         {
-            rest = rest[(delimiter + 1)..];
-            delimiter = rest.IndexOf(';');
-            segment = delimiter < 0 ? rest : rest[..delimiter];
-            if (segment.Length > 0 && char.IsAsciiDigit(segment[0]))
+            if (custom.IsFlexible)
             {
-                if (!Flexible.TryParse(segment, out Flexible interval) || (simple == 0 && interval.Delay == 0))
+                if (custom.Delay is not { } delay || custom.Period is not { } period || (simple == 0 && delay == 0))
                 {
-                    error = Invalid("flexible", segment);
+                    error = Invalid("flexible", custom.Text);
                     return false;
                 }
-                flexible.Add(interval);
+                flexible.Add(new Flexible((int)delay, period));
             }
             else
             {
-                if (!Scheduling.TryParse(segment, out Scheduling? interval))
+                if (custom.Schedule is not { } schedule)
                 {
-                    error = Invalid("scheduling", segment);
+                    error = Invalid("scheduling", custom.Text);
                     return false;
                 }
-                scheduling.Add(interval);
+                scheduling.Add(schedule);
             }
         }
 
         if ((flexible.Count == 0 && scheduling.Count == 0 && simple == 0) || simple > SecondsPerDay)
         {
-            error = Invalid("update", segment);                            // upstream names the last segment it read
+            error = Invalid("update", parts.Customs.Length > 0 ? parts.Customs[^1].Text : s);   // upstream names the last segment it read
             return false;
         }
 
         // Upstream prepends to its lists; the order only decides ties that give the same instant, so it is kept as read.
-        result = new ZabbixItemDelay(s.ToString(), simple, [.. flexible], [.. scheduling]);
+        result = new ZabbixItemDelay(s.ToString(), (int)simple, [.. flexible], [.. scheduling]);
         error = null;
         return true;
     }
 
     private static string Invalid(string kind, ReadOnlySpan<char> text) => $"Invalid {kind} interval \"{text}\".";
-
-    /// <summary>
-    /// A non-negative whole number of seconds with an optional <c>s</c>, <c>m</c>, <c>h</c>, <c>d</c> or <c>w</c> suffix,
-    /// the whole span and nothing else, within <see cref="int.MaxValue"/> seconds: upstream's <c>zbx_is_time_suffix</c>.
-    /// </summary>
-    /// <param name="text">The text.</param>
-    /// <param name="seconds">The value in seconds.</param>
-    /// <returns>Whether it parsed.</returns>
-    internal static bool TryParseTimeSuffix(ReadOnlySpan<char> text, out int seconds)
-    {
-        seconds = 0;
-        if (text.IsEmpty || !char.IsAsciiDigit(text[0])) return false;
-        int value = 0;
-        int i = 0;
-        for (; i < text.Length && char.IsAsciiDigit(text[i]); i++)
-        {
-            int digit = text[i] - '0';
-            if ((int.MaxValue - digit) / 10 < value) return false;                  // overflow
-            value = (value * 10) + digit;
-        }
-        int factor = 1;
-        if (i < text.Length)
-        {
-            factor = text[i] switch
-            {
-                's' => 1,
-                'm' => SecondsPerMinute,
-                'h' => SecondsPerHour,
-                'd' => SecondsPerDay,
-                'w' => SecondsPerWeek,
-                _ => 0,
-            };
-            if (factor == 0) return false;
-            i++;
-        }
-        if (i != text.Length || int.MaxValue / factor < value) return false;
-        seconds = value * factor;
-        return true;
-    }
-
-    /// <summary>Digits only, at least one, the value within [<paramref name="min"/>, <paramref name="max"/>]: <c>zbx_is_uint_n_range</c>.</summary>
-    private static bool TryParseRange(ReadOnlySpan<char> digits, int min, int max, out int value)
-    {
-        value = 0;
-        if (digits.IsEmpty) return false;
-        long accumulated = 0;
-        foreach (char c in digits)
-        {
-            if (!char.IsAsciiDigit(c)) return false;
-            accumulated = (accumulated * 10) + (c - '0');
-            if (accumulated > int.MaxValue) return false;
-        }
-        if (accumulated < min || accumulated > max) return false;
-        value = (int)accumulated;
-        return true;
-    }
 
     // ----- formatting and equality ------------------------------------------------------------------------------------
 
@@ -310,7 +259,7 @@ public sealed class ZabbixItemDelay : IEquatable<ZabbixItemDelay>, ISpanParsable
         LocalTime local = clock.Local(t);
         int current = -1;
         foreach (Flexible interval in _flexible)
-            if ((current == -1 || interval.Delay < current) && interval.Period.Contains(local)) current = interval.Delay;
+            if ((current == -1 || interval.Delay < current) && interval.Contains(local)) current = interval.Delay;
         return current == -1 ? UpdateSeconds : current;
     }
 
@@ -339,206 +288,14 @@ public sealed class ZabbixItemDelay : IEquatable<ZabbixItemDelay>, ISpanParsable
 
     private static long FloorDiv(long value, long divisor) => (value / divisor) - (value % divisor != 0 && (value < 0) != (divisor < 0) ? 1 : 0);
 
-    /// <summary><c>delay/d[-d],hh:mm-hh:mm</c>: <c>flexible_interval_parse</c>.</summary>
+    /// <summary>A flexible interval: the delay in force over its period.</summary>
     private readonly record struct Flexible(int Delay, Period Period)
     {
-        public static bool TryParse(ReadOnlySpan<char> text, out Flexible result)
-        {
-            result = default;
-            int slash = text.IndexOf('/');
-            if (!TryParseTimeSuffix(slash < 0 ? text : text[..slash], out int delay) || slash < 0) return false;
-            if (!Period.TryParse(text[(slash + 1)..], out Period period)) return false;
-            result = new Flexible(delay, period);
-            return true;
-        }
-    }
-
-    /// <summary>Days 1 (Monday) to 7, and a time range in seconds of the day, end excluded: <c>zbx_time_period_t</c>.</summary>
-    private readonly record struct Period(int StartDay, int EndDay, int StartTime, int EndTime)
-    {
         public bool Contains(LocalTime local)
-            => StartDay <= local.IsoDayOfWeek && local.IsoDayOfWeek <= EndDay && StartTime <= local.SecondOfDay && local.SecondOfDay < EndTime;
-
-        /// <summary><c>time_period_parse</c>: <c>d[-d],time-time</c>.</summary>
-        public static bool TryParse(ReadOnlySpan<char> text, out Period result)
-        {
-            result = default;
-            int i = 0;
-            if (i >= text.Length || text[i] < '1' || text[i] > '7') return false;
-            int startDay = text[i++] - '0';
-            if (i >= text.Length) return false;
-            int endDay = startDay;
-            if (text[i] == '-')
-            {
-                i++;
-                if (i >= text.Length || text[i] < '1' || text[i] > '7') return false;
-                endDay = text[i++] - '0';
-                if (startDay > endDay) return false;
-            }
-            if (i >= text.Length || text[i++] != ',') return false;
-            if (!TryParseTime(text[i..], out int startTime, out int parsed)) return false;
-            i += parsed;
-            if (i >= text.Length || text[i++] != '-') return false;
-            if (!TryParseTime(text[i..], out int endTime, out parsed)) return false;
-            if (startTime >= endTime || i + parsed != text.Length) return false;
-            result = new Period(startDay, endDay, startTime, endTime);
-            return true;
-        }
-
-        /// <summary><c>time_parse</c>: <c>h:mm</c>, <c>hh:mm</c> (hours 0–24, 24 only as 24:00), minutes exactly two digits.</summary>
-        private static bool TryParseTime(ReadOnlySpan<char> text, out int seconds, out int parsed)
-        {
-            seconds = 0;
-            parsed = 0;
-            int i = 0;
-            while (i < text.Length && char.IsAsciiDigit(text[i]) && i <= 2) i++;
-            if (!TryParseRange(text[..i], 0, 24, out int hours)) return false;
-            if (i >= text.Length || text[i++] != ':') return false;
-            int minutesStart = i;
-            while (i < text.Length && char.IsAsciiDigit(text[i]) && i - minutesStart <= 2) i++;
-            if (i - minutesStart != 2 || !TryParseRange(text[minutesStart..i], 0, 59, out int minutes)) return false;
-            if (hours == 24 && minutes != 0) return false;
-            parsed = i;
-            seconds = (SecondsPerHour * hours) + (SecondsPerMinute * minutes);
-            return true;
-        }
+            => Period.StartDay <= local.IsoDayOfWeek && local.IsoDayOfWeek <= Period.EndDay && Period.StartTime <= local.SecondOfDay && local.SecondOfDay < Period.EndTime;
     }
 
-    // ----- scheduling intervals: scheduler_interval_parse and scheduler_get_nextcheck ----------------------------------
-
-    /// <summary>One filter of a scheduling interval: <c>start[-end][/step]</c>.</summary>
-    private readonly record struct Filter(int Start, int End, int Step);
-
-    private enum Level
-    {
-        None = 0,
-        Day = 1,
-        Hour = 2,
-        Minute = 3,
-        Second = 4,
-    }
-
-    /// <summary>A scheduling interval: filters for month days or week days, hours, minutes and seconds.</summary>
-    private sealed class Scheduling
-    {
-        public Filter[]? MonthDays { get; private set; }
-
-        public Filter[]? WeekDays { get; private set; }
-
-        public Filter[]? Hours { get; private set; }
-
-        public Filter[]? Minutes { get; private set; }
-
-        public Filter[]? Seconds { get; private set; }
-
-        public Level FilterLevel { get; private set; }
-
-        public static bool TryParse(ReadOnlySpan<char> text, [NotNullWhen(true)] out Scheduling? result)
-        {
-            result = null;
-            if (text.IsEmpty) return false;
-            var interval = new Scheduling();
-            int i = 0;
-            while (i < text.Length)
-            {
-                Filter[]? filters;
-                switch (text[i])
-                {
-                    case 'h':
-                        if (Level.Hour < interval.FilterLevel || interval.Hours is not null) return false;
-                        if (!TryParseFilters(text, ref i, 1, 0, 23, 2, out filters)) return false;
-                        interval.Hours = filters;
-                        interval.FilterLevel = Level.Hour;
-                        break;
-                    case 's':
-                        if (Level.Second < interval.FilterLevel || interval.Seconds is not null) return false;
-                        if (!TryParseFilters(text, ref i, 1, 0, 59, 2, out filters)) return false;
-                        interval.Seconds = filters;
-                        interval.FilterLevel = Level.Second;
-                        break;
-                    case 'w':
-                        if (At(text, i + 1) != 'd' || Level.Day < interval.FilterLevel || interval.WeekDays is not null) return false;
-                        if (!TryParseFilters(text, ref i, 2, 1, 7, 1, out filters)) return false;
-                        interval.WeekDays = filters;
-                        interval.FilterLevel = Level.Day;
-                        break;
-                    case 'm' when At(text, i + 1) == 'd':
-                        if (Level.Day < interval.FilterLevel || interval.WeekDays is not null || interval.MonthDays is not null) return false;
-                        if (!TryParseFilters(text, ref i, 2, 1, 31, 2, out filters)) return false;
-                        interval.MonthDays = filters;
-                        interval.FilterLevel = Level.Day;
-                        break;
-                    case 'm':
-                        if (Level.Minute < interval.FilterLevel || interval.Minutes is not null) return false;
-                        if (!TryParseFilters(text, ref i, 1, 0, 59, 2, out filters)) return false;
-                        interval.Minutes = filters;
-                        interval.FilterLevel = Level.Minute;
-                        break;
-                    default:
-                        return false;
-                }
-            }
-            result = interval;
-            return true;
-        }
-
-        /// <summary>The character at <paramref name="index"/>, or NUL past the end: what the C reads there (a <c>;</c> or the terminator).</summary>
-        private static char At(ReadOnlySpan<char> text, int index) => index < text.Length ? text[index] : '\0';
-
-        /// <summary><c>scheduler_parse_filter_r</c>: comma-separated <c>from[-to][/step]</c> after a <paramref name="prefix"/>-long unit.</summary>
-        private static bool TryParseFilters(ReadOnlySpan<char> text, ref int i, int prefix, int min, int max, int width, [NotNullWhen(true)] out Filter[]? filters)
-        {
-            filters = null;
-            var parsed = new List<Filter>();
-            i += prefix;
-            while (true)
-            {
-                int filterStart = i;
-                int start, end, step = 1;
-                int digits = i;
-                while (digits < text.Length && char.IsAsciiDigit(text[digits])) digits++;
-                if (digits != i)
-                {
-                    if (digits - i > width || !TryParseRange(text[i..digits], min, max, out start)) return false;
-                    i = digits;
-                    if (At(text, i) == '-')
-                    {
-                        int from = ++i;
-                        while (i < text.Length && char.IsAsciiDigit(text[i])) i++;
-                        if (i == from || i - from > width || !TryParseRange(text[from..i], min, max, out end)) return false;
-                        if (end < start) return false;
-                    }
-                    else
-                    {
-                        if (At(text, i) == '/') return false;                       // a step needs a range
-                        end = start;
-                    }
-                }
-                else
-                {
-                    start = min;
-                    end = max;
-                }
-
-                if (At(text, i) == '/')
-                {
-                    int from = ++i;
-                    while (i < text.Length && char.IsAsciiDigit(text[i])) i++;
-                    if (i == from || i - from > width || !TryParseRange(text[from..i], 1, end - start, out step)) return false;
-                }
-                else if (i == filterStart)
-                {
-                    return false;                                                   // neither a value nor a step
-                }
-
-                parsed.Add(new Filter(start, end, step));
-                if (At(text, i) != ',') break;
-                if (++i >= text.Length) return false;                              // no filter after the comma
-            }
-            filters = [.. parsed];
-            return true;
-        }
-    }
+    // ----- scheduling intervals: scheduler_get_nextcheck -----------------------------------------------------------------
 
     /// <summary>
     /// The local clock of a zone, in the terms the C uses: <c>localtime</c> gives the broken-down time and its
@@ -609,11 +366,11 @@ public sealed class ZabbixItemDelay : IEquatable<ZabbixItemDelay>, ISpanParsable
         }
 
         /// <summary><c>scheduler_get_nextcheck</c>: the earliest instant after <paramref name="now"/> any interval admits.</summary>
-        public long ScheduledNextCheck(Scheduling[] intervals, long now)
+        public long ScheduledNextCheck(Schedule[] intervals, long now)
         {
             LocalTime start = Local(now);
             long nextcheck = 0;
-            foreach (Scheduling interval in intervals)
+            foreach (Schedule interval in intervals)
             {
                 var tm = new BrokenDown(start.Wall);
                 tm.Increment();
@@ -679,7 +436,7 @@ public sealed class ZabbixItemDelay : IEquatable<ZabbixItemDelay>, ISpanParsable
             _year++;
         }
 
-        public void ApplyDay(Scheduling interval)
+        public void ApplyDay(Schedule interval)
         {
             (int day, int mon, int year) = (_mday, _mon, _year);
             while (!DayNextCheck(interval))
@@ -694,7 +451,7 @@ public sealed class ZabbixItemDelay : IEquatable<ZabbixItemDelay>, ISpanParsable
             if (_mday != day || _mon != mon || _year != year) (_hour, _min, _sec) = (0, 0, 0);
         }
 
-        public void ApplyHour(Scheduling interval)
+        public void ApplyHour(Schedule interval)
         {
             int hour = _hour;
             while (!FilterNextCheck(interval, Level.Hour))
@@ -706,7 +463,7 @@ public sealed class ZabbixItemDelay : IEquatable<ZabbixItemDelay>, ISpanParsable
             if (_hour != hour) (_min, _sec) = (0, 0);
         }
 
-        public void ApplyMinute(Scheduling interval)
+        public void ApplyMinute(Schedule interval)
         {
             int min = _min;
             while (!FilterNextCheck(interval, Level.Minute))
@@ -718,7 +475,7 @@ public sealed class ZabbixItemDelay : IEquatable<ZabbixItemDelay>, ISpanParsable
             if (_min != min) _sec = 0;
         }
 
-        public void ApplySecond(Scheduling interval)
+        public void ApplySecond(Schedule interval)
         {
             while (!FilterNextCheck(interval, Level.Second))
             {
@@ -729,7 +486,7 @@ public sealed class ZabbixItemDelay : IEquatable<ZabbixItemDelay>, ISpanParsable
         }
 
         /// <summary><c>scheduler_get_filter_nextcheck</c> for the hour, minute and second levels.</summary>
-        private bool FilterNextCheck(Scheduling interval, Level level)
+        private bool FilterNextCheck(Schedule interval, Level level)
         {
             (Filter[]? filters, int max) = level switch
             {
@@ -743,13 +500,13 @@ public sealed class ZabbixItemDelay : IEquatable<ZabbixItemDelay>, ISpanParsable
             {
                 // An unspecified unit finer than the interval's own level matches 0 only (m30: second 0); a coarser
                 // one matches everything (m30: every hour).
-                return interval.FilterLevel > level || value == 0;
+                return interval.Level > level || value == 0;
             }
             return NearestFilterValue(filters, ref value);
         }
 
         /// <summary><c>scheduler_get_day_nextcheck</c>: the next day the month-day and week-day filters admit, in this month.</summary>
-        private bool DayNextCheck(Scheduling interval)
+        private bool DayNextCheck(Schedule interval)
         {
             if (_year < 1970 || _mday < 1 || _mday > DaysInMonth(_year, _mon + 1) || _hour > 23 || _min > 59 || _sec > 61) return false;
             if (interval.MonthDays is null) return WeekDayNextCheck(interval);
@@ -763,7 +520,7 @@ public sealed class ZabbixItemDelay : IEquatable<ZabbixItemDelay>, ISpanParsable
             return false;
         }
 
-        private bool WeekDayNextCheck(Scheduling interval)
+        private bool WeekDayNextCheck(Schedule interval)
         {
             if (interval.WeekDays is null) return true;
             int now = DayOfWeek(_year, _mon + 1, _mday);
@@ -778,7 +535,7 @@ public sealed class ZabbixItemDelay : IEquatable<ZabbixItemDelay>, ISpanParsable
             return _mday <= DaysInMonth(_year, _mon + 1);
         }
 
-        private readonly bool MatchesWeekDay(Scheduling interval)
+        private readonly bool MatchesWeekDay(Schedule interval)
         {
             if (interval.WeekDays is null) return true;
             int value = DayOfWeek(_year, _mon + 1, _mday);

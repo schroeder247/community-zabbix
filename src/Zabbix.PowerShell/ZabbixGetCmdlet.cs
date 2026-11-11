@@ -62,11 +62,11 @@ public abstract class ZabbixGetCmdlet<TEntity, TParameters> : ZabbixServerCmdlet
     /// </summary>
     public abstract int? Limit { get; set; }
 
-    // Eight of the eleven options IZabbixGetParameters guarantees every *GetParameters carries (CommonGetOptions,
-    // ZabbixApiEmitter) — all but Output/Filter (already ByFilter's whole -Filter) and Limit (above): sort, search,
-    // and count-instead-of-objects. Declared with no ParameterSetName, so they compose with every one of -Id/-Name/
-    // -Filter/no-selection at once (all fold into the same request object -Filter builds) rather than gating a fifth
-    // exclusive set.
+    // Seven of the ten options IZabbixGetParameters<TRecord> guarantees every *GetParameters carries (CommonGetOptions,
+    // ZabbixApiEmitter) — all but Output/Filter (already ByFilter's whole -Filter) and Limit (above): the sort, as
+    // -SortField and -SortOrder, search, and count-instead-of-objects. Declared with no ParameterSetName, so they compose
+    // with every one of -Id/-Name/-Filter/no-selection at once (all fold into the same request object -Filter builds)
+    // rather than gating a fifth exclusive set.
 
     /// <summary>
     /// Sort by these fields, in order (<c>sortfield</c>). Abstract for the reason <see cref="Name"/> is: the derived class
@@ -112,15 +112,36 @@ public abstract class ZabbixGetCmdlet<TEntity, TParameters> : ZabbixServerCmdlet
     public SwitchParameter CountOutput { get; set; }
 
     /// <summary>
-    /// <see cref="SortOrder"/>, converted to the SDK's <see cref="System.ComponentModel.ListSortDirection"/>, or <see langword="null"/>
-    /// when not bound. A plain helper, not folded here: <c>with</c> (the only way to change one member of an existing
-    /// record instance without losing every other member <see cref="Selection"/> or <c>-Filter</c> already set) needs
-    /// a compile-time record type, which the generic <typeparamref name="TParameters"/> is not (CS8858,
-    /// "the receiver type 'TParameters' is not a valid record type") even though every <c>*GetParameters</c> record
-    /// it stands for is one. <see cref="ApplyEntityFilters"/> — overridden where <typeparamref name="TParameters"/>
-    /// is concrete again — calls this and folds the result with <c>with</c>.
+    /// The sort <see cref="SortField"/> and <see cref="SortOrder"/> say, over <paramref name="current"/>, the sort
+    /// <see cref="Selection"/> or <c>-Filter</c> already set; <see langword="null"/> when neither is bound, or when there is
+    /// no field to sort by. <see cref="SortField"/> names the fields, each the field of that name of
+    /// <typeparamref name="TEntity"/>, and <see cref="SortOrder"/> their directions by position, a field it leaves off
+    /// ascending; either one not bound keeps <paramref name="current"/>'s, as the API's two lists would. A plain helper,
+    /// not folded here: <c>with</c> (the only way to change one member of an existing record instance without losing every
+    /// other member <see cref="Selection"/> or <c>-Filter</c> already set) needs a compile-time record type, which the
+    /// generic <typeparamref name="TParameters"/> is not (CS8858, "the receiver type 'TParameters' is not a valid record
+    /// type") even though every <c>*GetParameters</c> record it stands for is one. <see cref="ApplyEntityFilters"/>,
+    /// overridden where <typeparamref name="TParameters"/> is concrete again, calls this and folds the result with
+    /// <c>with</c>.
     /// </summary>
-    protected System.ComponentModel.ListSortDirection[]? SortOrderWire() => SortOrder is { Length: > 0 } ? [.. SortOrder.Select(o => o.ToDirection())] : null;
+    /// <param name="current">The sort the parameters hold.</param>
+    /// <returns>The sort to send, or <see langword="null"/> to keep <paramref name="current"/>.</returns>
+    /// <exception cref="ArgumentException">A name in <see cref="SortField"/> is empty.</exception>
+    protected IReadOnlyList<ZabbixSort<TEntity>>? SortWire(IReadOnlyList<ZabbixSort<TEntity>>? current)
+    {
+        if (SortField is not { Length: > 0 } && SortOrder is not { Length: > 0 }) return null;
+        ZabbixField<TEntity>[] fields = SortField is { Length: > 0 } ? [.. SortField.Select(name => new ZabbixField<TEntity>(name))] : [.. (current ?? []).Select(sort => sort.Field)];
+        if (fields.Length == 0) return null;
+        var sorted = new ZabbixSort<TEntity>[fields.Length];
+        for (int i = 0; i < sorted.Length; i++)
+        {
+            System.ComponentModel.ListSortDirection direction = SortOrder is { Length: > 0 } orders
+                ? i < orders.Length ? orders[i].ToDirection() : System.ComponentModel.ListSortDirection.Ascending
+                : current is { } held && i < held.Count ? held[i].Direction : System.ComponentModel.ListSortDirection.Ascending;
+            sorted[i] = new(fields[i], direction);
+        }
+        return sorted;
+    }
 
     /// <summary>The bound <see cref="Search"/> hashtable as the wire's own field-name/value dictionary, or <see langword="null"/> when not bound.</summary>
     protected IReadOnlyDictionary<string, ZabbixFieldValue>? SearchDictionary()
@@ -167,7 +188,7 @@ public abstract class ZabbixGetCmdlet<TEntity, TParameters> : ZabbixServerCmdlet
     /// <summary>
     /// Folds every bound option that only <c>with</c> on a concrete record can apply without losing whatever
     /// <see cref="Selection"/> or <c>-Filter</c> already set: the eight common options this class declares besides <see cref="Limit"/>
-    /// (<see cref="SortField"/>/<see cref="SortOrder"/>/<see cref="Search"/>/<see cref="SearchByAny"/>/
+    /// (<see cref="SortField"/> and <see cref="SortOrder"/> as one sort/<see cref="Search"/>/<see cref="SearchByAny"/>/
     /// <see cref="StartSearch"/>/<see cref="ExcludeSearch"/>/<see cref="SearchWildcardsEnabled"/>/
     /// <see cref="CountOutput"/> — composing with every one of <c>-Id</c>/<c>-Name</c>/<c>-Filter</c>/no-selection
     /// alike) and, when the entity has any, its own <c>-Select*</c>/<c>-Editable</c> (not on

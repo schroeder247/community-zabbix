@@ -5,12 +5,13 @@ namespace Community.Zabbix.PowerShell;
 /// <summary>
 /// The common <c>.get</c> options a selection sets before the entity's own parameters record exists: what the generic
 /// code decides (a name search, an output restriction, a limit), handed to the record's generated factory, which alone
-/// knows the record's required options and builds the instance (<see cref="ZabbixEntityShape{TEntity}.Materialize"/>).
+/// knows the record's required options and its fields' type, and builds the instance
+/// (<see cref="ZabbixEntityShape{TEntity}.Materialize"/>).
 /// </summary>
 internal sealed record ZabbixGetSelection
 {
-    /// <summary>The fields to return, or <see langword="null"/> for the server's default set.</summary>
-    public ZabbixOutput? Output { get; init; }
+    /// <summary>The fields to return, by the names the API gives them, or <see langword="null"/> for the server's default set.</summary>
+    public IReadOnlyList<string>? Output { get; init; }
 
     /// <summary>An exact filter by field, or <see langword="null"/>.</summary>
     public IReadOnlyDictionary<string, ZabbixFieldValue>? Filter { get; init; }
