@@ -21,7 +21,7 @@ namespace Community.Zabbix.Hosting;
 /// yet read when the reader stops are counted and logged (event 3007). Enumerating it twice is two polls. Disposing the
 /// enumerator stops the heartbeat.
 /// </summary>
-public static class ZabbixPoll
+internal static class ZabbixPoll
 {
     /// <summary>How many records a poll holds by default for a reader that has fallen behind before it sheds the oldest (a watcher reader's default).</summary>
     public const int DefaultMaxItems = 4096;

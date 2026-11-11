@@ -35,7 +35,7 @@ public static class ZabbixPassiveAgentBuilderExtensions
         {
             ArgumentNullException.ThrowIfNull(builder);
             string name = builder.Name;
-            ZabbixAgentHealthChecks.Add(builder.Services, "zabbix-passive-agent-" + name, provider =>
+            ZabbixComponentHealthChecks.Add(builder.Services, "zabbix-passive-agent-" + name, provider =>
             {
                 ZabbixPassiveAgent agent = provider.GetRequiredKeyedService<ZabbixPassiveAgent>(name);
                 return new ZabbixListenerHealthCheck(agent.Name, "agent", () => agent.Listener);
@@ -60,7 +60,7 @@ public static class ZabbixPassiveAgentBuilderExtensions
         }
 
         /// <summary>
-        /// Binds the agent's options to a configuration section, in order with the other verbs: <c>Hostname</c>,
+        /// Binds the agent's options to a configuration section, in order with the other verbs: <c>HostName</c>,
         /// <c>AllowedPeers</c>, <c>Address</c>, <c>Port</c>, <c>CheckTimeout</c> and the rest, as
         /// <see cref="ZabbixPassiveAgentOptions"/> names them. The section is read when the agent is built.
         /// </summary>

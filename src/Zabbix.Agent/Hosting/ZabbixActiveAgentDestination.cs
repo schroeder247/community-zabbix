@@ -139,7 +139,7 @@ internal sealed class ZabbixActiveAgentDestination : IHostedLifecycleService, IA
         Destination = serverActive.Count > 0 ? serverActive[destination] : [];
         StoreName = serverActive.Count > 1 ? $"{name}[{string.Join(';', Destination)}]" : name;
         Session = session ?? Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(16));
-        Status = new ZabbixAgentStatus(StoreName, _telemetry);
+        Status = new ZabbixComponentStatus(StoreName, _telemetry);
     }
 
     /// <summary>The destination's HA nodes, in order (one <c>,</c>-separated element of <c>ServerActive</c>).</summary>
@@ -167,7 +167,7 @@ internal sealed class ZabbixActiveAgentDestination : IHostedLifecycleService, IA
     public bool IsUploadPaused => Volatile.Read(ref _uploadPaused) != 0;
 
     /// <summary>What the agent is doing.</summary>
-    public ZabbixAgentStatus Status { get; }
+    public ZabbixComponentStatus Status { get; }
 
     /// <inheritdoc/>
     public async Task StartingAsync(CancellationToken cancellationToken)
@@ -289,7 +289,7 @@ internal sealed class ZabbixActiveAgentDestination : IHostedLifecycleService, IA
 
     private async Task RefreshAsync(CancellationToken cancellationToken)
     {
-        var request = new ZabbixActiveChecksRequest("active checks", _options.Hostname, _options.HostMetadata, ZabbixWire.AgentVersion, ZabbixWire.AgentVariant, Volatile.Read(ref _configRevision), Session);
+        var request = new ZabbixActiveChecksRequest("active checks", _options.HostName, _options.HostMetadata, ZabbixWire.AgentVersion, ZabbixWire.AgentVariant, Volatile.Read(ref _configRevision), Session);
         ZabbixOperation exchange = _telemetry.StartExchange(_name, request.Request);
         ZabbixActiveChecksResponse? response;
         try
@@ -391,7 +391,7 @@ internal sealed class ZabbixActiveAgentDestination : IHostedLifecycleService, IA
         var due = new Dictionary<ulong, Due>(assignments.Count);
         foreach (ZabbixItemAssignment assignment in assignments.Values)
         {
-            if (!ZabbixItemKey.TryParse(assignment.Key, null, out ZabbixItemKey key))
+            if (!ZabbixItemKey.TryParse(assignment.Key, out ZabbixItemKey key))
             {
                 Admit(assignment.ItemId, "Invalid item key format.", supported: false, now);
                 continue;
@@ -513,10 +513,10 @@ internal sealed class ZabbixActiveAgentDestination : IHostedLifecycleService, IA
 
     // ----- the uploads -----------------------------------------------------------------------------------------
 
-    private async ValueTask<ZabbixDelivery> DeliverAsync(IReadOnlyList<ZabbixAgentDataItem> batch, CancellationToken cancellationToken)
+    private async ValueTask<ZabbixSendOutcome> DeliverAsync(IReadOnlyList<ZabbixAgentDataItem> batch, CancellationToken cancellationToken)
     {
-        if (IsUploadPaused) return ZabbixDelivery.Held;                                  // the server's word: hold, do not send
-        var request = new ZabbixAgentDataRequest("agent data", batch, Session, _options.Hostname, ZabbixWire.AgentVersion, ZabbixWire.AgentVariant);
+        if (IsUploadPaused) return ZabbixSendOutcome.Held;                                  // the server's word: hold, do not send
+        var request = new ZabbixAgentDataRequest("agent data", batch, Session, _options.HostName, ZabbixWire.AgentVersion, ZabbixWire.AgentVariant);
         ZabbixOperation exchange = _telemetry.StartExchange(_name, request.Request);
         ZabbixAgentResponse? response;
         try
@@ -528,28 +528,28 @@ internal sealed class ZabbixActiveAgentDestination : IHostedLifecycleService, IA
         {
             _telemetry.Finish(exchange, failure);
             if (!ZabbixAgentLoop.IsExchangeFailure(failure, cancellationToken)) throw;   // the send loop logs it as a fault and keeps the batch
-            return ZabbixDelivery.Retried;
+            return ZabbixSendOutcome.Retried;
         }
         Upload(response?.Upload);
         if (response is not null && string.Equals(response.Response, "success", StringComparison.Ordinal))
         {
             _telemetry.Finish(exchange);
-            return ZabbixDelivery.Delivered;
+            return ZabbixSendOutcome.Delivered;
         }
         if (IsUploadPaused)
         {
             _telemetry.Finish(exchange, errorType: "upload_disabled");
-            return ZabbixDelivery.Held;
+            return ZabbixSendOutcome.Held;
         }
         _telemetry.Finish(exchange, errorType: "refused");
         AgentLog.AgentDataRefused(_logger, _name, response?.Info ?? "no reply");
-        return ZabbixDelivery.Retried;                                                     // upstream keeps the buffer and sends it again
+        return ZabbixSendOutcome.Retried;                                                     // upstream keeps the buffer and sends it again
     }
 
     private async Task HeartbeatLoopAsync(CancellationToken stopping)
     {
         using var timer = new PeriodicTimer(_options.HeartbeatInterval, _time);
-        var request = new ZabbixHeartbeatRequest("active check heartbeat", _options.Hostname, (int)_options.HeartbeatInterval.TotalSeconds, ZabbixWire.AgentVersion, ZabbixWire.AgentVariant);
+        var request = new ZabbixHeartbeatRequest("active check heartbeat", _options.HostName, (int)_options.HeartbeatInterval.TotalSeconds, ZabbixWire.AgentVersion, ZabbixWire.AgentVariant);
         byte[] frame = JsonSerializer.SerializeToUtf8Bytes(request, ZabbixActiveAgentJson.Default.ZabbixHeartbeatRequest);
         while (await timer.WaitForNextTickAsync(stopping).ConfigureAwait(false))
         {

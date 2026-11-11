@@ -34,14 +34,14 @@ public static class ZabbixActiveProxyServiceCollectionExtensions
     /// <exception cref="ArgumentException"><paramref name="name"/> is empty.</exception>
     /// <exception cref="ArgumentNullException"><paramref name="services"/> or <paramref name="name"/> is <see langword="null"/>.</exception>
     /// <remarks>
-    /// You must name its server with <c>AddServer</c>, and who may reach its trapper with <c>AllowPeer</c>: a proxy without
+    /// You must name its server with <c>WithServer</c>, and who may reach its trapper with <c>AllowPeer</c>: a proxy without
     /// them doesn't start. This method binds no configuration: <c>Bind</c> does, and <c>AddZabbixProxies</c> binds each
     /// <c>Proxies:{name}</c> row of a document.
     /// </remarks>
     /// <example>
     /// <code language="csharp">
     /// builder.Services.AddZabbixActiveProxy("proxy-01")
-    ///     .AddServer("zbx-server-01")
+    ///     .WithServer("zbx-server-01")
     ///     .AllowPeer(IPNetwork.Parse("10.0.0.0/8"))
     ///     .AddHealthCheck();
     /// </code>
@@ -64,7 +64,7 @@ public static class ZabbixActiveProxyServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<ZabbixProxyOptions>, ZabbixProxyProtocolValidator>());
         // This proxy's server, and not a passive proxy's of another name in the same container, which has none.
         services.AddSingleton<IValidateOptions<ZabbixProxyOptions>>(new ZabbixProxyServersValidator(name));
-        services.AddKeyedSingleton<ZabbixActiveProxy>(name, static (provider, key) =>
+        ZabbixComponentRegistration.AddShared<ZabbixActiveProxy>(services, name, static (provider, key) =>
         {
             string proxy = NameOf(key);
             ZabbixProxyOptions options = provider.GetRequiredService<IOptionsMonitor<ZabbixProxyOptions>>().Get(proxy);

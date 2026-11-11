@@ -173,7 +173,7 @@ public sealed class ZabbixProxyConfig
             foreach (Dictionary<string, JsonElement> row in hostRows)
             {
                 if (Id(row, "hostid") is not { } hostId || Text(row, "host") is not { } host) continue;
-                Hosts[hostId] = new ZabbixProxyConfigHost(hostId, host, Text(row, "name") ?? host, (ZabbixProxyHostStatus)(Long(row, "status") ?? 0));
+                Hosts[hostId] = new ZabbixProxyConfigHost(hostId, host, Text(row, "name") ?? host, (ZabbixHostStatus)(Long(row, "status") ?? 0));
                 updated.Add(hostId);
             }
             RemoveItemsOf(Items, updated);
@@ -185,7 +185,7 @@ public sealed class ZabbixProxyConfig
             foreach (Dictionary<string, JsonElement> row in itemRows)
             {
                 if (Id(row, "itemid") is not { } itemId || Id(row, "hostid") is not { } hostId || Text(row, "key_") is not { } key) continue;
-                Items[itemId] = new ZabbixProxyConfigItem(itemId, hostId, key, (ZabbixProxyItemType)(Long(row, "type") ?? 0), (ZabbixProxyItemStatus)(Long(row, "status") ?? 0),
+                Items[itemId] = new ZabbixProxyConfigItem(itemId, hostId, key, (ZabbixItemType)(Long(row, "type") ?? 0), (ZabbixItemStatus)(Long(row, "status") ?? 0),
                     [.. ZabbixPeer.FromReply(Text(row, "trapper_hosts") ?? string.Empty)], Long(row, "allow_traps") == 1, ZabbixInterval.FromReply(Text(row, "delay") ?? string.Empty),
                     Text(row, "timeout") is { Length: > 0 } timeout ? ZabbixDuration.FromReply(timeout) : null);
             }

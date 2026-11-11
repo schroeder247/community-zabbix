@@ -175,7 +175,7 @@ A constructor's parameters come from the agent's container, so you must register
 
 ```csharp
 ZabbixItemDictionary table = ZabbixItemDictionary.BuiltIn("web-01").Add("app.version", _ => "2.4.1");
-ZabbixAgentAnswer answer = await table.AnswerAsync(ZabbixItemKey.Parse("app.version", null), TimeSpan.FromSeconds(3));
+ZabbixAgentAnswer answer = await table.AnswerAsync(ZabbixItemKey.Parse("app.version"), TimeSpan.FromSeconds(3));
 Console.WriteLine(answer.IsSupported ? answer.Value : answer.Error);     // 2.4.1
 ```
 

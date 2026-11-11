@@ -58,8 +58,8 @@ public sealed class DocumentTests
             options.Connection.Timeout = TimeSpan.FromSeconds(3);
             options.Connection.Tls = new ZabbixTlsOptions { Mode = ZabbixTlsMode.PreSharedKey, PskIdentity = "edge", Psk = "0123456789abcdef0123456789abcdef" };
         }).AddTrapper(0, o => o.AllowedPeers.Add("127.0.0.1"));
-        services.AddZabbixActiveAgent("roaming-01").AddServer("zbx-server-01").Configure(o => o.Hostname = "roamer");
-        services.AddZabbixPassiveAgent("probe-01").Configure(o => { o.Port = 0; o.AllowedPeers.Add("127.0.0.1"); o.Hostname = "prober"; });
+        services.AddZabbixActiveAgent("roaming-01").AddServer("zbx-server-01").Configure(o => o.HostName = "roamer");
+        services.AddZabbixPassiveAgent("probe-01").Configure(o => { o.Port = 0; o.AllowedPeers.Add("127.0.0.1"); o.HostName = "prober"; });
         services.AddZabbixPassiveProxy("proxy-01").WithVersion("7.4.15").AddTrapper(0).AllowPeer(System.Net.IPAddress.Loopback);
         return services.BuildValidated();
     }
@@ -87,11 +87,11 @@ public sealed class DocumentTests
         Assert.Equal("edge", edge.Connection.Tls.PskIdentity);
 
         ZabbixActiveAgentOptions roaming = provider.GetRequiredService<IOptionsMonitor<ZabbixActiveAgentOptions>>().Get("roaming-01");
-        Assert.Equal("roamer", roaming.Hostname);
+        Assert.Equal("roamer", roaming.HostName);
         Assert.Equal("zbx-server-01:10051", Assert.Single(Assert.Single(ZabbixServerActive.Parse(roaming.ServerActive!, CultureInfo.InvariantCulture))).ToString());
 
         ZabbixPassiveAgentOptions probe = provider.GetRequiredService<IOptionsMonitor<ZabbixPassiveAgentOptions>>().Get("probe-01");
-        Assert.Equal("prober", probe.Hostname);
+        Assert.Equal("prober", probe.HostName);
         Assert.Equal(["127.0.0.1"], probe.AllowedPeers);
 
         ZabbixProxyOptions proxy = provider.GetRequiredService<IOptionsMonitor<ZabbixProxyOptions>>().Get("proxy-01");

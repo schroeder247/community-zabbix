@@ -8,7 +8,7 @@ Starts a passive proxy's listener as a session: the server pushes configuration 
 ## SYNTAX
 
 ```
-Start-ZbxPassiveProxy [-Name] <string> [-AllowedPeer] <string[]> [-Address <string>] [-Port <int>] -Version <ZabbixComponentVersion> [-TlsAccept <ZabbixTlsAcceptModes[]>] [-PassThru] [-PskIdentity <string>] [-Psk <SecureString>] [-Certificate <string>] [-CertificateKey <string>] [-CertificateAuthority <string>] [-CertificateRevocationList <string>] [-ServerIssuer <string>] [-ServerSubject <string>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Start-ZbxPassiveProxy [-Name] <string> [-AllowedPeer] <string[]> [-Address <string>] [-Port <int>] -Version <Version> [-TlsAccept <ZabbixTlsAcceptModes[]>] [-PassThru] [-PskIdentity <string>] [-Psk <SecureString>] [-Certificate <string>] [-CertificateKey <string>] [-CertificateAuthority <string>] [-CertificateRevocationList <string>] [-ServerIssuer <string>] [-ServerSubject <string>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -119,7 +119,7 @@ The version the proxy announces: the server's own major.minor (e.g. 7.4). No ser
 
 | | |
 | --- | --- |
-| Type | `ZabbixComponentVersion` |
+| Type | `Version` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | True |

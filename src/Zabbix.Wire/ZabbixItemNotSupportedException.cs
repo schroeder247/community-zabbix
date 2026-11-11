@@ -25,19 +25,19 @@ public sealed class ZabbixItemNotSupportedException : ZabbixRefusedException
 
     /// <summary>Initializes the exception for the agent's answer about <paramref name="key"/>.</summary>
     /// <param name="key">The key that was asked for.</param>
-    /// <param name="reason">The agent's reason, verbatim.</param>
-    public ZabbixItemNotSupportedException(ZabbixItemKey key, string? reason)
-        : base($"The agent doesn't support this item: {reason ?? "it gave no reason"}")
+    /// <param name="error">The agent's reason, verbatim: the answer's <see cref="ZabbixAgentAnswer.Error"/>.</param>
+    public ZabbixItemNotSupportedException(ZabbixItemKey key, string? error)
+        : base($"The agent doesn't support this item: {error ?? "it gave no reason"}")
     {
         Key = key;
-        Reason = reason;
+        Error = error;
     }
 
     /// <summary>Gets the key that was asked for.</summary>
     /// <value>The key; <see langword="default"/> when the exception was not built from an answer.</value>
     public ZabbixItemKey Key { get; }
 
-    /// <summary>Gets the agent's reason.</summary>
+    /// <summary>Gets the agent's reason, as <see cref="ZabbixAgentAnswer.Error"/> carries it.</summary>
     /// <value>The reason, verbatim; <see langword="null"/> when the agent gave none.</value>
-    public string? Reason { get; }
+    public string? Error { get; }
 }

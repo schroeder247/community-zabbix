@@ -53,7 +53,7 @@ public sealed class CertificateTrustOwnershipTests : IDisposable
         Assert.Equal(2, trust.Length);
         Assert.All(trust, read => Assert.False(read.IsReleased));
 
-        wire.Dispose();
+        await wire.DisposeAsync();
 
         Assert.All(trust, read => Assert.True(read.IsReleased));
     }
@@ -172,7 +172,7 @@ public sealed class CertificateTrustOwnershipTests : IDisposable
     {
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddZabbixActiveProxy("proxy-01").AddServer(new System.Net.DnsEndPoint("127.0.0.1", ClosedPort()))
+        services.AddZabbixActiveProxy("proxy-01").WithServer(new System.Net.DnsEndPoint("127.0.0.1", ClosedPort()))
             .AddTrapper(0, o => o.Address = "127.0.0.1")
             .AllowPeer(System.Net.IPAddress.Loopback)
             .Configure(o => o.Connection.Tls = _certificate);

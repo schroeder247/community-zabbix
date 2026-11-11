@@ -194,6 +194,8 @@ Console.WriteLine(listener.LocalEndPoint);
   transport yourself.
 - `AllowPeer` and `AllowPsk` are the verbs a passive agent and a proxy have. `WithCertificate` gives the listener its certificate,
   `Configure` sets any other option, and `UseLogging`, `UseTimeProvider`, and `UseMeterFactory` set its logging, clock, and meters.
+- The builder holds a container of its own, `Services`, as a proxy's and an agent's builders do: the verbs write the listener's
+  options there, and the listener that `Build()` returns owns that container and disposes it.
 - `OnRequest` takes a `ZabbixRequestCallback`, one frame in and one out, or a `ZabbixConversationCallback`, for a protocol of
   several frames. A later call replaces it.
 - `Build()` checks the options with the rules the listener checks at start, and throws `InvalidOperationException` saying what to
@@ -210,10 +212,9 @@ Console.WriteLine(listener.LocalEndPoint);
 | `ZabbixTrapper` | `Handler` writes each value into a `ChannelWriter<ZabbixValue>`. Give it a channel in `BoundedChannelFullMode.Wait` mode: a channel that drops reports a dropped value as kept. |
 | `ZabbixTrapperSource` | Pairs the trapper with its listener as a hosted service: a push agent's `AddTrapper`. Read its values once, from `ReadAllAsync`. |
 | `ZabbixPassiveCheckResponder` | `Handler` answers keys from a `ZabbixItemDictionary` table. `ZabbixPassiveAgent` pairs it with its listener. |
-| `ZabbixProxyUplink` | The active proxy's side of the server conversation, over any `ZabbixExchangeCallback` ([the link](wire-client.md#the-link-beneath-the-client)). `GetConfigAsync(held)` pulls `proxy config` and merges it into the configuration held, `UploadAsync(page, more, proxyDelay)` sends a `proxy data` page, and `ProbeAsync` asks a server that disabled uploads whether it has enabled them. |
+| `ZabbixProxyUplink` | The active proxy's side of the server conversation, over any `ZabbixExchangeCallback` ([the link](wire-client.md#the-link-beneath-the-client)). `GetConfigAsync(held)` pulls `proxy config` and merges it into the configuration held, `UploadAsync(page, backlog, proxyDelay)` sends a `proxy data` page, with `ZabbixProxyBacklog.More` when more waits behind it and the age of the oldest value left behind as a `TimeSpan`, and `ProbeAsync` asks a server that disabled uploads whether it has enabled them. |
 | `ZabbixProxyAdmission` | `BuildAsync(config, protocol)` builds the admission rule for a configuration, and `Refusal` says why a value is refused. |
 | `ZabbixProxyDataProviders` | Asks providers for pages and merges them. |
-| `ZabbixComponentVersion` | Reads Zabbix's version strings, `8.0.0rc1` included. |
 | `ZabbixListenerOptions.ParseAllowedPeers()` | Reads `AllowedPeers` as the listeners read it, so you can check a list before you use it. Each entry is a `ZabbixPeer`: its `Network` is an address or a block as an `IPNetwork`, and its `HostName` a name the listener resolves at each connection. |
 
 ## In an application with a host

@@ -34,15 +34,15 @@ public sealed class ZabbixPushAgentBuilder : IZabbixPushAgentBuilder
     private readonly ServiceCollection _services = [];
     private bool _built;
 
-    /// <summary>A builder for an agent named <paramref name="hostname"/>, which is its host unless <c>Configure</c> sets another.</summary>
-    /// <param name="hostname">The agent's name, and the host its typed polls and meters report for.</param>
-    /// <exception cref="ArgumentException"><paramref name="hostname"/> is empty.</exception>
-    /// <exception cref="ArgumentNullException"><paramref name="hostname"/> is <see langword="null"/>.</exception>
-    public ZabbixPushAgentBuilder(string hostname)
+    /// <summary>A builder for an agent named <paramref name="hostName"/>, which is its host unless <c>Configure</c> sets another.</summary>
+    /// <param name="hostName">The agent's name, and the host its typed polls and meters report for.</param>
+    /// <exception cref="ArgumentException"><paramref name="hostName"/> is empty.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="hostName"/> is <see langword="null"/>.</exception>
+    public ZabbixPushAgentBuilder(string hostName)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(hostname);
-        Name = hostname;
-        _services.AddZabbixPushAgent(hostname);
+        ArgumentException.ThrowIfNullOrWhiteSpace(hostName);
+        Name = hostName;
+        _services.AddZabbixPushAgent(hostName);
     }
 
     /// <summary>The agent's name: the host it reports for unless <c>Configure</c> sets another.</summary>

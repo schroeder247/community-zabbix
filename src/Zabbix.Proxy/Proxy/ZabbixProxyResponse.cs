@@ -10,7 +10,7 @@ public sealed record ZabbixProxyResponse(
     [property: JsonPropertyName("response")] string? Response,
     [property: JsonPropertyName("info")] string? Info,
     [property: JsonPropertyName("upload")] string? Upload,
-    [property: JsonPropertyName("version")] string? Version,
+    [property: JsonPropertyName("version"), JsonConverter(typeof(ZabbixVersionTextConverter))] Version? Version,
     [property: JsonPropertyName("tasks")] JsonElement? Tasks)
 {
     /// <summary>Whether the server took it.</summary>
@@ -26,7 +26,7 @@ public sealed record ZabbixProxyResponse(
     /// <param name="other">The other reply.</param>
     public bool Equals(ZabbixProxyResponse? other)
         => other is not null && string.Equals(Response, other.Response, StringComparison.Ordinal) && string.Equals(Info, other.Info, StringComparison.Ordinal)
-            && string.Equals(Upload, other.Upload, StringComparison.Ordinal) && string.Equals(Version, other.Version, StringComparison.Ordinal)
+            && string.Equals(Upload, other.Upload, StringComparison.Ordinal) && Equals(Version, other.Version)
             && ZabbixValueEquality.JsonEqual(Tasks, other.Tasks);
 
     /// <inheritdoc/>

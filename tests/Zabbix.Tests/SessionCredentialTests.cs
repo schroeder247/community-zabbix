@@ -393,6 +393,6 @@ public sealed class SessionCredentialTests
         Assert.DoesNotContain(Password, new ZabbixSessionCredential("Admin", Password).ToString(), StringComparison.Ordinal);
         Assert.DoesNotContain("tok-secret", new ZabbixApiTokenCredential("tok-secret").ToString(), StringComparison.Ordinal);
         Assert.DoesNotContain("person-41", new ZabbixSessionCredential("person-41", Password).ToString(), StringComparison.Ordinal);
-        Assert.NotNull(typeof(ZabbixSessionCredential).GetProperty(nameof(ZabbixSessionCredential.Username))!.GetCustomAttributes(typeof(ZabbixPersonalAttribute), false).SingleOrDefault());
+        Assert.NotNull(typeof(ZabbixSessionCredential).GetProperty(nameof(ZabbixSessionCredential.UserName))!.GetCustomAttributes(typeof(ZabbixPersonalAttribute), false).SingleOrDefault());
     }
 }

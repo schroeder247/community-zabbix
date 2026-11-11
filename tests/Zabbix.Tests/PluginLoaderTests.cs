@@ -229,7 +229,7 @@ public sealed class PluginLoaderTests : IDisposable
     }
 
     private static async Task<string?> Answer(ZabbixItemProvider provider, string key)
-        => (await provider.GetValueAsync(ZabbixItemKey.Parse(key, null), Ct)).Value;
+        => (await provider.GetValueAsync(ZabbixItemKey.Parse(key), Ct)).Value;
 
     // A plugin folder as dotnet publish leaves it: the plugin's assembly and its dependency, Dependency.dll, at the
     // version given, which answers "dependency <version>".

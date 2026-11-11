@@ -100,7 +100,7 @@ internal static class ZabbixProxyPaging
             host = null;
             key = default;
             return config.Items.TryGetValue(itemId, out ZabbixProxyConfigItem? item) && config.Hosts.TryGetValue(item.HostId, out ZabbixProxyConfigHost? owner)
-                   && ZabbixItemKey.TryParse(item.Key, null, out key) && (host = owner.Host) is not null;
+                   && ZabbixItemKey.TryParse(item.Key, out key) && (host = owner.Host) is not null;
         }
 
         public ZabbixAgentSession? Session(ulong hostId, string session) => sessions.Get(hostId, session);
@@ -128,12 +128,12 @@ internal static class ZabbixProxyPaging
         }
         if (ask?.Host is not { Length: > 0 } host) return ActiveChecksFailed("no host name was sent");
         if (!config.HostsByName.TryGetValue(host, out ZabbixProxyConfigHost? found)) return ActiveChecksFailed($"host [{host}] not found");
-        if (found.Status != ZabbixProxyHostStatus.Monitored) return ActiveChecksFailed($"host \"{host}\" not monitored");
+        if (found.Status != ZabbixHostStatus.Enabled) return ActiveChecksFailed($"host \"{host}\" not monitored");
 
         var assignments = new List<ZabbixItemAssignment>();
         foreach (ZabbixProxyConfigItem item in config.ItemsByHost.GetValueOrDefault(found.HostId, []))
         {
-            if (item.Type == ZabbixProxyItemType.ZabbixAgentActive && item.Status == ZabbixProxyItemStatus.Active)
+            if (item.Type == ZabbixItemType.ZabbixActive && item.Status == ZabbixItemStatus.Active)
             {
                 // Delay and timeout with the host's user macros resolved, as zbx_dc_expand_user_and_func_macros does; an
                 // item without its own timeout carries the proxy's agent timeout (dbconfig.c timeout_orig), and none is

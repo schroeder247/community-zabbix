@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using Community.Zabbix.Protocol;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
 using Microsoft.Extensions.Options;
@@ -73,20 +74,24 @@ public sealed class ZabbixWireClientTests
         InvalidOperationException sending = await Assert.ThrowsAsync<InvalidOperationException>(() => wire.SendAsync([Value], TestContext.Current.CancellationToken));
         InvalidOperationException asking = await Assert.ThrowsAsync<InvalidOperationException>(() => wire.GetStatusAsync(TestContext.Current.CancellationToken));
 
-        Assert.Contains("Options.Server", sending.Message, StringComparison.Ordinal);
+        Assert.Contains("WithServer", sending.Message, StringComparison.Ordinal);
         Assert.Equal(sending.Message, asking.Message);
     }
 
     [Fact]
-    public async Task A_server_set_through_the_options_is_read_at_the_first_request()
+    public async Task A_client_keeps_its_own_copy_of_the_options_it_was_given()
     {
         (int port, Task<int> received) = MockTrapper.Collect(1);
-        using var wire = new ZabbixWireClient();
-        wire.Options.Server = $"127.0.0.1:{port}";
+        var options = new ZabbixWireOptions { Server = $"127.0.0.1:{port}", Connection = { Timeout = TimeSpan.FromSeconds(10) } };
+        await using var wire = new ZabbixWireClient(options);
+        options.Server = "a b";                                                            // a change after the client was built doesn't reach it
+        options.Connection.Timeout = TimeSpan.Zero;
 
         await wire.SendAsync([Value], TestContext.Current.CancellationToken);
 
         Assert.Equal(1, await received.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken));
+        Assert.Equal(($"127.0.0.1:{port}", TimeSpan.FromSeconds(10)), (wire.Options.Server, wire.Options.Connection.Timeout));
+        Assert.Null(typeof(ZabbixWireClient).GetProperty(nameof(ZabbixWireClient.Options), System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance));
     }
 
     [Fact]
@@ -119,7 +124,7 @@ public sealed class ZabbixWireClientTests
     [Fact]
     public void The_builder_s_token_is_the_options_session()
     {
-        using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder().AddServer("zbx-server-01").WithToken("the-session").Build();
+        using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder().WithServer("zbx-server-01").WithToken("the-session").Build();
 
         Assert.Equal(("zbx-server-01:10051", "the-session"), (wire.Options.Server, wire.Options.SessionId));
     }
@@ -180,7 +185,7 @@ public sealed class ZabbixWireClientTests
         using var wire = new ZabbixWireClient();
 
         ZabbixAgentAnswer a = await wire.GetAgentItemAsync($"127.0.0.1:{one}", "agent.ping", TestContext.Current.CancellationToken);
-        ZabbixAgentAnswer b = await wire.GetAgentItemAsync($"127.0.0.1:{two}", ZabbixItemKey.Parse("agent.hostname", null), TestContext.Current.CancellationToken);
+        ZabbixAgentAnswer b = await wire.GetAgentItemAsync($"127.0.0.1:{two}", ZabbixItemKey.Parse("agent.hostname"), TestContext.Current.CancellationToken);
 
         Assert.Equal(("1", "1"), (a.Value, b.Value));
         Assert.Contains("agent.ping", await first.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken), StringComparison.Ordinal);
@@ -250,14 +255,41 @@ public sealed class ZabbixWireClientTests
     public async Task A_disposed_client_refuses_every_request_naming_itself()
     {
         var wire = new ZabbixWireClient("127.0.0.1:9");
-        wire.Dispose();
-        wire.Dispose();
+        await wire.DisposeAsync();
+        await wire.DisposeAsync();
 
         ObjectDisposedException sending = await Assert.ThrowsAsync<ObjectDisposedException>(() => wire.SendAsync([Value], TestContext.Current.CancellationToken));
         ObjectDisposedException reading = await Assert.ThrowsAsync<ObjectDisposedException>(() => wire.GetAgentItemAsync("web-01", "agent.ping", TestContext.Current.CancellationToken));
 
         Assert.Equal((typeof(ZabbixWireClient).FullName, typeof(ZabbixWireClient).FullName), (sending.ObjectName, reading.ObjectName));
     }
+
+    [Fact]
+    public async Task A_client_from_the_container_outlives_a_caller_s_dispose_until_the_container_is_disposed()
+    {
+        (int port, Task<int> received) = MockTrapper.Collect(2);
+        var services = new ServiceCollection();
+        services.AddZabbixWireClient("prod").WithServer($"127.0.0.1:{port}");
+        await using ServiceProvider provider = services.BuildServiceProvider();
+        ZabbixWireClient wire = provider.GetRequiredService<IZabbixWireClientFactory>().Create("prod");
+        ZabbixWireClient injected = provider.GetRequiredKeyedService<ZabbixWireClient>("prod");
+        await using ZabbixWireClient built = ZabbixWireClient.CreateBuilder().WithServer($"127.0.0.1:{port}").Build();
+
+        DisposeAsACallerWould(wire);                                                       // the container's client: left running
+        await wire.DisposeAsync();
+        await wire.SendAsync([Value], TestContext.Current.CancellationToken);
+        await injected.SendAsync([Value], TestContext.Current.CancellationToken);
+        Assert.Equal(2, await received.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken));
+        await provider.DisposeAsync();                                                     // the container releases it
+        await built.DisposeAsync();                                                        // a builder's client is its caller's
+
+        Assert.Same(wire, injected);
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => wire.SendAsync([Value], TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => built.SendAsync([Value], TestContext.Current.CancellationToken));
+    }
+
+    // A caller's using block, written by code that doesn't know the client is the container's.
+    private static void DisposeAsACallerWould(IDisposable disposable) => disposable.Dispose();
 
     [Fact]
     public async Task A_given_exchange_stays_the_caller_s()
@@ -271,7 +303,7 @@ public sealed class ZabbixWireClientTests
         var wire = new ZabbixWireClient(exchange);
         await wire.PingAsync(TestContext.Current.CancellationToken);
 
-        wire.Dispose();
+        await wire.DisposeAsync();
         await exchange(ReadOnlyMemory<byte>.Empty, TestContext.Current.CancellationToken);
 
         Assert.Equal(2, calls);

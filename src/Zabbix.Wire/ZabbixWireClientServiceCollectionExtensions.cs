@@ -13,6 +13,10 @@ namespace Community.Zabbix;
 /// service, which <see cref="IZabbixWireClientFactory"/> returns by name. <see cref="ZabbixWireClient.CreateBuilder"/> builds
 /// its client through the same registration, in a container of its own.
 /// </summary>
+/// <remarks>
+/// The container owns the client it hands out: a caller's <c>Dispose</c> leaves it running, and the container disposes it
+/// when it's disposed, as disposing an <c>HttpClient</c> from <c>IHttpClientFactory</c> leaves its handler.
+/// </remarks>
 public static class ZabbixWireClientServiceCollectionExtensions
 {
     /// <summary>Registers the unnamed wire client, which is also injected as plain <see cref="ZabbixWireClient"/>.</summary>
@@ -30,8 +34,7 @@ public static class ZabbixWireClientServiceCollectionExtensions
     /// <example>
     /// <code language="csharp">
     /// builder.Services.AddZabbixWireClient("prod")
-    ///     .AddServer("zbx-server-01")
-    ///     .AddServer("zbx-server-02")
+    ///     .WithServer("zbx-server-01;zbx-server-02")
     ///     .WithTimeout(TimeSpan.FromSeconds(5));
     /// // later, from the container
     /// ZabbixWireClient prod = services.GetRequiredService&lt;IZabbixWireClientFactory&gt;().Create("prod");
@@ -52,11 +55,14 @@ public static class ZabbixWireClientServiceCollectionExtensions
         services.TryAddSingleton<IZabbixWireClientFactory, ZabbixWireClientFactory>();
 
         // The client's own constructor, from the named options. The container's logging and clock are used when it has them,
-        // and the client's defaults otherwise: no logging, and the system's clock.
-        services.TryAddKeyedSingleton(name, static (provider, key) => new ZabbixWireClient(
+        // and the client's defaults otherwise: no logging, and the system's clock. The container holds the client through
+        // its owner, which releases it when the container is disposed; the client it hands out is shared, so a caller's
+        // dispose leaves it running.
+        services.TryAddKeyedSingleton(name, static (provider, key) => new ZabbixWireClientOwner(new ZabbixWireClient(
             provider.GetRequiredService<IOptionsMonitor<ZabbixWireOptions>>().Get(NameOf(key)),
             provider.GetService<ILoggerFactory>(),
-            provider.GetService<TimeProvider>()));
+            provider.GetService<TimeProvider>())));
+        services.TryAddKeyedSingleton(name, static (provider, key) => provider.GetRequiredKeyedService<ZabbixWireClientOwner>(key).Client);
 
         // The unnamed client is the plain unkeyed service too, so the one-client case injects ZabbixWireClient.
         if (name == Options.DefaultName)

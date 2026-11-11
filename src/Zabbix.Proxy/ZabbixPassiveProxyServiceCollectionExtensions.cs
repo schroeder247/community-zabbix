@@ -63,7 +63,7 @@ public static class ZabbixPassiveProxyServiceCollectionExtensions
             .ValidateOnStart();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<ZabbixProxyOptions>, ZabbixProxyOptionsValidator>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<ZabbixProxyOptions>, ZabbixProxyProtocolValidator>());
-        services.AddKeyedSingleton<ZabbixPassiveProxy>(name, static (provider, key) =>
+        ZabbixComponentRegistration.AddShared<ZabbixPassiveProxy>(services, name, static (provider, key) =>
         {
             string proxy = NameOf(key);
             ZabbixProxyOptions options = provider.GetRequiredService<IOptionsMonitor<ZabbixProxyOptions>>().Get(proxy);

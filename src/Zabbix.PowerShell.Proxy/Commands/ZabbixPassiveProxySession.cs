@@ -61,7 +61,7 @@ public sealed class ZabbixPassiveProxySession : IZabbixSession, IZabbixLoggedSes
                 PSDataCollection<PSObject> output = await bridge.InvokeAsync(scriptText, [incoming, held], cancellationToken).ConfigureAwait(false);
                 PSObject? last = output.Count > 0 ? output[^1] : null;
                 string? veto = last is null ? null : LanguagePrimitives.ConvertTo<string>(last.BaseObject);
-                return string.IsNullOrEmpty(veto) ? null : veto;
+                return string.IsNullOrWhiteSpace(veto) ? ZabbixProxyConfigVerdict.Accepted : ZabbixProxyConfigVerdict.Refuse(veto);
             }
             catch (OperationCanceledException)
             {
@@ -69,7 +69,7 @@ public sealed class ZabbixPassiveProxySession : IZabbixSession, IZabbixLoggedSes
             }
             catch (Exception failure) when (failure is not OutOfMemoryException)
             {
-                return failure.Message;
+                return ZabbixProxyConfigVerdict.Refuse(string.IsNullOrWhiteSpace(failure.Message) ? failure.GetType().Name : failure.Message);
             }
         };
     }
@@ -196,8 +196,8 @@ public sealed class ZabbixPassiveProxySession : IZabbixSession, IZabbixLoggedSes
         }
 
         // Nothing registered accepts the configuration, as a proxy without OnConfig does.
-        public ValueTask<string?> ConfigAsync(ZabbixProxyConfig incoming, ZabbixProxyConfig held, CancellationToken cancellationToken)
-            => Config is { } config ? config(incoming, held, cancellationToken) : ValueTask.FromResult<string?>(null);
+        public ValueTask<ZabbixProxyConfigVerdict> ConfigAsync(ZabbixProxyConfig incoming, ZabbixProxyConfig held, CancellationToken cancellationToken)
+            => Config is { } config ? config(incoming, held, cancellationToken) : ValueTask.FromResult(ZabbixProxyConfigVerdict.Accepted);
 
         // Nothing registered answers an empty data object, as a proxy without OnStats does.
         public ValueTask<IReadOnlyDictionary<string, JsonElement>?> StatsAsync(ReadOnlyMemory<byte> request, CancellationToken cancellationToken)

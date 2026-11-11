@@ -69,12 +69,16 @@ its package (`Community.Zabbix.Sdk.dll`), and the namespaces and telemetry names
   reaches its hosts by name; `IZabbixWatcher` streams the history collected since its last read.
 - **The framed-TCP wire** (`Community.Zabbix.Wire`, a package of its own: an API consumer takes no TLS stack). `ZabbixWireClient`
   sends values, reads an item from an agent and asks a server, with PSK and certificate TLS and the HA node walk.
-  `new ZabbixWireClient("zbx-server-01")` takes a server; `ZabbixWireClient.CreateBuilder()` sets more (`AddServer`, `WithToken`,
-  `WithPsk` with the key as bytes, `UseLogging`) and validates it in `Build()`; and `AddZabbixWireClient("prod")` registers a named
-  client with the same verbs, written once for both builders, which `IZabbixWireClientFactory` returns
-  ([ADR 0013](docs/adr/0013-builders-verbs-and-typed-values.md)). `ZabbixWireLink` is
+  `new ZabbixWireClient("zbx-server-01")` takes a server; `ZabbixWireClient.CreateBuilder()` sets more (`WithServer` for the one
+  server or HA cluster, which a later call replaces, `WithToken`, `WithPsk` with the key as bytes, `UseLogging`) and validates it
+  in `Build()`; and `AddZabbixWireClient("prod")` registers a named client with the same verbs, written once for both builders,
+  which `IZabbixWireClientFactory` returns ([ADR 0013](docs/adr/0013-builders-verbs-and-typed-values.md)). A client keeps its own
+  copy of the options it's built with. A client from the container or the factory is the container's: disposing it where it's
+  used leaves it running, and the container disposes it. `ZabbixWireLink` is
   the connection beneath it, a node list and its TLS shared across clients, whose exchange a caller can wrap or use for a request no
-  client models (accepting large replies for a proxy's configuration). A call that can be cancelled has an overload with
+  client models (`AsExchange(ZabbixExchangeOptions.AcceptLargeReplies)` for a proxy's configuration). An agent's reason for a
+  refusal is `Error`, on `ZabbixAgentRefusedException` and `ZabbixItemNotSupportedException` as on `ZabbixAgentAnswer`, and
+  `ZabbixItemKey.Parse("app.disk.free[/]")` reads a key. A call that can be cancelled has an overload with
   a token and one without, and the clients' virtual members let an application fake them in
   its tests.
 - **Agents** (`Community.Zabbix.Agent`, and `ZabbixPassiveAgent` in `Community.Zabbix.Proxy`)
@@ -101,26 +105,30 @@ its package (`Community.Zabbix.Sdk.dll`), and the namespaces and telemetry names
 - **Proxies** ([ADR 0013](docs/adr/0013-builders-verbs-and-typed-values.md)). `ZabbixActiveProxy.CreateBuilder("proxy-01")` and
   `ZabbixPassiveProxy.CreateBuilder("dmz-proxy")` build a proxy on a container of its own, validated in `Build()`, and
   `AddZabbixActiveProxy("proxy-01")` and `AddZabbixPassiveProxy("dmz-proxy")` register the same classes and return a builder
-  with the same verbs. `AddServer` names the one server or HA cluster an active proxy reports to, as Zabbix's `Server` does
-  (`ZabbixProxyOptions.Server`, Zabbix's spelling: a second `AddServer` is refused, as Zabbix refuses a comma); `WithVersion`
-  sets the version announced, which a passive proxy requires; `WithPsk` sets the proxy's own key as bytes; `OnTask`,
-  `OnConfig` and `OnStats` set what answers the server, and `AddProvider` adds a page of the application's own values;
+  with the same verbs. `WithServer` sets the one server or HA cluster an active proxy reports to, as Zabbix's `Server` does
+  (`ZabbixProxyOptions.Server`, Zabbix's spelling): a later call replaces it, and a comma is refused, as Zabbix refuses one;
+  `WithVersion` sets the version announced, a `System.Version` or Zabbix's spelling (`"8.0.0rc1"`), which a passive proxy
+  requires; `WithPsk` sets the proxy's own key as bytes; `OnTask`, `OnConfig` (a `ZabbixProxyConfigVerdict` accepts or refuses
+  a configuration) and `OnStats` set what answers the server, and `AddProvider` adds a page of the application's own values;
   `AddHealthCheck` checks either proxy. The verbs a passive agent, a push agent or a listener has mean the same on a proxy and
   are written once for all of them: `AllowPeer` and `AllowPsk` on every builder of a listener, `UseStore`, `UseMemoryStore` and
   `UseEntityFrameworkStore` on a push agent's and a proxy's, and `AddTrapper(port, configure)` taking `ZabbixListenerOptions`
   on both; a push agent's trapper intake holds the agent's `MaxItems`. The proxies keep the `()`, `(options)` and
   `(options, loggers, time, meters)` constructors for an application that sets the options itself. `ZabbixTrapper` and
   `ZabbixTrapperSource` take `(…, loggers, time, meters)`, and the listener's and the trapper source's lifecycle methods take
-  an optional token.
+  an optional token. A proxy's records take the API's enums (`ZabbixHostStatus`, `ZabbixItemStatus`, `ZabbixItemType`,
+  `ZabbixItemValueType`, `ZabbixSeverity`), and a configuration row's `Mode` chooses an active or a passive proxy.
+  `ZabbixProxyUplink.UploadAsync(page, backlog, proxyDelay)` takes a `ZabbixProxyBacklog` and a `TimeSpan`.
 - **Every entry point without a container** ([ADR 0007](docs/adr/0007-container-free-runners.md),
   [ADR 0010](docs/adr/0010-agent-proxy-client-classes.md)).
   `new ZabbixClient("https://zabbix.example/", token)` takes the frontend's address
   (`ZabbixOptions.GetApiEndpoint` appends `api_jsonrpc.php`, in `AddZabbix` and a bound configuration too), and
   `ZabbixClient.CreateBuilder()` takes a logger factory and a clock (`UseLogging`, `UseTimeProvider`); a `NetworkCredential`
   logs in with a session.
-  `ZabbixWireClient`, and the agents' and the active proxy's `AddServer` read `host` or
+  `ZabbixWireClient`, the agents' `AddServer`, and the wire client's and the active proxy's `WithServer` read `host` or
   `host:port`. Every agent and proxy derives from `ZabbixComponent`, one lifetime with no host: `StartAsync`, `StopAsync`,
-  `RunAsync`, `DisposeAsync` and `StopTimeout`. A constructor only captures and `Options` is read at start, where
+  `RunAsync`, `DisposeAsync` and `StopTimeout`. An agent or a proxy from the container is the container's: a caller's
+  `DisposeAsync` leaves it running, and the container stops and disposes it. A constructor only captures and `Options` is read at start, where
   `StartAsync` throws `InvalidOperationException` saying what to set; the `(options, loggers, time, meters)` constructor
   takes the application's logging, clock and meters. An agent's builder starts what its container hosts, such as a
   trapper, after the agent and stops it before. The PowerShell modules' agent sessions build the same classes with their
@@ -131,7 +139,7 @@ its package (`Community.Zabbix.Sdk.dll`), and the namespaces and telemetry names
   [ADR 0010](docs/adr/0010-agent-proxy-client-classes.md)). `ZabbixItemProvider` in
   `Community.Zabbix.Abstractions` lists a set of keys and answers them, so a library implements keys against the
   contracts alone. The active and the passive agent each own one table of keys, `Items`, a `ZabbixItemDictionary`: `Add`
-  takes an answer that gives text or a number, a typed key's delegate, or a provider, and refuses a name held; the indexer
+  takes an answer that gives text, a typed key's delegate, or a provider, and refuses a name held; the indexer
   replaces; and at start the built-in keys fill the names left free. `Items.Add`, `Items.Register` and `Items.AddPlugins`
   return `Items`. A key name is one provider's. The builders' `AddItem` and `AddItems` register the same, written once for
   both agents over `IZabbixItemsBuilder`, and `AddItem` replaces a provider's key. `Community.Zabbix.Agent.Plugins` loads providers
@@ -154,7 +162,8 @@ its package (`Community.Zabbix.Sdk.dll`), and the namespaces and telemetry names
   acknowledged face; `ZabbixMemoryStore<T>`, and `ZabbixEntityFrameworkStore<T>` on EF Core (`Community.Zabbix.Agent.Storage.EntityFrameworkCore`, tested on
   SQLite and PostgreSQL, and chosen with `UseEntityFrameworkStore`), which keeps a leased batch until the server acknowledges
   it. `DrainAsync` and `ZabbixSendLoop.RunAsync` run the send loop without an agent, each with an overload with a token and
-  one without.
+  one without. A `ZabbixSendOutcome` says what became of a batch, and a `ZabbixStoreDropReason` says why a store didn't keep a
+  record, as the `zabbix.store.reason` tag of `zabbix.store.dropped` spells it.
 - **Configuration.** `AddZabbixClients`, `AddZabbixAgents` and `AddZabbixProxies` bind servers, agents and
   listeners from any configuration source.
 - **Telemetry.** Activity sources and meters named under `Community.Zabbix.` (one subscription, `Community.Zabbix.*`), durations in

@@ -21,7 +21,7 @@ using Community.Zabbix.Listening;
 var services = new ServiceCollection();
 services.AddZabbix("smoke").WithEndpoint("http://127.0.0.1:9/api_jsonrpc.php");
 services.AddZabbixPushAgent("relay").AddTrapper(10099, o => o.AllowedPeers.Add("127.0.0.1")).AddServer("127.0.0.1:9");
-services.AddZabbixWireClient("smoke").AddServer("127.0.0.1:9").WithTimeout(TimeSpan.FromSeconds(5));
+services.AddZabbixWireClient("smoke").WithServer("127.0.0.1:9").WithTimeout(TimeSpan.FromSeconds(5));
 await using ServiceProvider provider = services.BuildServiceProvider();
 ZabbixClient client = provider.GetRequiredService<IZabbixClientFactory>().Create("smoke");
 try
@@ -126,7 +126,7 @@ await using (ZabbixClient bound = ZabbixClient.CreateBuilder().Bind(apiSection).
     }
 }
 
-using var wire = new ZabbixWireClient("127.0.0.1:9");
+await using var wire = new ZabbixWireClient("127.0.0.1:9");
 try
 {
     await wire.SendAsync("smoke", new ZabbixItemKey<long>("smoke.key"), 1L, CancellationToken.None).ConfigureAwait(false);
@@ -139,12 +139,20 @@ catch (System.Net.Sockets.SocketException e)
 // The registered client, and one its builder binds from configuration: the generated binder and the options' validator.
 IConfiguration wireSection = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> { ["Server"] = "127.0.0.1:9", ["BatchSize"] = "10" }).Build();
 ZabbixWireClient registered = provider.GetRequiredService<IZabbixWireClientFactory>().Create("smoke");
-using ZabbixWireClient built = ZabbixWireClient.CreateBuilder().Bind(wireSection).WithTimeout(TimeSpan.FromSeconds(5)).Build();
-if (built.Options is not { Server: "127.0.0.1:9", BatchSize: 10 })
+await using ZabbixWireClient built = ZabbixWireClient.CreateBuilder().Bind(wireSection).WithTimeout(TimeSpan.FromSeconds(5)).Build();
+var bindings = new ServiceCollection();
+bindings.AddZabbixWireClient("bound").Bind(wireSection);
+await using (ServiceProvider bound = bindings.BuildServiceProvider())
 {
-    Console.WriteLine($"aot smoke: the builder bound Server '{built.Options.Server}' and BatchSize {built.Options.BatchSize}");
-    return 1;
+    ZabbixWireOptions boundOptions = bound.GetRequiredService<Microsoft.Extensions.Options.IOptionsMonitor<ZabbixWireOptions>>().Get("bound");
+    if (boundOptions is not { Server: "127.0.0.1:9", BatchSize: 10 })
+    {
+        Console.WriteLine($"aot smoke: the builder bound Server '{boundOptions.Server}' and BatchSize {boundOptions.BatchSize}");
+        return 1;
+    }
 }
+// A shared client outlives a caller's dispose: the container owns it.
+await registered.DisposeAsync().ConfigureAwait(false);
 foreach ((string kind, ZabbixWireClient sending) in new[] { ("registered", registered), ("built", built) })
 {
     try
@@ -190,8 +198,8 @@ ZabbixActiveAgentBuilder answering = ZabbixActiveAgent.CreateBuilder("smoke")
 answering.Services.AddSingleton(new Counter(7));
 await using (ZabbixActiveAgent active = answering.Build())
 {
-    string answered = (await active.Items.AnswerAsync(ZabbixItemKey.Parse("smoke.pending", null), TimeSpan.FromSeconds(5)).ConfigureAwait(false)).Value ?? "";
-    string length = (await active.Items.AnswerAsync(ZabbixItemKey.Parse("smoke.length[abc]", null), TimeSpan.FromSeconds(5)).ConfigureAwait(false)).Value ?? "";
+    string answered = (await active.Items.AnswerAsync(ZabbixItemKey.Parse("smoke.pending"), TimeSpan.FromSeconds(5)).ConfigureAwait(false)).Value ?? "";
+    string length = (await active.Items.AnswerAsync(ZabbixItemKey.Parse("smoke.length[abc]"), TimeSpan.FromSeconds(5)).ConfigureAwait(false)).Value ?? "";
     if ((answered, length) != ("7", "3"))
     {
         Console.WriteLine($"aot smoke: the active agent answered '{answered}' and '{length}'");
@@ -240,14 +248,14 @@ await using (ZabbixListener listener = ZabbixListener.CreateBuilder()
 // The proxies' builders: an active proxy whose server isn't there, which starts on the configuration it holds, and a
 // passive proxy whose zabbix.stats answer is the builder's OnStats.
 await using (ZabbixActiveProxy active = ZabbixActiveProxy.CreateBuilder("smoke")
-    .AddServer("127.0.0.1:9")
+    .WithServer("127.0.0.1:9")
     .AddTrapper(0, o => o.Address = "127.0.0.1")
     .AllowPeer(IPAddress.Loopback)
     .UseMemoryStore()
     .Build())
 {
     await active.StartAsync().ConfigureAwait(false);
-    Console.WriteLine($"active proxy: started, its trapper on {active.Trapper!.LocalEndPoint}");
+    Console.WriteLine($"active proxy: started, holding configuration revision {active.Config.ConfigRevision}");
 }
 
 JsonElement one = JsonDocument.Parse("1").RootElement.Clone();
@@ -307,7 +315,7 @@ string[] keys =
 int refused = 0;
 foreach (string text in keys)
 {
-    ZabbixAgentAnswer answer = await bundled.AnswerAsync(ZabbixItemKey.Parse(text, null), TimeSpan.FromSeconds(10), CancellationToken.None).ConfigureAwait(false);
+    ZabbixAgentAnswer answer = await bundled.AnswerAsync(ZabbixItemKey.Parse(text), TimeSpan.FromSeconds(10), CancellationToken.None).ConfigureAwait(false);
     if (answer.IsSupported) continue;
     refused++;
     Console.WriteLine($"{text}: {answer.Error}");

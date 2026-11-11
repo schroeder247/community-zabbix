@@ -44,7 +44,8 @@ public sealed class AdversarialTlsTests : IDisposable
         var options = new ZabbixListenerOptions { Address = "127.0.0.1", Port = 0, Timeout = TimeSpan.FromSeconds(5) };
         options.AllowedPeers.Add("127.0.0.1");
         configure(options);
-        var listener = new ZabbixListener(options, static (request, _) => ValueTask.FromResult(request.Payload), ListenerTests.Transport(), time, logger, meters);
+        using ILoggerFactory? loggers = SingleLoggerFactory.Of(logger);
+        var listener = new ZabbixListener(options, static (request, _) => ValueTask.FromResult(request.Payload), ListenerTests.Transport(), loggers, time, meters);
         await listener.StartingAsync(TestContext.Current.CancellationToken);
         await listener.StartAsync(TestContext.Current.CancellationToken);
         var bound = (IPEndPoint)listener.LocalEndPoint!;

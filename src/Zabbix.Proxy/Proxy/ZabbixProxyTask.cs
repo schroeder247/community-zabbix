@@ -22,7 +22,7 @@ namespace Community.Zabbix.Proxy;
 /// <param name="ExecuteOn">Where to run it: 0 agent, 1 server/proxy, 2 proxy (<c>ZBX_SCRIPT_EXECUTE_ON_*</c>).</param>
 /// <param name="Port">The agent port to run it on, when <paramref name="ExecuteOn"/> is the agent.</param>
 /// <param name="AuthType">The connection's authentication type, for an SSH/Telnet script.</param>
-/// <param name="Username">The connection's username.</param>
+/// <param name="UserName">The connection's user name.</param>
 /// <param name="Password">The connection's password.</param>
 /// <param name="PublicKey">The SSH public key file name.</param>
 /// <param name="PrivateKey">The SSH private key file name.</param>
@@ -39,7 +39,7 @@ public sealed record ZabbixProxyTask(
     [property: JsonPropertyName("execute_on")] int? ExecuteOn = null,
     [property: JsonPropertyName("port")] int? Port = null,
     [property: JsonPropertyName("authtype")] int? AuthType = null,
-    [property: JsonPropertyName("username")] string? Username = null,
+    [property: JsonPropertyName("username")] string? UserName = null,
     [property: JsonPropertyName("password"), ZabbixSecret] string? Password = null,
     [property: JsonPropertyName("publickey")] string? PublicKey = null,
     [property: JsonPropertyName("privatekey")] string? PrivateKey = null,
@@ -52,7 +52,7 @@ public sealed record ZabbixProxyTask(
     private bool PrintMembers(StringBuilder builder)
     {
         builder.Append(CultureInfo.InvariantCulture, $"Type = {Type}, Clock = {Clock}, Ttl = {Ttl}, ItemId = {ItemId}, CommandType = {CommandType}, ")
-            .Append(CultureInfo.InvariantCulture, $"Command = {Command}, ExecuteOn = {ExecuteOn}, Port = {Port}, AuthType = {AuthType}, Username = {Username}, ")
+            .Append(CultureInfo.InvariantCulture, $"Command = {Command}, ExecuteOn = {ExecuteOn}, Port = {Port}, AuthType = {AuthType}, UserName = {UserName}, ")
             .Append(CultureInfo.InvariantCulture, $"PublicKey = {PublicKey}, PrivateKey = {PrivateKey}, AlertId = {AlertId}, HostId = {HostId}, ParentTaskId = {ParentTaskId}");
         return true;
     }

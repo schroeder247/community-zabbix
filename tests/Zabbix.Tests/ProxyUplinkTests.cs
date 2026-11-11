@@ -40,7 +40,7 @@ public sealed class ProxyUplinkTests
     public async Task A_config_pull_sends_the_revisions_held_and_merges_the_reply()
     {
         var server = new Scripted(ProxyConfigFixtures.Delta80);
-        var uplink = new ZabbixProxyUplink(server.Exchange, "zbx-proxy-probe", new ZabbixComponentVersion(8, 0, 0), session: Session);
+        var uplink = new ZabbixProxyUplink(server.Exchange, "zbx-proxy-probe", new Version(8, 0, 0), Session, loggers: null, time: null);
         using JsonDocument full = JsonDocument.Parse(ProxyConfigFixtures.Full80);
         ZabbixProxyConfig held = ZabbixProxyConfig.Empty.Merge(full.RootElement);
 
@@ -61,7 +61,7 @@ public sealed class ProxyUplinkTests
     {
         var server = new Scripted("""{"response":"failed","info":"cannot collect configuration data"}""");
         var logger = new FakeLogger<ZabbixProxyUplink>();
-        var uplink = new ZabbixProxyUplink(server.Exchange, "proxy-01", logger: logger, session: Session);
+        var uplink = new ZabbixProxyUplink(server.Exchange, "proxy-01", version: null, time: null, logger: logger, session: Session, telemetry: null);
 
         ZabbixProxyRefusedException refused = await Assert.ThrowsAsync<ZabbixProxyRefusedException>(() => uplink.GetConfigAsync(ZabbixProxyConfig.Empty, TestContext.Current.CancellationToken));
 
@@ -80,7 +80,7 @@ public sealed class ProxyUplinkTests
         // "the connection ended before a whole frame arrived".
         var logger = new FakeLogger<ZabbixProxyUplink>();
         var uplink = new ZabbixProxyUplink((_, cancellationToken) => new ValueTask<ReadOnlyMemory<byte>>(ZabbixHeader.ReadAsync(Stream.Null, cancellationToken)),
-            "proxy-new", logger: logger, session: Session);
+            "proxy-new", version: null, time: null, logger: logger, session: Session, telemetry: null);
 
         ZabbixProxyRefusedException refused = await Assert.ThrowsAsync<ZabbixProxyRefusedException>(() => uplink.GetConfigAsync(ZabbixProxyConfig.Empty, TestContext.Current.CancellationToken));
 
@@ -93,12 +93,12 @@ public sealed class ProxyUplinkTests
     public async Task A_refusal_naming_the_server_s_version_is_answered_by_announcing_it_and_asking_again()
     {
         var server = new Scripted("""{"response":"failed","info":"proxy and server major versions do not match","version":"8.0.0rc1"}""", ProxyConfigFixtures.Full80);
-        var uplink = new ZabbixProxyUplink(server.Exchange, "proxy-01", new ZabbixComponentVersion(7, 4, 0), session: Session);
+        var uplink = new ZabbixProxyUplink(server.Exchange, "proxy-01", new Version(7, 4, 0), Session, loggers: null, time: null);
 
         ZabbixProxyConfig config = await uplink.GetConfigAsync(ZabbixProxyConfig.Empty, TestContext.Current.CancellationToken);
 
         Assert.Equal(["7.4.0", "8.0.0"], server.Sent.Select(request => request.GetProperty("version").GetString()));
-        Assert.Equal(new ZabbixComponentVersion(8, 0, 0), uplink.Version);
+        Assert.Equal(new Version(8, 0, 0), uplink.Version);
         Assert.Single(config.Items);
     }
 
@@ -106,10 +106,10 @@ public sealed class ProxyUplinkTests
     public async Task History_is_pushed_with_the_ids_given_more_and_proxy_delay()
     {
         var server = new Scripted("""{"upload":"enabled","response":"success"}""", """{"upload":"disabled","response":"failed"}""");
-        var uplink = new ZabbixProxyUplink(server.Exchange, "proxy-01", session: Session);
+        var uplink = new ZabbixProxyUplink(server.Exchange, "proxy-01", version: null, Session, loggers: null, time: null);
 
-        ZabbixProxyResponse first = await uplink.UploadAsync(new ZabbixProxyDataPage(History: [new ZabbixProxyHistoryItem(41, 100, new ZabbixClock(1_700_000_000, 500), "0.5")]), more: true, proxyDelay: 12, TestContext.Current.CancellationToken);
-        ZabbixProxyResponse second = await uplink.UploadAsync(new ZabbixProxyDataPage(History: [new ZabbixProxyHistoryItem(42, 101, new ZabbixClock(1_700_000_001, 0), "1")]), more: false, proxyDelay: 0, TestContext.Current.CancellationToken);
+        ZabbixProxyResponse first = await uplink.UploadAsync(new ZabbixProxyDataPage(History: [new ZabbixProxyHistoryItem(41, 100, new ZabbixClock(1_700_000_000, 500), "0.5")]), ZabbixProxyBacklog.More, TimeSpan.FromSeconds(12), TestContext.Current.CancellationToken);
+        ZabbixProxyResponse second = await uplink.UploadAsync(new ZabbixProxyDataPage(History: [new ZabbixProxyHistoryItem(42, 101, new ZabbixClock(1_700_000_001, 0), "1")]), ZabbixProxyBacklog.None, TimeSpan.Zero, TestContext.Current.CancellationToken);
 
         JsonElement page = server.Sent[0];
         Assert.Equal("proxy data", page.GetProperty("request").GetString());
@@ -125,10 +125,25 @@ public sealed class ProxyUplinkTests
     }
 
     [Fact]
+    public async Task The_delay_an_upload_reports_is_whole_seconds_and_never_negative()
+    {
+        // The protocol's proxy_delay is the age of the oldest value left behind, in whole seconds.
+        var server = new Scripted("""{"upload":"enabled","response":"success"}""");
+        var uplink = new ZabbixProxyUplink(server.Exchange, "proxy-01");
+        ZabbixProxyDataPage page = new(History: [new ZabbixProxyHistoryItem(1, 100, new ZabbixClock(1_700_000_000, 0), "1")]);
+
+        await uplink.UploadAsync(page, ZabbixProxyBacklog.More, TimeSpan.FromMilliseconds(1_999), TestContext.Current.CancellationToken);
+
+        Assert.Equal(1, server.Sent[0].GetProperty("proxy_delay").GetInt64());
+        Assert.Equal("proxyDelay", (await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => uplink.UploadAsync(page, ZabbixProxyBacklog.None, TimeSpan.FromSeconds(-1), TestContext.Current.CancellationToken))).ParamName);
+        Assert.Single(server.Sent);                                                          // a refused delay sends nothing
+    }
+
+    [Fact]
     public async Task A_probe_carries_no_history_data_key()
     {
         var server = new Scripted("""{"upload":"disabled","response":"success"}""");
-        var uplink = new ZabbixProxyUplink(server.Exchange, "proxy-01", session: Session);
+        var uplink = new ZabbixProxyUplink(server.Exchange, "proxy-01", version: null, Session, loggers: null, time: null);
 
         ZabbixProxyResponse probe = await uplink.ProbeAsync(TestContext.Current.CancellationToken);
 
@@ -140,14 +155,14 @@ public sealed class ProxyUplinkTests
     public async Task A_page_carries_discovery_autoregistration_availability_and_task_results_under_their_own_wire_keys()
     {
         var server = new Scripted("""{"upload":"enabled","response":"success"}""");
-        var uplink = new ZabbixProxyUplink(server.Exchange, "proxy-01", session: Session);
+        var uplink = new ZabbixProxyUplink(server.Exchange, "proxy-01", version: null, Session, loggers: null, time: null);
         var page = new ZabbixProxyDataPage(
-            Discovery: [new ZabbixProxyDiscoveryItem(DateTimeOffset.FromUnixTimeSeconds(1_700_000_000), DruleId: 5, DcheckId: 6, Ip: "10.0.0.1", Dns: null, Port: 22, Value: "ssh", Status: 0)],
+            Discovery: [new ZabbixProxyDiscoveryItem(DateTimeOffset.FromUnixTimeSeconds(1_700_000_000), NetworkDiscoveryRuleId: 5, NetworkDiscoveryCheckId: 6, Ip: "10.0.0.1", Dns: null, Port: 22, Value: "ssh", Status: 0)],
             Autoregistration: [new ZabbixProxyAutoregistrationItem(DateTimeOffset.FromUnixTimeSeconds(1_700_000_000), "new-host", Ip: "10.0.0.2", Dns: null, Port: 10050, HostMetadata: "linux", Flags: 0, TlsAccepted: 1)],
             Availability: [new ZabbixProxyAvailabilityItem(InterfaceId: 7, Available: 1, Error: null)],
             Tasks: [new ZabbixProxyTaskResult(Type: ZabbixProxyTaskType.RemoteCommandResult, Clock: DateTimeOffset.FromUnixTimeSeconds(1_700_000_000), Ttl: 0, Status: 0, Info: "done", ParentTaskId: 9)]);
 
-        ZabbixProxyResponse response = await uplink.UploadAsync(page, more: false, proxyDelay: 0, TestContext.Current.CancellationToken);
+        ZabbixProxyResponse response = await uplink.UploadAsync(page, ZabbixProxyBacklog.None, TimeSpan.Zero, TestContext.Current.CancellationToken);
 
         JsonElement sent = Assert.Single(server.Sent);
         Assert.False(sent.TryGetProperty("history data", out _));
@@ -178,8 +193,8 @@ public sealed class ProxyUplinkTests
             rows);
         Assert.Equal([new ZabbixProxyDiscoveryItem(DateTimeOffset.FromUnixTimeSeconds(1_700_000_000), 5, 0, "10.0.0.2", "", 0, "", 1)], down.ToRows());
         Assert.Contains("\"dcheck\":0", JsonSerializer.Serialize(rows[^1], ZabbixProxyJson.Default.ZabbixProxyDiscoveryItem), StringComparison.Ordinal);
-        Assert.Equal("DcheckId", Assert.Throws<ArgumentOutOfRangeException>(() => new ZabbixProxyDiscoveredService(0, 22, IsUp: true)).ParamName);
-        Assert.Equal("DruleId", Assert.Throws<ArgumentOutOfRangeException>(() => new ZabbixProxyDiscoveredHost(0, "10.0.0.1", clock, [])).ParamName);
+        Assert.Equal("NetworkDiscoveryCheckId", Assert.Throws<ArgumentOutOfRangeException>(() => new ZabbixProxyDiscoveredService(0, 22, IsUp: true)).ParamName);
+        Assert.Equal("NetworkDiscoveryRuleId", Assert.Throws<ArgumentOutOfRangeException>(() => new ZabbixProxyDiscoveredHost(0, "10.0.0.1", clock, [])).ParamName);
         Assert.Throws<ArgumentException>(() => new ZabbixProxyDiscoveredHost(5, " ", clock, []));
     }
 
@@ -211,7 +226,7 @@ public sealed class ProxyUplinkTests
         var uplink = new ZabbixProxyUplink(server.Exchange, proxy, null, null, null, Session, telemetry);
 
         await Assert.ThrowsAsync<ZabbixProxyRefusedException>(() => uplink.GetConfigAsync(ZabbixProxyConfig.Empty, TestContext.Current.CancellationToken));
-        await uplink.UploadAsync(new ZabbixProxyDataPage(History: [new ZabbixProxyHistoryItem(1, 100, new ZabbixClock(0, 0), "1")]), more: false, proxyDelay: 0, TestContext.Current.CancellationToken);
+        await uplink.UploadAsync(new ZabbixProxyDataPage(History: [new ZabbixProxyHistoryItem(1, 100, new ZabbixClock(0, 0), "1")]), ZabbixProxyBacklog.None, TimeSpan.Zero, TestContext.Current.CancellationToken);
 
         Activity[] seen = [.. spans];
         Assert.Equal([ZabbixProxyTelemetry.ConfigSpan, ZabbixProxyTelemetry.DataSpan], seen.Select(span => span.OperationName));

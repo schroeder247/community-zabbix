@@ -30,19 +30,19 @@ public sealed class ZabbixAgentRefusedException : ZabbixRefusedException
 
     /// <summary>Initializes the agent's refusal of the request for <paramref name="key"/>.</summary>
     /// <param name="key">The key that was asked for.</param>
-    /// <param name="info">The agent's <c>error</c> text, verbatim.</param>
-    public ZabbixAgentRefusedException(ZabbixItemKey key, string info)
-        : base($"The agent refused the request: {info}")
+    /// <param name="error">The agent's <c>error</c> text, verbatim.</param>
+    public ZabbixAgentRefusedException(ZabbixItemKey key, string error)
+        : base($"The agent refused the request: {error}")
     {
         Key = key;
-        Info = info;
+        Error = error;
     }
 
     /// <summary>Gets the key that was asked for.</summary>
     /// <value>The key; <see langword="default"/> when the exception was not built from a reply.</value>
     public ZabbixItemKey Key { get; }
 
-    /// <summary>Gets the agent's reason.</summary>
+    /// <summary>Gets the agent's reason, as <see cref="ZabbixAgentAnswer.Error"/> carries a key's.</summary>
     /// <value>The <c>error</c> text, verbatim; <see langword="null"/> when the exception was not built from a reply.</value>
-    public string? Info { get; }
+    public string? Error { get; }
 }

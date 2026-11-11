@@ -88,11 +88,11 @@ public static class ZabbixWireClientExtensions
     }
 
     /// <summary>
-    /// The client as a destination for a send loop: a counted success is <see cref="ZabbixDelivery.Delivered"/> (a value
+    /// The client as a destination for a send loop: a counted success is <see cref="ZabbixSendOutcome.Delivered"/> (a value
     /// the server refused inside it is a permanent, per-value fact it reported); a refusal is
-    /// <see cref="ZabbixDelivery.Rejected"/>, since sending the same frame again gets the same answer, except a server
+    /// <see cref="ZabbixSendOutcome.Rejected"/>, since sending the same frame again gets the same answer, except a server
     /// that paused data collection (<see cref="ZabbixTrapperRefusedException.IsPaused"/>: it took nothing), which is a retry; an
-    /// exchange that failed (a redirect that could not be followed among them) is <see cref="ZabbixDelivery.Retried"/>, so
+    /// exchange that failed (a redirect that could not be followed among them) is <see cref="ZabbixSendOutcome.Retried"/>, so
     /// the batch is kept — nothing is ever delivered by mistake. The batch goes as one frame whatever
     /// <see cref="ZabbixWireOptions.BatchSize"/> says (the loop's <see cref="ZabbixSendOptions.BatchSize"/> sized it), so one
     /// answer covers all of it and a retry never sends again what an earlier frame delivered.
@@ -101,7 +101,7 @@ public static class ZabbixWireClientExtensions
     /// <param name="batch">The batch.</param>
     /// <param name="cancellationToken">Stops the exchange: the batch is then neither delivered nor rejected.</param>
     /// <returns>What became of the batch.</returns>
-    public static ValueTask<ZabbixDelivery> DeliverAsync(this ZabbixWireClient wire, IReadOnlyList<ZabbixValue> batch, CancellationToken cancellationToken = default)
+    public static ValueTask<ZabbixSendOutcome> DeliverAsync(this ZabbixWireClient wire, IReadOnlyList<ZabbixValue> batch, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(wire);
         ArgumentNullException.ThrowIfNull(batch);
@@ -109,26 +109,26 @@ public static class ZabbixWireClientExtensions
     }
 
     // The send loop in a push agent, which holds what sends rather than a client.
-    internal static async ValueTask<ZabbixDelivery> DeliverAsync(this ZabbixSender sender, IReadOnlyList<ZabbixValue> batch, CancellationToken cancellationToken)
+    internal static async ValueTask<ZabbixSendOutcome> DeliverAsync(this ZabbixSender sender, IReadOnlyList<ZabbixValue> batch, CancellationToken cancellationToken)
     {
         try
         {
             await sender.SendFrameAsync(batch, cancellationToken).ConfigureAwait(false);   // the loop's batch is one frame
-            return ZabbixDelivery.Delivered;
+            return ZabbixSendOutcome.Delivered;
         }
         catch (ZabbixTrapperRefusedException paused) when (paused.IsPaused)
         {
-            return ZabbixDelivery.Retried;                                                    // nothing was taken: held, sent again
+            return ZabbixSendOutcome.Retried;                                                    // nothing was taken: held, sent again
         }
         catch (ZabbixTrapperRefusedException)
         {
-            return ZabbixDelivery.Rejected;                                                 // the sender logged it (1007)
+            return ZabbixSendOutcome.Rejected;                                                 // the sender logged it (1007)
         }
         // Spelled out (not ZabbixFrames.IsExchangeFailure(failure)) so the filter is a type test that analyzer CA1031 (no catch-all)
         // reads as narrowing, not a method call it cannot see through; keep this set equal to IsExchangeFailure's (a test pins it).
         catch (Exception failure) when (failure is SocketException or IOException or AuthenticationException or InvalidDataException or TimeoutException)
         {
-            return ZabbixDelivery.Retried;                                                    // the sender logged it (1003, 1008)
+            return ZabbixSendOutcome.Retried;                                                    // the sender logged it (1003, 1008)
         }
     }
 }

@@ -38,7 +38,8 @@ public sealed class AdversarialHostsSurfaceTests
     public async Task A_synchronous_disposal_whose_unbind_then_fails_logs_the_failure_instead_of_leaving_it_unobserved()
     {
         var logs = new FakeLogCollector();
-        var listener = new ZabbixListener(Loopback(), Never, new FailingUnbindTransport(), time: null, logger: new FakeLogger<ZabbixListener>(logs), meters: null);
+        using var loggers = new SingleLoggerFactory(new FakeLogger<ZabbixListener>(logs));
+        var listener = new ZabbixListener(Loopback(), Never, new FailingUnbindTransport(), loggers: loggers, time: null, meters: null);
         await listener.StartingAsync(TestContext.Current.CancellationToken);
 
 #pragma warning disable CA1849 // the synchronous disposal is the path under test
@@ -96,7 +97,8 @@ public sealed class AdversarialHostsSurfaceTests
         ZabbixListenerOptions options = Loopback();
         options.AllowedPeers.Clear();
         options.AllowedPeers.Add("10.0.0.0/8");
-        var listener = new ZabbixListener(options, Never, provider.GetRequiredKeyedService<IConnectionListenerFactory>(ZabbixListener.TransportKey), time: null, logger: new FakeLogger<ZabbixListener>(logs), meters: provider.GetRequiredService<IMeterFactory>());
+        using var loggers = new SingleLoggerFactory(new FakeLogger<ZabbixListener>(logs));
+        var listener = new ZabbixListener(options, Never, provider.GetRequiredKeyedService<IConnectionListenerFactory>(ZabbixListener.TransportKey), loggers: loggers, time: null, meters: provider.GetRequiredService<IMeterFactory>());
         await listener.StartingAsync(TestContext.Current.CancellationToken);
         await listener.StartAsync(TestContext.Current.CancellationToken);
         var bound = (IPEndPoint)listener.LocalEndPoint!;

@@ -177,9 +177,9 @@ public sealed class RedirectTests
         var logs = new FakeLogCollector();
         using var sender = new ZabbixSender(ZabbixFrames.Connect(new ZabbixServerNode("127.0.0.1", port)), "proxy-a", new FakeLogger<ZabbixSender>(logs));
 
-        ZabbixDelivery delivery = await sender.DeliverAsync([Value], TestContext.Current.CancellationToken);
+        ZabbixSendOutcome delivery = await sender.DeliverAsync([Value], TestContext.Current.CancellationToken);
 
-        Assert.Equal(ZabbixDelivery.Retried, delivery);
+        Assert.Equal(ZabbixSendOutcome.Retried, delivery);
         Assert.Contains(logs.GetSnapshot(), record => record.Id.Id == 1008 && record.Level == LogLevel.Warning);
     }
 

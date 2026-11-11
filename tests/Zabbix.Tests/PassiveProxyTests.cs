@@ -170,7 +170,7 @@ public sealed class PassiveProxyTests
         await using Running proxy = await StartAsync();
         await ConfigureAsync(proxy);
         const string Unreadable = """{"response":"failed","info":"cannot find pair with name \"ip\""}""";
-        proxy.Proxy.DiscoveryStore!.TryWrite(new ZabbixProxyDiscoveryItem(DateTimeOffset.FromUnixTimeSeconds(1_700_000_000), DruleId: 5, DcheckId: 6, Ip: null!, Dns: null, Port: 22, Value: "ssh", Status: 0));
+        proxy.Proxy.DiscoveryStore!.TryWrite(new ZabbixProxyDiscoveryItem(DateTimeOffset.FromUnixTimeSeconds(1_700_000_000), NetworkDiscoveryRuleId: 5, NetworkDiscoveryCheckId: 6, Ip: null!, Dns: null, Port: 22, Value: "ssh", Status: 0));
         using ZabbixSender sender2 = new ZabbixSender([proxy.Node]);
         await sender2.SendAsync([new ZabbixValue("web-01", "cpu", "1", DateTimeOffset.UnixEpoch)], TestContext.Current.CancellationToken);
 
@@ -233,7 +233,7 @@ public sealed class PassiveProxyTests
     public async Task Discovery_and_availability_entries_written_to_their_stores_are_pulled_under_their_own_wire_keys()
     {
         await using Running proxy = await StartAsync();
-        proxy.Proxy.DiscoveryStore!.TryWrite(new ZabbixProxyDiscoveryItem(DateTimeOffset.FromUnixTimeSeconds(1_700_000_000), DruleId: 5, DcheckId: 6, Ip: "10.0.0.1", Dns: null, Port: 22, Value: "ssh", Status: 0));
+        proxy.Proxy.DiscoveryStore!.TryWrite(new ZabbixProxyDiscoveryItem(DateTimeOffset.FromUnixTimeSeconds(1_700_000_000), NetworkDiscoveryRuleId: 5, NetworkDiscoveryCheckId: 6, Ip: "10.0.0.1", Dns: null, Port: 22, Value: "ssh", Status: 0));
         proxy.Proxy.AvailabilityStore!.TryWrite(new ZabbixProxyAvailabilityItem(InterfaceId: 7, Available: 1, Error: null));
 
         JsonElement page = await PullAsync(proxy, """{"response":"success"}""");
@@ -378,9 +378,21 @@ public sealed class PassiveProxyTests
     // ----- the extension points: OnConfig, providers, OnStats ---------------------------------------------------------------
 
     [Fact]
+    public void A_verdict_takes_the_configuration_unless_it_gives_a_reason()
+    {
+        ZabbixProxyConfigVerdict refused = ZabbixProxyConfigVerdict.Refuse("This proxy takes at most 10,000 hosts.");
+
+        Assert.Equal((true, null), (default(ZabbixProxyConfigVerdict).IsAccepted, default(ZabbixProxyConfigVerdict).Reason));
+        Assert.Equal(ZabbixProxyConfigVerdict.Accepted, default);
+        Assert.Equal((false, "This proxy takes at most 10,000 hosts."), (refused.IsAccepted, refused.Reason));
+        Assert.NotEqual(ZabbixProxyConfigVerdict.Accepted, refused);
+        Assert.Throws<ArgumentException>(() => ZabbixProxyConfigVerdict.Refuse(" "));        // a refusal says why
+    }
+
+    [Fact]
     public async Task A_registered_config_handler_can_veto_a_pushed_configuration()
     {
-        await using Running proxy = await StartAsync(builder => builder.OnConfig((_, _, _) => ValueTask.FromResult<string?>("not today")));
+        await using Running proxy = await StartAsync(builder => builder.OnConfig((_, _, _) => ValueTask.FromResult(ZabbixProxyConfigVerdict.Refuse("not today"))));
         await using ServerSide server = await ServerSide.ConnectAsync(proxy.Node);
 
         await server.SendAsync("""{"request":"proxy config"}""");
@@ -397,7 +409,7 @@ public sealed class PassiveProxyTests
     [Fact]
     public async Task A_registered_config_handler_that_accepts_lets_the_configuration_through()
     {
-        await using Running proxy = await StartAsync(builder => builder.OnConfig((_, _, _) => ValueTask.FromResult<string?>(null)));
+        await using Running proxy = await StartAsync(builder => builder.OnConfig((_, _, _) => ValueTask.FromResult(ZabbixProxyConfigVerdict.Accepted)));
         await ConfigureAsync(proxy);
 
         Assert.Equal(9, proxy.Proxy.Config.ConfigRevision);

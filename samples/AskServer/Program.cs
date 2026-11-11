@@ -8,8 +8,8 @@ string server = Environment.GetEnvironmentVariable("ZABBIX_SERVER") ?? "zbx-serv
 string token = Environment.GetEnvironmentVariable("ZABBIX_API_TOKEN")
     ?? throw new InvalidOperationException("Set ZABBIX_API_TOKEN to a super admin's API token.");
 
-using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder()
-    .AddServer(server)
+await using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder()
+    .WithServer(server)
     .WithToken(token)
     .Build();
 await wire.PingAsync();

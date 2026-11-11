@@ -1,7 +1,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
 using System.Buffers;
-using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using Community.Zabbix.Protocol;
@@ -140,7 +139,7 @@ internal sealed class ZabbixGetter : IDisposable
         }
         catch (ZabbixAgentRefusedException refused)
         {
-            WireLog.GetterRefused(_logger, Destination, key, refused.Info);
+            WireLog.GetterRefused(_logger, Destination, key, refused.Error);
             throw;
         }
         catch (Exception failure) when (ZabbixFrames.IsExchangeFailure(failure))
@@ -223,7 +222,7 @@ internal sealed class ZabbixGetter : IDisposable
     public Task<ZabbixAgentAnswer> GetAsync(string key) => GetAsync(key, CancellationToken.None);
 
     /// <inheritdoc cref="GetAsync(ZabbixItemKey, CancellationToken)"/>
-    public Task<ZabbixAgentAnswer> GetAsync(string key, CancellationToken cancellationToken) => GetAsync(ZabbixItemKey.Parse(key, CultureInfo.InvariantCulture), cancellationToken);
+    public Task<ZabbixAgentAnswer> GetAsync(string key, CancellationToken cancellationToken) => GetAsync(ZabbixItemKey.Parse(key), cancellationToken);
 
     /// <summary>Releases the connection the client built (its certificate trust); a client over a given exchange has none.</summary>
     public void Dispose()

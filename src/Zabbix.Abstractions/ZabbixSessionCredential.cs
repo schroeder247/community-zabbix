@@ -28,32 +28,32 @@ public sealed class ZabbixSessionCredential : ZabbixCredential
     private Exception? _refusal;
     private long _refusedAt;
 
-    /// <summary>A credential for <paramref name="username"/> with a password held for its lifetime.</summary>
-    /// <param name="username">The Zabbix user.</param>
+    /// <summary>A credential for <paramref name="userName"/> with a password held for its lifetime.</summary>
+    /// <param name="userName">The Zabbix user.</param>
     /// <param name="password">The password; a secret, never logged.</param>
-    public ZabbixSessionCredential(string username, [ZabbixSecret] string password)
+    public ZabbixSessionCredential(string userName, [ZabbixSecret] string password)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(username);
+        ArgumentException.ThrowIfNullOrWhiteSpace(userName);
         ArgumentException.ThrowIfNullOrEmpty(password);
-        Username = username;
+        UserName = userName;
         _password = _ => new ValueTask<string>(password);
     }
 
-    /// <summary>A credential for <paramref name="username"/> whose password is fetched for each login and not kept.</summary>
-    /// <param name="username">The Zabbix user.</param>
+    /// <summary>A credential for <paramref name="userName"/> whose password is fetched for each login and not kept.</summary>
+    /// <param name="userName">The Zabbix user.</param>
     /// <param name="password">Answers the password when a login needs it.</param>
-    public ZabbixSessionCredential(string username, Func<CancellationToken, ValueTask<string>> password)
+    public ZabbixSessionCredential(string userName, Func<CancellationToken, ValueTask<string>> password)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(username);
+        ArgumentException.ThrowIfNullOrWhiteSpace(userName);
         ArgumentNullException.ThrowIfNull(password);
-        Username = username;
+        UserName = userName;
         _password = password;
     }
 
     /// <summary>Gets the Zabbix user the credential logs in as.</summary>
     /// <value>The user name; personal data, so it is classified for redaction and never put in a message.</value>
     [ZabbixPersonal]
-    public string Username { get; }
+    public string UserName { get; }
 
     /// <summary>How long a refused login is answered from memory before the server is asked again; Zabbix's default <c>login_block</c>.</summary>
     public TimeSpan LoginBackoff { get; init; } = TimeSpan.FromSeconds(30);
@@ -142,7 +142,7 @@ public sealed class ZabbixSessionCredential : ZabbixCredential
         }
     }
 
-    /// <summary>Returns the credential's type name; the user name is personal data and is read from <see cref="Username"/>.</summary>
+    /// <summary>Returns the credential's type name; the user name is personal data and is read from <see cref="UserName"/>.</summary>
     /// <returns><c>ZabbixSessionCredential</c>.</returns>
     public override string ToString() => nameof(ZabbixSessionCredential);
 
@@ -152,7 +152,7 @@ public sealed class ZabbixSessionCredential : ZabbixCredential
     {
         try
         {
-            var login = new ZabbixLoginParameters(Username, await _password(CancellationToken.None).ConfigureAwait(false));
+            var login = new ZabbixLoginParameters(UserName, await _password(CancellationToken.None).ConfigureAwait(false));
             ZabbixLoginUser user = await context.Transport.SendAsync("user.login", login, ZabbixLoginJson.Default.ZabbixLoginParameters, ZabbixLoginJson.Default.ZabbixLoginUser, CancellationToken.None).ConfigureAwait(false);
             if (user.MfaId is { } mfa and not 0)
             {

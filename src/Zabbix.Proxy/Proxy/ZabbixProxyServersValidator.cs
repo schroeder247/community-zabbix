@@ -27,12 +27,12 @@ internal sealed class ZabbixProxyServersValidator : IValidateOptions<ZabbixProxy
         ArgumentNullException.ThrowIfNull(options);
         if (_proxy is not null && _proxy != name) return ValidateOptionsResult.Skip;
         if (string.IsNullOrWhiteSpace(options.Server))
-            return ValidateOptionsResult.Fail("Server is required: the server or HA cluster the proxy reports to (AddServer, or a Server entry)");
+            return ValidateOptionsResult.Fail("Server is required: the server or HA cluster the proxy reports to (WithServer, or a Server entry)");
         if (!ZabbixServerActive.TryParse(options.Server.AsSpan(), CultureInfo.InvariantCulture, out ZabbixServerActive? server, out string? error))
             return ValidateOptionsResult.Fail($"Server \"{options.Server}\" isn't a server: {error}");
         return server.Count == 1
             ? ValidateOptionsResult.Success
             : ValidateOptionsResult.Fail($"Server \"{options.Server}\" names {server.Count} servers, and a proxy reports to one server or one HA cluster, as Zabbix's proxy does: "
-                + "pass every node of the cluster to one AddServer call, or join them with ';'");
+                + "pass every node of the cluster to one WithServer call, or join them with ';'");
     }
 }

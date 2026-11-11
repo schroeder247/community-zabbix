@@ -40,7 +40,7 @@ public sealed class LiveDefectTests
     /// <summary>
     /// Every server refuses a <c>proxy data</c> message with a discovery row it cannot read ("received invalid proxy
     /// data … cannot find pair with name …", <c>proxy.c</c> process_discovery_data_contents), after it stored the history
-    /// that came before the row. <see cref="ZabbixProxyDiscoveryItem.DcheckId"/> is a <see langword="long"/>, so a row
+    /// that came before the row. <see cref="ZabbixProxyDiscoveryItem.NetworkDiscoveryCheckId"/> is a <see langword="long"/>, so a row
     /// without its <c>dcheck</c> cannot be written; the test writes the other row the server cannot read, one without its
     /// <c>ip</c>, and requires the proxy to take the refused page apart rather than re-send it every turn, so the history
     /// written after it is still uploaded.
@@ -61,7 +61,7 @@ public sealed class LiveDefectTests
         LiveFixtures.LiveItem probe = await LiveFixtures.ProxyProbeAsync(scope, host);
 
         IHost app = await LiveHosting.StartAsync(services => services.AddZabbixActiveProxy(proxyName)
-            .AddServer(new System.Net.DnsEndPoint(trapper.Host, trapper.Port))
+            .WithServer(new System.Net.DnsEndPoint(trapper.Host, trapper.Port))
             .AddTrapper(0, o => o.Address = "127.0.0.1")
             .AllowPeer(System.Net.IPAddress.Loopback)
             .Configure(o => { o.ConfigInterval = TimeSpan.FromSeconds(1); o.DataInterval = TimeSpan.FromSeconds(1); o.DrainTimeout = TimeSpan.FromSeconds(1); o.PageSize = 1; }));

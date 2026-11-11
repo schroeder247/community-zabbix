@@ -10,7 +10,7 @@ namespace Community.Zabbix.Hosting;
 /// Puts an agent or a proxy on its container's health checks, under the <c>zabbix</c> tag and its role's, <c>agent</c> or
 /// <c>proxy</c>: the one registration the builders' <c>AddHealthCheck</c> verbs make.
 /// </summary>
-internal static class ZabbixAgentHealthChecks
+internal static class ZabbixComponentHealthChecks
 {
     /// <summary>The tag of an agent's check.</summary>
     public const string Agent = "agent";
@@ -28,14 +28,14 @@ internal static class ZabbixAgentHealthChecks
     /// <param name="configure">Sets the thresholds.</param>
     /// <param name="role">The role's tag: <see cref="Agent"/> or <see cref="Proxy"/>.</param>
     /// <exception cref="OptionsValidationException">The thresholds don't validate.</exception>
-    public static void Add(IServiceCollection services, string name, Func<IServiceProvider, IReadOnlyList<ZabbixAgentStatus>> statuses, Action<ZabbixAgentHealthCheckOptions> configure,
+    public static void Add(IServiceCollection services, string name, Func<IServiceProvider, IReadOnlyList<ZabbixComponentStatus>> statuses, Action<ZabbixComponentHealthCheckOptions> configure,
         string role = Agent)
     {
-        var options = new ZabbixAgentHealthCheckOptions();
+        var options = new ZabbixComponentHealthCheckOptions();
         configure(options);
-        List<string> failures = [.. new IValidateOptions<ZabbixAgentHealthCheckOptions>[] { new ZabbixAgentHealthCheckOptionsValidator(), new ZabbixAgentHealthCheckStaleAfterValidator() }
+        List<string> failures = [.. new IValidateOptions<ZabbixComponentHealthCheckOptions>[] { new ZabbixComponentHealthCheckOptionsValidator(), new ZabbixComponentHealthCheckStaleAfterValidator() }
             .Select(validator => validator.Validate(name, options)).Where(result => result.Failed).SelectMany(result => result.Failures ?? [])];
-        if (failures.Count > 0) throw new OptionsValidationException(name, typeof(ZabbixAgentHealthCheckOptions), failures);
+        if (failures.Count > 0) throw new OptionsValidationException(name, typeof(ZabbixComponentHealthCheckOptions), failures);
         Add(services, name, provider => new Destinations(() => statuses(provider), provider.GetService<TimeProvider>(), options, role), role);
     }
 
@@ -47,14 +47,14 @@ internal static class ZabbixAgentHealthChecks
     public static void Add(IServiceCollection services, string name, Func<IServiceProvider, IHealthCheck> check, string role = Agent)
         => services.AddHealthChecks().Add(new HealthCheckRegistration(name, check, failureStatus: null, tags: ["zabbix", role]));
 
-    private sealed class Destinations(Func<IReadOnlyList<ZabbixAgentStatus>> statuses, TimeProvider? time, ZabbixAgentHealthCheckOptions options, string role) : IHealthCheck
+    private sealed class Destinations(Func<IReadOnlyList<ZabbixComponentStatus>> statuses, TimeProvider? time, ZabbixComponentHealthCheckOptions options, string role) : IHealthCheck
     {
         public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
         {
             HealthCheckResult? worst = null;
-            foreach (ZabbixAgentStatus status in statuses())
+            foreach (ZabbixComponentStatus status in statuses())
             {
-                HealthCheckResult result = await new ZabbixAgentHealthCheck(status, time) { DegradedFillFraction = options.DegradedFillFraction, StaleAfter = options.StaleAfter }
+                HealthCheckResult result = await new ZabbixComponentHealthCheck(status, time) { DegradedFillFraction = options.DegradedFillFraction, StaleAfter = options.StaleAfter }
                     .CheckHealthAsync(context, cancellationToken).ConfigureAwait(false);
                 if (worst is not { } held || result.Status < held.Status) worst = result;
             }

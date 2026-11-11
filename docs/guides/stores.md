@@ -63,8 +63,8 @@ while (await store.WaitToLeaseAsync(cancellationToken))
     List<ZabbixStoreEntry<ZabbixValue>> batch = [];
     while (batch.Count < 250 && store.TryLease(out ZabbixStoreEntry<ZabbixValue> entry)) batch.Add(entry);
     if (batch.Count == 0) continue;
-    ZabbixDelivery answer = await wire.DeliverAsync([.. batch.Select(leased => leased.Record)], cancellationToken);
-    if (answer is ZabbixDelivery.Delivered or ZabbixDelivery.Rejected)
+    ZabbixSendOutcome answer = await wire.DeliverAsync([.. batch.Select(leased => leased.Record)], cancellationToken);
+    if (answer is ZabbixSendOutcome.Delivered or ZabbixSendOutcome.Rejected)
         store.Acknowledge(batch[^1].Sequence);                            // the batch has its final answer
     else
     {
@@ -136,7 +136,7 @@ You state the policy once, in the store's constructor. It's an immutable record,
 
 Every record a store doesn't keep is counted on the `zabbix.store.dropped` metric (meter `Community.Zabbix.Store`), tagged with
 the store's name and the reason: `refused`, `discarded`, `expired`, `drop_oldest`, `drop_newest`, `drop_write`, or `faulted` (the
-`ZabbixStoreDropReason` constants). It's logged as event 2100 at the 1st, 10th, 100th, and later powers of ten of each reason.
+`ZabbixStoreDropReason` values, in snake case). It's logged as event 2100 at the 1st, 10th, 100th, and later powers of ten of each reason.
 
 ## Use the memory store
 

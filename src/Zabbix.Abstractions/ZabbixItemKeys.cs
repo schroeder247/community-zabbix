@@ -64,7 +64,7 @@ public static class ZabbixItemKeys
         public static ZabbixItemKey<string> Version { get; } = Item<string>("agent.version");
 
         /// <summary>The name the agent was configured to report, not necessarily the machine's: <c>agent.hostname</c>.</summary>
-        public static ZabbixItemKey<string> Hostname { get; } = Item<string>("agent.hostname");
+        public static ZabbixItemKey<string> HostName { get; } = Item<string>("agent.hostname");
 
         /// <summary>Which of Zabbix's two agents this one is or behaves as, 1 or 2: <c>agent.variant</c>.</summary>
         public static ZabbixItemKey<long> Variant { get; } = Item<long>("agent.variant");
@@ -77,7 +77,7 @@ public static class ZabbixItemKeys
     public static class Host
     {
         /// <summary>Which of a machine's names to read.</summary>
-        public enum HostnameKind
+        public enum HostNameKind
         {
             /// <summary>Whichever the key answers when not told: the NetBIOS name on Windows, the host name elsewhere.</summary>
             Default,
@@ -99,8 +99,8 @@ public static class ZabbixItemKeys
         /// <param name="kind">Which of the machine's names to read.</param>
         /// <param name="lowercase">Whether the agent writes the name in lowercase.</param>
         /// <returns>The item for that name.</returns>
-        /// <remarks>Only Windows answers <see cref="HostnameKind.NetBiosName"/>.</remarks>
-        public static ZabbixItemKey<string> Hostname(HostnameKind kind = HostnameKind.Default, bool lowercase = false)
+        /// <remarks>Only Windows answers <see cref="HostNameKind.NetBiosName"/>.</remarks>
+        public static ZabbixItemKey<string> HostName(HostNameKind kind = HostNameKind.Default, bool lowercase = false)
             => Item<string>("system.hostname", Text(kind), lowercase ? "lower" : string.Empty);
 
         /// <summary>One line describing the operating system and the machine: <c>system.uname</c>.</summary>
@@ -140,13 +140,13 @@ public static class ZabbixItemKeys
         /// <remarks>Linux and Windows only.</remarks>
         public static ZabbixItemKey<string> OsDetails { get; } = Item<string>("system.sw.os.get");
 
-        private static string Text(HostnameKind kind) => kind switch
+        private static string Text(HostNameKind kind) => kind switch
         {
-            HostnameKind.Default => string.Empty,
-            HostnameKind.HostName => "host",
-            HostnameKind.ShortHostName => "shorthost",
-            HostnameKind.FullyQualifiedName => "fqdn",
-            HostnameKind.NetBiosName => "netbios",
+            HostNameKind.Default => string.Empty,
+            HostNameKind.HostName => "host",
+            HostNameKind.ShortHostName => "shorthost",
+            HostNameKind.FullyQualifiedName => "fqdn",
+            HostNameKind.NetBiosName => "netbios",
             _ => throw Undefined(kind),
         };
     }
@@ -1724,12 +1724,12 @@ public static class ZabbixItemKeys
             => Item<string>("web.page.regexp", Required(host), path, Port(port), Required(pattern), Whole(length, 1), output);
 
         /// <summary>A site's TLS certificate and whether it is valid, as JSON: <c>web.certificate.get[host name,port,address]</c>.</summary>
-        /// <param name="hostname">The host name the certificate must be good for.</param>
+        /// <param name="hostName">The host name the certificate must be good for.</param>
         /// <param name="port">The port to connect to; 443 when left out.</param>
         /// <param name="address">The IPv4 address or name to connect to; the host name when left out.</param>
         /// <returns>The item for that site.</returns>
-        public static ZabbixItemKey<string> Certificate(string hostname, int? port = null, string? address = null)
-            => Item<string>("web.certificate.get", Required(hostname), Port(port), address);
+        public static ZabbixItemKey<string> Certificate(string hostName, int? port = null, string? address = null)
+            => Item<string>("web.certificate.get", Required(hostName), Port(port), address);
     }
 
     // One parameter of a key, and whether the key may leave it out when nothing after it is written. Absent or empty text may go,

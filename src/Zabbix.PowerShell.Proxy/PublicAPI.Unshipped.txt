@@ -51,7 +51,6 @@ Community.Zabbix.PowerShell.Commands.NewZbxProxyDataCommand.ProxyName.get -> str
 Community.Zabbix.PowerShell.Commands.NewZbxProxyDataCommand.ProxyName.set -> void
 Community.Zabbix.PowerShell.Commands.NewZbxProxyDataCommand.Session.get -> string!
 Community.Zabbix.PowerShell.Commands.NewZbxProxyDataCommand.Session.set -> void
-Community.Zabbix.PowerShell.Commands.NewZbxProxyDataCommand.Version.get -> string!
 Community.Zabbix.PowerShell.Commands.NewZbxProxyDataCommand.Version.set -> void
 Community.Zabbix.PowerShell.Commands.ReadZbxConnectorStreamCommand
 Community.Zabbix.PowerShell.Commands.ReadZbxConnectorStreamCommand.EventHandler.get -> System.Management.Automation.ScriptBlock?
@@ -139,7 +138,6 @@ Community.Zabbix.PowerShell.Commands.SendZbxProxyDataCommand.ProxyName.set -> vo
 Community.Zabbix.PowerShell.Commands.SendZbxProxyDataCommand.SendZbxProxyDataCommand() -> void
 Community.Zabbix.PowerShell.Commands.SendZbxProxyDataCommand.Server.get -> System.Net.DnsEndPoint![]!
 Community.Zabbix.PowerShell.Commands.SendZbxProxyDataCommand.Server.set -> void
-Community.Zabbix.PowerShell.Commands.SendZbxProxyDataCommand.Version.get -> Community.Zabbix.ZabbixComponentVersion?
 Community.Zabbix.PowerShell.Commands.SendZbxProxyDataCommand.Version.set -> void
 Community.Zabbix.PowerShell.Commands.SetZbxActiveProxyCommand
 Community.Zabbix.PowerShell.Commands.SetZbxActiveProxyCommand.Name.get -> string!
@@ -175,7 +173,6 @@ Community.Zabbix.PowerShell.Commands.StartZbxPassiveProxyCommand.Port.set -> voi
 Community.Zabbix.PowerShell.Commands.StartZbxPassiveProxyCommand.StartZbxPassiveProxyCommand() -> void
 Community.Zabbix.PowerShell.Commands.StartZbxPassiveProxyCommand.TlsAccept.get -> Community.Zabbix.ZabbixTlsAcceptModes[]?
 Community.Zabbix.PowerShell.Commands.StartZbxPassiveProxyCommand.TlsAccept.set -> void
-Community.Zabbix.PowerShell.Commands.StartZbxPassiveProxyCommand.Version.get -> Community.Zabbix.ZabbixComponentVersion
 Community.Zabbix.PowerShell.Commands.StartZbxPassiveProxyCommand.Version.set -> void
 Community.Zabbix.PowerShell.Commands.StopZbxActiveProxyCommand
 Community.Zabbix.PowerShell.Commands.StopZbxActiveProxyCommand.StopZbxActiveProxyCommand() -> void
@@ -191,7 +188,6 @@ Community.Zabbix.PowerShell.Commands.ZabbixActiveProxySession.ProxyName.get -> s
 Community.Zabbix.PowerShell.Commands.ZabbixActiveProxySession.RefreshInterval.get -> System.TimeSpan
 Community.Zabbix.PowerShell.Commands.ZabbixActiveProxySession.Session.get -> string!
 Community.Zabbix.PowerShell.Commands.ZabbixActiveProxySession.Started.get -> System.DateTimeOffset
-Community.Zabbix.PowerShell.Commands.ZabbixActiveProxySession.Version.get -> Community.Zabbix.ZabbixComponentVersion
 Community.Zabbix.PowerShell.Commands.ZabbixPassiveProxySession
 Community.Zabbix.PowerShell.Commands.ZabbixPassiveProxySession.Config.get -> Community.Zabbix.Proxy.ZabbixProxyConfig!
 Community.Zabbix.PowerShell.Commands.ZabbixPassiveProxySession.DisposeAsync() -> System.Threading.Tasks.ValueTask
@@ -202,3 +198,7 @@ Community.Zabbix.PowerShell.ZabbixProxyModule
 Community.Zabbix.PowerShell.ZabbixProxyModule.OnImport() -> void
 Community.Zabbix.PowerShell.ZabbixProxyModule.OnRemove(System.Management.Automation.PSModuleInfo! psModuleInfo) -> void
 Community.Zabbix.PowerShell.ZabbixProxyModule.ZabbixProxyModule() -> void
+Community.Zabbix.PowerShell.Commands.NewZbxProxyDataCommand.Version.get -> System.Version!
+Community.Zabbix.PowerShell.Commands.SendZbxProxyDataCommand.Version.get -> System.Version?
+Community.Zabbix.PowerShell.Commands.StartZbxPassiveProxyCommand.Version.get -> System.Version!
+Community.Zabbix.PowerShell.Commands.ZabbixActiveProxySession.Version.get -> System.Version!

@@ -47,7 +47,7 @@ public sealed class StartZbxPassiveProxyCommand : ZabbixTlsCmdlet
     /// proxy the server's version, and a server configures only a proxy of its own major.minor, so there is no default.
     /// </summary>
     [Parameter(Mandatory = true)]
-    public ZabbixComponentVersion Version { get; set; }
+    public Version Version { get; set; } = null!;
 
     /// <summary>
     /// Which connections are accepted (Zabbix's <c>TLSAccept</c>): <c>Unencrypted</c>, <c>Psk</c>, <c>Certificate</c>,

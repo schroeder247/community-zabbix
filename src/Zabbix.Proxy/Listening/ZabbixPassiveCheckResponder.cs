@@ -36,18 +36,30 @@ public sealed class ZabbixPassiveCheckResponder
     private readonly TimeProvider _time;
     private readonly ILogger _logger;
 
-    /// <summary>A passive agent answering with <paramref name="handlers"/>.</summary>
+    /// <summary>
+    /// A passive agent answering with <paramref name="handlers"/>: a key may take Zabbix's 3 seconds when the request doesn't
+    /// say, on the table's clock, and nothing is logged.
+    /// </summary>
     /// <param name="handlers">The keys it answers.</param>
-    /// <param name="checkTimeout">How long one key may take when the request does not say.</param>
-    /// <param name="time">The clock deadlines run on.</param>
-    /// <param name="logger">Where to log.</param>
-    public ZabbixPassiveCheckResponder(ZabbixItemDictionary handlers, TimeSpan? checkTimeout = null, TimeProvider? time = null, ILogger<ZabbixPassiveCheckResponder>? logger = null)
+    /// <exception cref="ArgumentNullException"><paramref name="handlers"/> is <see langword="null"/>.</exception>
+    public ZabbixPassiveCheckResponder(ZabbixItemDictionary handlers)
+        : this(handlers, TimeSpan.FromSeconds(3), loggers: null, time: null)
+    {
+    }
+
+    /// <summary>A passive agent answering with <paramref name="handlers"/>, with the application's logging and clock.</summary>
+    /// <param name="handlers">The keys it answers.</param>
+    /// <param name="checkTimeout">How long one key may take when the request doesn't say.</param>
+    /// <param name="loggers">Where to log; nowhere when <see langword="null"/>. The caller keeps owning it.</param>
+    /// <param name="time">The clock deadlines run on; the table's when <see langword="null"/>.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="handlers"/> is <see langword="null"/>.</exception>
+    public ZabbixPassiveCheckResponder(ZabbixItemDictionary handlers, TimeSpan checkTimeout, ILoggerFactory? loggers, TimeProvider? time)
     {
         ArgumentNullException.ThrowIfNull(handlers);
         _handlers = handlers;
-        CheckTimeout = checkTimeout ?? TimeSpan.FromSeconds(3);
-        _time = time ?? TimeProvider.System;
-        _logger = logger ?? NullLogger<ZabbixPassiveCheckResponder>.Instance;
+        CheckTimeout = checkTimeout;
+        _time = time ?? handlers.Time;
+        _logger = (ILogger?)loggers?.CreateLogger<ZabbixPassiveCheckResponder>() ?? NullLogger<ZabbixPassiveCheckResponder>.Instance;
     }
 
     /// <summary>How long one key may take when the request does not say; Zabbix's agent default.</summary>
@@ -92,7 +104,7 @@ public sealed class ZabbixPassiveCheckResponder
 
     private async ValueTask<ZabbixAgentAnswer> AnswerAsync(string? text, TimeSpan timeout, CancellationToken cancellationToken)
     {
-        if (!ZabbixItemKey.TryParse(text, null, out ZabbixItemKey key)) return ZabbixAgentAnswer.NotSupported(default, "Invalid item key format.");
+        if (!ZabbixItemKey.TryParse(text, out ZabbixItemKey key)) return ZabbixAgentAnswer.NotSupported(default, "Invalid item key format.");
         ZabbixAgentAnswer answer = await _handlers.AnswerLoggedAsync(key, timeout, _time, _logger, cancellationToken).ConfigureAwait(false);
         ListenerLog.PassiveCheckAnswered(_logger, key, answer.IsSupported);
         return answer;

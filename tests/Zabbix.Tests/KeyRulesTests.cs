@@ -140,5 +140,5 @@ public sealed class KeyRulesTests
         Assert.Contains(results, result => result.MemberNames.Contains(nameof(ZabbixActiveAgentOptions.KeyRules)));
     }
 
-    private static ZabbixItemKey Key(string text) => ZabbixItemKey.Parse(text, null);
+    private static ZabbixItemKey Key(string text) => ZabbixItemKey.Parse(text);
 }

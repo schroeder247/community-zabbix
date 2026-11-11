@@ -107,7 +107,7 @@ public sealed class AdversarialApiTests
     [InlineData("D9")]
     public void A_format_the_sdk_s_values_do_not_know_is_a_format_exception(string format)
     {
-        IFormattable[] values = [new ZabbixClock(1, 2), ZabbixComponentVersion.Parse("7.0.1", null), ZabbixItemKey.Parse("agent.ping", null), new ZabbixServerNode("zbx", 10051)];
+        IFormattable[] values = [new ZabbixClock(1, 2), ZabbixComponentVersion.Parse("7.0.1", null), ZabbixItemKey.Parse("agent.ping"), new ZabbixServerNode("zbx", 10051)];
 
         Assert.All(values, value => Assert.Throws<FormatException>(() => value.ToString(format, null)));
         Assert.All(values, value => Assert.Equal(value.ToString(), value.ToString("G", null)));

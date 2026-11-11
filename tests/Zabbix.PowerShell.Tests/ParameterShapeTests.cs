@@ -425,7 +425,6 @@ public sealed class ParameterShapeTests
             "User: Record, Reference",
             "UserGroup: Record, Reference",
             "Value: Object, String",
-            "Version: String, ZabbixComponentVersion",
         ];
 
         static string Shape(Type type)

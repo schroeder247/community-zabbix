@@ -80,17 +80,22 @@ public static class ZabbixProxyBuilderExtensions
         /// major.minor. A passive proxy must have it, because no server message says the server's version; an active proxy
         /// announces 7.4.0 without it, and adopts the version a refusing server names.
         /// </summary>
-        /// <param name="version">The server's version: <c>new ZabbixComponentVersion(7, 4)</c>.</param>
+        /// <param name="version">The server's version: <c>new Version(7, 4)</c>. Its major, minor and build are Zabbix's major, minor and patch.</param>
         /// <returns>The builder.</returns>
-        public TBuilder WithVersion(ZabbixComponentVersion version)
+        /// <exception cref="ArgumentNullException"><paramref name="version"/> is <see langword="null"/>.</exception>
+        public TBuilder WithVersion(Version version)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            string text = version.ToString(null, CultureInfo.InvariantCulture);
+            ArgumentNullException.ThrowIfNull(version);
+            string text = ZabbixComponentVersion.FromVersion(version).ToString();
             builder.Services.Configure<ZabbixProxyOptions>(builder.Name, options => options.Version = text);
             return builder;
         }
 
-        /// <summary>Sets the protocol version the proxy announces, in Zabbix's spelling: <c>"7.4"</c> or <c>"8.0.0"</c>.</summary>
+        /// <summary>
+        /// Sets the protocol version the proxy announces, in Zabbix's spelling: <c>"7.4"</c>, <c>"8.0.0"</c> or
+        /// <c>"8.0.0rc1"</c>, read as the <see cref="Version"/> Zabbix reads it as (8.0.0).
+        /// </summary>
         /// <param name="version">The server's version: <c>major.minor[.patch]</c>.</param>
         /// <returns>The builder.</returns>
         /// <exception cref="ArgumentException"><paramref name="version"/> isn't <c>major.minor[.patch]</c>.</exception>
@@ -100,7 +105,7 @@ public static class ZabbixProxyBuilderExtensions
             ArgumentNullException.ThrowIfNull(version);
             if (!ZabbixComponentVersion.TryParse(version, CultureInfo.InvariantCulture, out ZabbixComponentVersion parsed))
                 throw new ArgumentException($"\"{version}\" isn't a Zabbix version: major.minor[.patch], such as 7.4 or 8.0.0.", nameof(version));
-            return builder.WithVersion(parsed);
+            return builder.WithVersion(parsed.ToVersion());
         }
 
         /// <summary>Sets any of the proxy's options, in order with the other verbs.</summary>

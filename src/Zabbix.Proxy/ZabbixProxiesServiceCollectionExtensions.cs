@@ -13,13 +13,16 @@ namespace Community.Zabbix;
 /// </summary>
 public static class ZabbixProxiesServiceCollectionExtensions
 {
+    // The key of a proxy row that says which class it is: Zabbix's ProxyMode.
+    private const string ModeKey = "Mode";
+
     /// <summary>
     /// Registers every agent, agent-nested trapper, passive agent and proxy <paramref name="document"/> declares, by name,
     /// bound to its own subsection. A proxy row is wired to
     /// <see cref="ZabbixActiveProxyServiceCollectionExtensions.AddZabbixActiveProxy"/> or
-    /// <see cref="ZabbixPassiveProxyServiceCollectionExtensions.AddZabbixPassiveProxy"/> by its own
-    /// <see cref="ZabbixProxyOptions.Mode"/> (Zabbix's <c>ProxyMode</c>) — one row serves both verbs, so a document
-    /// never says which verb, only which mode, exactly as the proxy's own configuration file would.
+    /// <see cref="ZabbixPassiveProxyServiceCollectionExtensions.AddZabbixPassiveProxy"/> by its own <c>Mode</c> key,
+    /// <c>Active</c> (the default) or <c>Passive</c>, as Zabbix's <c>ProxyMode</c> chooses: one row serves both verbs, so a
+    /// document never says which verb, only which mode, exactly as the proxy's own configuration file would.
     /// </summary>
     /// <param name="services">The container.</param>
     /// <param name="document">
@@ -50,8 +53,10 @@ public static class ZabbixProxiesServiceCollectionExtensions
 
         foreach (IConfigurationSection proxy in document.GetSection(ZabbixConfigurationSections.Proxies).GetChildren())
         {
-            ZabbixProxyRole mode = proxy.GetValue<ZabbixProxyRole?>(nameof(ZabbixProxyOptions.Mode)) ?? ZabbixProxyRole.Active;
-            if (mode == ZabbixProxyRole.Active) services.AddZabbixActiveProxy(proxy.Key).Bind(proxy);
+            // The row's mode chooses the class, and the class is the role, so it's no option of the proxy's: the key is read
+            // here, as the API's operating mode (0 or Active, 1 or Passive), and the options binder passes over it.
+            ZabbixProxyOperatingMode mode = proxy.GetValue<ZabbixProxyOperatingMode?>(ModeKey) ?? ZabbixProxyOperatingMode.Active;
+            if (mode == ZabbixProxyOperatingMode.Active) services.AddZabbixActiveProxy(proxy.Key).Bind(proxy);
             else services.AddZabbixPassiveProxy(proxy.Key).Bind(proxy);
         }
 

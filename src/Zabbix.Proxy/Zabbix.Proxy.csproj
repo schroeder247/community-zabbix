@@ -23,8 +23,9 @@ License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="../Zabbix.Agent/Zabbix.Agent.csproj" />
     <!-- The API's vocabulary, not its client: a listener's TlsAccept is Zabbix's generated ZabbixTlsAcceptModes, the
-         same [Flags] the API's host and proxy records carry, and the connector's tags are ZabbixTag and ZabbixTagOrigin.
-         Zabbix.Sdk (the HTTP pipeline) stays out. DesignConformanceTests.Dependencies pins the three types. -->
+         same [Flags] the API's host and proxy records carry; the connector's tags, severities and value types and the proxy
+         configuration's host and item statuses, item types and proxy mode are the API's enums, not copies of them.
+         Zabbix.Sdk (the HTTP pipeline) stays out. DesignConformanceTests.Dependencies pins the types. -->
     <ProjectReference Include="../Zabbix.Api/Zabbix.Api.csproj" />
   </ItemGroup>
   <ItemGroup>

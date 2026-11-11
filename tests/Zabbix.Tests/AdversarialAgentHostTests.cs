@@ -53,10 +53,10 @@ public sealed class AdversarialAgentHostTests
         var logger = new FakeLogger(logs);
         var handlers = new ZabbixItemDictionary();
         handlers.Add("broken", new ZabbixItemCallback((_, _) => throw new InvalidOperationException("the probe failed")));
-        ZabbixItemKey key = ZabbixItemKey.Parse("broken[1]", null);
+        ZabbixItemKey key = ZabbixItemKey.Parse("broken[1]");
 
         ZabbixAgentAnswer first = await handlers.AnswerLoggedAsync(key, TimeSpan.FromSeconds(1), TimeProvider.System, logger, TestContext.Current.CancellationToken);
-        ZabbixAgentAnswer second = await handlers.AnswerLoggedAsync(ZabbixItemKey.Parse("broken[2]", null), TimeSpan.FromSeconds(1), TimeProvider.System, logger, TestContext.Current.CancellationToken);
+        ZabbixAgentAnswer second = await handlers.AnswerLoggedAsync(ZabbixItemKey.Parse("broken[2]"), TimeSpan.FromSeconds(1), TimeProvider.System, logger, TestContext.Current.CancellationToken);
 
         Assert.False(first.IsSupported);
         Assert.Equal("the probe failed", first.Error);
@@ -89,7 +89,7 @@ public sealed class AdversarialAgentHostTests
             return new ZabbixAgentAnswer(key, "1", null);
         }).Configure(o =>
         {
-            o.Hostname = "edge-01";
+            o.HostName = "edge-01";
             o.HeartbeatInterval = TimeSpan.Zero;
             o.RefreshInterval = TimeSpan.FromHours(1);
             o.MaxConcurrentChecks = 8;

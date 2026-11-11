@@ -29,7 +29,7 @@ public sealed class LiveAgentEdgeTests
             .AddItem("zbxtest.answer", _ => "42")
             .Configure(o =>
             {
-                o.Hostname = host.Host;
+                o.HostName = host.Host;
                 o.RefreshInterval = TimeSpan.FromSeconds(2);
                 o.Send.FlushInterval = TimeSpan.FromSeconds(1);
             }));
@@ -101,7 +101,7 @@ public sealed class LiveAgentEdgeTests
                 .AddItem("zbxtest.first", _ => "1")
                 .Configure(o =>
                 {
-                    o.Hostname = host.Host;
+                    o.HostName = host.Host;
                     o.RefreshInterval = TimeSpan.FromSeconds(2);
                     o.Send.FlushInterval = TimeSpan.FromSeconds(1);
                 });

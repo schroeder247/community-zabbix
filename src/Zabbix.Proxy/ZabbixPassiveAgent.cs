@@ -88,12 +88,12 @@ public class ZabbixPassiveAgent : ZabbixComponent
     }
 
     /// <summary>
-    /// Starts a builder for the agent of <paramref name="hostname"/>: who may poll it, its items, and its logging.
+    /// Starts a builder for the agent of <paramref name="hostName"/>: who may poll it, its items, and its logging.
     /// </summary>
-    /// <param name="hostname">The agent's name, and what <c>agent.hostname</c> answers unless <c>Configure</c> sets another.</param>
+    /// <param name="hostName">The agent's name, and what <c>agent.hostname</c> answers unless <c>Configure</c> sets another.</param>
     /// <returns>A builder whose <see cref="ZabbixPassiveAgentBuilder.Build"/> returns the agent.</returns>
-    /// <exception cref="ArgumentException"><paramref name="hostname"/> is empty.</exception>
-    /// <exception cref="ArgumentNullException"><paramref name="hostname"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException"><paramref name="hostName"/> is empty.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="hostName"/> is <see langword="null"/>.</exception>
     /// <example>
     /// <code language="csharp">
     /// await using ZabbixPassiveAgent agent = ZabbixPassiveAgent.CreateBuilder("web-01")
@@ -102,7 +102,7 @@ public class ZabbixPassiveAgent : ZabbixComponent
     ///     .Build();
     /// </code>
     /// </example>
-    public static ZabbixPassiveAgentBuilder CreateBuilder(string hostname) => new(hostname);
+    public static ZabbixPassiveAgentBuilder CreateBuilder(string hostName) => new(hostName);
 
     /// <summary>What the agent reads when it starts.</summary>
     public ZabbixPassiveAgentOptions Options { get; }
@@ -117,13 +117,14 @@ public class ZabbixPassiveAgent : ZabbixComponent
     public ZabbixListener? Listener => Volatile.Read(ref _listener);
 
     /// <inheritdoc/>
-    private protected override string DefaultName => Options.Name ?? Options.Hostname;
+    private protected override string DefaultName => Options.Name ?? Options.HostName;
 
     /// <inheritdoc/>
 #pragma warning disable IDE1006 // DisposeAsyncCore is the name the dispose pattern gives this method
     protected override async ValueTask DisposeAsyncCore()
 #pragma warning restore IDE1006
     {
+        if (IsKept) return;                                          // shared: its container releases it
         await base.DisposeAsyncCore().ConfigureAwait(false);          // stops a running component first, so it drains
         if (Interlocked.Exchange(ref _released, 1) != 0) return;
         if (_listener is not null) await _listener.DisposeAsync().ConfigureAwait(false);
@@ -134,6 +135,7 @@ public class ZabbixPassiveAgent : ZabbixComponent
     /// <inheritdoc/>
     protected override void Dispose(bool disposing)
     {
+        if (IsKept) return;                                          // shared: its container releases it
         if (disposing && Interlocked.Exchange(ref _released, 1) == 0)
         {
             _listener?.Dispose();
@@ -155,10 +157,10 @@ public class ZabbixPassiveAgent : ZabbixComponent
             ZabbixItemCollector? collector = _containerCollector;
             if (collector is null && Options.BundledItems) collector = _collector = new ZabbixItemCollector(ZabbixHostFiles.Host, Time);
             Items.KeyRules = ZabbixKeyRules.Parse(Options.KeyRules);
-            Items.AddDefaults(Options.Hostname, null, Options.BundledItems, collector);
+            Items.AddDefaults(Options.HostName, null, Options.BundledItems, collector);
         }
-        var responder = new ZabbixPassiveCheckResponder(Items, Options.CheckTimeout, Time, Loggers.CreateLogger<ZabbixPassiveCheckResponder>());
-        var listener = new ZabbixListener(Options, responder.Handler, _transport ?? ZabbixSocketTransport.Create(Loggers), Time, Loggers.CreateLogger<ZabbixListener>(), _meters);
+        var responder = new ZabbixPassiveCheckResponder(Items, Options.CheckTimeout, Loggers, Time);
+        var listener = new ZabbixListener(Options, responder.Handler, _transport ?? ZabbixSocketTransport.Create(Loggers), Loggers, Time, _meters);
         Volatile.Write(ref _listener, listener);
         return listener.StartingAsync(cancellationToken);
     }

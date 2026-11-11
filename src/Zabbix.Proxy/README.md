@@ -28,7 +28,7 @@ await agent.StartAsync();
 
 // An active proxy that reports to an HA cluster:
 await using ZabbixActiveProxy proxy = ZabbixActiveProxy.CreateBuilder("proxy-01")
-    .AddServer("zbx-server-01;zbx-server-02")
+    .WithServer("zbx-server-01;zbx-server-02")
     .AllowPeer(IPNetwork.Parse("10.0.0.0/8"))
     .Build();
 await proxy.StartAsync();

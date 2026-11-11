@@ -328,7 +328,7 @@ Keep the token out of the file: set `Zabbix__Servers__prod__ApiToken` in the env
 The wire client registers by name too, with the verbs of its builder. Add this before `builder.Build()`:
 
 ```csharp
-builder.Services.AddZabbixWireClient("prod").AddServer("zabbix.example:10051");
+builder.Services.AddZabbixWireClient("prod").WithServer("zabbix.example:10051");
 ```
 
 Then `app.Services.GetRequiredService<IZabbixWireClientFactory>().Create("prod")` returns it.

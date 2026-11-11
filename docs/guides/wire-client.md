@@ -17,7 +17,7 @@ The client belongs to one server or proxy, and each read from an agent names the
 ## Send a value
 
 ```csharp
-using var wire = new ZabbixWireClient("zabbix.example");
+await using var wire = new ZabbixWireClient("zabbix.example");
 
 ZabbixItemKey<long> requests = new("app.requests");
 
@@ -103,16 +103,17 @@ To batch, retry, and survive restarts, drain a store into the client with `Drain
 
 ## HA nodes and redirects
 
-Name the nodes of an HA cluster, or a proxy and its fallback, in order of preference. Add each one to a builder, or join them with
-`;` for the constructor: `new ZabbixWireClient("zbx-server-01;zbx-server-02")`.
+Name the nodes of an HA cluster, or a proxy and its fallback, in order of preference: joined with `;`, as Zabbix spells them, or as
+`DnsEndPoint` nodes. The constructor takes them too: `new ZabbixWireClient("zbx-server-01;zbx-server-02")`.
 
 ```csharp
-using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder()
-    .AddServer("zbx-server-01")
-    .AddServer("zbx-server-02:10051")
+await using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder()
+    .WithServer("zbx-server-01;zbx-server-02:10051")
     .WithTimeout(TimeSpan.FromSeconds(5))
     .Build();
 ```
+
+- A client has one server, so `WithServer` sets it, and a later call replaces it. Several nodes in one call are one HA cluster.
 
 - The client tries the next node only when a connect or TLS handshake fails. Nothing is sent again once a request is written.
 - The node that answered stays first for the next call, and a failed first node moves behind the others.
@@ -128,7 +129,7 @@ redirects across a network you don't trust. If a redirect can't be followed, the
 Each read names the agent, so one client reads from many. It doesn't need a server.
 
 ```csharp
-using var wire = new ZabbixWireClient();
+await using var wire = new ZabbixWireClient();
 
 ZabbixAgentAnswer answer = await wire.GetAgentItemAsync("web-01", "system.cpu.load[all,avg1]");
 
@@ -138,8 +139,9 @@ Console.WriteLine(answer.IsSupported ? answer.Value : $"not supported: {answer.E
 Name the agent as `host` or `host:port`. The port is `ZabbixWireClient.DefaultAgentPort` (10050) unless you name another. The
 agent's `Server` setting must allow your address.
 
-A key the agent doesn't support is an answer with `Error` set, not an exception. `ZabbixAgentRefusedException` means the agent
-refused the request as a whole. Network, TLS, deadline, and frame failures throw as they do for a send.
+A key the agent doesn't support is an answer with `Error` set, not an exception. A typed read, `GetAgentItemAsync(agent, key)`
+with a `ZabbixItemKey<T>`, throws `ZabbixItemNotSupportedException` instead, with the same `Error`. `ZabbixAgentRefusedException`
+means the agent refused the request as a whole, and its `Error` says why. Network, TLS, deadline, and frame failures throw as they do for a send.
 
 The client asks in JSON first and falls back to plaintext for an agent older than 7.0, which it remembers for that agent. It
 keeps a small object per agent until you dispose it, plus a copy of the certificate and key if you use certificate TLS.
@@ -150,8 +152,8 @@ The client sends the requests the web frontend sends to the server's trapper por
 A `user.login` session's id works too.
 
 ```csharp
-using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder()
-    .AddServer("zabbix.example")
+await using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder()
+    .WithServer("zabbix.example")
     .WithToken(apiToken)
     .Build();
 
@@ -192,7 +194,7 @@ The builder's verbs set what `ZabbixWireOptions` holds, in the order you call th
 
 | Verb | What it sets |
 | --- | --- |
-| `AddServer` | Adds a node of the server or proxy, after the nodes added before it. Pass a `DnsEndPoint`, or `host` or `host:port` as text. |
+| `WithServer` | The server or proxy: one node, or the nodes of one HA cluster. Pass `DnsEndPoint` nodes, or Zabbix's spelling as text. A later call replaces it. |
 | `WithToken` | The API token the server's requests carry. |
 | `WithPsk`, `WithCertificate` | TLS with a pre-shared key, given as bytes, or with certificate files. A later call replaces an earlier one. See [TLS and PSK](tls-and-psk.md). |
 | `WithTimeout` | How long one attempt on one node may take. |
@@ -209,8 +211,8 @@ The builder's verbs set what `ZabbixWireOptions` holds, in the order you call th
 
 ## Set options
 
-Set them with the builder's verbs, pass `ZabbixWireOptions` to the constructor, or set `Options` before the first request. The
-client reads them at the first request.
+Set them with the builder's verbs, or pass `ZabbixWireOptions` to the constructor. A client's settings are fixed when it's built:
+the constructor copies the options, so a later change to that object doesn't reach the client.
 
 | Option | Default | Meaning |
 | --- | --- | --- |
@@ -230,7 +232,7 @@ client reads them at the first request.
 | `Compress` | `false` | Compress a request when that makes it smaller. |
 | `Tls` | Unencrypted | Certificate or pre-shared-key TLS. See [TLS and PSK](tls-and-psk.md). |
 
-A server passed to a constructor or to `AddServer` that doesn't parse throws `ArgumentException` there. Options that can't be used, including a
+A server passed to a constructor or to `WithServer` that doesn't parse throws `ArgumentException` there. Options that can't be used, including a
 certificate file that can't be read, throw `InvalidOperationException` at the first request, with the reason in the message and
 the cause inside. So does a request to the server when none is set.
 
@@ -244,7 +246,7 @@ injector in a test, or to send a request the client doesn't model:
 using Community.Zabbix.Protocol;
 
 using var link = new ZabbixWireLink([ZabbixEndPoint.Parse("zbx-server-01"), ZabbixEndPoint.Parse("zbx-server-02")]);
-var real = link.AsExchange(followRedirects: false);
+var real = link.AsExchange();
 Func<ReadOnlyMemory<byte>, CancellationToken, ValueTask<ReadOnlyMemory<byte>>> logged = async (request, cancellationToken) =>
 {
     ReadOnlyMemory<byte> reply = await real(request, cancellationToken);
@@ -252,30 +254,31 @@ Func<ReadOnlyMemory<byte>, CancellationToken, ValueTask<ReadOnlyMemory<byte>>> l
     return reply;
 };
 
-using var wire = new ZabbixWireClient(logged);
+await using var wire = new ZabbixWireClient(logged);
 JsonElement stats = await wire.GetStatsAsync();
 ```
 
 - An exchange is one request and its reply, as a `Func`: the payload goes in, and the reply's payload comes back unframed.
-- `AsExchange(followRedirects: true)` follows a proxy group's redirect once. Pass `acceptLargeReplies: true` to accept a reply of
-  up to 16 GiB, as a proxy's configuration needs.
+- `AsExchange(ZabbixExchangeOptions.FollowRedirects)` follows a proxy group's redirect once, and
+  `ZabbixExchangeOptions.AcceptLargeReplies` accepts a reply of up to 16 GiB, as a proxy's configuration needs. Combine them with `|`.
 - A client built on an exchange sends everything over it. To also pass a token, logging, or a batch size, use
-  `new ZabbixWireClient(exchange, options, loggers, time)`. `Options.Server` then only names the other end in logs and failures.
+  `new ZabbixWireClient(exchange, options, loggers, time)`. The options' `Server` then only names the other end in logs and failures.
 - The client owns nothing it was given. You must dispose the link after the clients that use it, because the link holds what
   certificate mode read from its files.
 
 ## Lifetime and logging
 
-The client is thread-safe and meant to be shared. Each call opens its own connection. Dispose the client to release what
-certificate mode read from its files.
+The client is thread-safe and meant to be shared. Each call opens its own connection. Dispose a client you construct or build to
+release what certificate mode read from its files. A client from a container is the container's: see
+[Register it in a host](#register-it-in-a-host).
 
 Without a logger factory, the client logs nowhere. Pass one to `UseLogging`, or to the longest constructor:
 
 ```csharp
 using ILoggerFactory loggers = LoggerFactory.Create(logging => logging.AddConsole());
 
-using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder()
-    .AddServer("zbx-server-01")
+await using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder()
+    .WithServer("zbx-server-01")
     .UseLogging(loggers)
     .Build();
 ```
@@ -291,8 +294,7 @@ through the host's logging.
 ```csharp
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddZabbixWireClient("prod")
-    .AddServer("zbx-server-01")
-    .AddServer("zbx-server-02")
+    .WithServer("zbx-server-01;zbx-server-02")
     .WithTimeout(TimeSpan.FromSeconds(5));
 
 using IHost app = builder.Build();
@@ -304,6 +306,8 @@ await wire.SendAsync("web-01", new ZabbixItemKey<long>("app.requests"), 42);
   `UseLogging` and `UseTimeProvider`.
 - `IZabbixWireClientFactory.Create(name)` returns the client registered under the name, built once and shared. It throws
   `KeyNotFoundException` for a name nobody registered, and `TryCreate` asks first.
+- The container owns the client. A `Dispose` or `DisposeAsync` on the client it hands out leaves it running for everyone else, as
+  disposing an `HttpClient` from `IHttpClientFactory` leaves its handler, and the container disposes it at shutdown.
 - The client is also a keyed singleton: `[FromKeyedServices("prod")] ZabbixWireClient wire`.
 - `AddZabbixWireClient()` without a name registers the unnamed client, which is also injected as plain `ZabbixWireClient`.
 - Registering a name again continues setting up the same client.

@@ -38,7 +38,7 @@ public sealed class ProxyProviderTests
         services.AddLogging(logging => logging.AddFakeLogging().SetMinimumLevel(LogLevel.Debug));
         services.AddMetrics();
         IZabbixActiveProxyBuilder proxy = services.AddZabbixActiveProxy("proxy-01")
-            .AddServer(server.ToDnsEndPoint())
+            .WithServer(server.ToDnsEndPoint())
             .AddTrapper(0, o => o.Address = "127.0.0.1")
             .AllowPeer(System.Net.IPAddress.Loopback)
             .Configure(o => { o.DataInterval = TimeSpan.FromMilliseconds(20); o.ConfigInterval = TimeSpan.FromMinutes(1); });

@@ -44,7 +44,8 @@ public sealed class ConnectorTests
         Assert.Equal(new ZabbixClock(1_700_000_000, 501), value.Exact);
         Assert.Equal("cpu", value.ItemTags![0].Value);
         Assert.Equal(77UL, @event.EventId);
-        Assert.Equal(3, @event.Severity);
+        Assert.Equal(ZabbixSeverity.Average, @event.Severity);
+        Assert.Equal(ZabbixItemValueType.Float, value.Type);
         Assert.Equal("performance", @event.Tags![0].Value);
         // the connector's tags are the API's own tag record, so one helper reads both
         Assert.IsType<ZabbixTag>(@event.Tags[0]);
@@ -59,7 +60,8 @@ public sealed class ConnectorTests
         Assert.Equal(200UL, log.ItemId);
         Assert.Equal(1_699_999_999, log.Timestamp);
         Assert.Equal("kernel", log.Source);
-        Assert.Equal(4, log.Severity);
+        Assert.Equal(4, log.Severity);                                                    // a log's own severity, not a trigger's
+        Assert.Equal(ZabbixItemValueType.Log, log.Type);
         Assert.Equal(1234, log.LogEventId);
         Assert.Equal("oops", log.Value.GetString());
     }

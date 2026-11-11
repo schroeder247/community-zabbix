@@ -144,18 +144,44 @@ public sealed class OptionsTests
     }
 
     [Fact]
-    public void A_proxy_row_defaults_to_active_mode_as_upstream_s_proxymode_does()
-        => Assert.Equal(ZabbixProxyRole.Active, new ZabbixProxyOptions().Mode);
+    public void A_proxy_row_is_active_unless_its_mode_says_passive_as_upstream_s_proxymode_is()
+    {
+        IConfiguration document = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Proxies:edge:Server"] = "zbx-1",
+            ["Proxies:edge:Trapper:AllowedPeers:0"] = "127.0.0.1",
+            ["Proxies:dmz:Mode"] = "Passive",
+            ["Proxies:dmz:Version"] = "7.4",
+            ["Proxies:dmz:Trapper:AllowedPeers:0"] = "127.0.0.1",
+            ["Proxies:dmz1:Mode"] = "1",                                                // ProxyMode's number reads too
+            ["Proxies:dmz1:Version"] = "7.4",
+            ["Proxies:dmz1:Trapper:AllowedPeers:0"] = "127.0.0.1",
+        }).Build();
+        var services = new ServiceCollection();
+
+        services.AddZabbixProxies(document);
+
+        Assert.Contains(services, descriptor => descriptor.IsKeyedService && descriptor.ServiceType == typeof(ZabbixActiveProxy) && Equals(descriptor.ServiceKey, "edge"));
+        Assert.Contains(services, descriptor => descriptor.IsKeyedService && descriptor.ServiceType == typeof(ZabbixPassiveProxy) && Equals(descriptor.ServiceKey, "dmz"));
+        Assert.Contains(services, descriptor => descriptor.IsKeyedService && descriptor.ServiceType == typeof(ZabbixPassiveProxy) && Equals(descriptor.ServiceKey, "dmz1"));
+        Assert.Null(typeof(ZabbixProxyOptions).GetProperty("Mode"));                       // the class is the role, not an option
+    }
 
     [Fact]
-    public void Calling_add_zabbix_proxy_directly_ignores_a_passive_mode_left_on_the_row()
+    public void A_mode_left_on_a_row_bound_to_a_proxy_directly_is_passed_over()
     {
-        // Mode only steers ZabbixConfigurationSections.AddZabbixProxies's choice of verb; code that already chose a verb is
-        // not second-guessed by a stray Mode the row happens to carry (e.g. from a shared base configuration).
+        // Mode only steers AddZabbixProxies's choice of class; code that already chose one binds the rest of the row, and a
+        // stray Mode the row happens to carry (from a shared base configuration) changes nothing.
+        IConfiguration row = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Mode"] = "Passive",
+            ["Server"] = "zbx1",
+            ["Trapper:AllowedPeers:0"] = "10.0.0.0/8",
+        }).Build();
         var services = new ServiceCollection();
-        services.AddZabbixActiveProxy("p").AddServer("zbx1").AddTrapper(0).AllowPeer(System.Net.IPNetwork.Parse("10.0.0.0/8")).Configure(o => o.Mode = ZabbixProxyRole.Passive);
+        services.AddZabbixActiveProxy("p").Bind(row).AddTrapper(0);
         using ServiceProvider provider = services.BuildValidated();
 
-        Assert.IsType<ZabbixActiveProxy>(provider.GetRequiredKeyedService<ZabbixActiveProxy>("p"));
+        Assert.Equal("zbx1", provider.GetRequiredKeyedService<ZabbixActiveProxy>("p").Options.Server);
     }
 }

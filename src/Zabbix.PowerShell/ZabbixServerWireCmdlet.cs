@@ -142,7 +142,7 @@ public abstract class ZabbixServerWireCmdlet : ZabbixServerCmdlet, IZabbixTlsPar
         IReadOnlyList<DnsEndPoint> nodes = await ResolveTrapperAsync(server, cancellationToken).ConfigureAwait(false);
         string? token = await Connected.GetTokenAsync(cancellationToken).ConfigureAwait(false);
         using ZabbixWireLink link = ZabbixWireLinks.Open(nodes, options, Connected.Time, Connected.Loggers);
-        using var wire = new ZabbixWireClient(link.AsExchange(followRedirects: false), new ZabbixWireOptions { Server = string.Join(';', nodes.Distinct().Select(ZabbixEndPoint.Format)), SessionId = token }, Connected.Loggers, Connected.Time);
+        using var wire = new ZabbixWireClient(link.AsExchange(), new ZabbixWireOptions { Server = string.Join(';', nodes.Distinct().Select(ZabbixEndPoint.Format)), SessionId = token }, Connected.Loggers, Connected.Time);
         return await call(wire, cancellationToken).ConfigureAwait(false);
     }
 }

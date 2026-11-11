@@ -36,49 +36,47 @@ public sealed class ZabbixWireLink : IDisposable
     /// <param name="connection">The connection's words (deadline, TLS, compression) for every node; the defaults when <see langword="null"/>.</param>
     /// <exception cref="ArgumentException"><paramref name="nodes"/> is empty, or <paramref name="connection"/> does not validate.</exception>
     public ZabbixWireLink(IEnumerable<DnsEndPoint> nodes, ZabbixConnectionOptions? connection)
-        : this(nodes, connection, time: null, logger: null)
+        : this(nodes, connection, loggers: null, time: null)
     {
     }
 
-    /// <summary>Initializes a link to <paramref name="nodes"/>.</summary>
+    /// <summary>Initializes a link to <paramref name="nodes"/>, with the application's logging and clock.</summary>
     /// <param name="nodes">The nodes, in order of preference.</param>
     /// <param name="connection">The connection's words (deadline, TLS, compression) for every node; the defaults when <see langword="null"/>.</param>
+    /// <param name="loggers">Where the link logs its failovers and redirects; nowhere when <see langword="null"/>. The caller keeps owning it.</param>
     /// <param name="time">The clock the deadlines run on; the system clock when <see langword="null"/>.</param>
-    /// <param name="logger">Where the link logs its failovers and redirects.</param>
     /// <exception cref="ArgumentException"><paramref name="nodes"/> is empty, or <paramref name="connection"/> does not validate.</exception>
-    public ZabbixWireLink(IEnumerable<DnsEndPoint> nodes, ZabbixConnectionOptions? connection, TimeProvider? time, ILogger<ZabbixWireLink>? logger)
+    public ZabbixWireLink(IEnumerable<DnsEndPoint> nodes, ZabbixConnectionOptions? connection, ILoggerFactory? loggers, TimeProvider? time)
     {
         ArgumentNullException.ThrowIfNull(nodes);
-        _link = new ZabbixNodeLink([.. nodes.Select(static node => (ZabbixServerNode)node)], connection, time, logger, telemetry: null);
+        _link = new ZabbixNodeLink([.. nodes.Select(static node => (ZabbixServerNode)node)], connection, time, loggers?.CreateLogger<ZabbixWireLink>(), telemetry: null);
     }
 
     /// <summary>Gets the node the next exchange starts at.</summary>
     public DnsEndPoint First => _link.First;
 
     /// <summary>
-    /// Returns the link as a request/reply exchange: connect (failing over), send one frame, read one frame, close.
+    /// Returns the link as a request/reply exchange: connect (failing over), send one frame, read one frame, close. A redirect
+    /// reply isn't followed, and a reply is at most <see cref="ZabbixConnectionOptions.DefaultMaxPayloadBytes"/> unless
+    /// <see cref="ZabbixConnectionOptions.MaxPayloadBytes"/> says otherwise.
     /// </summary>
-    /// <param name="followRedirects">
-    /// Whether a proxy group's redirect reply is followed, as the agent and <c>zabbix_sender</c> follow it
-    /// (<c>zbx_comms_exchange_with_redirect</c>): the request is sent to the redirect's target once. A server never sends
-    /// one, so a request to a server does not need it.
-    /// </param>
     /// <returns>The exchange, which uses this link for as long as the link lives.</returns>
-    public ZabbixExchangeCallback AsExchange(bool followRedirects) => _link.Exchange(followRedirects);
+    public ZabbixExchangeCallback AsExchange() => AsExchange(ZabbixExchangeOptions.None);
 
     /// <summary>
-    /// Returns the link as a request/reply exchange whose replies may be large frames: a proxy's configuration arrives
-    /// as one, up to upstream's 16 GiB (<c>zbx_tcp_recv_large</c>), so a proxy uplink (<c>ZabbixProxyUplink</c>, in
-    /// <c>Community.Zabbix.Proxy</c>) is built over this exchange, as the hosted proxy builds its own.
+    /// Returns the link as a request/reply exchange: connect (failing over), send one frame, read one frame, close.
+    /// <see cref="ZabbixExchangeOptions.FollowRedirects"/> follows a proxy group's redirect, and
+    /// <see cref="ZabbixExchangeOptions.AcceptLargeReplies"/> takes a large reply, such as a proxy's configuration.
     /// </summary>
-    /// <param name="followRedirects">Whether a proxy group's redirect reply is followed (<see cref="AsExchange(bool)"/>).</param>
-    /// <param name="acceptLargeReplies">
-    /// Whether a reply may be a large frame, capped at 16 GiB while <see cref="ZabbixConnectionOptions.MaxPayloadBytes"/>
-    /// is unset; <see langword="false"/> keeps <see cref="ZabbixConnectionOptions.DefaultMaxPayloadBytes"/> (16 MiB), as
-    /// <see cref="AsExchange(bool)"/> does. A set <see cref="ZabbixConnectionOptions.MaxPayloadBytes"/> caps either way.
-    /// </param>
+    /// <param name="options">How the exchange treats a reply.</param>
     /// <returns>The exchange, which uses this link for as long as the link lives.</returns>
-    public ZabbixExchangeCallback AsExchange(bool followRedirects, bool acceptLargeReplies) => _link.Exchange(followRedirects, acceptLargeReplies);
+    /// <example>
+    /// <code language="csharp">
+    /// ZabbixExchangeCallback sending = link.AsExchange(ZabbixExchangeOptions.FollowRedirects);
+    /// </code>
+    /// </example>
+    public ZabbixExchangeCallback AsExchange(ZabbixExchangeOptions options)
+        => _link.Exchange(options.HasFlag(ZabbixExchangeOptions.FollowRedirects), options.HasFlag(ZabbixExchangeOptions.AcceptLargeReplies));
 
     /// <summary>What certificate mode read, held until the link is disposed; <see langword="null"/> in the other modes.</summary>
     internal ZabbixCertificateTrust? Trust => _link.Trust;

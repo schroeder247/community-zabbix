@@ -35,7 +35,7 @@ public sealed class PassiveAgentTests
         handlers["agent.ping"] = (key, _) => ValueTask.FromResult(ZabbixAgentAnswer.Supported(key, "2"));
 
         Assert.Contains("agent.ping", refused.Message, StringComparison.Ordinal);
-        Assert.Equal("2", (await handlers.AnswerAsync(ZabbixItemKey.Parse("agent.ping", null), TimeSpan.FromSeconds(1), TimeProvider.System, TestContext.Current.CancellationToken)).Value);
+        Assert.Equal("2", (await handlers.AnswerAsync(ZabbixItemKey.Parse("agent.ping"), TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken)).Value);
     }
 
     [Fact]
@@ -45,17 +45,17 @@ public sealed class PassiveAgentTests
             .Add("custom.async", async (key, cancellationToken) => { await Task.Yield(); return key[0]; })
             .Add("custom.broken", (key, _) => ValueTask.FromException<string>(new InvalidOperationException("The source is offline.")));
 
-        ZabbixAgentAnswer value = await handlers.AnswerAsync(ZabbixItemKey.Parse("custom.async[hello]", null), TimeSpan.FromSeconds(5), TimeProvider.System, TestContext.Current.CancellationToken);
-        ZabbixAgentAnswer broken = await handlers.AnswerAsync(ZabbixItemKey.Parse("custom.broken", null), TimeSpan.FromSeconds(5), TimeProvider.System, TestContext.Current.CancellationToken);
+        ZabbixAgentAnswer value = await handlers.AnswerAsync(ZabbixItemKey.Parse("custom.async[hello]"), TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        ZabbixAgentAnswer broken = await handlers.AnswerAsync(ZabbixItemKey.Parse("custom.broken"), TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
 
-        Assert.Equal(ZabbixAgentAnswer.Supported(ZabbixItemKey.Parse("custom.async[hello]", null), "hello"), value);
-        Assert.Equal(ZabbixAgentAnswer.NotSupported(ZabbixItemKey.Parse("custom.broken", null), "The source is offline."), broken);
+        Assert.Equal(ZabbixAgentAnswer.Supported(ZabbixItemKey.Parse("custom.async[hello]"), "hello"), value);
+        Assert.Equal(ZabbixAgentAnswer.NotSupported(ZabbixItemKey.Parse("custom.broken"), "The source is offline."), broken);
     }
 
     [Fact]
     public void The_answer_factories_say_supported_or_not_and_the_indexer_names_its_parameter_as_Add_does()
     {
-        ZabbixItemKey key = ZabbixItemKey.Parse("agent.ping", null);
+        ZabbixItemKey key = ZabbixItemKey.Parse("agent.ping");
 
         Assert.True(ZabbixAgentAnswer.Supported(key, null).IsSupported);
         Assert.False(ZabbixAgentAnswer.NotSupported(key, "This agent does not answer the key.").IsSupported);
@@ -140,7 +140,7 @@ public sealed class PassiveAgentTests
     public async Task A_hosted_passive_agent_answers_the_getter_over_the_platform_s_transport()
     {
         var services = new ServiceCollection();
-        services.AddZabbixPassiveAgent("edge").Configure(o => { o.Address = "127.0.0.1"; o.Port = 0; o.Hostname = "edge-01"; o.AllowedPeers.Add("127.0.0.1"); }).AddItem("custom.answer", _ => "42");
+        services.AddZabbixPassiveAgent("edge").Configure(o => { o.Address = "127.0.0.1"; o.Port = 0; o.HostName = "edge-01"; o.AllowedPeers.Add("127.0.0.1"); }).AddItem("custom.answer", _ => "42");
         using ServiceProvider provider = services.BuildValidated();
         var hosted = (IHostedLifecycleService)provider.GetServices<IHostedService>().Single();
         await hosted.StartingAsync(TestContext.Current.CancellationToken);

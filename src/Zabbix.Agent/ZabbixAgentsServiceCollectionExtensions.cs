@@ -21,7 +21,7 @@ public static class ZabbixAgentsServiceCollectionExtensions
     /// <see cref="ZabbixConfigurationSections.PushAgents"/> and <see cref="ZabbixConfigurationSections.ActiveAgents"/>. Each
     /// is <c>AddZabbixPushAgent(name).Bind(section)</c> or <c>AddZabbixActiveAgent(name).Bind(section)</c>, so a call of the
     /// same name adds sources, items and stores to the agent a row declares, and the row's name is the agent's host unless the
-    /// row sets <c>Hostname</c>. The names are read once; what is under a name is bound, so its options monitor sees a reload.
+    /// row sets <c>HostName</c>. The names are read once; what is under a name is bound, so its options monitor sees a reload.
     /// An agent sends over the wire and never calls the API, so the document's <see cref="ZabbixConfigurationSections.Servers"/>
     /// are not bound here: a host that also calls the API calls <c>Zabbix.Sdk</c>'s <c>AddZabbixClients</c> too.
     /// </summary>

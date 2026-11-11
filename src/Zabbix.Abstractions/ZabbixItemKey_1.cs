@@ -1,6 +1,5 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
-using System.Globalization;
 
 namespace Community.Zabbix;
 
@@ -30,7 +29,7 @@ public readonly record struct ZabbixItemKey<T>
     /// <exception cref="ArgumentNullException"><paramref name="key"/> is <see langword="null"/>.</exception>
     /// <exception cref="FormatException"><paramref name="key"/> is not an item key.</exception>
     public ZabbixItemKey([ZabbixItemKeyData] string key)
-        : this(ZabbixItemKey.Parse(key, CultureInfo.InvariantCulture))
+        : this(ZabbixItemKey.Parse(key))
     {
     }
 

@@ -40,7 +40,8 @@ public sealed class ListenerTests
         var options = new ZabbixListenerOptions { Address = "127.0.0.1", Port = 0, Timeout = TimeSpan.FromSeconds(5) };
         options.AllowedPeers.Add("127.0.0.1");
         configure?.Invoke(options);
-        var listener = new ZabbixListener(options, handler, Transport(), time, logger, meters);
+        using ILoggerFactory? loggers = SingleLoggerFactory.Of(logger);
+        var listener = new ZabbixListener(options, handler, Transport(), loggers, time, meters);
         await listener.StartingAsync(default);
         await listener.StartAsync(default);
         var bound = (IPEndPoint)listener.LocalEndPoint!;
@@ -266,7 +267,8 @@ public sealed class ListenerTests
         var logs = new FakeLogCollector();
         var options = new ZabbixListenerOptions { Address = "127.0.0.1", Port = 0 };
         options.AllowedPeers.Add("zabbix.invalid");
-        var listener = new ZabbixListener(options, Echo, Transport(), time: null, logger: new FakeLogger<ZabbixListener>(logs), meters: null)
+        using var loggers = new SingleLoggerFactory(new FakeLogger<ZabbixListener>(logs));
+        var listener = new ZabbixListener(options, Echo, Transport(), loggers: loggers, time: null, meters: null)
         {
             Resolver = (_, _) => Task.FromException<IPAddress[]>(new SocketException((int)SocketError.HostNotFound)),
         };

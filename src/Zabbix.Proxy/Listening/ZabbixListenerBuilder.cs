@@ -2,6 +2,8 @@
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
 using System.Diagnostics.Metrics;
 using System.Net;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -15,8 +17,11 @@ namespace Community.Zabbix.Listening;
 /// proxy have (<see cref="ZabbixListenerBuilderExtensions"/>).
 /// </summary>
 /// <remarks>
-/// A listener has no registration of its own: in an application with a host, a passive agent, a proxy or a push agent's
-/// trapper is the listener the host runs. To bring a transport of your own, construct the listener with it.
+/// The builder holds a container of its own, <see cref="Services"/>: the verbs write the listener's options there, and the
+/// application can register what the listener uses from it, such as its logging. The listener <see cref="Build"/> returns
+/// owns that container and disposes it. A listener has no registration in an application's container: in an application
+/// with a host, a passive agent, a proxy or a push agent's trapper is the listener the host runs. To bring a transport of
+/// your own, construct the listener with it.
 /// </remarks>
 /// <example>
 /// <code language="csharp">
@@ -33,17 +38,21 @@ namespace Community.Zabbix.Listening;
 /// </example>
 public sealed class ZabbixListenerBuilder : IZabbixListenerBuilder
 {
-    private readonly ZabbixListenerOptions _options = new();
+    private readonly ServiceCollection _services = [];
     private Func<ZabbixConversationContext, CancellationToken, ValueTask>? _conversation;
-    private ILoggerFactory? _loggers;
-    private TimeProvider? _time;
-    private IMeterFactory? _meters;
     private bool _built;
 
     /// <summary>A builder for a listener on port 10051 of every interface, until <c>UseSocketTransport</c> says otherwise.</summary>
-    public ZabbixListenerBuilder()
-    {
-    }
+    public ZabbixListenerBuilder() => _services.AddOptions<ZabbixListenerOptions>(Name);
+
+    /// <summary>The listener's name in <see cref="Services"/>: <see cref="Options.DefaultName"/>, since it's the one listener there.</summary>
+    public string Name => Options.DefaultName;
+
+    /// <summary>
+    /// The builder's own container. The verbs write the listener's options here, and the application can register what the
+    /// listener uses from it: its logging, its clock and its meters.
+    /// </summary>
+    public IServiceCollection Services => _services;
 
     /// <summary>Binds Kestrel's socket transport on <paramref name="endPoint"/>. A later call replaces it.</summary>
     /// <param name="endPoint">The address and port; port <c>0</c> lets the platform pick one.</param>
@@ -53,10 +62,13 @@ public sealed class ZabbixListenerBuilder : IZabbixListenerBuilder
     public ZabbixListenerBuilder UseSocketTransport(IPEndPoint endPoint)
     {
         ArgumentNullException.ThrowIfNull(endPoint);
-        ThrowIfBuilt();
-        _options.Address = endPoint.Address.ToString();
-        _options.Port = endPoint.Port;
-        return this;
+        string address = endPoint.Address.ToString();
+        int port = endPoint.Port;
+        return Configure(options =>
+        {
+            options.Address = address;
+            options.Port = port;
+        });
     }
 
     /// <summary>Binds Kestrel's socket transport on <paramref name="port"/> of every interface. A later call replaces it.</summary>
@@ -143,7 +155,7 @@ public sealed class ZabbixListenerBuilder : IZabbixListenerBuilder
     {
         ArgumentNullException.ThrowIfNull(configure);
         ThrowIfBuilt();
-        configure(_options);
+        _services.Configure(Name, configure);
         return this;
     }
 
@@ -156,7 +168,7 @@ public sealed class ZabbixListenerBuilder : IZabbixListenerBuilder
     {
         ArgumentNullException.ThrowIfNull(loggers);
         ThrowIfBuilt();
-        _loggers = loggers;
+        _services.Replace(ServiceDescriptor.Singleton(loggers));
         return this;
     }
 
@@ -169,7 +181,7 @@ public sealed class ZabbixListenerBuilder : IZabbixListenerBuilder
     {
         ArgumentNullException.ThrowIfNull(time);
         ThrowIfBuilt();
-        _time = time;
+        _services.Replace(ServiceDescriptor.Singleton(time));
         return this;
     }
 
@@ -182,13 +194,14 @@ public sealed class ZabbixListenerBuilder : IZabbixListenerBuilder
     {
         ArgumentNullException.ThrowIfNull(meters);
         ThrowIfBuilt();
-        _meters = meters;
+        _services.Replace(ServiceDescriptor.Singleton(meters));
         return this;
     }
 
     /// <summary>
-    /// Builds the listener: checks its options with the rules it checks when it starts, and returns it, not yet bound.
-    /// <see cref="Build"/> runs once, and the options can't change after it.
+    /// Builds the listener: checks its options with the rules it checks when it starts, and returns it, not yet bound. The
+    /// listener owns the builder's container and disposes it. <see cref="Build"/> runs once, and <see cref="Services"/> can't
+    /// change after it.
     /// </summary>
     /// <returns>The listener, which you must dispose. <see cref="ZabbixListener.StartingAsync"/> binds it, and <see cref="ZabbixListener.StartAsync"/> starts accepting.</returns>
     /// <exception cref="InvalidOperationException">
@@ -201,14 +214,28 @@ public sealed class ZabbixListenerBuilder : IZabbixListenerBuilder
         _built = true;
         Func<ZabbixConversationContext, CancellationToken, ValueTask> conversation = _conversation
             ?? throw new InvalidOperationException("The listener can't be built as it's set: OnRequest says what answers a request.");
-        ValidateOptionsResult valid = new ZabbixListenerOptionsValidator().Validate(Options.DefaultName, _options);
-        if (valid.Failed)
+        _services.MakeReadOnly();
+        ServiceProvider container = _services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
+        bool owned = false;
+        try
         {
-            var invalid = new OptionsValidationException(Options.DefaultName, typeof(ZabbixListenerOptions), valid.Failures);
-            throw new InvalidOperationException($"The listener can't be built as it's set: {invalid.Message}", invalid);
+            ZabbixListenerOptions options = container.GetRequiredService<IOptionsMonitor<ZabbixListenerOptions>>().Get(Name);
+            ValidateOptionsResult valid = new ZabbixListenerOptionsValidator().Validate(Name, options);
+            if (valid.Failed)
+            {
+                var invalid = new OptionsValidationException(Name, typeof(ZabbixListenerOptions), valid.Failures);
+                throw new InvalidOperationException($"The listener can't be built as it's set: {invalid.Message}", invalid);
+            }
+            ILoggerFactory loggers = container.GetService<ILoggerFactory>() ?? NullLoggerFactory.Instance;
+            var listener = new ZabbixListener(options, conversation, ZabbixSocketTransport.Create(loggers), loggers, container.GetService<TimeProvider>(), container.GetService<IMeterFactory>());
+            listener.OwnContainer(container);
+            owned = true;
+            return listener;
         }
-        ILoggerFactory loggers = _loggers ?? NullLoggerFactory.Instance;
-        return new ZabbixListener(_options, conversation, ZabbixSocketTransport.Create(loggers), _time, loggers.CreateLogger<ZabbixListener>(), _meters);
+        finally
+        {
+            if (!owned) container.Dispose();
+        }
     }
 
     // A listener's options are this builder's own until it builds.

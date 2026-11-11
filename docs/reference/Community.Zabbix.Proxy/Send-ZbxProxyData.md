@@ -8,7 +8,7 @@ Sends one page of history values as an active proxy.
 ## SYNTAX
 
 ```
-Send-ZbxProxyData [-ProxyName] <string> [-Server] <DnsEndPoint[]> [-History] <ZabbixProxyHistoryItem[]> [-More] [-ProxyDelay <long>] [-Version <ZabbixComponentVersion>] [-Tls <ZabbixTlsMode>] [-PskIdentity <string>] [-Psk <SecureString>] [-Certificate <string>] [-CertificateKey <string>] [-CertificateAuthority <string>] [-CertificateRevocationList <string>] [-ServerIssuer <string>] [-ServerSubject <string>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Send-ZbxProxyData [-ProxyName] <string> [-Server] <DnsEndPoint[]> [-History] <ZabbixProxyHistoryItem[]> [-More] [-ProxyDelay <long>] [-Version <Version>] [-Tls <ZabbixTlsMode>] [-PskIdentity <string>] [-Psk <SecureString>] [-Certificate <string>] [-CertificateKey <string>] [-CertificateAuthority <string>] [-CertificateRevocationList <string>] [-ServerIssuer <string>] [-ServerSubject <string>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -134,7 +134,7 @@ The proxy version to announce (7.0.0); 7.4 when omitted. A server refuses a prox
 
 | | |
 | --- | --- |
-| Type | `ZabbixComponentVersion` |
+| Type | `Version` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |

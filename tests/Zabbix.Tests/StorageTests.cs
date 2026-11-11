@@ -134,8 +134,8 @@ public sealed class StorageTests
         store.TryWrite(-1);                                                             // refused
 
         Assert.Collection(dropped.GetMeasurementSnapshot(),
-            m => { Assert.Equal(1, m.Value); Assert.Equal("edge-01", m.Tags["zabbix.store.name"]); Assert.Equal(ZabbixStoreDropReason.DropOldest, m.Tags["zabbix.store.reason"]); },
-            m => { Assert.Equal(1, m.Value); Assert.Equal(ZabbixStoreDropReason.Refused, m.Tags["zabbix.store.reason"]); });
+            m => { Assert.Equal(1, m.Value); Assert.Equal("edge-01", m.Tags["zabbix.store.name"]); Assert.Equal("drop_oldest", m.Tags["zabbix.store.reason"]); },
+            m => { Assert.Equal(1, m.Value); Assert.Equal("refused", m.Tags["zabbix.store.reason"]); });
     }
 
     [Fact]

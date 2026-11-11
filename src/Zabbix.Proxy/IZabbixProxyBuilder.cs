@@ -16,10 +16,10 @@ namespace Community.Zabbix;
 public interface IZabbixProxyBuilder : IZabbixStoreBuilder, IZabbixListenerBuilder
 {
     /// <summary>The proxy's name as the server knows it: the name of its options, and the key it's registered under.</summary>
-    string Name { get; }
+    new string Name { get; }
 
     /// <summary>The container the proxy is registered in.</summary>
-    IServiceCollection Services { get; }
+    new IServiceCollection Services { get; }
 
     // A proxy keeps its history store in its named options, built at start.
     [SuppressMessage("Design", "CA1033:Interface methods should be callable by child types",

@@ -52,7 +52,8 @@ public sealed class AdversarialProxyHardeningTests
         await using var transport = new FailingTransport(failures: 2);
         var options = new ZabbixListenerOptions { Address = "127.0.0.1", Port = 0 };
         options.AllowedPeers.Add("127.0.0.1");
-        await using var listener = new ZabbixListener(options, (_, _) => ValueTask.FromResult(ReadOnlyMemory<byte>.Empty), transport, time: null, logger: new FakeLogger<ZabbixListener>(logs), meters: null);
+        using var loggers = new SingleLoggerFactory(new FakeLogger<ZabbixListener>(logs));
+        await using var listener = new ZabbixListener(options, (_, _) => ValueTask.FromResult(ReadOnlyMemory<byte>.Empty), transport, loggers: loggers, time: null, meters: null);
         await listener.StartingAsync(TestContext.Current.CancellationToken);
 
         await listener.StartAsync(TestContext.Current.CancellationToken);

@@ -21,7 +21,7 @@ public sealed record ZabbixItemAssignment
     /// <param name="delay">The update interval, macros resolved.</param>
     /// <param name="timeout">The check timeout; <see langword="null"/> leaves the agent's own <c>Timeout</c>.</param>
     public ZabbixItemAssignment(ulong itemId, string key, ZabbixInterval delay, ZabbixDuration? timeout)
-        : this(itemId, key, delay, timeout, lastLogSize: 0, mtime: 0)
+        : this(itemId, key, delay, timeout, lastLogSize: 0, modifiedTime: 0)
     {
     }
 
@@ -31,16 +31,16 @@ public sealed record ZabbixItemAssignment
     /// <param name="delay">The update interval, macros resolved.</param>
     /// <param name="timeout">The check timeout; <see langword="null"/> leaves the agent's own <c>Timeout</c>.</param>
     /// <param name="lastLogSize">How far into its log a log item has read; 0 otherwise.</param>
-    /// <param name="mtime">The log file's modification time a log item has read to; 0 otherwise.</param>
+    /// <param name="modifiedTime">The modification time, in seconds since the Unix epoch, of the log file a log item has read to (<c>mtime</c>); 0 otherwise.</param>
     [JsonConstructor]
-    public ZabbixItemAssignment(ulong itemId, string key, ZabbixInterval delay, ZabbixDuration? timeout, long lastLogSize, int mtime)
+    public ZabbixItemAssignment(ulong itemId, string key, ZabbixInterval delay, ZabbixDuration? timeout, long lastLogSize, int modifiedTime)
     {
         ItemId = itemId;
         Key = key;
         Delay = delay;
         Timeout = timeout;
         LastLogSize = lastLogSize;
-        Mtime = mtime;
+        ModifiedTime = modifiedTime;
     }
 
     /// <summary>The item.</summary>
@@ -63,7 +63,7 @@ public sealed record ZabbixItemAssignment
     [JsonPropertyName("lastlogsize")]
     public long LastLogSize { get; init; }
 
-    /// <summary>The log file's modification time a log item has read to; 0 otherwise.</summary>
+    /// <summary>The modification time, in seconds since the Unix epoch, of the log file a log item has read to (<c>mtime</c>); 0 otherwise.</summary>
     [JsonPropertyName("mtime")]
-    public int Mtime { get; init; }
+    public int ModifiedTime { get; init; }
 }

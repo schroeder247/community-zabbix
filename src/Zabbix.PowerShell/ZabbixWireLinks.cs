@@ -40,7 +40,7 @@ internal static class ZabbixWireLinks
     /// <exception cref="System.Security.Cryptography.CryptographicException">A certificate mode file is not PEM, or the key does not match the certificate.</exception>
     public static ZabbixWireLink Open(IReadOnlyList<DnsEndPoint> nodes, ZabbixConnectionOptions options, TimeProvider time, ILoggerFactory? loggers)
     {
-        var link = new ZabbixWireLink(nodes, options, time, loggers?.CreateLogger<ZabbixWireLink>());
+        var link = new ZabbixWireLink(nodes, options, loggers, time);
         if (s_diagnostics.IsEnabled(LinkOpened)) s_diagnostics.Write(LinkOpened, link);
         return link;
     }

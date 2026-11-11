@@ -69,7 +69,7 @@ public sealed class ZabbixTrapperSource : IHostedLifecycleService, IAsyncDisposa
         // told a lost value was processed.
         _edge = Channel.CreateBounded<ZabbixValue>(new BoundedChannelOptions(maxItems) { FullMode = BoundedChannelFullMode.Wait, SingleReader = true });
         Trapper = new ZabbixTrapper(_edge.Writer, loggers, time, meters);
-        _listener = new ZabbixListener(options, Trapper.Handler, transport, time, loggers?.CreateLogger<ZabbixListener>(), meters);
+        _listener = new ZabbixListener(options, Trapper.Handler, transport, loggers, time, meters);
     }
 
     /// <summary>The trapper behind the listener.</summary>

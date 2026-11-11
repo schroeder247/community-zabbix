@@ -57,6 +57,7 @@ public sealed class ZabbixListener : IHostedLifecycleService, IAsyncDisposable, 
     private int _started;
     private int _disposed;
     private IConnectionListener? _listener;
+    private IDisposable? _container;                                                    // the builder's, disposed with the listener
     private Task _accepting = Task.CompletedTask;
 
     /// <summary>
@@ -80,19 +81,19 @@ public sealed class ZabbixListener : IHostedLifecycleService, IAsyncDisposable, 
     /// <param name="handler">What a request gets back.</param>
     /// <param name="transport">The connection layer; Kestrel's socket transport in a host.</param>
     public ZabbixListener(ZabbixListenerOptions options, ZabbixRequestCallback handler, IConnectionListenerFactory transport)
-        : this(options, handler, transport, time: null, logger: null, meters: null)
+        : this(options, handler, transport, loggers: null, time: null, meters: null)
     {
     }
 
-    /// <summary>A listener that answers with <paramref name="handler"/>.</summary>
+    /// <summary>A listener that answers with <paramref name="handler"/>, with the application's logging, clock and meters.</summary>
     /// <param name="options">Where and how; validated when the listener starts, not here.</param>
     /// <param name="handler">What a request gets back.</param>
     /// <param name="transport">The connection layer; Kestrel's socket transport in a host.</param>
+    /// <param name="loggers">Where to log; nowhere when <see langword="null"/>. The caller keeps owning it.</param>
     /// <param name="time">The clock deadlines run on; the system clock by default.</param>
-    /// <param name="logger">Where to log; silent when <see langword="null"/>.</param>
     /// <param name="meters">Where to count; an owned meter when <see langword="null"/>.</param>
-    public ZabbixListener(ZabbixListenerOptions options, ZabbixRequestCallback handler, IConnectionListenerFactory transport, TimeProvider? time, ILogger<ZabbixListener>? logger, IMeterFactory? meters)
-        : this(options, ZabbixConversationContext.Reply(handler), transport, time, logger, meters)
+    public ZabbixListener(ZabbixListenerOptions options, ZabbixRequestCallback handler, IConnectionListenerFactory transport, ILoggerFactory? loggers, TimeProvider? time, IMeterFactory? meters)
+        : this(options, ZabbixConversationContext.Reply(handler), transport, loggers, time, meters)
     {
     }
 
@@ -101,18 +102,21 @@ public sealed class ZabbixListener : IHostedLifecycleService, IAsyncDisposable, 
     /// <param name="conversation">What a connection is: the frames after the first, both ways.</param>
     /// <param name="transport">The connection layer; Kestrel's socket transport in a host.</param>
     public ZabbixListener(ZabbixListenerOptions options, ZabbixConversationCallback conversation, IConnectionListenerFactory transport)
-        : this(options, conversation, transport, time: null, logger: null, meters: null)
+        : this(options, conversation, transport, loggers: null, time: null, meters: null)
     {
     }
 
-    /// <summary>A listener that hands each connection, after its first frame, to <paramref name="conversation"/>.</summary>
+    /// <summary>
+    /// A listener that hands each connection, after its first frame, to <paramref name="conversation"/>, with the
+    /// application's logging, clock and meters.
+    /// </summary>
     /// <param name="options">Where and how.</param>
     /// <param name="conversation">What a connection is: the frames after the first, both ways.</param>
     /// <param name="transport">The connection layer; Kestrel's socket transport in a host.</param>
+    /// <param name="loggers">Where to log; nowhere when <see langword="null"/>. The caller keeps owning it.</param>
     /// <param name="time">The clock deadlines run on; the system clock by default.</param>
-    /// <param name="logger">Where to log; silent when <see langword="null"/>.</param>
     /// <param name="meters">Where to count; an owned meter when <see langword="null"/>.</param>
-    public ZabbixListener(ZabbixListenerOptions options, ZabbixConversationCallback conversation, IConnectionListenerFactory transport, TimeProvider? time, ILogger<ZabbixListener>? logger, IMeterFactory? meters)
+    public ZabbixListener(ZabbixListenerOptions options, ZabbixConversationCallback conversation, IConnectionListenerFactory transport, ILoggerFactory? loggers, TimeProvider? time, IMeterFactory? meters)
     {
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(conversation);
@@ -121,7 +125,7 @@ public sealed class ZabbixListener : IHostedLifecycleService, IAsyncDisposable, 
         _conversation = conversation;
         _transport = transport;
         _time = time ?? TimeProvider.System;
-        _logger = logger ?? NullLogger<ZabbixListener>.Instance;
+        _logger = (ILogger?)loggers?.CreateLogger<ZabbixListener>() ?? NullLogger<ZabbixListener>.Instance;
         _telemetry = new ZabbixListenerTelemetry(meters, _time);
         _refusals = new ZabbixLogOnce<(IPAddress, string)>(1024, TimeSpan.FromHours(1), _time);
         _failures = new ZabbixLogOnce<(IPAddress, Type)>(1024, TimeSpan.FromHours(1), _time);
@@ -243,7 +247,12 @@ public sealed class ZabbixListener : IHostedLifecycleService, IAsyncDisposable, 
         _stopping.Dispose();
         _admission?.Dispose();
         _telemetry.Dispose();
+        Interlocked.Exchange(ref _container, null)?.Dispose();
     }
+
+    /// <summary>Gives the listener the container a <see cref="ZabbixListenerBuilder"/> built it from, to dispose with itself.</summary>
+    /// <param name="container">The builder's container.</param>
+    internal void OwnContainer(IDisposable container) => _container = container;
 
     private async Task AcceptAsync(IConnectionListener listener, Admission admission, CancellationToken stopping)
     {

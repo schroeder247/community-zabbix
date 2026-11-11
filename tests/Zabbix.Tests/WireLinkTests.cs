@@ -12,7 +12,7 @@ public sealed class WireLinkTests
     {
         var (port, request) = MockTrapper.Answer("""{"response":"success"}""");
         using var link = new ZabbixWireLink([new ZabbixServerNode("127.0.0.1", port)]);
-        ZabbixExchangeCallback real = link.AsExchange(followRedirects: false);
+        ZabbixExchangeCallback real = link.AsExchange();
         int exchanges = 0;
         ZabbixExchangeCallback counted = (frame, cancellationToken) =>
         {
@@ -32,7 +32,7 @@ public sealed class WireLinkTests
     public async Task An_exchange_taken_from_a_disposed_link_throws_object_disposed()
     {
         var link = new ZabbixWireLink([new ZabbixServerNode("127.0.0.1", 10051)]);
-        ZabbixExchangeCallback exchange = link.AsExchange(followRedirects: false);
+        ZabbixExchangeCallback exchange = link.AsExchange();
         link.Dispose();
 
         await Assert.ThrowsAsync<ObjectDisposedException>(async () => await exchange("{}"u8.ToArray(), TestContext.Current.CancellationToken));

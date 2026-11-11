@@ -12,10 +12,9 @@ namespace Community.Zabbix;
 /// Represents the options of one proxy. A builder's verbs write them as named options, and a file's <c>Proxies:{name}</c>
 /// section binds them. The name is the proxy's name as the server knows it. Each knob is the upstream proxy's configuration
 /// parameter of the same meaning, with its default. The public members are the keys; a chosen store, the providers and the
-/// handlers are what only code can give, through the builder's verbs. <see cref="Mode"/> is read only by
-/// <see cref="ZabbixProxiesServiceCollectionExtensions.AddZabbixProxies"/>, to choose the verb; code that calls
-/// <see cref="ZabbixActiveProxyServiceCollectionExtensions.AddZabbixActiveProxy"/> or
-/// <see cref="ZabbixPassiveProxyServiceCollectionExtensions.AddZabbixPassiveProxy"/> directly has already chosen and the value is ignored.
+/// handlers are what only code can give, through the builder's verbs. Whether a proxy is active or passive is its class:
+/// a file's row says it with its <c>Mode</c> key, which
+/// <see cref="ZabbixProxiesServiceCollectionExtensions.AddZabbixProxies"/> reads to choose the class.
 /// </summary>
 public sealed class ZabbixProxyOptions : IValidatableObject
 {
@@ -25,14 +24,11 @@ public sealed class ZabbixProxyOptions : IValidatableObject
     /// </summary>
     public string? Name { get; set; }
 
-    /// <summary>Which verb a document row wires to; see <see cref="ZabbixProxyRole"/>. Ignored outside <see cref="ZabbixProxiesServiceCollectionExtensions.AddZabbixProxies"/>.</summary>
-    public ZabbixProxyRole Mode { get; set; } = ZabbixProxyRole.Active;
-
     /// <summary>
     /// The server an active proxy reports to, as Zabbix's <c>Server</c> spells it: <c>host</c>, <c>host:port</c> or
     /// <c>[ipv6]:port</c>, on port 10051 when it names none, or the nodes of one HA cluster joined by <c>;</c>, tried in
     /// order. A proxy reports to one server or one cluster, so a <c>,</c> is refused, as Zabbix's proxy refuses it. A
-    /// builder's <c>AddServer</c> sets it.
+    /// builder's <c>WithServer</c> sets it.
     /// </summary>
     public string? Server { get; set; }
 

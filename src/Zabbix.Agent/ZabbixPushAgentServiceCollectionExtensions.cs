@@ -30,7 +30,7 @@ public static class ZabbixPushAgentServiceCollectionExtensions
     /// <exception cref="ArgumentNullException"><paramref name="services"/> or <paramref name="name"/> is <see langword="null"/>.</exception>
     /// <remarks>
     /// The agent is the keyed service <c>GetRequiredKeyedService&lt;ZabbixPushAgent&gt;(name)</c>, and its statuses, one per
-    /// destination once it starts, are <c>GetRequiredKeyedService&lt;IReadOnlyList&lt;ZabbixAgentStatus&gt;&gt;(name)</c>.
+    /// destination once it starts, are <c>GetRequiredKeyedService&lt;IReadOnlyList&lt;ZabbixComponentStatus&gt;&gt;(name)</c>.
     /// A push and an active agent need names of their own for their statuses to be told apart.
     /// </remarks>
     /// <example>
@@ -54,13 +54,13 @@ public static class ZabbixPushAgentServiceCollectionExtensions
         services.AddLogging();
         services.AddZabbixAgentTelemetry();
         // The name is the agent's host unless a later Configure or Bind says otherwise: this runs first.
-        services.AddOptions<ZabbixPushAgentOptions>(name).Configure(options => options.Hostname = name).ValidateOnStart();
+        services.AddOptions<ZabbixPushAgentOptions>(name).Configure(options => options.HostName = name).ValidateOnStart();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<ZabbixPushAgentOptions>, ZabbixPushAgentOptionsValidator>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<ZabbixPushAgentOptions>, ZabbixPushAgentServersValidator>());
         // The agent's constructor, from the named options, over the container its sources and store resolve from. One hosted
         // service per name: AddHostedService<T> de-duplicates by type, so the agent is a keyed singleton and the hosted
         // service forwards to it.
-        services.AddKeyedSingleton<ZabbixPushAgent>(name, static (provider, key) =>
+        ZabbixComponentRegistration.AddShared<ZabbixPushAgent>(services, name, static (provider, key) =>
         {
             string agent = NameOf(key);
             ZabbixPushAgentOptions options = provider.GetRequiredService<IOptionsMonitor<ZabbixPushAgentOptions>>().Get(agent);
@@ -69,7 +69,7 @@ public static class ZabbixPushAgentServiceCollectionExtensions
                 provider.GetRequiredService<TimeProvider>(), provider.GetService<IMeterFactory>(), provider.GetRequiredService<ZabbixAgentTelemetry>(), provider.GetRequiredService<ZabbixWireTelemetry>());
         });
         services.AddSingleton<IHostedService>(provider => new ZabbixHostedComponent(provider.GetRequiredKeyedService<ZabbixPushAgent>(name)));
-        services.AddKeyedTransient<IReadOnlyList<ZabbixAgentStatus>>(name, static (provider, key) => provider.GetRequiredKeyedService<ZabbixPushAgent>(key).Statuses);
+        services.AddKeyedTransient<IReadOnlyList<ZabbixComponentStatus>>(name, static (provider, key) => provider.GetRequiredKeyedService<ZabbixPushAgent>(key).Statuses);
         return builder;
     }
 

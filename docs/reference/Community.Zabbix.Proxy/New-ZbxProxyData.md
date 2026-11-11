@@ -8,7 +8,7 @@ Builds a proxy data request without sending it.
 ## SYNTAX
 
 ```
-New-ZbxProxyData [-ProxyName] <string> [-Session] <string> [[-History] <ZabbixProxyHistoryItem[]>] [-More] [-ProxyDelay <long>] [-Version <string>] [<CommonParameters>]
+New-ZbxProxyData [-ProxyName] <string> [-Session] <string> [[-History] <ZabbixProxyHistoryItem[]>] [-More] [-ProxyDelay <long>] [-Version <Version>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -124,11 +124,11 @@ How old, in seconds, the oldest value left behind is.
 
 ### -Version
 
-The protocol version to announce.
+The protocol version to announce: 7.4.0 unless given.
 
 | | |
 | --- | --- |
-| Type | `string` |
+| Type | `Version` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |

@@ -109,7 +109,7 @@ public sealed class TypedItemTests
 
         Assert.Equal(17, free);
         Assert.Equal("app.disk.free[/]", sent[0].GetProperty("data")[0].GetProperty("key").GetString());
-        Assert.Equal("no such key", refused.Reason);
+        Assert.Equal("no such key", refused.Error);
     }
 
     // ----- answering ------------------------------------------------------------------------------------------------
@@ -236,18 +236,18 @@ public sealed class TypedItemTests
     }
 
     private static ValueTask<ZabbixAgentAnswer> AnswerAsync(ZabbixItemDictionary table, string key)
-        => table.AnswerAsync(ZabbixItemKey.Parse(key, CultureInfo.InvariantCulture), TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        => table.AnswerAsync(ZabbixItemKey.Parse(key), TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
 
     // ----- the push agent -------------------------------------------------------------------------------------------
 
     [Fact]
     public void A_typed_poll_or_a_meter_needs_a_host_and_the_build_says_so()
     {
-        ZabbixPushAgentBuilder builder = ZabbixPushAgent.CreateBuilder("edge").AddServer("127.0.0.1").AddMeter("Not.Used").Configure(o => o.Hostname = null);
+        ZabbixPushAgentBuilder builder = ZabbixPushAgent.CreateBuilder("edge").AddServer("127.0.0.1").AddMeter("Not.Used").Configure(o => o.HostName = null);
 
         InvalidOperationException refused = Assert.Throws<InvalidOperationException>(() => builder.Build().Dispose());
 
-        Assert.Contains("Hostname", refused.Message, StringComparison.Ordinal);
+        Assert.Contains("HostName", refused.Message, StringComparison.Ordinal);
     }
 
     [Fact]

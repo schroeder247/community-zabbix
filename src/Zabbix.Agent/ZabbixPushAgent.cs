@@ -54,7 +54,7 @@ public class ZabbixPushAgent : ZabbixComponent
     private readonly CancellationTokenSource _abandoningDrain = new();     // closes the drain window at once: disposal, or a host that gave up
     private CancellationTokenSource? _abandoning;                       // ends the pump's last reads and writes: the drain window
     private Destination[] _destinations = [];
-    private IReadOnlyList<ZabbixAgentStatus> _statuses;
+    private IReadOnlyList<ZabbixComponentStatus> _statuses;
     private int _released;
     private ZabbixSourcePump<ZabbixValue>? _pump;
     private Task _pumping = Task.CompletedTask;
@@ -101,20 +101,20 @@ public class ZabbixPushAgent : ZabbixComponent
         _ownsTelemetry = telemetry is null;
         _telemetry = telemetry ?? new ZabbixAgentTelemetry(meters, Time);
         _wire = wire;
-        Status = new ZabbixAgentStatus(Name, _telemetry);
+        Status = new ZabbixComponentStatus(Name, _telemetry);
         _statuses = [Status];
     }
 
     /// <summary>
-    /// Starts a builder for an agent that reports for <paramref name="hostname"/>: its sources, its servers, its store, and its
+    /// Starts a builder for an agent that reports for <paramref name="hostName"/>: its sources, its servers, its store, and its
     /// logging.
     /// </summary>
-    /// <param name="hostname">
+    /// <param name="hostName">
     /// The agent's name, and the host its typed polls and meters report for unless <c>Configure</c> sets another.
     /// </param>
     /// <returns>A builder whose <see cref="ZabbixPushAgentBuilder.Build"/> returns the agent.</returns>
-    /// <exception cref="ArgumentException"><paramref name="hostname"/> is empty.</exception>
-    /// <exception cref="ArgumentNullException"><paramref name="hostname"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException"><paramref name="hostName"/> is empty.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="hostName"/> is <see langword="null"/>.</exception>
     /// <example>
     /// <code language="csharp">
     /// await using ZabbixPushAgent agent = ZabbixPushAgent.CreateBuilder("web-01")
@@ -123,7 +123,7 @@ public class ZabbixPushAgent : ZabbixComponent
     ///     .Build();
     /// </code>
     /// </example>
-    public static ZabbixPushAgentBuilder CreateBuilder(string hostname) => new(hostname);
+    public static ZabbixPushAgentBuilder CreateBuilder(string hostName) => new(hostName);
 
     /// <summary>What the agent reads when it starts.</summary>
     public ZabbixPushAgentOptions Options { get; }
@@ -136,16 +136,16 @@ public class ZabbixPushAgent : ZabbixComponent
         => ZabbixOptionsCheck.RequireValid(Name, Options, new ZabbixPushAgentOptionsValidator(), new ZabbixPushAgentServersValidator());
 
     /// <summary>What the agent is doing, for its first destination; before it starts, a status with nothing to report.</summary>
-    public ZabbixAgentStatus Status { get; private set; }
+    public ZabbixComponentStatus Status { get; private set; }
 
     /// <summary>What the agent is doing for each destination, each with its own store and delivery accounting; before it starts, one status with nothing to report.</summary>
-    public IReadOnlyList<ZabbixAgentStatus> Statuses => Volatile.Read(ref _statuses);
+    public IReadOnlyList<ZabbixComponentStatus> Statuses => Volatile.Read(ref _statuses);
 
     /// <summary>Each destination's sender, which owns its connection; empty before start and after disposal.</summary>
     internal IReadOnlyList<ZabbixSender> Senders => [.. Volatile.Read(ref _destinations).Select(destination => destination.Sender)];
 
     /// <summary>One <c>ServerActive</c> destination: a store every value is written to, a sender over its HA nodes, and its accounting.</summary>
-    private sealed record Destination(ZabbixStore<ZabbixValue> Store, ZabbixSender Sender, ZabbixAgentStatus Status);
+    private sealed record Destination(ZabbixStore<ZabbixValue> Store, ZabbixSender Sender, ZabbixComponentStatus Status);
 
     /// <summary>One destination's store: the one <c>UseStore</c> chose, else in memory; the agent's policy and the host's services either way.</summary>
     private ZabbixStore<ZabbixValue> StoreFor(ZabbixPushAgentOptions agent, string name)
@@ -177,7 +177,7 @@ public class ZabbixPushAgent : ZabbixComponent
                 foreach (Destination built in destinations.Take(i)) built.Sender.Dispose();
                 throw;
             }
-            var status = new ZabbixAgentStatus(name, _telemetry);
+            var status = new ZabbixComponentStatus(name, _telemetry);
             status.Attach(store);
             destinations[i] = new Destination(store, sender, status);
         }
@@ -261,6 +261,7 @@ public class ZabbixPushAgent : ZabbixComponent
     protected override async ValueTask DisposeAsyncCore()
 #pragma warning restore IDE1006
     {
+        if (IsKept) return;                                          // shared: its container releases it
         await base.DisposeAsyncCore().ConfigureAwait(false);          // stops a running component first, so it drains
         if (Interlocked.Exchange(ref _released, 1) != 0) return;
         await _stoppingSources.CancelAsync().ConfigureAwait(false);
@@ -287,6 +288,7 @@ public class ZabbixPushAgent : ZabbixComponent
     /// <inheritdoc/>
     protected override void Dispose(bool disposing)
     {
+        if (IsKept) return;                                          // shared: its container releases it
         if (disposing && Interlocked.Exchange(ref _released, 1) == 0)
         {
             _stoppingSources.Cancel();

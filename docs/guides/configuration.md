@@ -133,13 +133,16 @@ builder.Services.AddZabbixAgents(builder.Configuration);    // PushAgents and Ac
 builder.Services.AddZabbixProxies(builder.Configuration);   // PushAgents with their Trapper, PassiveAgents, and Proxies
 ```
 
-- **A row's name.** It's the agent's name, and its host name unless the row sets `Hostname`.
+- **A row's name.** It's the agent's name, and its host name unless the row sets `HostName`, which binds from Zabbix's spelling,
+  `Hostname`, too.
 - **`ServerActive`.** `;` separates the nodes of one high-availability destination, and `,` separates one destination from another.
   In code, each `AddServer` adds one destination to it.
 - **`AllowedPeers`.** Every listener fails closed. A trapper, passive agent, or proxy with an empty `AllowedPeers` fails validation at
   start, so you must write out "everyone" (`0.0.0.0/0,::/0`).
 - **A proxy's `Server`.** One server, or the nodes of one high-availability cluster joined by `;`, as Zabbix's proxy reads its
-  `Server`. A `,` fails validation at start, because a proxy reports to one server or cluster. In code, `AddServer` sets it.
+  `Server`. A `,` fails validation at start, because a proxy reports to one server or cluster. In code, `WithServer` sets it.
+- **A proxy's mode.** A row's `Mode` key, `Active` (the default) or `Passive`, chooses the class, as Zabbix's `ProxyMode` does. It's
+  the row's, not an option of the proxy.
 - **A proxy's listener.** It's the proxy's `Trapper` subsection, the same options a push agent's `Trapper` has. A passive proxy
   (`"Mode": "Passive"`) must also set `Version` to the server's version.
 - **An agent's `Trapper`.** Without `Community.Zabbix.Proxy`, this subsection isn't bound.
@@ -164,12 +167,12 @@ builder.Services.AddZabbix("prod")                                     // the sa
 
 builder.Services.AddZabbixAgents(builder.Configuration);               // edge-01: where to send, batching
 builder.Services.AddZabbixPushAgent("edge-01")                         // edge-01: what to send
-    .Configure(o => o.Hostname = "web-01")
+    .Configure(o => o.HostName = "web-01")
     .AddPoll(new ZabbixItemKey<long>("app.requests"), TimeSpan.FromSeconds(30), () => Environment.ProcessorCount);
 ```
 
 - Each binding and each verb is one step on the same named options, run in the order you registered them. For a value both set,
-  the later step wins. A row's name is the agent's host name unless a step sets `Hostname`.
+  the later step wins. A row's name is the agent's host name unless a step sets `HostName`.
 - A credential given in code and an `ApiToken` in the row are two credentials for one client, and validation refuses the pair.
 - The document registers named clients only. For the unnamed client, which is also injected as plain `ZabbixClient`, bind one row
   directly: `builder.Services.AddZabbix().Bind(builder.Configuration.GetSection("Zabbix:Servers:prod"))`.

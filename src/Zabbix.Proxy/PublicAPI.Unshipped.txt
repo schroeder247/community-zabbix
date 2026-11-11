@@ -18,7 +18,7 @@ Community.Zabbix.Connector.ZabbixConnectorEvent.Name.get -> string?
 Community.Zabbix.Connector.ZabbixConnectorEvent.Name.init -> void
 Community.Zabbix.Connector.ZabbixConnectorEvent.ProblemEventId.get -> ulong?
 Community.Zabbix.Connector.ZabbixConnectorEvent.ProblemEventId.init -> void
-Community.Zabbix.Connector.ZabbixConnectorEvent.Severity.get -> int?
+Community.Zabbix.Connector.ZabbixConnectorEvent.Severity.get -> Community.Zabbix.ZabbixSeverity?
 Community.Zabbix.Connector.ZabbixConnectorEvent.Severity.init -> void
 Community.Zabbix.Connector.ZabbixConnectorEvent.Tags.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixTag!>?
 Community.Zabbix.Connector.ZabbixConnectorEvent.Tags.init -> void
@@ -67,21 +67,18 @@ Community.Zabbix.Connector.ZabbixConnectorValue.Source.get -> string?
 Community.Zabbix.Connector.ZabbixConnectorValue.Source.init -> void
 Community.Zabbix.Connector.ZabbixConnectorValue.Timestamp.get -> long?
 Community.Zabbix.Connector.ZabbixConnectorValue.Timestamp.init -> void
-Community.Zabbix.Connector.ZabbixConnectorValue.Type.get -> Community.Zabbix.Connector.ZabbixConnectorValueType
+Community.Zabbix.Connector.ZabbixConnectorValue.Type.get -> Community.Zabbix.ZabbixItemValueType
 Community.Zabbix.Connector.ZabbixConnectorValue.Type.init -> void
 Community.Zabbix.Connector.ZabbixConnectorValue.Value.get -> System.Text.Json.JsonElement
 Community.Zabbix.Connector.ZabbixConnectorValue.Value.init -> void
 Community.Zabbix.Connector.ZabbixConnectorValue.ZabbixConnectorValue() -> void
-Community.Zabbix.Connector.ZabbixConnectorValueType
-Community.Zabbix.Connector.ZabbixConnectorValueType.Binary = 5 -> Community.Zabbix.Connector.ZabbixConnectorValueType
-Community.Zabbix.Connector.ZabbixConnectorValueType.Character = 1 -> Community.Zabbix.Connector.ZabbixConnectorValueType
-Community.Zabbix.Connector.ZabbixConnectorValueType.Float = 0 -> Community.Zabbix.Connector.ZabbixConnectorValueType
-Community.Zabbix.Connector.ZabbixConnectorValueType.Log = 2 -> Community.Zabbix.Connector.ZabbixConnectorValueType
-Community.Zabbix.Connector.ZabbixConnectorValueType.Text = 4 -> Community.Zabbix.Connector.ZabbixConnectorValueType
-Community.Zabbix.Connector.ZabbixConnectorValueType.Unsigned = 3 -> Community.Zabbix.Connector.ZabbixConnectorValueType
 Community.Zabbix.IZabbixActiveProxyBuilder
 Community.Zabbix.IZabbixListenerBuilder
+Community.Zabbix.IZabbixListenerBuilder.Name.get -> string!
+Community.Zabbix.IZabbixListenerBuilder.Services.get -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 Community.Zabbix.IZabbixPassiveAgentBuilder
+Community.Zabbix.IZabbixPassiveAgentBuilder.Name.get -> string!
+Community.Zabbix.IZabbixPassiveAgentBuilder.Services.get -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 Community.Zabbix.IZabbixPassiveProxyBuilder
 Community.Zabbix.IZabbixProxyBuilder
 Community.Zabbix.IZabbixProxyBuilder.Name.get -> string!
@@ -104,14 +101,16 @@ Community.Zabbix.Listening.ZabbixListener.StopAsync(System.Threading.Cancellatio
 Community.Zabbix.Listening.ZabbixListener.StoppedAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Community.Zabbix.Listening.ZabbixListener.StoppingAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Community.Zabbix.Listening.ZabbixListener.ZabbixListener(Community.Zabbix.ZabbixListenerOptions! options, System.Func<Community.Zabbix.Listening.ZabbixConversationContext!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask>! conversation, Microsoft.AspNetCore.Connections.IConnectionListenerFactory! transport) -> void
-Community.Zabbix.Listening.ZabbixListener.ZabbixListener(Community.Zabbix.ZabbixListenerOptions! options, System.Func<Community.Zabbix.Listening.ZabbixConversationContext!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask>! conversation, Microsoft.AspNetCore.Connections.IConnectionListenerFactory! transport, System.TimeProvider? time, Microsoft.Extensions.Logging.ILogger<Community.Zabbix.Listening.ZabbixListener!>? logger, System.Diagnostics.Metrics.IMeterFactory? meters) -> void
+Community.Zabbix.Listening.ZabbixListener.ZabbixListener(Community.Zabbix.ZabbixListenerOptions! options, System.Func<Community.Zabbix.Listening.ZabbixConversationContext!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask>! conversation, Microsoft.AspNetCore.Connections.IConnectionListenerFactory! transport, Microsoft.Extensions.Logging.ILoggerFactory? loggers, System.TimeProvider? time, System.Diagnostics.Metrics.IMeterFactory? meters) -> void
 Community.Zabbix.Listening.ZabbixListener.ZabbixListener(Community.Zabbix.ZabbixListenerOptions! options, System.Func<Community.Zabbix.Listening.ZabbixRequest, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<System.ReadOnlyMemory<byte>>>! handler, Microsoft.AspNetCore.Connections.IConnectionListenerFactory! transport) -> void
-Community.Zabbix.Listening.ZabbixListener.ZabbixListener(Community.Zabbix.ZabbixListenerOptions! options, System.Func<Community.Zabbix.Listening.ZabbixRequest, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<System.ReadOnlyMemory<byte>>>! handler, Microsoft.AspNetCore.Connections.IConnectionListenerFactory! transport, System.TimeProvider? time, Microsoft.Extensions.Logging.ILogger<Community.Zabbix.Listening.ZabbixListener!>? logger, System.Diagnostics.Metrics.IMeterFactory? meters) -> void
+Community.Zabbix.Listening.ZabbixListener.ZabbixListener(Community.Zabbix.ZabbixListenerOptions! options, System.Func<Community.Zabbix.Listening.ZabbixRequest, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<System.ReadOnlyMemory<byte>>>! handler, Microsoft.AspNetCore.Connections.IConnectionListenerFactory! transport, Microsoft.Extensions.Logging.ILoggerFactory? loggers, System.TimeProvider? time, System.Diagnostics.Metrics.IMeterFactory? meters) -> void
 Community.Zabbix.Listening.ZabbixListenerBuilder
 Community.Zabbix.Listening.ZabbixListenerBuilder.Build() -> Community.Zabbix.Listening.ZabbixListener!
 Community.Zabbix.Listening.ZabbixListenerBuilder.Configure(System.Action<Community.Zabbix.ZabbixListenerOptions!>! configure) -> Community.Zabbix.Listening.ZabbixListenerBuilder!
+Community.Zabbix.Listening.ZabbixListenerBuilder.Name.get -> string!
 Community.Zabbix.Listening.ZabbixListenerBuilder.OnRequest(System.Func<Community.Zabbix.Listening.ZabbixConversationContext!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask>! conversation) -> Community.Zabbix.Listening.ZabbixListenerBuilder!
 Community.Zabbix.Listening.ZabbixListenerBuilder.OnRequest(System.Func<Community.Zabbix.Listening.ZabbixRequest, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<System.ReadOnlyMemory<byte>>>! handler) -> Community.Zabbix.Listening.ZabbixListenerBuilder!
+Community.Zabbix.Listening.ZabbixListenerBuilder.Services.get -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 Community.Zabbix.Listening.ZabbixListenerBuilder.UseLogging(Microsoft.Extensions.Logging.ILoggerFactory! loggers) -> Community.Zabbix.Listening.ZabbixListenerBuilder!
 Community.Zabbix.Listening.ZabbixListenerBuilder.UseMeterFactory(System.Diagnostics.Metrics.IMeterFactory! meters) -> Community.Zabbix.Listening.ZabbixListenerBuilder!
 Community.Zabbix.Listening.ZabbixListenerBuilder.UseSocketTransport(System.Net.IPEndPoint! endPoint) -> Community.Zabbix.Listening.ZabbixListenerBuilder!
@@ -122,7 +121,8 @@ Community.Zabbix.Listening.ZabbixListenerBuilder.ZabbixListenerBuilder() -> void
 Community.Zabbix.Listening.ZabbixPassiveCheckResponder
 Community.Zabbix.Listening.ZabbixPassiveCheckResponder.CheckTimeout.get -> System.TimeSpan
 Community.Zabbix.Listening.ZabbixPassiveCheckResponder.Handler.get -> System.Func<Community.Zabbix.Listening.ZabbixRequest, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<System.ReadOnlyMemory<byte>>>!
-Community.Zabbix.Listening.ZabbixPassiveCheckResponder.ZabbixPassiveCheckResponder(Community.Zabbix.ZabbixItemDictionary! handlers, System.TimeSpan? checkTimeout = null, System.TimeProvider? time = null, Microsoft.Extensions.Logging.ILogger<Community.Zabbix.Listening.ZabbixPassiveCheckResponder!>? logger = null) -> void
+Community.Zabbix.Listening.ZabbixPassiveCheckResponder.ZabbixPassiveCheckResponder(Community.Zabbix.ZabbixItemDictionary! handlers) -> void
+Community.Zabbix.Listening.ZabbixPassiveCheckResponder.ZabbixPassiveCheckResponder(Community.Zabbix.ZabbixItemDictionary! handlers, System.TimeSpan checkTimeout, Microsoft.Extensions.Logging.ILoggerFactory? loggers, System.TimeProvider? time) -> void
 Community.Zabbix.Listening.ZabbixRequest
 Community.Zabbix.Listening.ZabbixRequest.Deconstruct(out System.ReadOnlyMemory<byte> Payload, out System.Net.EndPoint? Peer) -> void
 Community.Zabbix.Listening.ZabbixRequest.Equals(Community.Zabbix.Listening.ZabbixRequest other) -> bool
@@ -156,7 +156,7 @@ Community.Zabbix.Proxy.ZabbixProxyAdmission
 Community.Zabbix.Proxy.ZabbixProxyAdmission.Config.get -> Community.Zabbix.Proxy.ZabbixProxyConfig!
 Community.Zabbix.Proxy.ZabbixProxyAdmission.For(System.Threading.Channels.ChannelWriter<Community.Zabbix.ZabbixValue!>! store, string! request, System.Net.IPAddress? peer, System.Action<Community.Zabbix.ZabbixValue!, string!>? refused = null) -> System.Threading.Channels.ChannelWriter<Community.Zabbix.ZabbixValue!>!
 Community.Zabbix.Proxy.ZabbixProxyAdmission.Knows(Community.Zabbix.ZabbixValue! value) -> bool
-Community.Zabbix.Proxy.ZabbixProxyAdmission.Protocol.get -> Community.Zabbix.ZabbixComponentVersion
+Community.Zabbix.Proxy.ZabbixProxyAdmission.Protocol.get -> System.Version!
 Community.Zabbix.Proxy.ZabbixProxyAdmission.Refusal(Community.Zabbix.ZabbixValue! value, string! request, System.Net.IPAddress? peer) -> string?
 Community.Zabbix.Proxy.ZabbixProxyAutoregistrationItem
 Community.Zabbix.Proxy.ZabbixProxyAutoregistrationItem.<Clone>$() -> Community.Zabbix.Proxy.ZabbixProxyAutoregistrationItem!
@@ -190,6 +190,9 @@ Community.Zabbix.Proxy.ZabbixProxyAvailabilityItem.Error.init -> void
 Community.Zabbix.Proxy.ZabbixProxyAvailabilityItem.InterfaceId.get -> ulong
 Community.Zabbix.Proxy.ZabbixProxyAvailabilityItem.InterfaceId.init -> void
 Community.Zabbix.Proxy.ZabbixProxyAvailabilityItem.ZabbixProxyAvailabilityItem(ulong InterfaceId, int? Available = null, string? Error = null) -> void
+Community.Zabbix.Proxy.ZabbixProxyBacklog
+Community.Zabbix.Proxy.ZabbixProxyBacklog.More = 1 -> Community.Zabbix.Proxy.ZabbixProxyBacklog
+Community.Zabbix.Proxy.ZabbixProxyBacklog.None = 0 -> Community.Zabbix.Proxy.ZabbixProxyBacklog
 Community.Zabbix.Proxy.ZabbixProxyConfig
 Community.Zabbix.Proxy.ZabbixProxyConfig.AgentTimeout.get -> string!
 Community.Zabbix.Proxy.ZabbixProxyConfig.ConfigRevision.get -> long
@@ -203,22 +206,20 @@ Community.Zabbix.Proxy.ZabbixProxyConfig.ItemsByKey.get -> System.Collections.Ge
 Community.Zabbix.Proxy.ZabbixProxyConfig.Merge(System.Text.Json.JsonElement reply) -> Community.Zabbix.Proxy.ZabbixProxyConfig!
 Community.Zabbix.Proxy.ZabbixProxyConfig.Templates.get -> System.Collections.Generic.IReadOnlyDictionary<ulong, System.Collections.Immutable.ImmutableArray<ulong>>!
 Community.Zabbix.Proxy.ZabbixProxyConfigHost
-Community.Zabbix.Proxy.ZabbixProxyConfigHost.<Clone>$() -> Community.Zabbix.Proxy.ZabbixProxyConfigHost!
-Community.Zabbix.Proxy.ZabbixProxyConfigHost.Deconstruct(out ulong HostId, out string! Host, out string! Name, out Community.Zabbix.Proxy.ZabbixProxyHostStatus Status) -> void
-Community.Zabbix.Proxy.ZabbixProxyConfigHost.Equals(Community.Zabbix.Proxy.ZabbixProxyConfigHost? other) -> bool
+Community.Zabbix.Proxy.ZabbixProxyConfigHost.Deconstruct(out ulong HostId, out string! Host, out string! Name, out Community.Zabbix.ZabbixHostStatus Status) -> void
 Community.Zabbix.Proxy.ZabbixProxyConfigHost.Host.get -> string!
 Community.Zabbix.Proxy.ZabbixProxyConfigHost.Host.init -> void
 Community.Zabbix.Proxy.ZabbixProxyConfigHost.HostId.get -> ulong
 Community.Zabbix.Proxy.ZabbixProxyConfigHost.HostId.init -> void
 Community.Zabbix.Proxy.ZabbixProxyConfigHost.Name.get -> string!
 Community.Zabbix.Proxy.ZabbixProxyConfigHost.Name.init -> void
-Community.Zabbix.Proxy.ZabbixProxyConfigHost.Status.get -> Community.Zabbix.Proxy.ZabbixProxyHostStatus
+Community.Zabbix.Proxy.ZabbixProxyConfigHost.Status.get -> Community.Zabbix.ZabbixHostStatus
 Community.Zabbix.Proxy.ZabbixProxyConfigHost.Status.init -> void
-Community.Zabbix.Proxy.ZabbixProxyConfigHost.ZabbixProxyConfigHost(ulong HostId, string! Host, string! Name, Community.Zabbix.Proxy.ZabbixProxyHostStatus Status) -> void
+Community.Zabbix.Proxy.ZabbixProxyConfigHost.ZabbixProxyConfigHost(ulong HostId, string! Host, string! Name, Community.Zabbix.ZabbixHostStatus Status) -> void
 Community.Zabbix.Proxy.ZabbixProxyConfigItem
-Community.Zabbix.Proxy.ZabbixProxyConfigItem.<Clone>$() -> Community.Zabbix.Proxy.ZabbixProxyConfigItem!
 Community.Zabbix.Proxy.ZabbixProxyConfigItem.AllowTraps.get -> bool
 Community.Zabbix.Proxy.ZabbixProxyConfigItem.AllowTraps.init -> void
+Community.Zabbix.Proxy.ZabbixProxyConfigItem.Deconstruct(out ulong ItemId, out ulong HostId, out string! Key, out Community.Zabbix.ZabbixItemType Type, out Community.Zabbix.ZabbixItemStatus Status, out System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixPeer>! TrapperHosts, out bool AllowTraps, out Community.Zabbix.ZabbixInterval Delay, out Community.Zabbix.ZabbixDuration? Timeout) -> void
 Community.Zabbix.Proxy.ZabbixProxyConfigItem.Delay.get -> Community.Zabbix.ZabbixInterval
 Community.Zabbix.Proxy.ZabbixProxyConfigItem.Delay.init -> void
 Community.Zabbix.Proxy.ZabbixProxyConfigItem.Equals(Community.Zabbix.Proxy.ZabbixProxyConfigItem? other) -> bool
@@ -228,15 +229,20 @@ Community.Zabbix.Proxy.ZabbixProxyConfigItem.ItemId.get -> ulong
 Community.Zabbix.Proxy.ZabbixProxyConfigItem.ItemId.init -> void
 Community.Zabbix.Proxy.ZabbixProxyConfigItem.Key.get -> string!
 Community.Zabbix.Proxy.ZabbixProxyConfigItem.Key.init -> void
-Community.Zabbix.Proxy.ZabbixProxyConfigItem.Status.get -> Community.Zabbix.Proxy.ZabbixProxyItemStatus
+Community.Zabbix.Proxy.ZabbixProxyConfigItem.Status.get -> Community.Zabbix.ZabbixItemStatus
 Community.Zabbix.Proxy.ZabbixProxyConfigItem.Status.init -> void
 Community.Zabbix.Proxy.ZabbixProxyConfigItem.Timeout.get -> Community.Zabbix.ZabbixDuration?
 Community.Zabbix.Proxy.ZabbixProxyConfigItem.Timeout.init -> void
 Community.Zabbix.Proxy.ZabbixProxyConfigItem.TrapperHosts.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixPeer>!
 Community.Zabbix.Proxy.ZabbixProxyConfigItem.TrapperHosts.init -> void
-Community.Zabbix.Proxy.ZabbixProxyConfigItem.Type.get -> Community.Zabbix.Proxy.ZabbixProxyItemType
+Community.Zabbix.Proxy.ZabbixProxyConfigItem.Type.get -> Community.Zabbix.ZabbixItemType
 Community.Zabbix.Proxy.ZabbixProxyConfigItem.Type.init -> void
-Community.Zabbix.Proxy.ZabbixProxyConfigItem.ZabbixProxyConfigItem(ulong ItemId, ulong HostId, string! Key, Community.Zabbix.Proxy.ZabbixProxyItemType Type, Community.Zabbix.Proxy.ZabbixProxyItemStatus Status, System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixPeer>! TrapperHosts, bool AllowTraps, Community.Zabbix.ZabbixInterval Delay = default(Community.Zabbix.ZabbixInterval), Community.Zabbix.ZabbixDuration? Timeout = null) -> void
+Community.Zabbix.Proxy.ZabbixProxyConfigItem.ZabbixProxyConfigItem(ulong ItemId, ulong HostId, string! Key, Community.Zabbix.ZabbixItemType Type, Community.Zabbix.ZabbixItemStatus Status, System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixPeer>! TrapperHosts, bool AllowTraps, Community.Zabbix.ZabbixInterval Delay = default(Community.Zabbix.ZabbixInterval), Community.Zabbix.ZabbixDuration? Timeout = null) -> void
+Community.Zabbix.Proxy.ZabbixProxyConfigVerdict
+Community.Zabbix.Proxy.ZabbixProxyConfigVerdict.Equals(Community.Zabbix.Proxy.ZabbixProxyConfigVerdict other) -> bool
+Community.Zabbix.Proxy.ZabbixProxyConfigVerdict.IsAccepted.get -> bool
+Community.Zabbix.Proxy.ZabbixProxyConfigVerdict.Reason.get -> string?
+Community.Zabbix.Proxy.ZabbixProxyConfigVerdict.ZabbixProxyConfigVerdict() -> void
 Community.Zabbix.Proxy.ZabbixProxyDataPage
 Community.Zabbix.Proxy.ZabbixProxyDataPage.<Clone>$() -> Community.Zabbix.Proxy.ZabbixProxyDataPage!
 Community.Zabbix.Proxy.ZabbixProxyDataPage.Autoregistration.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyAutoregistrationItem!>?
@@ -255,14 +261,13 @@ Community.Zabbix.Proxy.ZabbixProxyDataPage.Tasks.init -> void
 Community.Zabbix.Proxy.ZabbixProxyDataPage.ZabbixProxyDataPage(System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyHistoryItem!>? History = null, System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem!>? Discovery = null, System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyAutoregistrationItem!>? Autoregistration = null, System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyAvailabilityItem!>? Availability = null, System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyTaskResult!>? Tasks = null) -> void
 Community.Zabbix.Proxy.ZabbixProxyDataProviders
 Community.Zabbix.Proxy.ZabbixProxyDataRequest
-Community.Zabbix.Proxy.ZabbixProxyDataRequest.<Clone>$() -> Community.Zabbix.Proxy.ZabbixProxyDataRequest!
 Community.Zabbix.Proxy.ZabbixProxyDataRequest.Autoregistration.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyAutoregistrationItem!>?
 Community.Zabbix.Proxy.ZabbixProxyDataRequest.Autoregistration.init -> void
 Community.Zabbix.Proxy.ZabbixProxyDataRequest.Availability.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyAvailabilityItem!>?
 Community.Zabbix.Proxy.ZabbixProxyDataRequest.Availability.init -> void
 Community.Zabbix.Proxy.ZabbixProxyDataRequest.Clock.get -> System.DateTimeOffset
 Community.Zabbix.Proxy.ZabbixProxyDataRequest.Clock.init -> void
-Community.Zabbix.Proxy.ZabbixProxyDataRequest.Deconstruct(out string? Request, out string? Host, out string! Session, out System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyHistoryItem!>? History, out System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem!>? Discovery, out System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyAutoregistrationItem!>? Autoregistration, out System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyAvailabilityItem!>? Availability, out System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyTaskResult!>? Tasks, out int? More, out string! Version, out System.DateTimeOffset Clock, out long? ProxyDelay) -> void
+Community.Zabbix.Proxy.ZabbixProxyDataRequest.Deconstruct(out string? Request, out string? Host, out string! Session, out System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyHistoryItem!>? History, out System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem!>? Discovery, out System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyAutoregistrationItem!>? Autoregistration, out System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyAvailabilityItem!>? Availability, out System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyTaskResult!>? Tasks, out int? More, out System.Version! Version, out System.DateTimeOffset Clock, out long? ProxyDelay) -> void
 Community.Zabbix.Proxy.ZabbixProxyDataRequest.Discovery.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem!>?
 Community.Zabbix.Proxy.ZabbixProxyDataRequest.Discovery.init -> void
 Community.Zabbix.Proxy.ZabbixProxyDataRequest.Equals(Community.Zabbix.Proxy.ZabbixProxyDataRequest? other) -> bool
@@ -280,62 +285,57 @@ Community.Zabbix.Proxy.ZabbixProxyDataRequest.Session.get -> string!
 Community.Zabbix.Proxy.ZabbixProxyDataRequest.Session.init -> void
 Community.Zabbix.Proxy.ZabbixProxyDataRequest.Tasks.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyTaskResult!>?
 Community.Zabbix.Proxy.ZabbixProxyDataRequest.Tasks.init -> void
-Community.Zabbix.Proxy.ZabbixProxyDataRequest.Version.get -> string!
+Community.Zabbix.Proxy.ZabbixProxyDataRequest.Version.get -> System.Version!
 Community.Zabbix.Proxy.ZabbixProxyDataRequest.Version.init -> void
-Community.Zabbix.Proxy.ZabbixProxyDataRequest.ZabbixProxyDataRequest(string? Request, string? Host, string! Session, System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyHistoryItem!>? History, System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem!>? Discovery, System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyAutoregistrationItem!>? Autoregistration, System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyAvailabilityItem!>? Availability, System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyTaskResult!>? Tasks, int? More, string! Version, System.DateTimeOffset Clock, long? ProxyDelay) -> void
+Community.Zabbix.Proxy.ZabbixProxyDataRequest.ZabbixProxyDataRequest(string? Request, string? Host, string! Session, System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyHistoryItem!>? History, System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem!>? Discovery, System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyAutoregistrationItem!>? Autoregistration, System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyAvailabilityItem!>? Availability, System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyTaskResult!>? Tasks, int? More, System.Version! Version, System.DateTimeOffset Clock, long? ProxyDelay) -> void
 Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost
-Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.<Clone>$() -> Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost!
 Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.Clock.get -> System.DateTimeOffset
 Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.Clock.init -> void
-Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.Deconstruct(out ulong DruleId, out string! Ip, out System.DateTimeOffset Clock, out System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyDiscoveredService!>! Services, out string? Dns) -> void
+Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.Deconstruct(out ulong NetworkDiscoveryRuleId, out string! Ip, out System.DateTimeOffset Clock, out System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyDiscoveredService!>! Services, out string? Dns) -> void
 Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.Dns.get -> string?
 Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.Dns.init -> void
-Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.DruleId.get -> ulong
-Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.DruleId.init -> void
 Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.Equals(Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost? other) -> bool
 Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.Ip.get -> string!
 Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.Ip.init -> void
+Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.NetworkDiscoveryRuleId.get -> ulong
+Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.NetworkDiscoveryRuleId.init -> void
 Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.Services.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyDiscoveredService!>!
 Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.Services.init -> void
 Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.ToRows() -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem!>!
-Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.ZabbixProxyDiscoveredHost(ulong DruleId, string! Ip, System.DateTimeOffset Clock, System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyDiscoveredService!>! Services, string? Dns = null) -> void
+Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.ZabbixProxyDiscoveredHost(ulong NetworkDiscoveryRuleId, string! Ip, System.DateTimeOffset Clock, System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyDiscoveredService!>! Services, string? Dns = null) -> void
 Community.Zabbix.Proxy.ZabbixProxyDiscoveredService
-Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.<Clone>$() -> Community.Zabbix.Proxy.ZabbixProxyDiscoveredService!
-Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.DcheckId.get -> ulong
-Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.DcheckId.init -> void
-Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.Deconstruct(out ulong DcheckId, out int Port, out bool IsUp, out string? Value) -> void
-Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.Equals(Community.Zabbix.Proxy.ZabbixProxyDiscoveredService? other) -> bool
+Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.Deconstruct(out ulong NetworkDiscoveryCheckId, out int Port, out bool IsUp, out string? Value) -> void
 Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.IsUp.get -> bool
 Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.IsUp.init -> void
+Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.NetworkDiscoveryCheckId.get -> ulong
+Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.NetworkDiscoveryCheckId.init -> void
 Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.Port.get -> int
 Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.Port.init -> void
 Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.Value.get -> string?
 Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.Value.init -> void
-Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.ZabbixProxyDiscoveredService(ulong DcheckId, int Port, bool IsUp, string? Value = null) -> void
+Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.ZabbixProxyDiscoveredService(ulong NetworkDiscoveryCheckId, int Port, bool IsUp, string? Value = null) -> void
 Community.Zabbix.Proxy.ZabbixProxyDiscovery
 Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem
-Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.<Clone>$() -> Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem!
 Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.Clock.get -> System.DateTimeOffset
 Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.Clock.init -> void
-Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.DcheckId.get -> ulong
-Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.DcheckId.init -> void
-Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.Deconstruct(out System.DateTimeOffset Clock, out ulong DruleId, out ulong DcheckId, out string! Ip, out string? Dns, out int Port, out string? Value, out int Status, out string? Error) -> void
+Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.Deconstruct(out System.DateTimeOffset Clock, out ulong NetworkDiscoveryRuleId, out ulong NetworkDiscoveryCheckId, out string! Ip, out string? Dns, out int Port, out string? Value, out int Status, out string? Error) -> void
 Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.Dns.get -> string?
 Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.Dns.init -> void
-Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.DruleId.get -> ulong
-Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.DruleId.init -> void
-Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.Equals(Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem? other) -> bool
 Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.Error.get -> string?
 Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.Error.init -> void
 Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.Ip.get -> string!
 Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.Ip.init -> void
+Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.NetworkDiscoveryCheckId.get -> ulong
+Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.NetworkDiscoveryCheckId.init -> void
+Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.NetworkDiscoveryRuleId.get -> ulong
+Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.NetworkDiscoveryRuleId.init -> void
 Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.Port.get -> int
 Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.Port.init -> void
 Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.Status.get -> int
 Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.Status.init -> void
 Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.Value.get -> string?
 Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.Value.init -> void
-Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.ZabbixProxyDiscoveryItem(System.DateTimeOffset Clock, ulong DruleId, ulong DcheckId, string! Ip, string? Dns, int Port, string? Value, int Status, string? Error = null) -> void
+Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.ZabbixProxyDiscoveryItem(System.DateTimeOffset Clock, ulong NetworkDiscoveryRuleId, ulong NetworkDiscoveryCheckId, string! Ip, string? Dns, int Port, string? Value, int Status, string? Error = null) -> void
 Community.Zabbix.Proxy.ZabbixProxyHistoryItem
 Community.Zabbix.Proxy.ZabbixProxyHistoryItem.<Clone>$() -> Community.Zabbix.Proxy.ZabbixProxyHistoryItem!
 Community.Zabbix.Proxy.ZabbixProxyHistoryItem.Clock.get -> System.DateTimeOffset
@@ -351,44 +351,16 @@ Community.Zabbix.Proxy.ZabbixProxyHistoryItem.State.init -> void
 Community.Zabbix.Proxy.ZabbixProxyHistoryItem.Value.get -> string?
 Community.Zabbix.Proxy.ZabbixProxyHistoryItem.Value.init -> void
 Community.Zabbix.Proxy.ZabbixProxyHistoryItem.ZabbixProxyHistoryItem(long Sequence, ulong ItemId, System.DateTimeOffset Clock, string? Value, int? State = null) -> void
-Community.Zabbix.Proxy.ZabbixProxyHostStatus
-Community.Zabbix.Proxy.ZabbixProxyHostStatus.Monitored = 0 -> Community.Zabbix.Proxy.ZabbixProxyHostStatus
-Community.Zabbix.Proxy.ZabbixProxyHostStatus.NotMonitored = 1 -> Community.Zabbix.Proxy.ZabbixProxyHostStatus
-Community.Zabbix.Proxy.ZabbixProxyItemStatus
-Community.Zabbix.Proxy.ZabbixProxyItemStatus.Active = 0 -> Community.Zabbix.Proxy.ZabbixProxyItemStatus
-Community.Zabbix.Proxy.ZabbixProxyItemStatus.Disabled = 1 -> Community.Zabbix.Proxy.ZabbixProxyItemStatus
-Community.Zabbix.Proxy.ZabbixProxyItemType
-Community.Zabbix.Proxy.ZabbixProxyItemType.Browser = 22 -> Community.Zabbix.Proxy.ZabbixProxyItemType
-Community.Zabbix.Proxy.ZabbixProxyItemType.Calculated = 15 -> Community.Zabbix.Proxy.ZabbixProxyItemType
-Community.Zabbix.Proxy.ZabbixProxyItemType.DatabaseMonitor = 11 -> Community.Zabbix.Proxy.ZabbixProxyItemType
-Community.Zabbix.Proxy.ZabbixProxyItemType.Dependent = 18 -> Community.Zabbix.Proxy.ZabbixProxyItemType
-Community.Zabbix.Proxy.ZabbixProxyItemType.External = 10 -> Community.Zabbix.Proxy.ZabbixProxyItemType
-Community.Zabbix.Proxy.ZabbixProxyItemType.HttpAgent = 19 -> Community.Zabbix.Proxy.ZabbixProxyItemType
-Community.Zabbix.Proxy.ZabbixProxyItemType.Internal = 5 -> Community.Zabbix.Proxy.ZabbixProxyItemType
-Community.Zabbix.Proxy.ZabbixProxyItemType.Ipmi = 12 -> Community.Zabbix.Proxy.ZabbixProxyItemType
-Community.Zabbix.Proxy.ZabbixProxyItemType.Jmx = 16 -> Community.Zabbix.Proxy.ZabbixProxyItemType
-Community.Zabbix.Proxy.ZabbixProxyItemType.NestedDiscovery = 23 -> Community.Zabbix.Proxy.ZabbixProxyItemType
-Community.Zabbix.Proxy.ZabbixProxyItemType.Script = 21 -> Community.Zabbix.Proxy.ZabbixProxyItemType
-Community.Zabbix.Proxy.ZabbixProxyItemType.SimpleCheck = 3 -> Community.Zabbix.Proxy.ZabbixProxyItemType
-Community.Zabbix.Proxy.ZabbixProxyItemType.Snmp = 20 -> Community.Zabbix.Proxy.ZabbixProxyItemType
-Community.Zabbix.Proxy.ZabbixProxyItemType.SnmpTrap = 17 -> Community.Zabbix.Proxy.ZabbixProxyItemType
-Community.Zabbix.Proxy.ZabbixProxyItemType.Ssh = 13 -> Community.Zabbix.Proxy.ZabbixProxyItemType
-Community.Zabbix.Proxy.ZabbixProxyItemType.Telnet = 14 -> Community.Zabbix.Proxy.ZabbixProxyItemType
-Community.Zabbix.Proxy.ZabbixProxyItemType.Trapper = 2 -> Community.Zabbix.Proxy.ZabbixProxyItemType
-Community.Zabbix.Proxy.ZabbixProxyItemType.WebItem = 9 -> Community.Zabbix.Proxy.ZabbixProxyItemType
-Community.Zabbix.Proxy.ZabbixProxyItemType.ZabbixAgent = 0 -> Community.Zabbix.Proxy.ZabbixProxyItemType
-Community.Zabbix.Proxy.ZabbixProxyItemType.ZabbixAgentActive = 7 -> Community.Zabbix.Proxy.ZabbixProxyItemType
 Community.Zabbix.Proxy.ZabbixProxyRefusedException
 Community.Zabbix.Proxy.ZabbixProxyRefusedException.Info.get -> string?
 Community.Zabbix.Proxy.ZabbixProxyRefusedException.Request.get -> string?
-Community.Zabbix.Proxy.ZabbixProxyRefusedException.ServerVersion.get -> string?
+Community.Zabbix.Proxy.ZabbixProxyRefusedException.ServerVersion.get -> System.Version?
 Community.Zabbix.Proxy.ZabbixProxyRefusedException.ZabbixProxyRefusedException() -> void
 Community.Zabbix.Proxy.ZabbixProxyRefusedException.ZabbixProxyRefusedException(string! message) -> void
 Community.Zabbix.Proxy.ZabbixProxyRefusedException.ZabbixProxyRefusedException(string! message, System.Exception! innerException) -> void
-Community.Zabbix.Proxy.ZabbixProxyRefusedException.ZabbixProxyRefusedException(string! request, string? info, string? serverVersion) -> void
+Community.Zabbix.Proxy.ZabbixProxyRefusedException.ZabbixProxyRefusedException(string! request, string? info, System.Version? serverVersion) -> void
 Community.Zabbix.Proxy.ZabbixProxyResponse
-Community.Zabbix.Proxy.ZabbixProxyResponse.<Clone>$() -> Community.Zabbix.Proxy.ZabbixProxyResponse!
-Community.Zabbix.Proxy.ZabbixProxyResponse.Deconstruct(out string? Response, out string? Info, out string? Upload, out string? Version, out System.Text.Json.JsonElement? Tasks) -> void
+Community.Zabbix.Proxy.ZabbixProxyResponse.Deconstruct(out string? Response, out string? Info, out string? Upload, out System.Version? Version, out System.Text.Json.JsonElement? Tasks) -> void
 Community.Zabbix.Proxy.ZabbixProxyResponse.Equals(Community.Zabbix.Proxy.ZabbixProxyResponse? other) -> bool
 Community.Zabbix.Proxy.ZabbixProxyResponse.Info.get -> string?
 Community.Zabbix.Proxy.ZabbixProxyResponse.Info.init -> void
@@ -401,12 +373,11 @@ Community.Zabbix.Proxy.ZabbixProxyResponse.Tasks.init -> void
 Community.Zabbix.Proxy.ZabbixProxyResponse.Upload.get -> string?
 Community.Zabbix.Proxy.ZabbixProxyResponse.Upload.init -> void
 Community.Zabbix.Proxy.ZabbixProxyResponse.UploadDisabled.get -> bool
-Community.Zabbix.Proxy.ZabbixProxyResponse.Version.get -> string?
+Community.Zabbix.Proxy.ZabbixProxyResponse.Version.get -> System.Version?
 Community.Zabbix.Proxy.ZabbixProxyResponse.Version.init -> void
-Community.Zabbix.Proxy.ZabbixProxyResponse.ZabbixProxyResponse(string? Response, string? Info, string? Upload, string? Version, System.Text.Json.JsonElement? Tasks) -> void
+Community.Zabbix.Proxy.ZabbixProxyResponse.ZabbixProxyResponse(string? Response, string? Info, string? Upload, System.Version? Version, System.Text.Json.JsonElement? Tasks) -> void
 Community.Zabbix.Proxy.ZabbixProxyResponseTasks
 Community.Zabbix.Proxy.ZabbixProxyTask
-Community.Zabbix.Proxy.ZabbixProxyTask.<Clone>$() -> Community.Zabbix.Proxy.ZabbixProxyTask!
 Community.Zabbix.Proxy.ZabbixProxyTask.AlertId.get -> ulong?
 Community.Zabbix.Proxy.ZabbixProxyTask.AlertId.init -> void
 Community.Zabbix.Proxy.ZabbixProxyTask.AuthType.get -> int?
@@ -417,8 +388,7 @@ Community.Zabbix.Proxy.ZabbixProxyTask.Command.get -> string?
 Community.Zabbix.Proxy.ZabbixProxyTask.Command.init -> void
 Community.Zabbix.Proxy.ZabbixProxyTask.CommandType.get -> int?
 Community.Zabbix.Proxy.ZabbixProxyTask.CommandType.init -> void
-Community.Zabbix.Proxy.ZabbixProxyTask.Deconstruct(out Community.Zabbix.Proxy.ZabbixProxyTaskType Type, out System.DateTimeOffset Clock, out long Ttl, out ulong? ItemId, out int? CommandType, out string? Command, out int? ExecuteOn, out int? Port, out int? AuthType, out string? Username, out string? Password, out string? PublicKey, out string? PrivateKey, out ulong? AlertId, out ulong? HostId, out ulong? ParentTaskId) -> void
-Community.Zabbix.Proxy.ZabbixProxyTask.Equals(Community.Zabbix.Proxy.ZabbixProxyTask? other) -> bool
+Community.Zabbix.Proxy.ZabbixProxyTask.Deconstruct(out Community.Zabbix.Proxy.ZabbixProxyTaskType Type, out System.DateTimeOffset Clock, out long Ttl, out ulong? ItemId, out int? CommandType, out string? Command, out int? ExecuteOn, out int? Port, out int? AuthType, out string? UserName, out string? Password, out string? PublicKey, out string? PrivateKey, out ulong? AlertId, out ulong? HostId, out ulong? ParentTaskId) -> void
 Community.Zabbix.Proxy.ZabbixProxyTask.ExecuteOn.get -> int?
 Community.Zabbix.Proxy.ZabbixProxyTask.ExecuteOn.init -> void
 Community.Zabbix.Proxy.ZabbixProxyTask.HostId.get -> ulong?
@@ -439,9 +409,9 @@ Community.Zabbix.Proxy.ZabbixProxyTask.Ttl.get -> long
 Community.Zabbix.Proxy.ZabbixProxyTask.Ttl.init -> void
 Community.Zabbix.Proxy.ZabbixProxyTask.Type.get -> Community.Zabbix.Proxy.ZabbixProxyTaskType
 Community.Zabbix.Proxy.ZabbixProxyTask.Type.init -> void
-Community.Zabbix.Proxy.ZabbixProxyTask.Username.get -> string?
-Community.Zabbix.Proxy.ZabbixProxyTask.Username.init -> void
-Community.Zabbix.Proxy.ZabbixProxyTask.ZabbixProxyTask(Community.Zabbix.Proxy.ZabbixProxyTaskType Type, System.DateTimeOffset Clock, long Ttl, ulong? ItemId = null, int? CommandType = null, string? Command = null, int? ExecuteOn = null, int? Port = null, int? AuthType = null, string? Username = null, string? Password = null, string? PublicKey = null, string? PrivateKey = null, ulong? AlertId = null, ulong? HostId = null, ulong? ParentTaskId = null) -> void
+Community.Zabbix.Proxy.ZabbixProxyTask.UserName.get -> string?
+Community.Zabbix.Proxy.ZabbixProxyTask.UserName.init -> void
+Community.Zabbix.Proxy.ZabbixProxyTask.ZabbixProxyTask(Community.Zabbix.Proxy.ZabbixProxyTaskType Type, System.DateTimeOffset Clock, long Ttl, ulong? ItemId = null, int? CommandType = null, string? Command = null, int? ExecuteOn = null, int? Port = null, int? AuthType = null, string? UserName = null, string? Password = null, string? PublicKey = null, string? PrivateKey = null, ulong? AlertId = null, ulong? HostId = null, ulong? ParentTaskId = null) -> void
 Community.Zabbix.Proxy.ZabbixProxyTaskResult
 Community.Zabbix.Proxy.ZabbixProxyTaskResult.<Clone>$() -> Community.Zabbix.Proxy.ZabbixProxyTaskResult!
 Community.Zabbix.Proxy.ZabbixProxyTaskResult.Clock.get -> System.DateTimeOffset
@@ -474,9 +444,10 @@ Community.Zabbix.Proxy.ZabbixProxyUplink.GetConfigAsync(Community.Zabbix.Proxy.Z
 Community.Zabbix.Proxy.ZabbixProxyUplink.ProbeAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.Proxy.ZabbixProxyResponse!>!
 Community.Zabbix.Proxy.ZabbixProxyUplink.ProxyName.get -> string!
 Community.Zabbix.Proxy.ZabbixProxyUplink.Session.get -> string!
-Community.Zabbix.Proxy.ZabbixProxyUplink.UploadAsync(Community.Zabbix.Proxy.ZabbixProxyDataPage! page, bool more, long proxyDelay, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.Proxy.ZabbixProxyResponse!>!
-Community.Zabbix.Proxy.ZabbixProxyUplink.Version.get -> Community.Zabbix.ZabbixComponentVersion
-Community.Zabbix.Proxy.ZabbixProxyUplink.ZabbixProxyUplink(System.Func<System.ReadOnlyMemory<byte>, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<System.ReadOnlyMemory<byte>>>! exchange, string! proxyName, Community.Zabbix.ZabbixComponentVersion? version = null, System.TimeProvider? time = null, Microsoft.Extensions.Logging.ILogger<Community.Zabbix.Proxy.ZabbixProxyUplink!>? logger = null, string? session = null) -> void
+Community.Zabbix.Proxy.ZabbixProxyUplink.UploadAsync(Community.Zabbix.Proxy.ZabbixProxyDataPage! page, Community.Zabbix.Proxy.ZabbixProxyBacklog backlog, System.TimeSpan proxyDelay, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.Proxy.ZabbixProxyResponse!>!
+Community.Zabbix.Proxy.ZabbixProxyUplink.Version.get -> System.Version!
+Community.Zabbix.Proxy.ZabbixProxyUplink.ZabbixProxyUplink(System.Func<System.ReadOnlyMemory<byte>, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<System.ReadOnlyMemory<byte>>>! exchange, string! proxyName) -> void
+Community.Zabbix.Proxy.ZabbixProxyUplink.ZabbixProxyUplink(System.Func<System.ReadOnlyMemory<byte>, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<System.ReadOnlyMemory<byte>>>! exchange, string! proxyName, System.Version? version, string? session, Microsoft.Extensions.Logging.ILoggerFactory? loggers, System.TimeProvider? time) -> void
 Community.Zabbix.ZabbixActiveProxy
 Community.Zabbix.ZabbixActiveProxy.Admission.get -> Community.Zabbix.Proxy.ZabbixProxyAdmission!
 Community.Zabbix.ZabbixActiveProxy.AutoregistrationStore.get -> Community.Zabbix.Storage.ZabbixStore<Community.Zabbix.Proxy.ZabbixProxyAutoregistrationItem!>?
@@ -485,11 +456,8 @@ Community.Zabbix.ZabbixActiveProxy.Config.get -> Community.Zabbix.Proxy.ZabbixPr
 Community.Zabbix.ZabbixActiveProxy.DiscoveryStore.get -> Community.Zabbix.Storage.ZabbixStore<Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem!>?
 Community.Zabbix.ZabbixActiveProxy.IsHeld.get -> bool
 Community.Zabbix.ZabbixActiveProxy.Options.get -> Community.Zabbix.ZabbixProxyOptions!
-Community.Zabbix.ZabbixActiveProxy.Status.get -> Community.Zabbix.ZabbixAgentStatus!
-Community.Zabbix.ZabbixActiveProxy.Store.get -> Community.Zabbix.Storage.ZabbixStore<Community.Zabbix.ZabbixValue!>?
+Community.Zabbix.ZabbixActiveProxy.Status.get -> Community.Zabbix.ZabbixComponentStatus!
 Community.Zabbix.ZabbixActiveProxy.TasksStore.get -> Community.Zabbix.Storage.ZabbixStore<Community.Zabbix.Proxy.ZabbixProxyTaskResult!>?
-Community.Zabbix.ZabbixActiveProxy.Trapper.get -> Community.Zabbix.Listening.ZabbixListener?
-Community.Zabbix.ZabbixActiveProxy.Uplink.get -> Community.Zabbix.Proxy.ZabbixProxyUplink?
 Community.Zabbix.ZabbixActiveProxy.ZabbixActiveProxy() -> void
 Community.Zabbix.ZabbixActiveProxy.ZabbixActiveProxy(Community.Zabbix.ZabbixProxyOptions! options) -> void
 Community.Zabbix.ZabbixActiveProxy.ZabbixActiveProxy(Community.Zabbix.ZabbixProxyOptions! options, Microsoft.Extensions.Logging.ILoggerFactory? loggers, System.TimeProvider? time, System.Diagnostics.Metrics.IMeterFactory? meters) -> void
@@ -503,11 +471,9 @@ Community.Zabbix.ZabbixActiveProxyBuilder.UseTimeProvider(System.TimeProvider! t
 Community.Zabbix.ZabbixActiveProxyBuilder.ZabbixActiveProxyBuilder(string! name) -> void
 Community.Zabbix.ZabbixActiveProxyBuilderExtensions
 Community.Zabbix.ZabbixActiveProxyBuilderExtensions.extension<TBuilder>(TBuilder)
-Community.Zabbix.ZabbixActiveProxyBuilderExtensions.extension<TBuilder>(TBuilder).AddHealthCheck() -> TBuilder
-Community.Zabbix.ZabbixActiveProxyBuilderExtensions.extension<TBuilder>(TBuilder).AddHealthCheck(System.Action<Community.Zabbix.Hosting.ZabbixAgentHealthCheckOptions!>! configure) -> TBuilder
-Community.Zabbix.ZabbixActiveProxyBuilderExtensions.extension<TBuilder>(TBuilder).AddServer(params System.ReadOnlySpan<System.Net.DnsEndPoint!> nodes) -> TBuilder
-Community.Zabbix.ZabbixActiveProxyBuilderExtensions.extension<TBuilder>(TBuilder).AddServer(string! server) -> TBuilder
-Community.Zabbix.ZabbixActiveProxyBuilderExtensions.extension<TBuilder>(TBuilder).WithPsk(string! identity, System.ReadOnlySpan<byte> key) -> TBuilder
+Community.Zabbix.ZabbixActiveProxyBuilderExtensions.extension<TBuilder>(TBuilder).AddHealthCheck(System.Action<Community.Zabbix.Hosting.ZabbixComponentHealthCheckOptions!>! configure) -> TBuilder
+Community.Zabbix.ZabbixActiveProxyBuilderExtensions.extension<TBuilder>(TBuilder).WithServer(params System.ReadOnlySpan<System.Net.DnsEndPoint!> nodes) -> TBuilder
+Community.Zabbix.ZabbixActiveProxyBuilderExtensions.extension<TBuilder>(TBuilder).WithServer(string! server) -> TBuilder
 Community.Zabbix.ZabbixActiveProxyServiceCollectionExtensions
 Community.Zabbix.ZabbixListenerBuilderExtensions
 Community.Zabbix.ZabbixListenerBuilderExtensions.extension<TBuilder>(TBuilder)
@@ -554,7 +520,7 @@ Community.Zabbix.ZabbixPassiveAgentBuilder.Services.get -> Microsoft.Extensions.
 Community.Zabbix.ZabbixPassiveAgentBuilder.UseLogging(Microsoft.Extensions.Logging.ILoggerFactory! loggers) -> Community.Zabbix.ZabbixPassiveAgentBuilder!
 Community.Zabbix.ZabbixPassiveAgentBuilder.UseMeterFactory(System.Diagnostics.Metrics.IMeterFactory! meters) -> Community.Zabbix.ZabbixPassiveAgentBuilder!
 Community.Zabbix.ZabbixPassiveAgentBuilder.UseTimeProvider(System.TimeProvider! time) -> Community.Zabbix.ZabbixPassiveAgentBuilder!
-Community.Zabbix.ZabbixPassiveAgentBuilder.ZabbixPassiveAgentBuilder(string! hostname) -> void
+Community.Zabbix.ZabbixPassiveAgentBuilder.ZabbixPassiveAgentBuilder(string! hostName) -> void
 Community.Zabbix.ZabbixPassiveAgentBuilderExtensions
 Community.Zabbix.ZabbixPassiveAgentBuilderExtensions.extension(Community.Zabbix.IZabbixPassiveAgentBuilder!)
 Community.Zabbix.ZabbixPassiveAgentBuilderExtensions.extension(Community.Zabbix.IZabbixPassiveAgentBuilder!).AddItems<TProvider>() -> Community.Zabbix.IZabbixPassiveAgentBuilder!
@@ -569,8 +535,8 @@ Community.Zabbix.ZabbixPassiveAgentOptions.BundledItems.get -> bool
 Community.Zabbix.ZabbixPassiveAgentOptions.BundledItems.set -> void
 Community.Zabbix.ZabbixPassiveAgentOptions.CheckTimeout.get -> System.TimeSpan
 Community.Zabbix.ZabbixPassiveAgentOptions.CheckTimeout.set -> void
-Community.Zabbix.ZabbixPassiveAgentOptions.Hostname.get -> string!
-Community.Zabbix.ZabbixPassiveAgentOptions.Hostname.set -> void
+Community.Zabbix.ZabbixPassiveAgentOptions.HostName.get -> string!
+Community.Zabbix.ZabbixPassiveAgentOptions.HostName.set -> void
 Community.Zabbix.ZabbixPassiveAgentOptions.KeyRules.get -> System.Collections.Generic.IList<string!>!
 Community.Zabbix.ZabbixPassiveAgentOptions.Name.get -> string?
 Community.Zabbix.ZabbixPassiveAgentOptions.Name.set -> void
@@ -600,21 +566,12 @@ Community.Zabbix.ZabbixPassiveProxyBuilder.UseTimeProvider(System.TimeProvider! 
 Community.Zabbix.ZabbixPassiveProxyBuilder.ZabbixPassiveProxyBuilder(string! name) -> void
 Community.Zabbix.ZabbixPassiveProxyBuilderExtensions
 Community.Zabbix.ZabbixPassiveProxyBuilderExtensions.extension<TBuilder>(TBuilder)
-Community.Zabbix.ZabbixPassiveProxyBuilderExtensions.extension<TBuilder>(TBuilder).AddHealthCheck() -> TBuilder
-Community.Zabbix.ZabbixPassiveProxyBuilderExtensions.extension<TBuilder>(TBuilder).OnConfig(System.Func<Community.Zabbix.Proxy.ZabbixProxyConfig!, Community.Zabbix.Proxy.ZabbixProxyConfig!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<string?>>! handler) -> TBuilder
-Community.Zabbix.ZabbixPassiveProxyBuilderExtensions.extension<TBuilder>(TBuilder).OnStats(System.Func<System.ReadOnlyMemory<byte>, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyDictionary<string!, System.Text.Json.JsonElement>?>>! handler) -> TBuilder
-Community.Zabbix.ZabbixPassiveProxyBuilderExtensions.extension<TBuilder>(TBuilder).WithPsk(string! identity, System.ReadOnlySpan<byte> key) -> TBuilder
+Community.Zabbix.ZabbixPassiveProxyBuilderExtensions.extension<TBuilder>(TBuilder).OnConfig(System.Func<Community.Zabbix.Proxy.ZabbixProxyConfig!, Community.Zabbix.Proxy.ZabbixProxyConfig!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<Community.Zabbix.Proxy.ZabbixProxyConfigVerdict>>! handler) -> TBuilder
 Community.Zabbix.ZabbixPassiveProxyServiceCollectionExtensions
 Community.Zabbix.ZabbixProxiesServiceCollectionExtensions
 Community.Zabbix.ZabbixProxyBuilderExtensions
 Community.Zabbix.ZabbixProxyBuilderExtensions.extension<TBuilder>(TBuilder)
-Community.Zabbix.ZabbixProxyBuilderExtensions.extension<TBuilder>(TBuilder).AddProvider(System.Func<Community.Zabbix.Proxy.ZabbixProxyConfig!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<Community.Zabbix.Proxy.ZabbixProxyDataPage?>>! provider) -> TBuilder
-Community.Zabbix.ZabbixProxyBuilderExtensions.extension<TBuilder>(TBuilder).AddTrapper(int port, System.Action<Community.Zabbix.ZabbixListenerOptions!>? configure = null) -> TBuilder
-Community.Zabbix.ZabbixProxyBuilderExtensions.extension<TBuilder>(TBuilder).Bind(Microsoft.Extensions.Configuration.IConfiguration! section) -> TBuilder
-Community.Zabbix.ZabbixProxyBuilderExtensions.extension<TBuilder>(TBuilder).Configure(System.Action<Community.Zabbix.ZabbixProxyOptions!>! configure) -> TBuilder
-Community.Zabbix.ZabbixProxyBuilderExtensions.extension<TBuilder>(TBuilder).OnTask(System.Func<Community.Zabbix.Proxy.ZabbixProxyTask!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<Community.Zabbix.Proxy.ZabbixProxyTaskResult!>>! handler) -> TBuilder
-Community.Zabbix.ZabbixProxyBuilderExtensions.extension<TBuilder>(TBuilder).WithVersion(Community.Zabbix.ZabbixComponentVersion version) -> TBuilder
-Community.Zabbix.ZabbixProxyBuilderExtensions.extension<TBuilder>(TBuilder).WithVersion(string! version) -> TBuilder
+Community.Zabbix.ZabbixProxyBuilderExtensions.extension<TBuilder>(TBuilder).WithVersion(System.Version! version) -> TBuilder
 Community.Zabbix.ZabbixProxyOptions
 Community.Zabbix.ZabbixProxyOptions.ConfigInterval.get -> System.TimeSpan
 Community.Zabbix.ZabbixProxyOptions.ConfigInterval.set -> void
@@ -626,8 +583,6 @@ Community.Zabbix.ZabbixProxyOptions.DrainTimeout.get -> System.TimeSpan
 Community.Zabbix.ZabbixProxyOptions.DrainTimeout.set -> void
 Community.Zabbix.ZabbixProxyOptions.MaxItems.get -> int?
 Community.Zabbix.ZabbixProxyOptions.MaxItems.set -> void
-Community.Zabbix.ZabbixProxyOptions.Mode.get -> Community.Zabbix.ZabbixProxyRole
-Community.Zabbix.ZabbixProxyOptions.Mode.set -> void
 Community.Zabbix.ZabbixProxyOptions.Name.get -> string?
 Community.Zabbix.ZabbixProxyOptions.Name.set -> void
 Community.Zabbix.ZabbixProxyOptions.OfflineBuffer.get -> System.TimeSpan
@@ -643,9 +598,6 @@ Community.Zabbix.ZabbixProxyOptions.Trapper.set -> void
 Community.Zabbix.ZabbixProxyOptions.Version.get -> string?
 Community.Zabbix.ZabbixProxyOptions.Version.set -> void
 Community.Zabbix.ZabbixProxyOptions.ZabbixProxyOptions() -> void
-Community.Zabbix.ZabbixProxyRole
-Community.Zabbix.ZabbixProxyRole.Active = 0 -> Community.Zabbix.ZabbixProxyRole
-Community.Zabbix.ZabbixProxyRole.Passive = 1 -> Community.Zabbix.ZabbixProxyRole
 Community.Zabbix.ZabbixSocketTransportServiceCollectionExtensions
 Community.Zabbix.ZabbixTrapperAgentBuilderExtensions
 Community.Zabbix.ZabbixTrapperAgentBuilderExtensions.extension<TBuilder>(TBuilder)
@@ -655,7 +607,6 @@ abstract Community.Zabbix.Connector.ZabbixConnectorRecord.<Clone>$() -> Communit
 const Community.Zabbix.Listening.ZabbixListener.TransportKey = "Zabbix" -> string!
 const Community.Zabbix.Listening.ZabbixTrapper.OutcomeTag = "zabbix.listener.trapper.outcome" -> string!
 const Community.Zabbix.Listening.ZabbixTrapper.ValuesInstrument = "zabbix.listener.trapper.values" -> string!
-const Community.Zabbix.Proxy.ZabbixProxyUplink.DefaultVersion = "7.4.0" -> string!
 override Community.Zabbix.Connector.ZabbixConnectorError.Equals(object? obj) -> bool
 override Community.Zabbix.Connector.ZabbixConnectorError.GetHashCode() -> int
 override Community.Zabbix.Connector.ZabbixConnectorError.ToString() -> string!
@@ -680,36 +631,17 @@ override Community.Zabbix.Proxy.ZabbixProxyAutoregistrationItem.ToString() -> st
 override Community.Zabbix.Proxy.ZabbixProxyAvailabilityItem.Equals(object? obj) -> bool
 override Community.Zabbix.Proxy.ZabbixProxyAvailabilityItem.GetHashCode() -> int
 override Community.Zabbix.Proxy.ZabbixProxyAvailabilityItem.ToString() -> string!
-override Community.Zabbix.Proxy.ZabbixProxyConfigHost.Equals(object? obj) -> bool
-override Community.Zabbix.Proxy.ZabbixProxyConfigHost.GetHashCode() -> int
-override Community.Zabbix.Proxy.ZabbixProxyConfigHost.ToString() -> string!
-override Community.Zabbix.Proxy.ZabbixProxyConfigItem.Equals(object? obj) -> bool
 override Community.Zabbix.Proxy.ZabbixProxyConfigItem.GetHashCode() -> int
-override Community.Zabbix.Proxy.ZabbixProxyConfigItem.ToString() -> string!
+override Community.Zabbix.Proxy.ZabbixProxyConfigVerdict.GetHashCode() -> int
 override Community.Zabbix.Proxy.ZabbixProxyDataPage.Equals(object? obj) -> bool
 override Community.Zabbix.Proxy.ZabbixProxyDataPage.GetHashCode() -> int
 override Community.Zabbix.Proxy.ZabbixProxyDataPage.ToString() -> string!
-override Community.Zabbix.Proxy.ZabbixProxyDataRequest.Equals(object? obj) -> bool
 override Community.Zabbix.Proxy.ZabbixProxyDataRequest.GetHashCode() -> int
-override Community.Zabbix.Proxy.ZabbixProxyDataRequest.ToString() -> string!
-override Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.Equals(object? obj) -> bool
 override Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.GetHashCode() -> int
-override Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.ToString() -> string!
-override Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.Equals(object? obj) -> bool
-override Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.GetHashCode() -> int
-override Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.ToString() -> string!
-override Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.Equals(object? obj) -> bool
-override Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.GetHashCode() -> int
-override Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.ToString() -> string!
 override Community.Zabbix.Proxy.ZabbixProxyHistoryItem.Equals(object? obj) -> bool
 override Community.Zabbix.Proxy.ZabbixProxyHistoryItem.GetHashCode() -> int
 override Community.Zabbix.Proxy.ZabbixProxyHistoryItem.ToString() -> string!
-override Community.Zabbix.Proxy.ZabbixProxyResponse.Equals(object? obj) -> bool
 override Community.Zabbix.Proxy.ZabbixProxyResponse.GetHashCode() -> int
-override Community.Zabbix.Proxy.ZabbixProxyResponse.ToString() -> string!
-override Community.Zabbix.Proxy.ZabbixProxyTask.Equals(object? obj) -> bool
-override Community.Zabbix.Proxy.ZabbixProxyTask.GetHashCode() -> int
-override Community.Zabbix.Proxy.ZabbixProxyTask.ToString() -> string!
 override Community.Zabbix.Proxy.ZabbixProxyTaskResult.Equals(object? obj) -> bool
 override Community.Zabbix.Proxy.ZabbixProxyTaskResult.GetHashCode() -> int
 override Community.Zabbix.Proxy.ZabbixProxyTaskResult.ToString() -> string!
@@ -739,7 +671,7 @@ static Community.Zabbix.Listening.ZabbixConversationContext.Reply(System.Func<Co
 static Community.Zabbix.Listening.ZabbixListener.CreateBuilder() -> Community.Zabbix.Listening.ZabbixListenerBuilder!
 static Community.Zabbix.Listening.ZabbixRequest.operator !=(Community.Zabbix.Listening.ZabbixRequest left, Community.Zabbix.Listening.ZabbixRequest right) -> bool
 static Community.Zabbix.Listening.ZabbixRequest.operator ==(Community.Zabbix.Listening.ZabbixRequest left, Community.Zabbix.Listening.ZabbixRequest right) -> bool
-static Community.Zabbix.Proxy.ZabbixProxyAdmission.BuildAsync(Community.Zabbix.Proxy.ZabbixProxyConfig! config, Community.Zabbix.ZabbixComponentVersion protocol, System.Func<string!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<System.Net.IPAddress!>!>>? resolve = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<Community.Zabbix.Proxy.ZabbixProxyAdmission!>
+static Community.Zabbix.Proxy.ZabbixProxyAdmission.BuildAsync(Community.Zabbix.Proxy.ZabbixProxyConfig! config, System.Version! protocol, System.Func<string!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<System.Net.IPAddress!>!>>? resolve = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<Community.Zabbix.Proxy.ZabbixProxyAdmission!>
 static Community.Zabbix.Proxy.ZabbixProxyAdmission.Empty.get -> Community.Zabbix.Proxy.ZabbixProxyAdmission!
 static Community.Zabbix.Proxy.ZabbixProxyAutoregistrationItem.operator !=(Community.Zabbix.Proxy.ZabbixProxyAutoregistrationItem? left, Community.Zabbix.Proxy.ZabbixProxyAutoregistrationItem? right) -> bool
 static Community.Zabbix.Proxy.ZabbixProxyAutoregistrationItem.operator ==(Community.Zabbix.Proxy.ZabbixProxyAutoregistrationItem? left, Community.Zabbix.Proxy.ZabbixProxyAutoregistrationItem? right) -> bool
@@ -747,45 +679,32 @@ static Community.Zabbix.Proxy.ZabbixProxyAvailabilityItem.operator !=(Community.
 static Community.Zabbix.Proxy.ZabbixProxyAvailabilityItem.operator ==(Community.Zabbix.Proxy.ZabbixProxyAvailabilityItem? left, Community.Zabbix.Proxy.ZabbixProxyAvailabilityItem? right) -> bool
 static Community.Zabbix.Proxy.ZabbixProxyConfig.Empty.get -> Community.Zabbix.Proxy.ZabbixProxyConfig!
 static Community.Zabbix.Proxy.ZabbixProxyConfig.IsFullSync(System.Text.Json.JsonElement reply) -> bool
-static Community.Zabbix.Proxy.ZabbixProxyConfigHost.operator !=(Community.Zabbix.Proxy.ZabbixProxyConfigHost? left, Community.Zabbix.Proxy.ZabbixProxyConfigHost? right) -> bool
-static Community.Zabbix.Proxy.ZabbixProxyConfigHost.operator ==(Community.Zabbix.Proxy.ZabbixProxyConfigHost? left, Community.Zabbix.Proxy.ZabbixProxyConfigHost? right) -> bool
-static Community.Zabbix.Proxy.ZabbixProxyConfigItem.operator !=(Community.Zabbix.Proxy.ZabbixProxyConfigItem? left, Community.Zabbix.Proxy.ZabbixProxyConfigItem? right) -> bool
-static Community.Zabbix.Proxy.ZabbixProxyConfigItem.operator ==(Community.Zabbix.Proxy.ZabbixProxyConfigItem? left, Community.Zabbix.Proxy.ZabbixProxyConfigItem? right) -> bool
+static Community.Zabbix.Proxy.ZabbixProxyConfigVerdict.Accepted.get -> Community.Zabbix.Proxy.ZabbixProxyConfigVerdict
+static Community.Zabbix.Proxy.ZabbixProxyConfigVerdict.operator !=(Community.Zabbix.Proxy.ZabbixProxyConfigVerdict left, Community.Zabbix.Proxy.ZabbixProxyConfigVerdict right) -> bool
+static Community.Zabbix.Proxy.ZabbixProxyConfigVerdict.operator ==(Community.Zabbix.Proxy.ZabbixProxyConfigVerdict left, Community.Zabbix.Proxy.ZabbixProxyConfigVerdict right) -> bool
+static Community.Zabbix.Proxy.ZabbixProxyConfigVerdict.Refuse(string! reason) -> Community.Zabbix.Proxy.ZabbixProxyConfigVerdict
 static Community.Zabbix.Proxy.ZabbixProxyDataPage.Empty.get -> Community.Zabbix.Proxy.ZabbixProxyDataPage!
 static Community.Zabbix.Proxy.ZabbixProxyDataPage.operator !=(Community.Zabbix.Proxy.ZabbixProxyDataPage? left, Community.Zabbix.Proxy.ZabbixProxyDataPage? right) -> bool
 static Community.Zabbix.Proxy.ZabbixProxyDataPage.operator ==(Community.Zabbix.Proxy.ZabbixProxyDataPage? left, Community.Zabbix.Proxy.ZabbixProxyDataPage? right) -> bool
 static Community.Zabbix.Proxy.ZabbixProxyDataProviders.AskAsync(System.Collections.Generic.IReadOnlyList<System.Func<Community.Zabbix.Proxy.ZabbixProxyConfig!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<Community.Zabbix.Proxy.ZabbixProxyDataPage?>>!>! providers, Community.Zabbix.Proxy.ZabbixProxyConfig! config, System.Action<System.Exception!>? onFailed, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyDataPage!>!>
 static Community.Zabbix.Proxy.ZabbixProxyDataProviders.Merge(Community.Zabbix.Proxy.ZabbixProxyDataPage! page, System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyDataPage!>! extra) -> Community.Zabbix.Proxy.ZabbixProxyDataPage!
-static Community.Zabbix.Proxy.ZabbixProxyDataRequest.operator !=(Community.Zabbix.Proxy.ZabbixProxyDataRequest? left, Community.Zabbix.Proxy.ZabbixProxyDataRequest? right) -> bool
-static Community.Zabbix.Proxy.ZabbixProxyDataRequest.operator ==(Community.Zabbix.Proxy.ZabbixProxyDataRequest? left, Community.Zabbix.Proxy.ZabbixProxyDataRequest? right) -> bool
-static Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.operator !=(Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost? left, Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost? right) -> bool
-static Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.operator ==(Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost? left, Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost? right) -> bool
-static Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.operator !=(Community.Zabbix.Proxy.ZabbixProxyDiscoveredService? left, Community.Zabbix.Proxy.ZabbixProxyDiscoveredService? right) -> bool
-static Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.operator ==(Community.Zabbix.Proxy.ZabbixProxyDiscoveredService? left, Community.Zabbix.Proxy.ZabbixProxyDiscoveredService? right) -> bool
 static Community.Zabbix.Proxy.ZabbixProxyDiscovery.WriteAsync(this System.Threading.Channels.ChannelWriter<Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem!>! writer, Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost! host, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask
-static Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.operator !=(Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem? left, Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem? right) -> bool
-static Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.operator ==(Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem? left, Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem? right) -> bool
 static Community.Zabbix.Proxy.ZabbixProxyHistoryItem.operator !=(Community.Zabbix.Proxy.ZabbixProxyHistoryItem? left, Community.Zabbix.Proxy.ZabbixProxyHistoryItem? right) -> bool
 static Community.Zabbix.Proxy.ZabbixProxyHistoryItem.operator ==(Community.Zabbix.Proxy.ZabbixProxyHistoryItem? left, Community.Zabbix.Proxy.ZabbixProxyHistoryItem? right) -> bool
-static Community.Zabbix.Proxy.ZabbixProxyResponse.operator !=(Community.Zabbix.Proxy.ZabbixProxyResponse? left, Community.Zabbix.Proxy.ZabbixProxyResponse? right) -> bool
-static Community.Zabbix.Proxy.ZabbixProxyResponse.operator ==(Community.Zabbix.Proxy.ZabbixProxyResponse? left, Community.Zabbix.Proxy.ZabbixProxyResponse? right) -> bool
 static Community.Zabbix.Proxy.ZabbixProxyResponseTasks.DeserializeTasks(this Community.Zabbix.Proxy.ZabbixProxyResponse! response) -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.Proxy.ZabbixProxyTask!>!
-static Community.Zabbix.Proxy.ZabbixProxyTask.operator !=(Community.Zabbix.Proxy.ZabbixProxyTask? left, Community.Zabbix.Proxy.ZabbixProxyTask? right) -> bool
-static Community.Zabbix.Proxy.ZabbixProxyTask.operator ==(Community.Zabbix.Proxy.ZabbixProxyTask? left, Community.Zabbix.Proxy.ZabbixProxyTask? right) -> bool
 static Community.Zabbix.Proxy.ZabbixProxyTaskResult.operator !=(Community.Zabbix.Proxy.ZabbixProxyTaskResult? left, Community.Zabbix.Proxy.ZabbixProxyTaskResult? right) -> bool
 static Community.Zabbix.Proxy.ZabbixProxyTaskResult.operator ==(Community.Zabbix.Proxy.ZabbixProxyTaskResult? left, Community.Zabbix.Proxy.ZabbixProxyTaskResult? right) -> bool
+static Community.Zabbix.Proxy.ZabbixProxyUplink.DefaultVersion.get -> System.Version!
 static Community.Zabbix.ZabbixActiveProxy.CreateBuilder(string! name) -> Community.Zabbix.ZabbixActiveProxyBuilder!
-static Community.Zabbix.ZabbixActiveProxyBuilderExtensions.AddHealthCheck<TBuilder>(this TBuilder builder) -> TBuilder
-static Community.Zabbix.ZabbixActiveProxyBuilderExtensions.AddHealthCheck<TBuilder>(this TBuilder builder, System.Action<Community.Zabbix.Hosting.ZabbixAgentHealthCheckOptions!>! configure) -> TBuilder
-static Community.Zabbix.ZabbixActiveProxyBuilderExtensions.AddServer<TBuilder>(this TBuilder builder, params System.ReadOnlySpan<System.Net.DnsEndPoint!> nodes) -> TBuilder
-static Community.Zabbix.ZabbixActiveProxyBuilderExtensions.AddServer<TBuilder>(this TBuilder builder, string! server) -> TBuilder
-static Community.Zabbix.ZabbixActiveProxyBuilderExtensions.WithPsk<TBuilder>(this TBuilder builder, string! identity, System.ReadOnlySpan<byte> key) -> TBuilder
+static Community.Zabbix.ZabbixActiveProxyBuilderExtensions.AddHealthCheck<TBuilder>(this TBuilder builder, System.Action<Community.Zabbix.Hosting.ZabbixComponentHealthCheckOptions!>! configure) -> TBuilder
+static Community.Zabbix.ZabbixActiveProxyBuilderExtensions.WithServer<TBuilder>(this TBuilder builder, params System.ReadOnlySpan<System.Net.DnsEndPoint!> nodes) -> TBuilder
+static Community.Zabbix.ZabbixActiveProxyBuilderExtensions.WithServer<TBuilder>(this TBuilder builder, string! server) -> TBuilder
 static Community.Zabbix.ZabbixActiveProxyServiceCollectionExtensions.AddZabbixActiveProxy(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string! name) -> Community.Zabbix.IZabbixActiveProxyBuilder!
 static Community.Zabbix.ZabbixListenerBuilderExtensions.AllowPeer<TBuilder>(this TBuilder builder, System.Net.IPAddress! address) -> TBuilder
 static Community.Zabbix.ZabbixListenerBuilderExtensions.AllowPeer<TBuilder>(this TBuilder builder, System.Net.IPNetwork network) -> TBuilder
 static Community.Zabbix.ZabbixListenerBuilderExtensions.AllowPeer<TBuilder>(this TBuilder builder, string! hostName) -> TBuilder
 static Community.Zabbix.ZabbixListenerBuilderExtensions.AllowPsk<TBuilder>(this TBuilder builder, string! identity, System.ReadOnlySpan<byte> key) -> TBuilder
-static Community.Zabbix.ZabbixPassiveAgent.CreateBuilder(string! hostname) -> Community.Zabbix.ZabbixPassiveAgentBuilder!
+static Community.Zabbix.ZabbixPassiveAgent.CreateBuilder(string! hostName) -> Community.Zabbix.ZabbixPassiveAgentBuilder!
 static Community.Zabbix.ZabbixPassiveAgentBuilderExtensions.AddHealthCheck<TBuilder>(this TBuilder builder) -> TBuilder
 static Community.Zabbix.ZabbixPassiveAgentBuilderExtensions.AddItems<TProvider>(this Community.Zabbix.IZabbixPassiveAgentBuilder! builder) -> Community.Zabbix.IZabbixPassiveAgentBuilder!
 static Community.Zabbix.ZabbixPassiveAgentBuilderExtensions.AddItems<TProvider>(this Community.Zabbix.ZabbixPassiveAgentBuilder! builder) -> Community.Zabbix.ZabbixPassiveAgentBuilder!
@@ -793,19 +712,10 @@ static Community.Zabbix.ZabbixPassiveAgentBuilderExtensions.Bind<TBuilder>(this 
 static Community.Zabbix.ZabbixPassiveAgentBuilderExtensions.Configure<TBuilder>(this TBuilder builder, System.Action<Community.Zabbix.ZabbixPassiveAgentOptions!>! configure) -> TBuilder
 static Community.Zabbix.ZabbixPassiveAgentServiceCollectionExtensions.AddZabbixPassiveAgent(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string! name) -> Community.Zabbix.IZabbixPassiveAgentBuilder!
 static Community.Zabbix.ZabbixPassiveProxy.CreateBuilder(string! name) -> Community.Zabbix.ZabbixPassiveProxyBuilder!
-static Community.Zabbix.ZabbixPassiveProxyBuilderExtensions.AddHealthCheck<TBuilder>(this TBuilder builder) -> TBuilder
-static Community.Zabbix.ZabbixPassiveProxyBuilderExtensions.OnConfig<TBuilder>(this TBuilder builder, System.Func<Community.Zabbix.Proxy.ZabbixProxyConfig!, Community.Zabbix.Proxy.ZabbixProxyConfig!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<string?>>! handler) -> TBuilder
-static Community.Zabbix.ZabbixPassiveProxyBuilderExtensions.OnStats<TBuilder>(this TBuilder builder, System.Func<System.ReadOnlyMemory<byte>, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyDictionary<string!, System.Text.Json.JsonElement>?>>! handler) -> TBuilder
-static Community.Zabbix.ZabbixPassiveProxyBuilderExtensions.WithPsk<TBuilder>(this TBuilder builder, string! identity, System.ReadOnlySpan<byte> key) -> TBuilder
+static Community.Zabbix.ZabbixPassiveProxyBuilderExtensions.OnConfig<TBuilder>(this TBuilder builder, System.Func<Community.Zabbix.Proxy.ZabbixProxyConfig!, Community.Zabbix.Proxy.ZabbixProxyConfig!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<Community.Zabbix.Proxy.ZabbixProxyConfigVerdict>>! handler) -> TBuilder
 static Community.Zabbix.ZabbixPassiveProxyServiceCollectionExtensions.AddZabbixPassiveProxy(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string! name) -> Community.Zabbix.IZabbixPassiveProxyBuilder!
 static Community.Zabbix.ZabbixProxiesServiceCollectionExtensions.AddZabbixProxies(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, Microsoft.Extensions.Configuration.IConfiguration! document) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
-static Community.Zabbix.ZabbixProxyBuilderExtensions.AddProvider<TBuilder>(this TBuilder builder, System.Func<Community.Zabbix.Proxy.ZabbixProxyConfig!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<Community.Zabbix.Proxy.ZabbixProxyDataPage?>>! provider) -> TBuilder
-static Community.Zabbix.ZabbixProxyBuilderExtensions.AddTrapper<TBuilder>(this TBuilder builder, int port, System.Action<Community.Zabbix.ZabbixListenerOptions!>? configure = null) -> TBuilder
-static Community.Zabbix.ZabbixProxyBuilderExtensions.Bind<TBuilder>(this TBuilder builder, Microsoft.Extensions.Configuration.IConfiguration! section) -> TBuilder
-static Community.Zabbix.ZabbixProxyBuilderExtensions.Configure<TBuilder>(this TBuilder builder, System.Action<Community.Zabbix.ZabbixProxyOptions!>! configure) -> TBuilder
-static Community.Zabbix.ZabbixProxyBuilderExtensions.OnTask<TBuilder>(this TBuilder builder, System.Func<Community.Zabbix.Proxy.ZabbixProxyTask!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<Community.Zabbix.Proxy.ZabbixProxyTaskResult!>>! handler) -> TBuilder
-static Community.Zabbix.ZabbixProxyBuilderExtensions.WithVersion<TBuilder>(this TBuilder builder, Community.Zabbix.ZabbixComponentVersion version) -> TBuilder
-static Community.Zabbix.ZabbixProxyBuilderExtensions.WithVersion<TBuilder>(this TBuilder builder, string! version) -> TBuilder
+static Community.Zabbix.ZabbixProxyBuilderExtensions.WithVersion<TBuilder>(this TBuilder builder, System.Version! version) -> TBuilder
 static Community.Zabbix.ZabbixSocketTransportServiceCollectionExtensions.AddZabbixSocketTransport(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static Community.Zabbix.ZabbixTrapperAgentBuilderExtensions.AddTrapper<TBuilder>(this TBuilder builder, Microsoft.Extensions.Configuration.IConfiguration! section) -> TBuilder
 static Community.Zabbix.ZabbixTrapperAgentBuilderExtensions.AddTrapper<TBuilder>(this TBuilder builder, int port, System.Action<Community.Zabbix.ZabbixListenerOptions!>? configure = null) -> TBuilder
@@ -814,4 +724,75 @@ virtual Community.Zabbix.Connector.ZabbixConnectorRecord.Equals(Community.Zabbix
 virtual Community.Zabbix.Connector.ZabbixConnectorRecord.PrintMembers(System.Text.StringBuilder! builder) -> bool
 ~override Community.Zabbix.Listening.ZabbixRequest.Equals(object obj) -> bool
 ~override Community.Zabbix.Listening.ZabbixRequest.ToString() -> string
-Community.Zabbix.Proxy.ZabbixProxyConfigItem.Deconstruct(out ulong ItemId, out ulong HostId, out string! Key, out Community.Zabbix.Proxy.ZabbixProxyItemType Type, out Community.Zabbix.Proxy.ZabbixProxyItemStatus Status, out System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixPeer>! TrapperHosts, out bool AllowTraps, out Community.Zabbix.ZabbixInterval Delay, out Community.Zabbix.ZabbixDuration? Timeout) -> void
+~override Community.Zabbix.Proxy.ZabbixProxyConfigVerdict.Equals(object obj) -> bool
+~override Community.Zabbix.Proxy.ZabbixProxyConfigVerdict.ToString() -> string
+Community.Zabbix.Proxy.ZabbixProxyConfigHost.<Clone>$() -> Community.Zabbix.Proxy.ZabbixProxyConfigHost!
+Community.Zabbix.Proxy.ZabbixProxyConfigHost.Equals(Community.Zabbix.Proxy.ZabbixProxyConfigHost? other) -> bool
+Community.Zabbix.Proxy.ZabbixProxyConfigItem.<Clone>$() -> Community.Zabbix.Proxy.ZabbixProxyConfigItem!
+Community.Zabbix.Proxy.ZabbixProxyDataRequest.<Clone>$() -> Community.Zabbix.Proxy.ZabbixProxyDataRequest!
+Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.<Clone>$() -> Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost!
+Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.<Clone>$() -> Community.Zabbix.Proxy.ZabbixProxyDiscoveredService!
+Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.Equals(Community.Zabbix.Proxy.ZabbixProxyDiscoveredService? other) -> bool
+Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.<Clone>$() -> Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem!
+Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.Equals(Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem? other) -> bool
+Community.Zabbix.Proxy.ZabbixProxyResponse.<Clone>$() -> Community.Zabbix.Proxy.ZabbixProxyResponse!
+Community.Zabbix.Proxy.ZabbixProxyTask.<Clone>$() -> Community.Zabbix.Proxy.ZabbixProxyTask!
+Community.Zabbix.Proxy.ZabbixProxyTask.Equals(Community.Zabbix.Proxy.ZabbixProxyTask? other) -> bool
+Community.Zabbix.ZabbixActiveProxyBuilderExtensions.extension<TBuilder>(TBuilder).AddHealthCheck() -> TBuilder
+Community.Zabbix.ZabbixActiveProxyBuilderExtensions.extension<TBuilder>(TBuilder).WithPsk(string! identity, System.ReadOnlySpan<byte> key) -> TBuilder
+Community.Zabbix.ZabbixPassiveProxyBuilderExtensions.extension<TBuilder>(TBuilder).AddHealthCheck() -> TBuilder
+Community.Zabbix.ZabbixPassiveProxyBuilderExtensions.extension<TBuilder>(TBuilder).OnStats(System.Func<System.ReadOnlyMemory<byte>, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyDictionary<string!, System.Text.Json.JsonElement>?>>! handler) -> TBuilder
+Community.Zabbix.ZabbixPassiveProxyBuilderExtensions.extension<TBuilder>(TBuilder).WithPsk(string! identity, System.ReadOnlySpan<byte> key) -> TBuilder
+Community.Zabbix.ZabbixProxyBuilderExtensions.extension<TBuilder>(TBuilder).AddProvider(System.Func<Community.Zabbix.Proxy.ZabbixProxyConfig!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<Community.Zabbix.Proxy.ZabbixProxyDataPage?>>! provider) -> TBuilder
+Community.Zabbix.ZabbixProxyBuilderExtensions.extension<TBuilder>(TBuilder).AddTrapper(int port, System.Action<Community.Zabbix.ZabbixListenerOptions!>? configure = null) -> TBuilder
+Community.Zabbix.ZabbixProxyBuilderExtensions.extension<TBuilder>(TBuilder).Bind(Microsoft.Extensions.Configuration.IConfiguration! section) -> TBuilder
+Community.Zabbix.ZabbixProxyBuilderExtensions.extension<TBuilder>(TBuilder).Configure(System.Action<Community.Zabbix.ZabbixProxyOptions!>! configure) -> TBuilder
+Community.Zabbix.ZabbixProxyBuilderExtensions.extension<TBuilder>(TBuilder).OnTask(System.Func<Community.Zabbix.Proxy.ZabbixProxyTask!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<Community.Zabbix.Proxy.ZabbixProxyTaskResult!>>! handler) -> TBuilder
+Community.Zabbix.ZabbixProxyBuilderExtensions.extension<TBuilder>(TBuilder).WithVersion(string! version) -> TBuilder
+override Community.Zabbix.Proxy.ZabbixProxyConfigHost.Equals(object? obj) -> bool
+override Community.Zabbix.Proxy.ZabbixProxyConfigHost.GetHashCode() -> int
+override Community.Zabbix.Proxy.ZabbixProxyConfigHost.ToString() -> string!
+override Community.Zabbix.Proxy.ZabbixProxyConfigItem.Equals(object? obj) -> bool
+override Community.Zabbix.Proxy.ZabbixProxyConfigItem.ToString() -> string!
+override Community.Zabbix.Proxy.ZabbixProxyDataRequest.Equals(object? obj) -> bool
+override Community.Zabbix.Proxy.ZabbixProxyDataRequest.ToString() -> string!
+override Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.Equals(object? obj) -> bool
+override Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.ToString() -> string!
+override Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.Equals(object? obj) -> bool
+override Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.GetHashCode() -> int
+override Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.ToString() -> string!
+override Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.Equals(object? obj) -> bool
+override Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.GetHashCode() -> int
+override Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.ToString() -> string!
+override Community.Zabbix.Proxy.ZabbixProxyResponse.Equals(object? obj) -> bool
+override Community.Zabbix.Proxy.ZabbixProxyResponse.ToString() -> string!
+override Community.Zabbix.Proxy.ZabbixProxyTask.Equals(object? obj) -> bool
+override Community.Zabbix.Proxy.ZabbixProxyTask.GetHashCode() -> int
+override Community.Zabbix.Proxy.ZabbixProxyTask.ToString() -> string!
+static Community.Zabbix.Proxy.ZabbixProxyConfigHost.operator !=(Community.Zabbix.Proxy.ZabbixProxyConfigHost? left, Community.Zabbix.Proxy.ZabbixProxyConfigHost? right) -> bool
+static Community.Zabbix.Proxy.ZabbixProxyConfigHost.operator ==(Community.Zabbix.Proxy.ZabbixProxyConfigHost? left, Community.Zabbix.Proxy.ZabbixProxyConfigHost? right) -> bool
+static Community.Zabbix.Proxy.ZabbixProxyConfigItem.operator !=(Community.Zabbix.Proxy.ZabbixProxyConfigItem? left, Community.Zabbix.Proxy.ZabbixProxyConfigItem? right) -> bool
+static Community.Zabbix.Proxy.ZabbixProxyConfigItem.operator ==(Community.Zabbix.Proxy.ZabbixProxyConfigItem? left, Community.Zabbix.Proxy.ZabbixProxyConfigItem? right) -> bool
+static Community.Zabbix.Proxy.ZabbixProxyDataRequest.operator !=(Community.Zabbix.Proxy.ZabbixProxyDataRequest? left, Community.Zabbix.Proxy.ZabbixProxyDataRequest? right) -> bool
+static Community.Zabbix.Proxy.ZabbixProxyDataRequest.operator ==(Community.Zabbix.Proxy.ZabbixProxyDataRequest? left, Community.Zabbix.Proxy.ZabbixProxyDataRequest? right) -> bool
+static Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.operator !=(Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost? left, Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost? right) -> bool
+static Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost.operator ==(Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost? left, Community.Zabbix.Proxy.ZabbixProxyDiscoveredHost? right) -> bool
+static Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.operator !=(Community.Zabbix.Proxy.ZabbixProxyDiscoveredService? left, Community.Zabbix.Proxy.ZabbixProxyDiscoveredService? right) -> bool
+static Community.Zabbix.Proxy.ZabbixProxyDiscoveredService.operator ==(Community.Zabbix.Proxy.ZabbixProxyDiscoveredService? left, Community.Zabbix.Proxy.ZabbixProxyDiscoveredService? right) -> bool
+static Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.operator !=(Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem? left, Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem? right) -> bool
+static Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem.operator ==(Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem? left, Community.Zabbix.Proxy.ZabbixProxyDiscoveryItem? right) -> bool
+static Community.Zabbix.Proxy.ZabbixProxyResponse.operator !=(Community.Zabbix.Proxy.ZabbixProxyResponse? left, Community.Zabbix.Proxy.ZabbixProxyResponse? right) -> bool
+static Community.Zabbix.Proxy.ZabbixProxyResponse.operator ==(Community.Zabbix.Proxy.ZabbixProxyResponse? left, Community.Zabbix.Proxy.ZabbixProxyResponse? right) -> bool
+static Community.Zabbix.Proxy.ZabbixProxyTask.operator !=(Community.Zabbix.Proxy.ZabbixProxyTask? left, Community.Zabbix.Proxy.ZabbixProxyTask? right) -> bool
+static Community.Zabbix.Proxy.ZabbixProxyTask.operator ==(Community.Zabbix.Proxy.ZabbixProxyTask? left, Community.Zabbix.Proxy.ZabbixProxyTask? right) -> bool
+static Community.Zabbix.ZabbixActiveProxyBuilderExtensions.AddHealthCheck<TBuilder>(this TBuilder builder) -> TBuilder
+static Community.Zabbix.ZabbixActiveProxyBuilderExtensions.WithPsk<TBuilder>(this TBuilder builder, string! identity, System.ReadOnlySpan<byte> key) -> TBuilder
+static Community.Zabbix.ZabbixPassiveProxyBuilderExtensions.AddHealthCheck<TBuilder>(this TBuilder builder) -> TBuilder
+static Community.Zabbix.ZabbixPassiveProxyBuilderExtensions.OnStats<TBuilder>(this TBuilder builder, System.Func<System.ReadOnlyMemory<byte>, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<System.Collections.Generic.IReadOnlyDictionary<string!, System.Text.Json.JsonElement>?>>! handler) -> TBuilder
+static Community.Zabbix.ZabbixPassiveProxyBuilderExtensions.WithPsk<TBuilder>(this TBuilder builder, string! identity, System.ReadOnlySpan<byte> key) -> TBuilder
+static Community.Zabbix.ZabbixProxyBuilderExtensions.AddProvider<TBuilder>(this TBuilder builder, System.Func<Community.Zabbix.Proxy.ZabbixProxyConfig!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<Community.Zabbix.Proxy.ZabbixProxyDataPage?>>! provider) -> TBuilder
+static Community.Zabbix.ZabbixProxyBuilderExtensions.AddTrapper<TBuilder>(this TBuilder builder, int port, System.Action<Community.Zabbix.ZabbixListenerOptions!>? configure = null) -> TBuilder
+static Community.Zabbix.ZabbixProxyBuilderExtensions.Bind<TBuilder>(this TBuilder builder, Microsoft.Extensions.Configuration.IConfiguration! section) -> TBuilder
+static Community.Zabbix.ZabbixProxyBuilderExtensions.Configure<TBuilder>(this TBuilder builder, System.Action<Community.Zabbix.ZabbixProxyOptions!>! configure) -> TBuilder
+static Community.Zabbix.ZabbixProxyBuilderExtensions.OnTask<TBuilder>(this TBuilder builder, System.Func<Community.Zabbix.Proxy.ZabbixProxyTask!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<Community.Zabbix.Proxy.ZabbixProxyTaskResult!>>! handler) -> TBuilder
+static Community.Zabbix.ZabbixProxyBuilderExtensions.WithVersion<TBuilder>(this TBuilder builder, string! version) -> TBuilder

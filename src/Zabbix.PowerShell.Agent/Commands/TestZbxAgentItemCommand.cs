@@ -20,7 +20,7 @@ namespace Community.Zabbix.PowerShell.Commands;
 /// </summary>
 /// <remarks>
 /// With <c>-Session</c>, the key goes through the live <see cref="ZabbixAgentSession.Handlers"/> and the
-/// <see cref="ZabbixItemDictionary.AnswerAsync(ZabbixItemKey, TimeSpan, TimeProvider?, CancellationToken)"/> contract; without it, through <see cref="ZabbixItemDictionary.BuiltIn"/>'s
+/// <see cref="ZabbixItemDictionary.AnswerAsync(ZabbixItemKey, TimeSpan, CancellationToken)"/> contract, on the session's clock; without it, through <see cref="ZabbixItemDictionary.BuiltIn"/>'s
 /// same contract.
 /// </remarks>
 [Cmdlet(VerbsDiagnostic.Test, "ZbxAgentItem", DefaultParameterSetName = ParameterSets.Answer)]
@@ -75,9 +75,8 @@ public sealed class TestZbxAgentItemCommand : ZabbixCmdlet
     /// <inheritdoc/>
     protected override void ProcessRecord()
     {
-        TimeProvider time = ZabbixContext.Time;
         ZabbixItemKey key = Key;
-        if (TryRun(cancellationToken => _handlers!.AnswerAsync(key, Timeout, time, cancellationToken).AsTask(), out ZabbixAgentAnswer? answer, key))
+        if (TryRun(cancellationToken => _handlers!.AnswerAsync(key, Timeout, cancellationToken).AsTask(), out ZabbixAgentAnswer? answer, key))
             WriteObject(Raw.IsPresent ? answer.Value ?? answer.Error : answer);
     }
 

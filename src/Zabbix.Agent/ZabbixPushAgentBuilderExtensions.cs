@@ -240,12 +240,12 @@ public static class ZabbixPushAgentBuilderExtensions
         /// <param name="configure">Sets the thresholds.</param>
         /// <returns>The builder.</returns>
         /// <exception cref="OptionsValidationException">The thresholds don't validate.</exception>
-        public TBuilder AddHealthCheck(Action<ZabbixAgentHealthCheckOptions> configure)
+        public TBuilder AddHealthCheck(Action<ZabbixComponentHealthCheckOptions> configure)
         {
             ArgumentNullException.ThrowIfNull(builder);
             ArgumentNullException.ThrowIfNull(configure);
             string name = builder.Name;
-            ZabbixAgentHealthChecks.Add(builder.Services, "zabbix-agent-" + name, provider => provider.GetRequiredKeyedService<ZabbixPushAgent>(name).Statuses, configure);
+            ZabbixComponentHealthChecks.Add(builder.Services, "zabbix-agent-" + name, provider => provider.GetRequiredKeyedService<ZabbixPushAgent>(name).Statuses, configure);
             return builder;
         }
 
@@ -267,7 +267,7 @@ public static class ZabbixPushAgentBuilderExtensions
 
         /// <summary>
         /// Binds the agent's options to a configuration section, in order with the other verbs: <c>ServerActive</c>,
-        /// <c>Hostname</c>, <c>MaxItems</c>, <c>Overflow</c>, and the <c>Connection</c> and <c>Send</c> subsections, as
+        /// <c>HostName</c>, <c>MaxItems</c>, <c>Overflow</c>, and the <c>Connection</c> and <c>Send</c> subsections, as
         /// <see cref="ZabbixPushAgentOptions"/> names them. The section is read when the agent is built.
         /// </summary>
         /// <param name="section">The agent's section.</param>
@@ -315,5 +315,5 @@ public static class ZabbixPushAgentBuilderExtensions
 
     // The host typed polls and meters report for; the validator has required it at start.
     private static string HostOf(ZabbixPushAgentOptions options, string name)
-        => options.Hostname ?? throw new InvalidOperationException($"Agent '{name}' has typed polls or a meter, and they need a host to report for: set Hostname.");
+        => options.HostName ?? throw new InvalidOperationException($"Agent '{name}' has typed polls or a meter, and they need a host to report for: set HostName.");
 }

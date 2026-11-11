@@ -25,6 +25,12 @@ namespace Community.Zabbix;
 /// <see cref="StopAsync"/> first to see it. A component takes no process signals, so it embeds in a console app, a desktop
 /// app, a test or a PowerShell session.
 /// </para>
+/// <para>
+/// A component an application's container builds (<c>AddZabbixActiveAgent</c>, …) is the container's: whoever resolves it
+/// shares it, a caller's <see cref="Dispose()"/> or <see cref="DisposeAsync"/> leaves it running, and the container disposes
+/// it when it's disposed, as disposing an <c>HttpClient</c> from <c>IHttpClientFactory</c> leaves its handler. A component
+/// you construct, or build with its builder, is yours to dispose.
+/// </para>
 /// </remarks>
 /// <example>
 /// <code language="csharp">
@@ -52,6 +58,8 @@ public abstract class ZabbixComponent : IAsyncDisposable, IDisposable
     private int _state;
     private int _disposed;
     private int _hosted;
+    private int _shared;                            // the container's: a caller's dispose leaves it running
+    private int _released;                          // the container let it go
 
     /// <summary>Initializes the lifetime. Only this SDK's agents and proxies derive from this class directly: its phases are internal.</summary>
     /// <param name="name">A registration's name; <see langword="null"/> when the component is constructed directly.</param>
@@ -97,6 +105,12 @@ public abstract class ZabbixComponent : IAsyncDisposable, IDisposable
     /// <summary>Whether a start has begun; what a component is composed with is fixed from then on.</summary>
     private protected bool HasStarted => Volatile.Read(ref _state) != Created;
 
+    /// <summary>
+    /// Whether a dispose leaves the component running: it's shared, and its container hasn't released it. A derived class's
+    /// <see cref="Dispose(bool)"/> and <see cref="DisposeAsyncCore"/> release nothing then.
+    /// </summary>
+    private protected bool IsKept => Volatile.Read(ref _shared) != 0 && Volatile.Read(ref _released) == 0;
+
     /// <summary>Starts the component.</summary>
     /// <param name="cancellationToken">Cancels the start.</param>
     /// <returns>A task that completes when the component has started.</returns>
@@ -140,7 +154,8 @@ public abstract class ZabbixComponent : IAsyncDisposable, IDisposable
 
     /// <summary>
     /// Stops a running component within <see cref="StopTimeout"/>, then releases what it holds, the container its builder
-    /// built it in among it. A second call does nothing.
+    /// built it in among it. A second call does nothing, and so does a call on a component its container shares: the
+    /// container disposes it.
     /// </summary>
     /// <returns>A task that completes when the component is released.</returns>
     public async ValueTask DisposeAsync()
@@ -152,7 +167,10 @@ public abstract class ZabbixComponent : IAsyncDisposable, IDisposable
         if (Interlocked.Exchange(ref _container, null) is { } container) await container.DisposeAsync().ConfigureAwait(false);
     }
 
-    /// <summary>Releases what the component holds at once, without delivering what it still holds. A second call does nothing.</summary>
+    /// <summary>
+    /// Releases what the component holds at once, without delivering what it still holds. A second call does nothing, and so
+    /// does a call on a component its container shares: the container disposes it.
+    /// </summary>
     public void Dispose()
     {
         Dispose(disposing: true);
@@ -173,17 +191,36 @@ public abstract class ZabbixComponent : IAsyncDisposable, IDisposable
     {
         _companions = [.. companions];
         _container = container;
+        Volatile.Write(ref _shared, 0);             // the builder's caller owns it
+    }
+
+    /// <summary>Makes the component its container's, which <see cref="ZabbixComponentOwner{TComponent}"/> releases.</summary>
+    internal void Share() => Volatile.Write(ref _shared, 1);
+
+    /// <summary>Releases the component, shared or not: its container's disposal, through <see cref="ZabbixComponentOwner{TComponent}"/>.</summary>
+    /// <returns>A task that completes when the component is released.</returns>
+    internal ValueTask ReleaseAsync()
+    {
+        Volatile.Write(ref _released, 1);
+        return DisposeAsync();
+    }
+
+    /// <summary>Releases the component at once, shared or not: its container's synchronous disposal.</summary>
+    internal void Release()
+    {
+        Volatile.Write(ref _released, 1);
+        Dispose();
     }
 
     /// <summary>Stops the component; a derived class then releases what it holds. See <see cref="DisposeAsync"/>.</summary>
     /// <returns>A task that completes when the component has stopped.</returns>
-    protected virtual ValueTask DisposeAsyncCore() => StopForDisposalAsync();
+    protected virtual ValueTask DisposeAsyncCore() => IsKept ? ValueTask.CompletedTask : StopForDisposalAsync();
 
     /// <summary>Marks the component disposed; a derived class releases what it holds. See <see cref="Dispose()"/>.</summary>
     /// <param name="disposing">Whether this is <see cref="Dispose()"/>, rather than the end of <see cref="DisposeAsync"/>.</param>
     protected virtual void Dispose(bool disposing)
     {
-        if (!disposing) return;
+        if (!disposing || IsKept) return;
         Volatile.Write(ref _disposed, 1);
         _stopRequested.TrySetResult();
         // A provider the container built may be disposable asynchronously only: the container's disposal is started, and a

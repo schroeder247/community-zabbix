@@ -23,11 +23,11 @@ public abstract class ZabbixCredential
     /// A user name and password that log in when a request first needs a session, and again when the server ends it: a
     /// <see cref="ZabbixSessionCredential"/>.
     /// </summary>
-    /// <param name="username">The Zabbix user.</param>
+    /// <param name="userName">The Zabbix user.</param>
     /// <param name="password">The user's password, held for the credential's lifetime.</param>
-    /// <returns>A credential that logs in as <paramref name="username"/>.</returns>
-    /// <exception cref="ArgumentException"><paramref name="username"/> or <paramref name="password"/> is empty.</exception>
-    public static ZabbixSessionCredential FromLogin(string username, [ZabbixSecret] string password) => new(username, password);
+    /// <returns>A credential that logs in as <paramref name="userName"/>.</returns>
+    /// <exception cref="ArgumentException"><paramref name="userName"/> or <paramref name="password"/> is empty.</exception>
+    public static ZabbixSessionCredential FromLogin(string userName, [ZabbixSecret] string password) => new(userName, password);
 
     /// <summary>The token to send as <c>Authorization: Bearer</c>; <see langword="null"/> to send none.</summary>
     /// <param name="context">The transport a credential may log in through, the method being called, and the clock.</param>

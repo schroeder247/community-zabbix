@@ -51,9 +51,10 @@ What each package and module does. To choose one, see [Key concepts](../README.m
 - `GetStatusAsync`, `GetStatsAsync` and `GetQueueAsync` ask a server for its status, statistics and queue, as the web
   frontend does.
 - It names a peer as `host` or `host:port`, as Zabbix's own configuration spells one.
-- `new ZabbixWireClient("zbx-server-01")` takes a server. `ZabbixWireClient.CreateBuilder()` sets more, such as HA nodes, a token,
-  TLS and logging, and checks it all when it builds. `AddZabbixWireClient("prod")` registers a named client in a host with the same
-  verbs, and `IZabbixWireClientFactory` returns it.
+- `new ZabbixWireClient("zbx-server-01")` takes a server. `ZabbixWireClient.CreateBuilder()` sets more, such as the one
+  server or HA cluster (`WithServer`), a token, TLS and logging, and checks it all when it builds. `AddZabbixWireClient("prod")`
+  registers a named client in a host with the same verbs, and `IZabbixWireClientFactory` returns it. The container owns
+  that client: disposing it where you use it leaves it running for the rest of the application.
 - TLS with certificates or a pre-shared key (PSK), set with Zabbix's own setting names, including certificate
   revocation lists and issuer and subject checks.
 
@@ -69,7 +70,7 @@ What each package and module does. To choose one, see [Key concepts](../README.m
 - The active agent runs Zabbix active checks: the server says which item keys to collect, and your items answer them.
   `AddItem` takes a delegate whose shape says what it needs (a value at hand, the key's parameters, a read that waits on
   I/O, or a service), and the key's type fixes the type of the value.
-- `AddServer` adds a destination, and several nodes in one call are an HA cluster.
+- `AddServer` adds a destination, and several nodes in one call are an HA cluster. An agent sends to every destination it has.
 - Item providers: a library's keys, implemented against `Community.Zabbix.Abstractions` alone, added to an active or a
   passive agent with `AddItems`, or `agent.Items.Add` while it runs.
 - Zabbix's own item keys, answered by every active and passive agent: memory, processors, file systems, processes,
@@ -90,7 +91,7 @@ What each package and module does. To choose one, see [Key concepts](../README.m
   registers one in a host, with the same verbs: `AllowPeer` takes an `IPAddress`, an `IPNetwork`, or a DNS name, and
   `AllowPsk` a peer's key as bytes.
 - `ZabbixActiveProxy.CreateBuilder("proxy-01")` and `ZabbixPassiveProxy.CreateBuilder("dmz-proxy")` build the proxies, and
-  `AddZabbixActiveProxy` and `AddZabbixPassiveProxy` register them in a host, with the same verbs: `AddServer` for the one
+  `AddZabbixActiveProxy` and `AddZabbixPassiveProxy` register them in a host, with the same verbs: `WithServer` for the one
   server or HA cluster an active proxy reports to, `WithVersion`, `WithPsk` for the proxy's own key, `AllowPeer` and
   `AllowPsk`, the store's verbs, `AddTrapper`, `AddProvider`, and `OnTask`, `OnConfig`, and `OnStats` for what answers the
   server.

@@ -7,9 +7,9 @@ namespace Community.Zabbix.Tests;
 
 /// <summary>
 /// The exception family (docs/design/decisions.md, "Refusals and failures are two families"): a peer's refusal derives
-/// from <see cref="ZabbixRefusedException"/>, a wire failure from an <see cref="IOException"/>
-/// (<see cref="ZabbixWireException"/> where the wire knows more), anything else from the nearest standard type, never
-/// <see cref="Exception"/> itself. Every concrete public exception is sealed, has the three standard constructors and
+/// from <see cref="ZabbixRefusedException"/>, a wire failure from an <see cref="IOException"/> (the incomplete send among
+/// them; the wire's own base for what it knows more about is internal, since nothing public derives from it), anything
+/// else from the nearest standard type, never <see cref="Exception"/> itself. Every concrete public exception is sealed, has the three standard constructors and
 /// names its own <c>error.type</c>.
 /// </summary>
 public sealed partial class DesignConformanceTests
@@ -38,6 +38,9 @@ public sealed partial class DesignConformanceTests
         Assert.All([typeof(ZabbixApiException), typeof(ZabbixTrapperRefusedException), typeof(ZabbixServerRefusedException), typeof(ZabbixAgentRefusedException), typeof(Zabbix.Proxy.ZabbixProxyRefusedException)],
             refusal => Assert.True(refusal.IsSubclassOf(typeof(ZabbixRefusedException)), refusal.Name));
         Assert.True(typeof(ZabbixWireException).IsSubclassOf(typeof(IOException)));
+        Assert.False(typeof(ZabbixWireException).IsPublic);
+        Assert.True(typeof(ZabbixSenderIncompleteException).IsSubclassOf(typeof(IOException)));
+        Assert.True(typeof(ZabbixItemNotSupportedException).IsSubclassOf(typeof(ZabbixRefusedException)));
         Assert.False(typeof(ZabbixRefusedException).IsSubclassOf(typeof(IOException)));
     }
 

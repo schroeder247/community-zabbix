@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace Community.Zabbix;
 
-/// <summary>What a <see cref="ZabbixWireClient"/> reads at its first request.</summary>
+/// <summary>Represents the options of a <see cref="ZabbixWireClient"/>, which the client copies when it's built.</summary>
 public sealed class ZabbixWireOptions : IValidatableObject
 {
     /// <summary>The most values one frame carries unless said otherwise: <c>zabbix_sender</c>'s <c>VALUES_MAX</c>, because a frame of many more takes long enough to hit the timeout.</summary>
@@ -42,6 +42,18 @@ public sealed class ZabbixWireOptions : IValidatableObject
 
     /// <summary>How long a read from an agent may take, which the request carries: whole seconds, 1 to 600; 3 seconds, Zabbix's default.</summary>
     public TimeSpan CheckTimeout { get; set; } = TimeSpan.FromSeconds(3);
+
+    /// <summary>A copy that changes to these options don't reach: what a client keeps.</summary>
+    /// <returns>The copy, with a copy of <see cref="Connection"/>.</returns>
+    internal ZabbixWireOptions Clone() => new()
+    {
+        Server = Server,
+        SessionId = SessionId,
+        Connection = Connection?.Clone() ?? new(),
+        BatchSize = BatchSize,
+        MaxBatchBytes = MaxBatchBytes,
+        CheckTimeout = CheckTimeout,
+    };
 
     /// <inheritdoc/>
     IEnumerable<ValidationResult> IValidatableObject.Validate(ValidationContext validationContext)

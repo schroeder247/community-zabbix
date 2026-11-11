@@ -1,6 +1,5 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
-using System.Globalization;
 using System.Runtime.CompilerServices;
 
 namespace Community.Zabbix;
@@ -169,7 +168,7 @@ public class ZabbixHostNode : ZabbixNode, IAsyncEnumerable<ZabbixItemNode>
     public virtual ZabbixItemNode Item(ZabbixItemKey key) => new(Client, Selection with { Key = key });
 
     /// <inheritdoc cref="Item(ZabbixItemKey)"/>
-    public virtual ZabbixItemNode Item(string key) => Item(ZabbixItemKey.Parse(key, CultureInfo.InvariantCulture));
+    public virtual ZabbixItemNode Item(string key) => Item(ZabbixItemKey.Parse(key));
 
     /// <inheritdoc/>
     /// <exception cref="ZabbixNotFoundException">The host does not exist.</exception>

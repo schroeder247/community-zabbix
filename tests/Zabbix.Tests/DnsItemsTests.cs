@@ -48,7 +48,7 @@ public sealed class DnsItemsTests : IDisposable
 
     private async Task<string> ValueAsync(string key)
     {
-        ZabbixAgentAnswer answer = await _items.GetValueAsync(ZabbixItemKey.Parse(key, null), Ct);
+        ZabbixAgentAnswer answer = await _items.GetValueAsync(ZabbixItemKey.Parse(key), Ct);
         Assert.Null(_server.Failure);
         Assert.True(answer.IsSupported, $"{key}: {answer.Error}");
         return answer.Value!;
@@ -56,7 +56,7 @@ public sealed class DnsItemsTests : IDisposable
 
     private async Task<string?> ErrorAsync(string key)
     {
-        ZabbixAgentAnswer answer = await _items.GetValueAsync(ZabbixItemKey.Parse(key, null), Ct);
+        ZabbixAgentAnswer answer = await _items.GetValueAsync(ZabbixItemKey.Parse(key), Ct);
         Assert.Null(_server.Failure);
         Assert.False(answer.IsSupported, $"{key} answered {answer.Value}");
         return answer.Error;

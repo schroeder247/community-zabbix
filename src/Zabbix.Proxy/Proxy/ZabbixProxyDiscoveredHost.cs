@@ -9,15 +9,15 @@ namespace Community.Zabbix.Proxy;
 /// discovery store as the rows the server reads (<see cref="ToRows"/>; the verb is
 /// <see cref="ZabbixProxyDiscovery.WriteAsync(ChannelWriter{ZabbixProxyDiscoveryItem}, ZabbixProxyDiscoveredHost, CancellationToken)"/>).
 /// </summary>
-/// <param name="DruleId">The discovery rule (<c>druleid</c>); not 0.</param>
+/// <param name="NetworkDiscoveryRuleId">The discovery rule (<c>druleid</c>); not 0.</param>
 /// <param name="Ip">The address.</param>
 /// <param name="Clock">When the checks ran; the rows carry it in whole seconds.</param>
 /// <param name="Services">The services found; empty when none answered, which makes the host down.</param>
 /// <param name="Dns">The address's name, when the rule resolved one.</param>
-public sealed record ZabbixProxyDiscoveredHost(ulong DruleId, string Ip, DateTimeOffset Clock, IReadOnlyList<ZabbixProxyDiscoveredService> Services, string? Dns = null)
+public sealed record ZabbixProxyDiscoveredHost(ulong NetworkDiscoveryRuleId, string Ip, DateTimeOffset Clock, IReadOnlyList<ZabbixProxyDiscoveredService> Services, string? Dns = null)
 {
     /// <summary>The discovery rule; positive.</summary>
-    public ulong DruleId { get; init; } = DruleId != 0 ? DruleId : throw new ArgumentOutOfRangeException(nameof(DruleId), DruleId, "A discovery rule id is not 0.");
+    public ulong NetworkDiscoveryRuleId { get; init; } = NetworkDiscoveryRuleId != 0 ? NetworkDiscoveryRuleId : throw new ArgumentOutOfRangeException(nameof(NetworkDiscoveryRuleId), NetworkDiscoveryRuleId, "A discovery rule id is not 0.");
 
     /// <summary>The address.</summary>
     public string Ip { get; init; } = string.IsNullOrWhiteSpace(Ip) ? throw new ArgumentException("A discovered host has an address.", nameof(Ip)) : Ip;
@@ -28,14 +28,14 @@ public sealed record ZabbixProxyDiscoveredHost(ulong DruleId, string Ip, DateTim
     /// <summary>Whether <paramref name="other"/> is the same host, its services element by element in order.</summary>
     /// <param name="other">The other host.</param>
     public bool Equals(ZabbixProxyDiscoveredHost? other)
-        => other is not null && DruleId == other.DruleId && string.Equals(Ip, other.Ip, StringComparison.Ordinal) && Clock == other.Clock
+        => other is not null && NetworkDiscoveryRuleId == other.NetworkDiscoveryRuleId && string.Equals(Ip, other.Ip, StringComparison.Ordinal) && Clock == other.Clock
             && ZabbixValueEquality.ListEqual(Services, other.Services) && string.Equals(Dns, other.Dns, StringComparison.Ordinal);
 
     /// <inheritdoc/>
     public override int GetHashCode()
     {
         var hash = new HashCode();
-        hash.Add(DruleId);
+        hash.Add(NetworkDiscoveryRuleId);
         hash.Add(Ip, StringComparer.Ordinal);
         hash.Add(Clock);
         ZabbixValueEquality.AddList(ref hash, Services);
@@ -61,9 +61,9 @@ public sealed record ZabbixProxyDiscoveredHost(ulong DruleId, string Ip, DateTim
         {
             ZabbixProxyDiscoveredService service = Services[i];
             anyUp |= service.IsUp;
-            rows[i] = new ZabbixProxyDiscoveryItem(clock, DruleId, service.DcheckId, Ip, dns, service.Port, service.Value ?? string.Empty, service.IsUp ? Up : Down);
+            rows[i] = new ZabbixProxyDiscoveryItem(clock, NetworkDiscoveryRuleId, service.NetworkDiscoveryCheckId, Ip, dns, service.Port, service.Value ?? string.Empty, service.IsUp ? Up : Down);
         }
-        rows[^1] = new ZabbixProxyDiscoveryItem(clock, DruleId, DcheckId: 0UL, Ip, dns, Port: 0, Value: string.Empty, anyUp ? Up : Down);
+        rows[^1] = new ZabbixProxyDiscoveryItem(clock, NetworkDiscoveryRuleId, NetworkDiscoveryCheckId: 0UL, Ip, dns, Port: 0, Value: string.Empty, anyUp ? Up : Down);
         return rows;
     }
 }

@@ -29,7 +29,7 @@ public sealed record ZabbixValue(string Host, ZabbixItemKey Key, string Value, D
     }
 
     internal ZabbixValue(string host, string key, string value, ZabbixClock clock)
-        : this(host, ZabbixItemKey.Parse(key, CultureInfo.InvariantCulture), value, clock)
+        : this(host, ZabbixItemKey.Parse(key), value, clock)
     {
     }
 
@@ -50,7 +50,7 @@ public sealed record ZabbixValue(string Host, ZabbixItemKey Key, string Value, D
     /// <param name="time">When the value was observed.</param>
     /// <exception cref="FormatException"><paramref name="key"/> is not an item key.</exception>
     public ZabbixValue(string host, string key, string value, DateTimeOffset time)
-        : this(host, ZabbixItemKey.Parse(key, CultureInfo.InvariantCulture), value, time)
+        : this(host, ZabbixItemKey.Parse(key), value, time)
     {
     }
 

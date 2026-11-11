@@ -32,8 +32,8 @@ public sealed class ZabbixProxyRefusedException : ZabbixRefusedException, IZabbi
     /// <summary>The server's refusal of <paramref name="request"/>.</summary>
     /// <param name="request">The request refused: <c>proxy config</c>, <c>proxy data</c>.</param>
     /// <param name="info">The server's <c>info</c>.</param>
-    /// <param name="serverVersion">The server's <c>version</c>, when it sent one.</param>
-    public ZabbixProxyRefusedException(string request, string? info, string? serverVersion)
+    /// <param name="serverVersion">The server's <c>version</c>, when it sent one that reads as a version.</param>
+    public ZabbixProxyRefusedException(string request, string? info, Version? serverVersion)
         : base($"The server refused {request}: {(info is { Length: > 0 } words ? words.TrimEnd('.') : "no reason given")}.")
     {
         Request = request;
@@ -47,8 +47,8 @@ public sealed class ZabbixProxyRefusedException : ZabbixRefusedException, IZabbi
     /// <summary>The server's words.</summary>
     public string? Info { get; }
 
-    /// <summary>The server's version, when the refusal carried it.</summary>
-    public string? ServerVersion { get; }
+    /// <summary>The server's version, when the refusal carried one: <c>8.0.0rc1</c> is 8.0.0, as Zabbix reads it.</summary>
+    public Version? ServerVersion { get; }
 
     /// <inheritdoc/>
     string IZabbixErrorTyped.ErrorType => "refused";

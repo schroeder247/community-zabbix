@@ -69,25 +69,6 @@ Community.Zabbix.ZabbixApiException.ZabbixApiException(string! message) -> void
 Community.Zabbix.ZabbixApiException.ZabbixApiException(string! message, System.Exception! innerException) -> void
 Community.Zabbix.ZabbixApiTokenCredential
 Community.Zabbix.ZabbixApiTokenCredential.ZabbixApiTokenCredential(string! token) -> void
-Community.Zabbix.ZabbixComponentVersion
-Community.Zabbix.ZabbixComponentVersion.CompareTo(Community.Zabbix.ZabbixComponentVersion other) -> int
-Community.Zabbix.ZabbixComponentVersion.CompareTo(object? obj) -> int
-Community.Zabbix.ZabbixComponentVersion.Deconstruct(out int Major, out int Minor, out int Patch) -> void
-Community.Zabbix.ZabbixComponentVersion.Equals(Community.Zabbix.ZabbixComponentVersion other) -> bool
-Community.Zabbix.ZabbixComponentVersion.Major.get -> int
-Community.Zabbix.ZabbixComponentVersion.Major.init -> void
-Community.Zabbix.ZabbixComponentVersion.Minor.get -> int
-Community.Zabbix.ZabbixComponentVersion.Minor.init -> void
-Community.Zabbix.ZabbixComponentVersion.Patch.get -> int
-Community.Zabbix.ZabbixComponentVersion.Patch.init -> void
-Community.Zabbix.ZabbixComponentVersion.ToString(string? format, System.IFormatProvider? formatProvider) -> string!
-Community.Zabbix.ZabbixComponentVersion.ToVersion() -> System.Version!
-Community.Zabbix.ZabbixComponentVersion.TryFormat(System.Span<byte> utf8Destination, out int bytesWritten, System.ReadOnlySpan<char> format, System.IFormatProvider? provider) -> bool
-Community.Zabbix.ZabbixComponentVersion.TryFormat(System.Span<char> destination, out int charsWritten, System.ReadOnlySpan<char> format, System.IFormatProvider? provider) -> bool
-Community.Zabbix.ZabbixComponentVersion.WithoutPatch.get -> Community.Zabbix.ZabbixComponentVersion
-Community.Zabbix.ZabbixComponentVersion.ZabbixComponentVersion() -> void
-Community.Zabbix.ZabbixComponentVersion.ZabbixComponentVersion(int Major, int Minor, int Patch) -> void
-Community.Zabbix.ZabbixComponentVersion.ZabbixComponentVersion(int major, int minor) -> void
 Community.Zabbix.ZabbixConfigurationSections
 Community.Zabbix.ZabbixCredential
 Community.Zabbix.ZabbixCredential.ZabbixCredential() -> void
@@ -186,12 +167,12 @@ Community.Zabbix.ZabbixItemKeys.File.FileTypes.None = 0 -> Community.Zabbix.Zabb
 Community.Zabbix.ZabbixItemKeys.File.FileTypes.Socket = 8 -> Community.Zabbix.ZabbixItemKeys.File.FileTypes
 Community.Zabbix.ZabbixItemKeys.File.FileTypes.SymbolicLink = 4 -> Community.Zabbix.ZabbixItemKeys.File.FileTypes
 Community.Zabbix.ZabbixItemKeys.Host
-Community.Zabbix.ZabbixItemKeys.Host.HostnameKind
-Community.Zabbix.ZabbixItemKeys.Host.HostnameKind.Default = 0 -> Community.Zabbix.ZabbixItemKeys.Host.HostnameKind
-Community.Zabbix.ZabbixItemKeys.Host.HostnameKind.FullyQualifiedName = 3 -> Community.Zabbix.ZabbixItemKeys.Host.HostnameKind
-Community.Zabbix.ZabbixItemKeys.Host.HostnameKind.HostName = 1 -> Community.Zabbix.ZabbixItemKeys.Host.HostnameKind
-Community.Zabbix.ZabbixItemKeys.Host.HostnameKind.NetBiosName = 4 -> Community.Zabbix.ZabbixItemKeys.Host.HostnameKind
-Community.Zabbix.ZabbixItemKeys.Host.HostnameKind.ShortHostName = 2 -> Community.Zabbix.ZabbixItemKeys.Host.HostnameKind
+Community.Zabbix.ZabbixItemKeys.Host.HostNameKind
+Community.Zabbix.ZabbixItemKeys.Host.HostNameKind.Default = 0 -> Community.Zabbix.ZabbixItemKeys.Host.HostNameKind
+Community.Zabbix.ZabbixItemKeys.Host.HostNameKind.FullyQualifiedName = 3 -> Community.Zabbix.ZabbixItemKeys.Host.HostNameKind
+Community.Zabbix.ZabbixItemKeys.Host.HostNameKind.HostName = 1 -> Community.Zabbix.ZabbixItemKeys.Host.HostNameKind
+Community.Zabbix.ZabbixItemKeys.Host.HostNameKind.NetBiosName = 4 -> Community.Zabbix.ZabbixItemKeys.Host.HostNameKind
+Community.Zabbix.ZabbixItemKeys.Host.HostNameKind.ShortHostName = 2 -> Community.Zabbix.ZabbixItemKeys.Host.HostNameKind
 Community.Zabbix.ZabbixItemKeys.Kernel
 Community.Zabbix.ZabbixItemKeys.Memory
 Community.Zabbix.ZabbixItemKeys.Network
@@ -352,9 +333,9 @@ Community.Zabbix.ZabbixSecretAttribute.ZabbixSecretAttribute() -> void
 Community.Zabbix.ZabbixSessionCredential
 Community.Zabbix.ZabbixSessionCredential.LoginBackoff.get -> System.TimeSpan
 Community.Zabbix.ZabbixSessionCredential.LoginBackoff.init -> void
-Community.Zabbix.ZabbixSessionCredential.Username.get -> string!
-Community.Zabbix.ZabbixSessionCredential.ZabbixSessionCredential(string! username, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<string!>>! password) -> void
-Community.Zabbix.ZabbixSessionCredential.ZabbixSessionCredential(string! username, string! password) -> void
+Community.Zabbix.ZabbixSessionCredential.UserName.get -> string!
+Community.Zabbix.ZabbixSessionCredential.ZabbixSessionCredential(string! userName, string! password) -> void
+Community.Zabbix.ZabbixSessionCredential.ZabbixSessionCredential(string! userName, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<string!>>! password) -> void
 Community.Zabbix.ZabbixSort<TRecord>
 Community.Zabbix.ZabbixSort<TRecord>.Deconstruct(out Community.Zabbix.ZabbixField<TRecord> Field, out System.ComponentModel.ListSortDirection Direction) -> void
 Community.Zabbix.ZabbixSort<TRecord>.Direction.get -> System.ComponentModel.ListSortDirection
@@ -424,8 +405,6 @@ override Community.Zabbix.ZabbixAgentAnswer.GetHashCode() -> int
 override Community.Zabbix.ZabbixAgentAnswer.ToString() -> string!
 override Community.Zabbix.ZabbixApiTokenCredential.GetTokenAsync(Community.Zabbix.ZabbixTokenRequestContext context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<string?>
 override Community.Zabbix.ZabbixApiTokenCredential.ToString() -> string!
-override Community.Zabbix.ZabbixComponentVersion.GetHashCode() -> int
-override Community.Zabbix.ZabbixComponentVersion.ToString() -> string!
 override Community.Zabbix.ZabbixDuration.GetHashCode() -> int
 override Community.Zabbix.ZabbixDuration.ToString() -> string!
 override Community.Zabbix.ZabbixField<TRecord>.GetHashCode() -> int
@@ -474,20 +453,9 @@ static Community.Zabbix.ZabbixAgentAnswer.NotSupported(Community.Zabbix.ZabbixIt
 static Community.Zabbix.ZabbixAgentAnswer.Supported(Community.Zabbix.ZabbixItemKey key, string? value) -> Community.Zabbix.ZabbixAgentAnswer!
 static Community.Zabbix.ZabbixAgentAnswer.operator !=(Community.Zabbix.ZabbixAgentAnswer? left, Community.Zabbix.ZabbixAgentAnswer? right) -> bool
 static Community.Zabbix.ZabbixAgentAnswer.operator ==(Community.Zabbix.ZabbixAgentAnswer? left, Community.Zabbix.ZabbixAgentAnswer? right) -> bool
-static Community.Zabbix.ZabbixComponentVersion.FromVersion(System.Version! version) -> Community.Zabbix.ZabbixComponentVersion
-static Community.Zabbix.ZabbixComponentVersion.Parse(System.ReadOnlySpan<char> s, System.IFormatProvider? provider) -> Community.Zabbix.ZabbixComponentVersion
-static Community.Zabbix.ZabbixComponentVersion.Parse(string! s, System.IFormatProvider? provider) -> Community.Zabbix.ZabbixComponentVersion
-static Community.Zabbix.ZabbixComponentVersion.TryParse(System.ReadOnlySpan<char> s, System.IFormatProvider? provider, out Community.Zabbix.ZabbixComponentVersion result) -> bool
-static Community.Zabbix.ZabbixComponentVersion.TryParse(string? s, System.IFormatProvider? provider, out Community.Zabbix.ZabbixComponentVersion result) -> bool
-static Community.Zabbix.ZabbixComponentVersion.operator !=(Community.Zabbix.ZabbixComponentVersion left, Community.Zabbix.ZabbixComponentVersion right) -> bool
-static Community.Zabbix.ZabbixComponentVersion.operator <(Community.Zabbix.ZabbixComponentVersion left, Community.Zabbix.ZabbixComponentVersion right) -> bool
-static Community.Zabbix.ZabbixComponentVersion.operator <=(Community.Zabbix.ZabbixComponentVersion left, Community.Zabbix.ZabbixComponentVersion right) -> bool
-static Community.Zabbix.ZabbixComponentVersion.operator ==(Community.Zabbix.ZabbixComponentVersion left, Community.Zabbix.ZabbixComponentVersion right) -> bool
-static Community.Zabbix.ZabbixComponentVersion.operator >(Community.Zabbix.ZabbixComponentVersion left, Community.Zabbix.ZabbixComponentVersion right) -> bool
-static Community.Zabbix.ZabbixComponentVersion.operator >=(Community.Zabbix.ZabbixComponentVersion left, Community.Zabbix.ZabbixComponentVersion right) -> bool
 static Community.Zabbix.ZabbixCredential.Anonymous.get -> Community.Zabbix.ZabbixCredential!
 static Community.Zabbix.ZabbixCredential.FromApiToken(string! token) -> Community.Zabbix.ZabbixApiTokenCredential!
-static Community.Zabbix.ZabbixCredential.FromLogin(string! username, string! password) -> Community.Zabbix.ZabbixSessionCredential!
+static Community.Zabbix.ZabbixCredential.FromLogin(string! userName, string! password) -> Community.Zabbix.ZabbixSessionCredential!
 static Community.Zabbix.ZabbixDataClassifications.ItemKey.get -> Microsoft.Extensions.Compliance.Classification.DataClassification
 static Community.Zabbix.ZabbixDataClassifications.PeerText.get -> Microsoft.Extensions.Compliance.Classification.DataClassification
 static Community.Zabbix.ZabbixDataClassifications.Personal.get -> Microsoft.Extensions.Compliance.Classification.DataClassification
@@ -531,18 +499,17 @@ static Community.Zabbix.ZabbixInterval.TryParse(System.ReadOnlySpan<char> s, out
 static Community.Zabbix.ZabbixItemDefinition.operator !=(Community.Zabbix.ZabbixItemDefinition? left, Community.Zabbix.ZabbixItemDefinition? right) -> bool
 static Community.Zabbix.ZabbixItemDefinition.operator ==(Community.Zabbix.ZabbixItemDefinition? left, Community.Zabbix.ZabbixItemDefinition? right) -> bool
 static Community.Zabbix.ZabbixItemKey.Create(string! name, params System.ReadOnlySpan<string!> parameters) -> Community.Zabbix.ZabbixItemKey
-static Community.Zabbix.ZabbixItemKey.Parse(System.ReadOnlySpan<char> s, System.IFormatProvider? provider) -> Community.Zabbix.ZabbixItemKey
-static Community.Zabbix.ZabbixItemKey.Parse(string! s, System.IFormatProvider? provider) -> Community.Zabbix.ZabbixItemKey
+static Community.Zabbix.ZabbixItemKey.Parse(string! s) -> Community.Zabbix.ZabbixItemKey
+static Community.Zabbix.ZabbixItemKey.Parse(System.ReadOnlySpan<char> s) -> Community.Zabbix.ZabbixItemKey
 static Community.Zabbix.ZabbixItemKey.TryCreate(string? name, System.ReadOnlySpan<string!> parameters, out Community.Zabbix.ZabbixItemKey result) -> bool
-static Community.Zabbix.ZabbixItemKey.TryParse(System.ReadOnlySpan<char> s, System.IFormatProvider? provider, out Community.Zabbix.ZabbixItemKey result) -> bool
-static Community.Zabbix.ZabbixItemKey.TryParse(string? s, System.IFormatProvider? provider, out Community.Zabbix.ZabbixItemKey result) -> bool
+static Community.Zabbix.ZabbixItemKey.TryParse(System.ReadOnlySpan<char> s, out Community.Zabbix.ZabbixItemKey result) -> bool
 static Community.Zabbix.ZabbixItemKey.TryParse(string? s, out Community.Zabbix.ZabbixItemKey result) -> bool
 static Community.Zabbix.ZabbixItemKey.operator !=(Community.Zabbix.ZabbixItemKey left, Community.Zabbix.ZabbixItemKey right) -> bool
 static Community.Zabbix.ZabbixItemKey.operator ==(Community.Zabbix.ZabbixItemKey left, Community.Zabbix.ZabbixItemKey right) -> bool
 static Community.Zabbix.ZabbixItemKey<T>.operator !=(Community.Zabbix.ZabbixItemKey<T> left, Community.Zabbix.ZabbixItemKey<T> right) -> bool
 static Community.Zabbix.ZabbixItemKey<T>.operator ==(Community.Zabbix.ZabbixItemKey<T> left, Community.Zabbix.ZabbixItemKey<T> right) -> bool
 static Community.Zabbix.ZabbixItemKeys.Agent.HostMetadata.get -> Community.Zabbix.ZabbixItemKey<string!>
-static Community.Zabbix.ZabbixItemKeys.Agent.Hostname.get -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Agent.HostName.get -> Community.Zabbix.ZabbixItemKey<string!>
 static Community.Zabbix.ZabbixItemKeys.Agent.Ping.get -> Community.Zabbix.ZabbixItemKey<bool>
 static Community.Zabbix.ZabbixItemKeys.Agent.Variant.get -> Community.Zabbix.ZabbixItemKey<long>
 static Community.Zabbix.ZabbixItemKeys.Agent.Version.get -> Community.Zabbix.ZabbixItemKey<string!>
@@ -615,7 +582,7 @@ static Community.Zabbix.ZabbixItemKeys.File.Sha256Checksum(string! path) -> Comm
 static Community.Zabbix.ZabbixItemKeys.File.SizeBytes(string! path) -> Community.Zabbix.ZabbixItemKey<long>
 static Community.Zabbix.ZabbixItemKeys.Host.Architecture.get -> Community.Zabbix.ZabbixItemKey<string!>
 static Community.Zabbix.ZabbixItemKeys.Host.BootTime.get -> Community.Zabbix.ZabbixItemKey<System.DateTimeOffset>
-static Community.Zabbix.ZabbixItemKeys.Host.Hostname(Community.Zabbix.ZabbixItemKeys.Host.HostnameKind kind = Community.Zabbix.ZabbixItemKeys.Host.HostnameKind.Default, bool lowercase = false) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Host.HostName(Community.Zabbix.ZabbixItemKeys.Host.HostNameKind kind = Community.Zabbix.ZabbixItemKeys.Host.HostNameKind.Default, bool lowercase = false) -> Community.Zabbix.ZabbixItemKey<string!>
 static Community.Zabbix.ZabbixItemKeys.Host.LocalTime.get -> Community.Zabbix.ZabbixItemKey<System.DateTimeOffset>
 static Community.Zabbix.ZabbixItemKeys.Host.LocalTimeText.get -> Community.Zabbix.ZabbixItemKey<string!>
 static Community.Zabbix.ZabbixItemKeys.Host.OsDetails.get -> Community.Zabbix.ZabbixItemKey<string!>
@@ -707,7 +674,7 @@ static Community.Zabbix.ZabbixItemKeys.Swap.PagesOut.get -> Community.Zabbix.Zab
 static Community.Zabbix.ZabbixItemKeys.Swap.TotalBytes.get -> Community.Zabbix.ZabbixItemKey<long>
 static Community.Zabbix.ZabbixItemKeys.Swap.UsedBytes.get -> Community.Zabbix.ZabbixItemKey<long>
 static Community.Zabbix.ZabbixItemKeys.Swap.UsedPercent.get -> Community.Zabbix.ZabbixItemKey<double>
-static Community.Zabbix.ZabbixItemKeys.Web.Certificate(string! hostname, int? port = null, string? address = null) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Web.Certificate(string! hostName, int? port = null, string? address = null) -> Community.Zabbix.ZabbixItemKey<string!>
 static Community.Zabbix.ZabbixItemKeys.Web.Page(string! host, string? path = null, int? port = null) -> Community.Zabbix.ZabbixItemKey<string!>
 static Community.Zabbix.ZabbixItemKeys.Web.PageLoadTime(string! host, string? path = null, int? port = null) -> Community.Zabbix.ZabbixItemKey<System.TimeSpan>
 static Community.Zabbix.ZabbixItemKeys.Web.PageMatch(string! host, string! pattern, string? path = null, int? port = null, int? length = null, string? output = null) -> Community.Zabbix.ZabbixItemKey<string!>
@@ -748,7 +715,6 @@ virtual Community.Zabbix.ZabbixCredential.Invalidate(string! token, Community.Za
 virtual Community.Zabbix.ZabbixGetConditions.EqualityContract.get -> System.Type!
 virtual Community.Zabbix.ZabbixGetConditions.Equals(Community.Zabbix.ZabbixGetConditions? other) -> bool
 virtual Community.Zabbix.ZabbixGetConditions.PrintMembers(System.Text.StringBuilder! builder) -> bool
-~override Community.Zabbix.ZabbixComponentVersion.Equals(object obj) -> bool
 ~override Community.Zabbix.ZabbixDuration.Equals(object obj) -> bool
 ~override Community.Zabbix.ZabbixField<TRecord>.Equals(object obj) -> bool
 ~override Community.Zabbix.ZabbixFieldValue.Equals(object obj) -> bool

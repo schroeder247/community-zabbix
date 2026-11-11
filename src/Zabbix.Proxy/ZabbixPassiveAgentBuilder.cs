@@ -32,15 +32,15 @@ public sealed class ZabbixPassiveAgentBuilder : IZabbixPassiveAgentBuilder
     private readonly ServiceCollection _services = [];
     private bool _built;
 
-    /// <summary>A builder for the agent of <paramref name="hostname"/>, what <c>agent.hostname</c> answers unless <c>Configure</c> sets another.</summary>
-    /// <param name="hostname">The agent's name, and its host.</param>
-    /// <exception cref="ArgumentException"><paramref name="hostname"/> is empty.</exception>
-    /// <exception cref="ArgumentNullException"><paramref name="hostname"/> is <see langword="null"/>.</exception>
-    public ZabbixPassiveAgentBuilder(string hostname)
+    /// <summary>A builder for the agent of <paramref name="hostName"/>, what <c>agent.hostname</c> answers unless <c>Configure</c> sets another.</summary>
+    /// <param name="hostName">The agent's name, and its host.</param>
+    /// <exception cref="ArgumentException"><paramref name="hostName"/> is empty.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="hostName"/> is <see langword="null"/>.</exception>
+    public ZabbixPassiveAgentBuilder(string hostName)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(hostname);
-        Name = hostname;
-        _services.AddZabbixPassiveAgent(hostname);
+        ArgumentException.ThrowIfNullOrWhiteSpace(hostName);
+        Name = hostName;
+        _services.AddZabbixPassiveAgent(hostName);
     }
 
     /// <summary>The agent's name: its host unless <c>Configure</c> sets another.</summary>

@@ -20,7 +20,7 @@ public sealed class AdversarialOptionsTests
     // Members whose zero or negative value is not checked here, with the reason.
     private static readonly Dictionary<string, string> Exempt = new(StringComparer.Ordinal)
     {
-        [$"{nameof(ZabbixAgentHealthCheckOptions)}.{nameof(ZabbixAgentHealthCheckOptions.StaleAfter)}"] = "its own validator (ZabbixAgentHealthCheckStaleAfterValidator), run by AddHealthCheck",
+        [$"{nameof(ZabbixComponentHealthCheckOptions)}.{nameof(ZabbixComponentHealthCheckOptions.StaleAfter)}"] = "its own validator (ZabbixComponentHealthCheckStaleAfterValidator), run by AddHealthCheck",
     };
 
     public static TheoryData<string> Members()

@@ -60,7 +60,7 @@ public abstract class ZabbixPersistentStore<T> : ZabbixStore<T>
     private readonly List<ZabbixStoreEntry<T>> _leased = [];            // leased, not acknowledged; ascending, all below _ahead
     private readonly List<long> _doomed = [];                           // dropped from memory, still to remove from the backend
     private readonly List<TaskCompletionSource> _turns = [];            // FlushAsync callers, told when the next whole turn ends
-    private readonly List<string> _shed = [];                           // reasons of records dropped under the gate, counted after it
+    private readonly List<ZabbixStoreDropReason> _shed = [];                           // reasons of records dropped under the gate, counted after it
     private TaskCompletionSource _opened = NewSignal();
     private int _head;
     private int _held;                                                  // the count: committed and held, plus pending
@@ -148,7 +148,7 @@ public abstract class ZabbixPersistentStore<T> : ZabbixStore<T>
     /// <inheritdoc/>
     internal override bool TryTake(T item)
     {
-        if (!_completed && RefusalOf(item) is { } refusal)
+        if (!_completed && GetRefusalReason(item) is { } refusal)
         {
             Drop(refusal);
             return true;                                                                // taken and dropped: not offered again
@@ -170,7 +170,7 @@ public abstract class ZabbixPersistentStore<T> : ZabbixStore<T>
         while (true)
         {
             if (_completed) throw new ChannelClosedException();
-            if (RefusalOf(item) is { } refusal)
+            if (GetRefusalReason(item) is { } refusal)
             {
                 Drop(refusal);
                 return;
@@ -203,7 +203,7 @@ public abstract class ZabbixPersistentStore<T> : ZabbixStore<T>
     internal override async ValueTask<bool> TryWriteDurablyAsync(T item, CancellationToken cancellationToken)
     {
         if (_completed) return false;
-        if (RefusalOf(item) is { } refusal)
+        if (GetRefusalReason(item) is { } refusal)
         {
             Drop(refusal);
             return false;
@@ -224,7 +224,7 @@ public abstract class ZabbixPersistentStore<T> : ZabbixStore<T>
     private Accepted Accept(T item, TaskCompletionSource<bool>? done, bool refuseChecked = false)
     {
         if (_completed) return Accepted.Closed;
-        if (!refuseChecked && RefusalOf(item) is { } refusal)
+        if (!refuseChecked && GetRefusalReason(item) is { } refusal)
         {
             Drop(refusal);
             return Accepted.Full;                                                       // the caller learns it was not kept
@@ -475,7 +475,7 @@ public abstract class ZabbixPersistentStore<T> : ZabbixStore<T>
             while (_head < _ahead.Count)
             {
                 entry = _ahead[_head];
-                if (ExpiryOf(entry) is not { } reason) return true;
+                if (GetExpiryReason(entry) is not { } reason) return true;
                 _head++;
                 _held--;
                 _doomed.Add(entry.Sequence);
@@ -513,14 +513,14 @@ public abstract class ZabbixPersistentStore<T> : ZabbixStore<T>
     // Counts the records dropped under the gate, after it: a drop logs and runs the meter's listeners.
     private void ReportShed()
     {
-        string[] reasons;
+        ZabbixStoreDropReason[] reasons;
         lock (_gate)
         {
             if (_shed.Count == 0) return;
             reasons = [.. _shed];
             _shed.Clear();
         }
-        foreach (string reason in reasons) Drop(reason);
+        foreach (ZabbixStoreDropReason reason in reasons) Drop(reason);
     }
 
     // A coalescing signal (capacity one, DropWrite): a full channel is already signalled and still answers true; false

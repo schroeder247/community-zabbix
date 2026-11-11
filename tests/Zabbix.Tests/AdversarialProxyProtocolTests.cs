@@ -32,7 +32,7 @@ public sealed class AdversarialProxyProtocolTests
         };
     }
 
-    private static ZabbixProxyUplink Uplink(Scripted server) => new(server.Exchange, "proxy-01", new ZabbixComponentVersion(7, 4, 0), session: Session);
+    private static ZabbixProxyUplink Uplink(Scripted server) => new(server.Exchange, "proxy-01", new Version(7, 4, 0), Session, loggers: null, time: null);
 
     private static ZabbixProxyConfig Merge(ZabbixProxyConfig held, string reply)
     {
@@ -96,7 +96,7 @@ public sealed class AdversarialProxyProtocolTests
         await Assert.ThrowsAsync<ZabbixProxyRefusedException>(() => uplink.GetConfigAsync(ZabbixProxyConfig.Empty, TestContext.Current.CancellationToken));
 
         Assert.Equal(1, server.Calls);
-        Assert.Equal(new ZabbixComponentVersion(7, 4, 0), uplink.Version);
+        Assert.Equal(new Version(7, 4, 0), uplink.Version);
     }
 
     [Fact]
@@ -108,7 +108,7 @@ public sealed class AdversarialProxyProtocolTests
         await Assert.ThrowsAsync<ZabbixProxyRefusedException>(() => uplink.GetConfigAsync(ZabbixProxyConfig.Empty, TestContext.Current.CancellationToken));
 
         Assert.Equal(2, server.Calls);
-        Assert.Equal(new ZabbixComponentVersion(8, 0, 0), uplink.Version);
+        Assert.Equal(new Version(8, 0, 0), uplink.Version);
     }
 
     [Theory]
@@ -201,8 +201,8 @@ public sealed class AdversarialProxyProtocolTests
         ZabbixProxyConfig trapper = Merge(ZabbixProxyConfig.Empty, "{\"full_sync\":1,\"config_revision\":1,\"data\":{" + Tables.Replace("TYPE", "2", StringComparison.Ordinal) + "}}");
         ZabbixProxyConfig active = Merge(trapper, "{\"config_revision\":2,\"data\":{" + Tables.Replace("TYPE", "7", StringComparison.Ordinal) + "}}");
 
-        Assert.Equal(ZabbixProxyItemType.Trapper, trapper.Items[100].Type);
-        Assert.Equal(ZabbixProxyItemType.ZabbixAgentActive, active.Items[100].Type);
+        Assert.Equal(ZabbixItemType.Trapper, trapper.Items[100].Type);
+        Assert.Equal(ZabbixItemType.ZabbixActive, active.Items[100].Type);
         Assert.Same(active.Items[100], active.ItemsByKey[("web-01", "cpu")]);
     }
 

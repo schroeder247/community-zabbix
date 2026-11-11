@@ -7,10 +7,10 @@ using Microsoft.Extensions.Options;
 namespace Community.Zabbix.Hosting;
 
 /// <summary>
-/// Reports an agent's health to the host's health checks: the agent's own dependency, the server it delivers to,
-/// never the things it monitors. In order:
+/// Reports an agent's or a proxy's health to the host's health checks: the component's own dependency, the server it
+/// delivers to, never the things it monitors. In order:
 /// <list type="bullet">
-/// <item><b>Unhealthy</b> when one of its loops is faulting (<see cref="ZabbixAgentStatus.Fault"/>), or when values are
+/// <item><b>Unhealthy</b> when one of its loops is faulting (<see cref="ZabbixComponentStatus.Fault"/>), or when values are
 /// waiting (in the store or held by the send loop) and nothing has been delivered for longer than
 /// <see cref="StaleAfter"/> (counted from the start when nothing ever was): the destination is down and the loss window
 /// is approaching;</item>
@@ -20,15 +20,24 @@ namespace Community.Zabbix.Hosting;
 /// <item><b>Healthy</b> otherwise.</item>
 /// </list>
 /// </summary>
-public sealed class ZabbixAgentHealthCheck : IHealthCheck
+public sealed class ZabbixComponentHealthCheck : IHealthCheck
 {
-    private readonly ZabbixAgentStatus _status;
+    private readonly ZabbixComponentStatus _status;
     private readonly TimeProvider _time;
 
-    /// <summary>A check over <paramref name="status"/>.</summary>
-    /// <param name="status">The agent's status.</param>
-    /// <param name="time">The clock.</param>
-    public ZabbixAgentHealthCheck(ZabbixAgentStatus status, TimeProvider? time = null)
+    /// <summary>A check over <paramref name="status"/>, on the system's clock.</summary>
+    /// <param name="status">The agent's or the proxy's status.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="status"/> is <see langword="null"/>.</exception>
+    public ZabbixComponentHealthCheck(ZabbixComponentStatus status)
+        : this(status, time: null)
+    {
+    }
+
+    /// <summary>A check over <paramref name="status"/>, on <paramref name="time"/>.</summary>
+    /// <param name="status">The agent's or the proxy's status.</param>
+    /// <param name="time">The clock; the system's when <see langword="null"/>.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="status"/> is <see langword="null"/>.</exception>
+    public ZabbixComponentHealthCheck(ZabbixComponentStatus status, TimeProvider? time)
     {
         ArgumentNullException.ThrowIfNull(status);
         _status = status;
@@ -36,12 +45,12 @@ public sealed class ZabbixAgentHealthCheck : IHealthCheck
         _ = status.Silence(_time);                                                // the status's proof is on this clock from now on
     }
 
-    /// <summary>The store's fill, as a fraction of its cap, past which the agent is degraded.</summary>
+    /// <summary>The store's fill, as a fraction of its cap, past which the component is degraded.</summary>
     public double DegradedFillFraction { get; init; } = 0.8;
 
     /// <summary>
-    /// How long values may wait undelivered before the agent is unhealthy, and the grace after start before an agent that
-    /// has delivered nothing is degraded. Measured on the clock's monotonic time (<see cref="TimeProvider.GetElapsedTime(long)"/>),
+    /// How long values may wait undelivered before the component is unhealthy, and the grace after start before a component
+    /// that has delivered nothing is degraded. Measured on the clock's monotonic time (<see cref="TimeProvider.GetElapsedTime(long)"/>),
     /// so a step of the wall clock neither hides a dead destination nor flags a live one.
     /// </summary>
     public TimeSpan StaleAfter { get; init; } = TimeSpan.FromMinutes(5);
@@ -87,17 +96,17 @@ public sealed class ZabbixAgentHealthCheck : IHealthCheck
 }
 
 /// <summary>
-/// <see cref="ZabbixAgentHealthCheckOptions.StaleAfter"/> must be positive — not a <see cref="RangeAttribute"/> here
+/// <see cref="ZabbixComponentHealthCheckOptions.StaleAfter"/> must be positive — not a <see cref="RangeAttribute"/> here
 /// (its <c>Type, string, string</c> constructor needs a runtime <see cref="System.ComponentModel.TypeConverter"/> the
 /// trimmer cannot see through, IL2026); a hand check is the trim-safe form of the same rule.
 /// </summary>
-internal sealed class ZabbixAgentHealthCheckStaleAfterValidator : IValidateOptions<ZabbixAgentHealthCheckOptions>
+internal sealed class ZabbixComponentHealthCheckStaleAfterValidator : IValidateOptions<ZabbixComponentHealthCheckOptions>
 {
-    public ValidateOptionsResult Validate(string? name, ZabbixAgentHealthCheckOptions options)
+    public ValidateOptionsResult Validate(string? name, ZabbixComponentHealthCheckOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
         return options.StaleAfter > TimeSpan.Zero
             ? ValidateOptionsResult.Success
-            : ValidateOptionsResult.Fail($"{nameof(ZabbixAgentHealthCheckOptions.StaleAfter)} must be positive");
+            : ValidateOptionsResult.Fail($"{nameof(ZabbixComponentHealthCheckOptions.StaleAfter)} must be positive");
     }
 }

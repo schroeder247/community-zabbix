@@ -201,8 +201,8 @@ public class ZabbixPassiveProxy : ZabbixComponent
         _onStats = Options.StatsHandler;
         var sender = new ZabbixProxyDataSender(Name, stores, Options.PageSize, () => Config, () => providers, () => onTask, _telemetry, _logger, Time, status: null);
         // The stores are handed to the conversation, never read back from a field that stop may have cleared.
-        _listener = new ZabbixListener(Options.Trapper, (conversation, cancellation) => ConverseAsync(stores, sender, conversation, cancellation), _transport ?? ZabbixSocketTransport.Create(Loggers), Time,
-            Loggers.CreateLogger<ZabbixListener>(), _meters);
+        _listener = new ZabbixListener(Options.Trapper, (conversation, cancellation) => ConverseAsync(stores, sender, conversation, cancellation), _transport ?? ZabbixSocketTransport.Create(Loggers), Loggers,
+            Time, _meters);
         ZabbixListener listener = _listener;
         await listener.StartingAsync(cancellationToken).ConfigureAwait(false);
         return listener;
@@ -235,6 +235,7 @@ public class ZabbixPassiveProxy : ZabbixComponent
     protected override async ValueTask DisposeAsyncCore()
 #pragma warning restore IDE1006
     {
+        if (IsKept) return;                                          // shared: its container releases it
         await base.DisposeAsyncCore().ConfigureAwait(false);          // stops a running component first, so it drains
         if (Interlocked.Exchange(ref _released, 1) != 0) return;
         if (_listener is not null) await _listener.DisposeAsync().ConfigureAwait(false);
@@ -246,6 +247,7 @@ public class ZabbixPassiveProxy : ZabbixComponent
     /// <inheritdoc/>
     protected override void Dispose(bool disposing)
     {
+        if (IsKept) return;                                          // shared: its container releases it
         if (disposing && Interlocked.Exchange(ref _released, 1) == 0)
         {
             _listener?.Dispose();
@@ -325,8 +327,8 @@ public class ZabbixPassiveProxy : ZabbixComponent
             {
                 if (_onConfig is { } onConfig)
                 {
-                    string? veto = await onConfig(merged, held.Config, cancellationToken).ConfigureAwait(false);
-                    if (veto is not null)
+                    ZabbixProxyConfigVerdict verdict = await onConfig(merged, held.Config, cancellationToken).ConfigureAwait(false);
+                    if (verdict.Reason is { } veto)
                     {
                         ProxyLog.ProxyConfigVetoed(_logger, Name, merged.ConfigRevision, veto);
                         await conversation.WriteAsync(Failed(veto), cancellationToken).ConfigureAwait(false);
@@ -337,7 +339,7 @@ public class ZabbixPassiveProxy : ZabbixComponent
                 Volatile.Write(ref _admission, await ZabbixProxyAdmission.BuildAsync(merged, ProtocolVersion, Options.Resolve, cancellationToken).ConfigureAwait(false));
                 ProxyLog.ProxyConfigReceived(_logger, Name, merged.ConfigRevision, fullSync, merged.Hosts.Count, merged.Items.Count);
             }
-            await conversation.WriteAsync(JsonSerializer.SerializeToUtf8Bytes(new ZabbixProxyResponse("success", null, null, version, null), ZabbixProxyJson.Default.ZabbixProxyResponse), cancellationToken).ConfigureAwait(false);
+            await conversation.WriteAsync(JsonSerializer.SerializeToUtf8Bytes(new ZabbixProxyResponse("success", null, null, ProtocolVersion.ToVersion(), null), ZabbixProxyJson.Default.ZabbixProxyResponse), cancellationToken).ConfigureAwait(false);
             _telemetry.Finish(operation, extra: new TagList { { "zabbix.proxy.config_revision", merged.ConfigRevision } });
         }
         catch (Exception failure) when (ZabbixProxyPaging.IsTransient(failure, cancellationToken))
@@ -421,7 +423,7 @@ public class ZabbixPassiveProxy : ZabbixComponent
             {
                 DateTimeOffset now = Time.GetUtcNow();
                 var request = new ZabbixProxyDataRequest(null, null, _session, page.History, page.Discovery, page.Autoregistration, page.Availability, page.Tasks,
-                    more ? 1 : null, ProtocolVersion.ToString(), now, delay > 0 ? delay : null);
+                    more ? 1 : null, ProtocolVersion.ToVersion(), now, delay > 0 ? delay : null);
                 await conversation.WriteAsync(JsonSerializer.SerializeToUtf8Bytes(request, ZabbixProxyJson.Default.ZabbixProxyDataRequest), cancellation).ConfigureAwait(false);
                 ZabbixProxyResponse ack = JsonSerializer.Deserialize((await conversation.ReadAsync(cancellation).ConfigureAwait(false)).Span, ZabbixProxyJson.Default.ZabbixProxyResponse)
                     ?? throw new JsonException("The server acknowledged proxy data with null.");

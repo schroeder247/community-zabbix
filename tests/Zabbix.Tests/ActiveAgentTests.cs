@@ -96,7 +96,7 @@ public sealed class ActiveAgentTests
         services.AddZabbixActiveAgent(name).AddServer(new DnsEndPoint(node.Host, node.Port)).AddItem("custom.fast", _ => "42")
             .Configure(o =>
             {
-                o.Hostname = "edge-01";
+                o.HostName = "edge-01";
                 o.Connection.Timeout = TimeSpan.FromDays(1);                                 // stepping the fake clock never expires an exchange in flight
                 o.RefreshInterval = TimeSpan.FromDays(1);
                 o.HeartbeatInterval = TimeSpan.Zero;
@@ -120,8 +120,8 @@ public sealed class ActiveAgentTests
     [Fact]
     public void An_active_agent_composed_by_hand_takes_its_options_value_and_its_destination()
     {
-        var options = new ZabbixActiveAgentOptions { Hostname = "by-hand", ServerActive = "zbx-01;zbx-02,zbx-03:10061" };
-        ZabbixItemDictionary handlers = ZabbixItemDictionary.BuiltIn(options.Hostname);
+        var options = new ZabbixActiveAgentOptions { HostName = "by-hand", ServerActive = "zbx-01;zbx-02,zbx-03:10061" };
+        ZabbixItemDictionary handlers = ZabbixItemDictionary.BuiltIn(options.HostName);
 
         using var second = new ZabbixActiveAgentDestination("by-hand", options, handlers, NullLoggerFactory.Instance, TimeProvider.System, destination: 1);
 
@@ -139,7 +139,7 @@ public sealed class ActiveAgentTests
         var log = new ZabbixItemAssignment(7UL, "log[/var/log/app]", TimeSpan.FromMinutes(1), null);
 
         Assert.Empty(defaulted);
-        Assert.Equal((0L, 0), (log.LastLogSize, log.Mtime));
+        Assert.Equal((0L, 0), (log.LastLogSize, log.ModifiedTime));
     }
 
     [Fact]
@@ -230,7 +230,7 @@ public sealed class ActiveAgentTests
         services.AddMetrics();
         services.AddZabbixActiveAgent("stepped").AddServer(new DnsEndPoint(server.Node.Host, server.Node.Port)).Configure(o =>
         {
-            o.Hostname = "edge-01";
+            o.HostName = "edge-01";
             o.Connection.Timeout = TimeSpan.FromDays(1);
             o.RefreshInterval = TimeSpan.FromDays(1);
             o.HeartbeatInterval = TimeSpan.Zero;
@@ -422,18 +422,18 @@ public sealed class ActiveAgentTests
     {
         // The caller's stop is not an answer: it must not be reported to the server as a timed-out check.
         var time = new FakeTimeProvider();
-        ZabbixItemDictionary handlers = new ZabbixItemDictionary().Add("slow", async (key, token) =>
+        ZabbixItemDictionary handlers = new ZabbixItemDictionary(time).Add("slow", async (key, token) =>
         {
             await Task.Delay(Timeout.InfiniteTimeSpan, token);
             return new ZabbixAgentAnswer(key, "never", null);
         });
-        ZabbixItemKey slow = ZabbixItemKey.Parse("slow", CultureInfo.InvariantCulture);
+        ZabbixItemKey slow = ZabbixItemKey.Parse("slow");
         using var stop = new CancellationTokenSource();
 
-        Task<ZabbixAgentAnswer> timingOut = handlers.AnswerAsync(slow, TimeSpan.FromSeconds(3), time, TestContext.Current.CancellationToken).AsTask();
+        Task<ZabbixAgentAnswer> timingOut = handlers.AnswerAsync(slow, TimeSpan.FromSeconds(3), TestContext.Current.CancellationToken).AsTask();
         time.Advance(TimeSpan.FromSeconds(3));
         ZabbixAgentAnswer timedOut = await timingOut.WaitAsync(Guard, TestContext.Current.CancellationToken);
-        Task<ZabbixAgentAnswer> stopping = handlers.AnswerAsync(slow, TimeSpan.FromSeconds(3), time, stop.Token).AsTask();
+        Task<ZabbixAgentAnswer> stopping = handlers.AnswerAsync(slow, TimeSpan.FromSeconds(3), stop.Token).AsTask();
         await stop.CancelAsync();
 
         Assert.Equal("The key did not answer before its deadline.", timedOut.Error);
@@ -448,8 +448,8 @@ public sealed class ActiveAgentTests
             .Add("deaf", (_, _) => new ValueTask<ZabbixAgentAnswer>(never.Task))
             .Add("empty", (ZabbixItemCallback)((_, _) => default));
 
-        ZabbixAgentAnswer deaf = await handlers.AnswerAsync(ZabbixItemKey.Parse("deaf", CultureInfo.InvariantCulture), TimeSpan.FromMilliseconds(50), TestContext.Current.CancellationToken).AsTask().WaitAsync(Guard, TestContext.Current.CancellationToken);
-        ZabbixAgentAnswer empty = await handlers.AnswerAsync(ZabbixItemKey.Parse("empty", CultureInfo.InvariantCulture), Guard, TestContext.Current.CancellationToken);
+        ZabbixAgentAnswer deaf = await handlers.AnswerAsync(ZabbixItemKey.Parse("deaf"), TimeSpan.FromMilliseconds(50), TestContext.Current.CancellationToken).AsTask().WaitAsync(Guard, TestContext.Current.CancellationToken);
+        ZabbixAgentAnswer empty = await handlers.AnswerAsync(ZabbixItemKey.Parse("empty"), Guard, TestContext.Current.CancellationToken);
 
         Assert.Equal("The key did not answer before its deadline.", deaf.Error);
         Assert.Equal("The key's handler gave no answer.", empty.Error);

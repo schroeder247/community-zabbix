@@ -21,11 +21,11 @@ public sealed class HealthCheckTests
     public async Task Healthy_then_degraded_as_the_store_fills_then_unhealthy_when_nothing_leaves()
     {
         var time = new FakeTimeProvider();
-        var status = new ZabbixAgentStatus("edge");
+        var status = new ZabbixComponentStatus("edge");
         await using var store = new ZabbixMemoryStore<ZabbixValue>(new ZabbixStorePolicy<ZabbixValue> { MaxItems = 10 });
         status.Attach(store);
         status.Started(time.GetUtcNow());
-        var check = new ZabbixAgentHealthCheck(status, time) { StaleAfter = TimeSpan.FromMinutes(1) };
+        var check = new ZabbixComponentHealthCheck(status, time) { StaleAfter = TimeSpan.FromMinutes(1) };
 
         status.Report(new ZabbixSendProgress(ZabbixSendOutcome.Delivered, 5, time.GetUtcNow()));
         HealthCheckResult healthy = await check.CheckHealthAsync(Context, TestContext.Current.CancellationToken);
@@ -43,16 +43,16 @@ public sealed class HealthCheckTests
     [Fact]
     public async Task The_status_names_the_store_cap_with_the_policy_word_MaxItems()
     {
-        var status = new ZabbixAgentStatus("edge");
+        var status = new ZabbixComponentStatus("edge");
         await using var store = new ZabbixMemoryStore<ZabbixValue>(new ZabbixStorePolicy<ZabbixValue> { MaxItems = 10 });
         status.Attach(store);
-        var check = new ZabbixAgentHealthCheck(status, new FakeTimeProvider());
+        var check = new ZabbixComponentHealthCheck(status, new FakeTimeProvider());
 
         HealthCheckResult result = await check.CheckHealthAsync(Context, TestContext.Current.CancellationToken);
 
         Assert.Equal(10, status.MaxItems);
         Assert.Equal(10, result.Data["maxItems"]);
-        Assert.DoesNotContain(typeof(ZabbixAgentStatus).GetProperties(), property => property.Name.EndsWith("Capacity", StringComparison.Ordinal));
+        Assert.DoesNotContain(typeof(ZabbixComponentStatus).GetProperties(), property => property.Name.EndsWith("Capacity", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -60,9 +60,9 @@ public sealed class HealthCheckTests
     {
         // An agent that has delivered nothing must not stay Healthy for ever.
         var time = new FakeTimeProvider();
-        var status = new ZabbixAgentStatus("edge");
+        var status = new ZabbixComponentStatus("edge");
         status.Started(time.GetUtcNow());
-        var check = new ZabbixAgentHealthCheck(status, time) { StaleAfter = TimeSpan.FromMinutes(5) };
+        var check = new ZabbixComponentHealthCheck(status, time) { StaleAfter = TimeSpan.FromMinutes(5) };
 
         HealthCheckResult starting = await check.CheckHealthAsync(Context, TestContext.Current.CancellationToken);
         time.Advance(TimeSpan.FromMinutes(6));
@@ -77,9 +77,9 @@ public sealed class HealthCheckTests
     {
         // 50 values held for an hour by a loop retrying against a dead server must not report Healthy.
         var time = new FakeTimeProvider();
-        var status = new ZabbixAgentStatus("edge");
+        var status = new ZabbixComponentStatus("edge");
         status.Started(time.GetUtcNow());
-        var check = new ZabbixAgentHealthCheck(status, time);
+        var check = new ZabbixComponentHealthCheck(status, time);
 
         status.Report(new ZabbixSendProgress(ZabbixSendOutcome.Retried, 50, time.GetUtcNow()));
         HealthCheckResult retrying = await check.CheckHealthAsync(Context, TestContext.Current.CancellationToken);
@@ -96,9 +96,9 @@ public sealed class HealthCheckTests
     {
         // A rejected batch does not move LastDelivered: otherwise an agent whose every batch is refused would stay Healthy.
         var time = new FakeTimeProvider();
-        var status = new ZabbixAgentStatus("edge");
+        var status = new ZabbixComponentStatus("edge");
         status.Started(time.GetUtcNow());
-        var check = new ZabbixAgentHealthCheck(status, time);
+        var check = new ZabbixComponentHealthCheck(status, time);
         DateTimeOffset delivered = time.GetUtcNow();
         status.Report(new ZabbixSendProgress(ZabbixSendOutcome.Delivered, 1, delivered));
         time.Advance(TimeSpan.FromSeconds(10));
@@ -114,8 +114,8 @@ public sealed class HealthCheckTests
     [Fact]
     public async Task A_faulting_loop_makes_the_agent_unhealthy_until_its_next_good_pass()
     {
-        var status = new ZabbixAgentStatus("edge");
-        var check = new ZabbixAgentHealthCheck(status, new FakeTimeProvider());
+        var status = new ZabbixComponentStatus("edge");
+        var check = new ZabbixComponentHealthCheck(status, new FakeTimeProvider());
 
         status.Faulted("refresh", new InvalidOperationException("a defect"));
         HealthCheckResult faulting = await check.CheckHealthAsync(Context, TestContext.Current.CancellationToken);
@@ -198,11 +198,11 @@ public sealed class HealthCheckTests
         var services = new ServiceCollection();
         services.AddZabbixPushAgent("edge").AddServer("zbx1").AddServer("zbx2");
         services.AddZabbixActiveAgent("roamer").AddServer("zbx1");
-        services.AddZabbixActiveProxy("proxy").AddServer("zbx1").AddTrapper(0).AllowPeer(System.Net.IPAddress.Loopback);
+        services.AddZabbixActiveProxy("proxy").WithServer("zbx1").AddTrapper(0).AllowPeer(System.Net.IPAddress.Loopback);
         using ServiceProvider provider = services.BuildValidated();
 
-        Assert.Equal("edge", Assert.Single(provider.GetRequiredKeyedService<IReadOnlyList<ZabbixAgentStatus>>("edge")).Name);   // one per destination once started
-        Assert.Equal("roamer", Assert.Single(provider.GetRequiredKeyedService<IReadOnlyList<ZabbixAgentStatus>>("roamer")).Name);
+        Assert.Equal("edge", Assert.Single(provider.GetRequiredKeyedService<IReadOnlyList<ZabbixComponentStatus>>("edge")).Name);   // one per destination once started
+        Assert.Equal("roamer", Assert.Single(provider.GetRequiredKeyedService<IReadOnlyList<ZabbixComponentStatus>>("roamer")).Name);
         Assert.NotNull(provider.GetRequiredKeyedService<ZabbixActiveProxy>("proxy"));
     }
 }

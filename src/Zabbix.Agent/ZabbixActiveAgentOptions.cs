@@ -15,7 +15,7 @@ namespace Community.Zabbix;
 public sealed class ZabbixActiveAgentOptions : IValidatableObject
 {
     /// <summary>
-    /// What this agent is called in its logs, metrics and status when it is constructed directly: <see cref="Hostname"/> when unset. A
+    /// What this agent is called in its logs, metrics and status when it is constructed directly: <see cref="HostName"/> when unset. A
     /// registration's name takes its place.
     /// </summary>
     public string? Name { get; set; }
@@ -24,7 +24,7 @@ public sealed class ZabbixActiveAgentOptions : IValidatableObject
     /// The host name as the server knows it: the agent's name in a builder, unless set, and the machine's name for an agent
     /// constructed directly.
     /// </summary>
-    public string Hostname { get; set; } = Environment.MachineName;
+    public string HostName { get; set; } = Environment.MachineName;
 
     /// <summary>What the server auto-registers the host by, when it does.</summary>
     public string? HostMetadata { get; set; }

@@ -46,7 +46,8 @@ public sealed class ZabbixMemoryStore<T> : ZabbixStore<T>
         // DropWrite sheds the incoming record, and the channel's TryWrite answers true for it as for a kept one: the store
         // sheds it itself over a waiting channel instead, so it knows.
         BoundedChannelFullMode mode = _policy.Overflow == BoundedChannelFullMode.DropWrite ? BoundedChannelFullMode.Wait : _policy.Overflow;
-        string shed = mode == BoundedChannelFullMode.Wait ? string.Empty : DropReasonOf(mode);
+        // The channel calls back only when it sheds, which a waiting channel never does.
+        ZabbixStoreDropReason shed = mode == BoundedChannelFullMode.Wait ? ZabbixStoreDropReason.DropWrite : DropReasonOf(mode);
         // SingleReader is a promise: only the consumer reads the channel. The store's bound is its item cap,
         // which the channel enforces itself; nothing sheds by reading from a writer's thread.
         _channel = _policy.MaxItems is int cap
@@ -90,7 +91,7 @@ public sealed class ZabbixMemoryStore<T> : ZabbixStore<T>
     private Offered Offer(T item)
     {
         if (_completed) return Offered.Closed;                                          // closed: not a drop, a refusal
-        if (RefusalOf(item) is { } refusal)
+        if (GetRefusalReason(item) is { } refusal)
         {
             Drop(refusal);
             return Offered.Refused;
@@ -109,7 +110,7 @@ public sealed class ZabbixMemoryStore<T> : ZabbixStore<T>
     /// <inheritdoc/>
     public override ValueTask WriteAsync(T item, CancellationToken cancellationToken = default)
     {
-        if (!_completed && RefusalOf(item) is { } refusal)                              // closed first: the channel's own ChannelClosedException
+        if (!_completed && GetRefusalReason(item) is { } refusal)                              // closed first: the channel's own ChannelClosedException
         {
             Drop(refusal);
             return ValueTask.CompletedTask;
@@ -252,7 +253,7 @@ public sealed class ZabbixMemoryStore<T> : ZabbixStore<T>
 
     private bool Expired(in ZabbixStoreEntry<T> entry)
     {
-        if (ExpiryOf(entry) is not { } reason) return false;
+        if (GetExpiryReason(entry) is not { } reason) return false;
         Drop(reason);
         return true;
     }

@@ -101,7 +101,7 @@ The item keys to create, when there is no running session to read them from. Not
 
 ### -HostName
 
-The monitored host's technical name. Default: the session's own Hostname.
+The monitored host's technical name. Default: the session's own HostName.
 
 | | |
 | --- | --- |

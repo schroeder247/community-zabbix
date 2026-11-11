@@ -195,8 +195,8 @@ Console.WriteLine(load);
 You need a super admin's API token for the status and the queue.
 
 ```csharp
-using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder()
-    .AddServer("zbx-server-01")
+await using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder()
+    .WithServer("zbx-server-01")
     .WithToken(token)
     .Build();
 

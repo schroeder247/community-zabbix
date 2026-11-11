@@ -107,8 +107,8 @@ public sealed partial class DesignConformanceTests
     }
 
     [Theory]
-    [InlineData(typeof(Zabbix.ZabbixAgentStatus), "Report")]
-    [InlineData(typeof(Zabbix.ZabbixAgentStatus), "Attach")]
+    [InlineData(typeof(Zabbix.ZabbixComponentStatus), "Report")]
+    [InlineData(typeof(Zabbix.ZabbixComponentStatus), "Attach")]
     [InlineData(typeof(Zabbix.Storage.ZabbixStore<int>), "DropReasonOf")]
     public void The_hosts_plumbing_is_not_part_of_the_public_or_protected_surface(Type type, string name)
         => Assert.DoesNotContain(
@@ -145,9 +145,9 @@ public sealed partial class DesignConformanceTests
     [Fact]
     public void The_oblivious_rule_spares_only_a_record_struct_s_synthesized_members()
     {
-        Assert.True(IsRecordStructSynthesized("~override Community.Zabbix.ZabbixComponentVersion.Equals(object obj) -> bool"));
+        Assert.True(IsRecordStructSynthesized("~override Community.Zabbix.ZabbixDuration.Equals(object obj) -> bool"));
         Assert.False(IsRecordStructSynthesized("~override Community.Zabbix.ZabbixHost.Equals(object obj) -> bool"));
-        Assert.False(IsRecordStructSynthesized("~Community.Zabbix.ZabbixComponentVersion.Major.get -> int"));
+        Assert.False(IsRecordStructSynthesized("~Community.Zabbix.ZabbixDuration.Length.get -> System.TimeSpan?"));
     }
 
     /// <summary>

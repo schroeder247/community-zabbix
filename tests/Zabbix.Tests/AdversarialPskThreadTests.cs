@@ -39,7 +39,7 @@ public sealed class AdversarialPskThreadTests
         var options = new ZabbixListenerOptions { Address = "127.0.0.1", Port = 0, Timeout = TimeSpan.FromSeconds(5), TlsAccept = ZabbixTlsAcceptModes.Psk, MaxConnectionsPerPeer = 1024 };
         options.AllowedPeers.Add("127.0.0.1");
         options.PreSharedKeys["edge-01"] = Key;
-        var listener = new ZabbixListener(options, static (request, _) => ValueTask.FromResult(request.Payload), ListenerTests.Transport(), time, logger: null, meters: null);
+        var listener = new ZabbixListener(options, static (request, _) => ValueTask.FromResult(request.Payload), ListenerTests.Transport(), loggers: null, time, meters: null);
         await listener.StartingAsync(TestContext.Current.CancellationToken);
         await listener.StartAsync(TestContext.Current.CancellationToken);
         var clients = new List<TcpClient>();

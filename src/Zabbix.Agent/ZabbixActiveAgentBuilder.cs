@@ -33,15 +33,15 @@ public sealed class ZabbixActiveAgentBuilder : IZabbixActiveAgentBuilder
     private readonly ServiceCollection _services = [];
     private bool _built;
 
-    /// <summary>A builder for the agent of <paramref name="hostname"/>, its host as the server knows it unless <c>Configure</c> sets another.</summary>
-    /// <param name="hostname">The agent's name, and its host.</param>
-    /// <exception cref="ArgumentException"><paramref name="hostname"/> is empty.</exception>
-    /// <exception cref="ArgumentNullException"><paramref name="hostname"/> is <see langword="null"/>.</exception>
-    public ZabbixActiveAgentBuilder(string hostname)
+    /// <summary>A builder for the agent of <paramref name="hostName"/>, its host as the server knows it unless <c>Configure</c> sets another.</summary>
+    /// <param name="hostName">The agent's name, and its host.</param>
+    /// <exception cref="ArgumentException"><paramref name="hostName"/> is empty.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="hostName"/> is <see langword="null"/>.</exception>
+    public ZabbixActiveAgentBuilder(string hostName)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(hostname);
-        Name = hostname;
-        _services.AddZabbixActiveAgent(hostname);
+        ArgumentException.ThrowIfNullOrWhiteSpace(hostName);
+        Name = hostName;
+        _services.AddZabbixActiveAgent(hostName);
     }
 
     /// <summary>The agent's name: its host unless <c>Configure</c> sets another.</summary>

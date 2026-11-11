@@ -70,9 +70,9 @@ public sealed class AdversarialAllocationTests
     public void Parsing_an_item_key_allocates_one_holder_and_no_parts()
     {
         const string key = "vfs.fs.size[/var/lib,pfree]";
-        _ = ZabbixItemKey.Parse(key, CultureInfo.InvariantCulture);                         // warm-up
+        _ = ZabbixItemKey.Parse(key);                         // warm-up
 
-        long allocated = Measure(() => _ = ZabbixItemKey.Parse(key, CultureInfo.InvariantCulture));
+        long allocated = Measure(() => _ = ZabbixItemKey.Parse(key));
 
         Assert.InRange(allocated, 1, 24);
     }
@@ -81,9 +81,9 @@ public sealed class AdversarialAllocationTests
     public void Parsing_a_bare_item_key_name_allocates_nothing()
     {
         const string key = "system.uptime";
-        _ = ZabbixItemKey.Parse(key, CultureInfo.InvariantCulture);                         // warm-up
+        _ = ZabbixItemKey.Parse(key);                         // warm-up
 
-        long allocated = Measure(() => _ = ZabbixItemKey.Parse(key, CultureInfo.InvariantCulture).Name);
+        long allocated = Measure(() => _ = ZabbixItemKey.Parse(key).Name);
 
         Assert.Equal(0, allocated);
     }
@@ -91,7 +91,7 @@ public sealed class AdversarialAllocationTests
     [Fact]
     public void A_parsed_key_reads_its_parts_on_first_access_and_keeps_them()
     {
-        ZabbixItemKey key = ZabbixItemKey.Parse("vfs.fs.size[\"/var lib\",[a,b],pfree]", CultureInfo.InvariantCulture);
+        ZabbixItemKey key = ZabbixItemKey.Parse("vfs.fs.size[\"/var lib\",[a,b],pfree]");
 
         Assert.Equal("vfs.fs.size", key.Name);
         Assert.Equal(["/var lib", "a,b", "pfree"], key.Parameters);
@@ -152,7 +152,7 @@ public sealed class AdversarialAllocationTests
             return ValueTask.FromResult<ReadOnlyMemory<byte>>(reply);
         }
         using var sender = new ZabbixSender(Answer, "test");
-        ZabbixValue[] values = [.. Enumerable.Range(0, Count).Select(i => new ZabbixValue("web-01", ZabbixItemKey.Parse("vfs.fs.size[/var/lib,pfree]", CultureInfo.InvariantCulture), i.ToString(CultureInfo.InvariantCulture), new ZabbixClock(1_700_000_000 + i, 0)))];
+        ZabbixValue[] values = [.. Enumerable.Range(0, Count).Select(i => new ZabbixValue("web-01", ZabbixItemKey.Parse("vfs.fs.size[/var/lib,pfree]"), i.ToString(CultureInfo.InvariantCulture), new ZabbixClock(1_700_000_000 + i, 0)))];
         _ = await sender.SendAsync(values, TestContext.Current.CancellationToken);           // warm-up
 
         long before = GC.GetAllocatedBytesForCurrentThread();

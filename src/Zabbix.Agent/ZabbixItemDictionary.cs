@@ -34,28 +34,39 @@ public sealed class ZabbixItemDictionary : IDictionary<string, ZabbixItemCallbac
     private readonly ConcurrentDictionary<string, ZabbixItemCallback> _handlers = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, ZabbixItemProvider> _owners = new(StringComparer.Ordinal);   // names a provider answers
     private readonly List<IAsyncDisposable> _registered = [];                                           // what Register built, released with the agent
+    private readonly TimeProvider? _time;                                                               // the clock it was created with, for a table no agent owns
+
+    /// <summary>An empty table, whose checks run on the system's clock unless an agent owns it.</summary>
+    public ZabbixItemDictionary()
+        : this(time: null)
+    {
+    }
+
+    /// <summary>An empty table, whose checks' deadlines run on <paramref name="time"/> unless an agent owns it.</summary>
+    /// <param name="time">The clock a check's deadline runs on; the system's when <see langword="null"/>. An agent's own table runs on the agent's.</param>
+    public ZabbixItemDictionary(TimeProvider? time) => _time = time;
 
     /// <summary>
     /// The handlers every agent has: the four every Zabbix agent answers (<c>agent.ping</c>, <c>agent.version</c>,
     /// <c>agent.hostname</c>, <c>system.uname</c>) and the bundled items, Zabbix's own system, process, file, network
     /// and web keys (<see cref="Items.ZabbixSystemItems"/> and the other families; docs/guides/bundled-items.md).
     /// </summary>
-    /// <param name="hostname">What <c>agent.hostname</c> answers.</param>
-    public static ZabbixItemDictionary BuiltIn(string hostname)
+    /// <param name="hostName">What <c>agent.hostname</c> answers.</param>
+    public static ZabbixItemDictionary BuiltIn(string hostName)
     {
         var handlers = new ZabbixItemDictionary();
-        handlers.AddFour(hostname);
+        handlers.AddFour(hostName);
         // Nothing owns this table's collector: it stops sampling once the table is out of reach.
         Items.ZabbixBundledItems.AddTo(handlers, hostMetadata: null, new Items.ZabbixItemCollector(Items.ZabbixHostFiles.Host));
         return handlers;
     }
 
-    private void AddFour(string hostname)
+    private void AddFour(string hostName)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(hostname);
+        ArgumentException.ThrowIfNullOrWhiteSpace(hostName);
         TryAdd("agent.ping", _ => "1");
         TryAdd("agent.version", _ => ZabbixWire.AgentVersion);
-        TryAdd("agent.hostname", _ => hostname);
+        TryAdd("agent.hostname", _ => hostName);
         TryAdd("system.uname", _ => RuntimeInformation.OSDescription);
     }
 
@@ -75,14 +86,17 @@ public sealed class ZabbixItemDictionary : IDictionary<string, ZabbixItemCallbac
     /// <summary>The agent this table belongs to, whose name, loggers and clock what <see cref="Register(Action{IZabbixItemsBuilder})"/> builds uses.</summary>
     internal ZabbixComponent? Owner { get; set; }
 
+    /// <summary>The clock a check's deadline runs on: the owning agent's, else the one the table was created with, else the system's.</summary>
+    internal TimeProvider Time => Owner?.Time ?? _time ?? TimeProvider.System;
+
     /// <summary>What an agent adds when it starts: the four and, when they are on, the bundled items, under every name left free.</summary>
-    /// <param name="hostname">What <c>agent.hostname</c> answers.</param>
+    /// <param name="hostName">What <c>agent.hostname</c> answers.</param>
     /// <param name="hostMetadata">What <c>agent.hostmetadata</c> answers; empty when <see langword="null"/>.</param>
     /// <param name="bundled">Whether the bundled items join the built-in four.</param>
     /// <param name="collector">The agent's collector, on the agent's clock, which the bundled items read; <see langword="null"/> when they are off.</param>
-    internal void AddDefaults(string hostname, string? hostMetadata, bool bundled, Items.ZabbixItemCollector? collector)
+    internal void AddDefaults(string hostName, string? hostMetadata, bool bundled, Items.ZabbixItemCollector? collector)
     {
-        AddFour(hostname);
+        AddFour(hostName);
         if (bundled && collector is not null) Items.ZabbixBundledItems.AddTo(this, hostMetadata, collector);
     }
 
@@ -186,22 +200,6 @@ public sealed class ZabbixItemDictionary : IDictionary<string, ZabbixItemCallbac
         return Add(keyName, (key, _) => ValueTask.FromResult(ZabbixAgentAnswer.Supported(key, answer(key))));
     }
 
-    /// <summary>Adds an answer that gives a whole number, formatted as Zabbix reads it; a thrown exception is the reason the key is not supported.</summary>
-    /// <inheritdoc cref="Add(string, Func{ZabbixItemKey, string})"/>
-    public ZabbixItemDictionary Add(string keyName, Func<ZabbixItemKey, long> answer)
-    {
-        ArgumentNullException.ThrowIfNull(answer);
-        return Add(keyName, (key, _) => ValueTask.FromResult(ZabbixAgentAnswer.Supported(key, Text(answer(key)))));
-    }
-
-    /// <summary>Adds an answer that gives a number, formatted as Zabbix reads it; a thrown exception is the reason the key is not supported.</summary>
-    /// <inheritdoc cref="Add(string, Func{ZabbixItemKey, string})"/>
-    public ZabbixItemDictionary Add(string keyName, Func<ZabbixItemKey, double> answer)
-    {
-        ArgumentNullException.ThrowIfNull(answer);
-        return Add(keyName, (key, _) => ValueTask.FromResult(ZabbixAgentAnswer.Supported(key, Text(answer(key)))));
-    }
-
     /// <summary>Adds the answer for a typed item: a value at hand. A thrown exception is the reason the item isn't supported.</summary>
     /// <typeparam name="T">The item's value type, which fixes what <paramref name="answer"/> returns.</typeparam>
     /// <param name="item">The item. Only its name counts: the dictionary answers any parameters.</param>
@@ -261,22 +259,6 @@ public sealed class ZabbixItemDictionary : IDictionary<string, ZabbixItemCallbac
         return Add(keyName, async (key, cancellationToken) => ZabbixAgentAnswer.Supported(key, await answer(key, cancellationToken).ConfigureAwait(false)));
     }
 
-    /// <summary>Adds an asynchronous answer that gives a whole number; a thrown exception is the reason the key is not supported.</summary>
-    /// <inheritdoc cref="Add(string, Func{ZabbixItemKey, CancellationToken, ValueTask{string}})"/>
-    public ZabbixItemDictionary Add(string keyName, Func<ZabbixItemKey, CancellationToken, ValueTask<long>> answer)
-    {
-        ArgumentNullException.ThrowIfNull(answer);
-        return Add(keyName, async (key, cancellationToken) => ZabbixAgentAnswer.Supported(key, Text(await answer(key, cancellationToken).ConfigureAwait(false))));
-    }
-
-    /// <summary>Adds an asynchronous answer that gives a number; a thrown exception is the reason the key is not supported.</summary>
-    /// <inheritdoc cref="Add(string, Func{ZabbixItemKey, CancellationToken, ValueTask{string}})"/>
-    public ZabbixItemDictionary Add(string keyName, Func<ZabbixItemKey, CancellationToken, ValueTask<double>> answer)
-    {
-        ArgumentNullException.ThrowIfNull(answer);
-        return Add(keyName, async (key, cancellationToken) => ZabbixAgentAnswer.Supported(key, Text(await answer(key, cancellationToken).ConfigureAwait(false))));
-    }
-
     /// <summary>
     /// Adds every key <paramref name="provider"/> lists, refusing a name already held. Nothing is added when one is refused.
     /// The provider stays yours.
@@ -323,7 +305,7 @@ public sealed class ZabbixItemDictionary : IDictionary<string, ZabbixItemCallbac
         ArgumentNullException.ThrowIfNull(configure);
         var services = new ServiceCollection();
         services.AddSingleton(Owner?.Loggers ?? NullLoggerFactory.Instance);
-        services.AddSingleton(Owner?.Time ?? TimeProvider.System);
+        services.AddSingleton(Time);
         services.AddLogging();
         var builder = new ZabbixRegistration(Owner?.Name ?? nameof(Items), services);
         configure(builder);
@@ -354,11 +336,6 @@ public sealed class ZabbixItemDictionary : IDictionary<string, ZabbixItemCallbac
         ValueTask releasing = ReleaseAsync();
         if (!releasing.IsCompletedSuccessfully) _ = releasing.AsTask();
     }
-
-    private static string Text(long value) => value.ToString(System.Globalization.CultureInfo.InvariantCulture);
-
-    private static string Text(double value)
-        => double.IsFinite(value) ? value.ToString("R", System.Globalization.CultureInfo.InvariantCulture) : throw new ArgumentOutOfRangeException(nameof(value), value, "Zabbix stores no NaN or infinity.");
 
     private sealed record ZabbixRegistration(string Name, IServiceCollection Services) : IZabbixItemsBuilder;
 
@@ -392,68 +369,34 @@ public sealed class ZabbixItemDictionary : IDictionary<string, ZabbixItemCallbac
         => ((ICollection<KeyValuePair<string, ZabbixItemCallback>>)_handlers).Remove(item);
 
     /// <summary>
-    /// Answers <paramref name="key"/> as an agent would, without a server, as
-    /// <see cref="AnswerAsync(ZabbixItemKey, TimeSpan, CancellationToken)"/> does.
-    /// </summary>
-    /// <param name="key">The key, its parameters included.</param>
-    /// <param name="timeout">The check's deadline, as an agent's item timeout is.</param>
-    /// <returns>The value, or why the key is not supported.</returns>
-    /// <exception cref="ArgumentOutOfRangeException"><paramref name="timeout"/> is neither positive nor infinite.</exception>
-    public ValueTask<ZabbixAgentAnswer> AnswerAsync(ZabbixItemKey key, TimeSpan timeout)
-        => AnswerAsync(key, timeout, CancellationToken.None);
-
-    /// <summary>
-    /// Answers <paramref name="key"/> through its handler within <paramref name="timeout"/> on <paramref name="time"/>, as
-    /// <see cref="AnswerAsync(ZabbixItemKey, TimeSpan, TimeProvider?, CancellationToken)"/> does.
-    /// </summary>
-    /// <param name="key">The key, its parameters included.</param>
-    /// <param name="timeout">The check's deadline.</param>
-    /// <param name="time">The clock the deadline runs on; the system clock when <see langword="null"/>.</param>
-    /// <returns>The value, or why the key is not supported.</returns>
-    /// <exception cref="ArgumentOutOfRangeException"><paramref name="timeout"/> is neither positive nor infinite.</exception>
-    public ValueTask<ZabbixAgentAnswer> AnswerAsync(ZabbixItemKey key, TimeSpan timeout, TimeProvider? time)
-        => AnswerAsync(key, timeout, time, CancellationToken.None);
-
-    /// <summary>
     /// Answers <paramref name="key"/> as an agent would, without a server: through its handler, within
-    /// <paramref name="timeout"/>. Use it to try a table, and the providers an agent composed into it, before a server
-    /// asks; <c>Test-ZbxAgentItem</c> answers this way.
+    /// <paramref name="timeout"/> on the table's clock, its agent's or the one it was created with. Use it to try a table, and
+    /// the providers an agent composed into it, before a server asks; <c>Test-ZbxAgentItem</c> answers this way.
     /// </summary>
     /// <param name="key">The key, its parameters included.</param>
     /// <param name="timeout">The check's deadline, as an agent's item timeout is.</param>
     /// <param name="cancellationToken">The caller's stop.</param>
     /// <returns>
-    /// The value, or why the key is not supported: no handler is "This agent does not answer the key."; a handler that runs past
-    /// <paramref name="timeout"/> is "The key did not answer before its deadline."; a handler that throws answers
-    /// with its message.
+    /// The value, or why the key isn't supported: no handler is "This agent does not answer the key."; a handler that runs past
+    /// <paramref name="timeout"/> is "The key did not answer before its deadline." (<c>src/go/internal/agent/scheduler/task.go</c>);
+    /// a handler that throws answers with its message. The caller stopping asking isn't an answer: it propagates as
+    /// <see cref="OperationCanceledException"/>.
     /// </returns>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="timeout"/> is neither positive nor infinite.</exception>
     /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
-    public ValueTask<ZabbixAgentAnswer> AnswerAsync(ZabbixItemKey key, TimeSpan timeout, CancellationToken cancellationToken)
-        => AnswerAsync(key, timeout, time: null, cancellationToken);
-
-    /// <summary>
-    /// Answers <paramref name="key"/> through its handler within <paramref name="timeout"/> on <paramref name="time"/>: the
-    /// value, or why it is not supported. No handler is "This agent does not answer the key."; a handler that runs past
-    /// <paramref name="timeout"/> is "The key did not answer before its deadline."
-    /// (<c>src/go/internal/agent/scheduler/task.go</c>); a handler that throws answers with its message. The caller
-    /// stopping asking is not an answer: it propagates as <see cref="OperationCanceledException"/>.
-    /// </summary>
-    /// <param name="key">The key, its parameters included.</param>
-    /// <param name="timeout">The check's deadline.</param>
-    /// <param name="time">The clock the deadline runs on; the system clock when <see langword="null"/>.</param>
-    /// <param name="cancellationToken">The caller's stop.</param>
-    /// <returns>The value, or why the key is not supported.</returns>
-    /// <exception cref="ArgumentOutOfRangeException"><paramref name="timeout"/> is neither positive nor infinite.</exception>
-    /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
-    public ValueTask<ZabbixAgentAnswer> AnswerAsync(ZabbixItemKey key, TimeSpan timeout, TimeProvider? time, CancellationToken cancellationToken)
+    /// <example>
+    /// <code language="csharp">
+    /// ZabbixAgentAnswer answer = await agent.Items.AnswerAsync(ZabbixItemKey.Parse("app.version"), TimeSpan.FromSeconds(3));
+    /// </code>
+    /// </example>
+    public ValueTask<ZabbixAgentAnswer> AnswerAsync(ZabbixItemKey key, TimeSpan timeout, CancellationToken cancellationToken = default)
     {
         if (timeout <= TimeSpan.Zero && timeout != Timeout.InfiniteTimeSpan)
             throw new ArgumentOutOfRangeException(nameof(timeout), timeout, "The deadline is positive, or infinite.");
-        return AnswerLoggedAsync(key, timeout, time ?? TimeProvider.System, logger: null, cancellationToken);
+        return AnswerLoggedAsync(key, timeout, Time, logger: null, cancellationToken);
     }
 
-    /// <summary>As <see cref="AnswerAsync(ZabbixItemKey, TimeSpan, TimeProvider?, CancellationToken)"/>; a handler's throw is logged (3211, Warning, with the exception) the first time each key name throws.</summary>
+    /// <summary>As <see cref="AnswerAsync(ZabbixItemKey, TimeSpan, CancellationToken)"/>, on <paramref name="time"/>; a handler's throw is logged (3211, Warning, with the exception) the first time each key name throws.</summary>
     internal async ValueTask<ZabbixAgentAnswer> AnswerLoggedAsync(ZabbixItemKey key, TimeSpan timeout, TimeProvider time, Microsoft.Extensions.Logging.ILogger? logger, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(time);

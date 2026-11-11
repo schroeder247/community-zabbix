@@ -5,12 +5,11 @@ using Community.Zabbix.Diagnostics;
 namespace Community.Zabbix;
 
 /// <summary>
-/// The base of the exceptions thrown when a framed-TCP exchange itself fails and the wire knows more than the raw
-/// transport failure does (which endpoint, which request, which redirect). It is an <see cref="IOException"/>, so a
-/// caller that handles a lost connection handles it without knowing the type; a peer that answered and declined is a
-/// <see cref="ZabbixRefusedException"/> instead.
+/// The base of the wire's own exchange failures, where it knows more than the raw transport failure does (which redirect).
+/// Internal: a caller sees an <see cref="IOException"/>, as for any lost connection, and a peer that answered and declined
+/// is a <see cref="ZabbixRefusedException"/> instead.
 /// </summary>
-public abstract class ZabbixWireException : IOException, IZabbixErrorTyped
+internal abstract class ZabbixWireException : IOException, IZabbixErrorTyped
 {
     /// <summary>Initializes a wire failure with no detail.</summary>
     protected ZabbixWireException()

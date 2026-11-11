@@ -75,12 +75,12 @@ public static class ZabbixActiveAgentBuilderExtensions
         /// <param name="configure">Sets the thresholds.</param>
         /// <returns>The builder.</returns>
         /// <exception cref="OptionsValidationException">The thresholds don't validate.</exception>
-        public TBuilder AddHealthCheck(Action<ZabbixAgentHealthCheckOptions> configure)
+        public TBuilder AddHealthCheck(Action<ZabbixComponentHealthCheckOptions> configure)
         {
             ArgumentNullException.ThrowIfNull(builder);
             ArgumentNullException.ThrowIfNull(configure);
             string name = builder.Name;
-            ZabbixAgentHealthChecks.Add(builder.Services, "zabbix-active-agent-" + name, provider => provider.GetRequiredKeyedService<ZabbixActiveAgent>(name).Statuses, configure);
+            ZabbixComponentHealthChecks.Add(builder.Services, "zabbix-active-agent-" + name, provider => provider.GetRequiredKeyedService<ZabbixActiveAgent>(name).Statuses, configure);
             return builder;
         }
 
@@ -102,7 +102,7 @@ public static class ZabbixActiveAgentBuilderExtensions
 
         /// <summary>
         /// Binds the agent's options to a configuration section, in order with the other verbs: <c>ServerActive</c>,
-        /// <c>Hostname</c>, <c>HostMetadata</c>, <c>RefreshInterval</c> and the rest, as <see cref="ZabbixActiveAgentOptions"/>
+        /// <c>HostName</c>, <c>HostMetadata</c>, <c>RefreshInterval</c> and the rest, as <see cref="ZabbixActiveAgentOptions"/>
         /// names them. The section is read when the agent is built.
         /// </summary>
         /// <param name="section">The agent's section.</param>

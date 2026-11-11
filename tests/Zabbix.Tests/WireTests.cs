@@ -371,7 +371,7 @@ public sealed class WireTests
 
         ZabbixAgentRefusedException refused = await Assert.ThrowsAsync<ZabbixAgentRefusedException>(() => getter.GetAsync("agent.ping", TestContext.Current.CancellationToken));
 
-        Assert.Equal("unknown request", refused.Info);
+        Assert.Equal("unknown request", refused.Error);
         Assert.Equal("agent.ping", refused.Key.ToString());
         Assert.False(ZabbixFrames.IsExchangeFailure(refused));
         Assert.Equal("refused", Zabbix.Diagnostics.ZabbixErrorType.Of(refused));

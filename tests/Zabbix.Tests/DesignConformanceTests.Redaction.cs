@@ -113,7 +113,7 @@ public sealed partial class DesignConformanceTests
         {
             _ when type == typeof(ILogger) => logger,
             _ when type == typeof(string) => text,
-            _ when type == typeof(ZabbixItemKey) => ZabbixItemKey.Parse($"web.page.get[{text}]", null),
+            _ when type == typeof(ZabbixItemKey) => ZabbixItemKey.Parse($"web.page.get[{text}]"),
             _ when type == typeof(IPAddress) => IPAddress.Loopback,
             _ when type == typeof(ZabbixServerNode) => ZabbixServerNode.Parse("127.0.0.1:10051", null),
             _ when typeof(Exception).IsAssignableFrom(type) => new InvalidOperationException("The sample failure."),

@@ -36,11 +36,42 @@ public sealed class AgentLifecycleTests
         await hosted.StopAsync(TestContext.Current.CancellationToken);                                              // the drain empties the completed store
         await hosted.StoppedAsync(TestContext.Current.CancellationToken);
 
-        ZabbixAgentStatus status = provider.GetRequiredKeyedService<ZabbixPushAgent>("edge").Status;
+        ZabbixComponentStatus status = provider.GetRequiredKeyedService<ZabbixPushAgent>("edge").Status;
         Assert.Equal(2, status.Delivered);
         Assert.NotNull(status.LastDelivered);
         Assert.Equal(0, status.Stored);
     }
+
+    [Fact]
+    public async Task An_agent_from_the_container_keeps_running_when_a_caller_disposes_it_until_the_container_stops_it()
+    {
+        var (port, received) = MockTrapper.Collect(2);
+        using var next = new SemaphoreSlim(0);
+        async IAsyncEnumerable<ZabbixValue> Source([System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken token = default)
+        {
+            yield return new ZabbixValue("web01", "a", "1", DateTimeOffset.UnixEpoch);
+            await next.WaitAsync(token);                                              // the second value comes after the caller's dispose
+            yield return new ZabbixValue("web01", "b", "2", DateTimeOffset.UnixEpoch);
+            await Task.Delay(Timeout.InfiniteTimeSpan, token);
+        }
+        var services = new ServiceCollection();
+        services.AddZabbixPushAgent("edge").AddSource(_ => Source()).AddServer(new DnsEndPoint("127.0.0.1", port)).Configure(o => o.Send.BatchSize = 1);
+        await using ServiceProvider provider = services.BuildValidated();
+        ZabbixPushAgent agent = provider.GetRequiredKeyedService<ZabbixPushAgent>("edge");
+        await agent.StartAsync(TestContext.Current.CancellationToken);
+
+        await agent.DisposeAsync();                                                   // a caller's: the agent is the container's
+        DisposeAsACallerWould(agent);
+        next.Release();
+
+        Assert.Equal(2, await received.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken));
+        await provider.DisposeAsync();                                                // the container stops it and releases it
+        Assert.Equal(2, agent.Status.Delivered);
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => agent.StartAsync(TestContext.Current.CancellationToken));
+    }
+
+    // A caller's using block, written by code that doesn't know the agent is the container's.
+    private static void DisposeAsACallerWould(IDisposable disposable) => disposable.Dispose();
 
     [Fact]
     public async Task A_source_that_ends_on_its_own_timeout_turns_the_agent_unhealthy()
@@ -60,7 +91,7 @@ public sealed class AgentLifecycleTests
 
         await hosted.StartingAsync(TestContext.Current.CancellationToken);
         await hosted.StartAsync(TestContext.Current.CancellationToken);
-        ZabbixAgentStatus status = provider.GetRequiredKeyedService<ZabbixPushAgent>("edge").Status;
+        ZabbixComponentStatus status = provider.GetRequiredKeyedService<ZabbixPushAgent>("edge").Status;
         // The status has no change signal to await, and the fault is set after the source's 3002 record is written.
 #pragma warning disable RS0030
         for (int i = 0; i < 500 && status.Fault is null; i++) await Task.Delay(10, TestContext.Current.CancellationToken);
@@ -105,7 +136,7 @@ public sealed class AgentLifecycleTests
         await hosted.StopAsync(gaveUp.Token);                                                // the host's patience is already spent
         await hosted.StoppedAsync(TestContext.Current.CancellationToken).WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
 
-        ZabbixAgentStatus status = provider.GetRequiredKeyedService<ZabbixPushAgent>("edge").Status;
+        ZabbixComponentStatus status = provider.GetRequiredKeyedService<ZabbixPushAgent>("edge").Status;
         Assert.Equal(0, status.Rejected);                                                    // never sent, so never refused
         Assert.Equal(1, status.Abandoned);
         Assert.DoesNotContain(provider.GetFakeLogCollector().GetSnapshot(), record => record.Level >= LogLevel.Error);

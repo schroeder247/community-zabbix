@@ -82,7 +82,7 @@ public sealed class EntryPointTests
         ZabbixSessionCredential login = ZabbixCredential.FromLogin("Admin", "zabbix");
 
         Assert.NotNull(token);
-        Assert.Equal("Admin", login.Username);
+        Assert.Equal("Admin", login.UserName);
         Assert.Throws<ArgumentException>(() => ZabbixCredential.FromApiToken("a token\n"));
         Assert.Throws<ArgumentException>(() => ZabbixCredential.FromLogin("Admin", ""));
     }
@@ -128,14 +128,14 @@ public sealed class EntryPointTests
     public void A_proxy_reads_its_server_s_host_and_port_from_one_string_as_an_agent_does()
     {
         var services = new ServiceCollection();
-        services.AddZabbixActiveProxy("proxy-01").AddServer("zbx-server:10052").AllowPeer(System.Net.IPAddress.Loopback);
-        services.AddZabbixActiveProxy("proxy-02").AddServer("zbx-server").AllowPeer(System.Net.IPAddress.Loopback);
+        services.AddZabbixActiveProxy("proxy-01").WithServer("zbx-server:10052").AllowPeer(System.Net.IPAddress.Loopback);
+        services.AddZabbixActiveProxy("proxy-02").WithServer("zbx-server").AllowPeer(System.Net.IPAddress.Loopback);
         using ServiceProvider provider = services.BuildServiceProvider();
         var options = provider.GetRequiredService<Microsoft.Extensions.Options.IOptionsMonitor<ZabbixProxyOptions>>();
 
         Assert.Equal(new ZabbixServerNode("zbx-server", 10052).ToString(), options.Get("proxy-01").Server);
         Assert.Equal(new ZabbixServerNode("zbx-server").ToString(), options.Get("proxy-02").Server);
-        ArgumentException refused = Assert.Throws<ArgumentException>(() => new ServiceCollection().AddZabbixActiveProxy("proxy-03").AddServer("zbx-server:port"));
+        ArgumentException refused = Assert.Throws<ArgumentException>(() => new ServiceCollection().AddZabbixActiveProxy("proxy-03").WithServer("zbx-server:port"));
         Assert.Equal("server", refused.ParamName);
     }
 

@@ -34,7 +34,7 @@ public static class ZabbixActiveAgentServiceCollectionExtensions
     /// This method binds no configuration: <c>Bind</c> does, and <see cref="ZabbixAgentsServiceCollectionExtensions.AddZabbixAgents"/>
     /// binds each <c>ActiveAgents:{name}</c> row of a document. The agent is the keyed service
     /// <c>GetRequiredKeyedService&lt;ZabbixActiveAgent&gt;(name)</c>, and its statuses, one per destination, are
-    /// <c>GetRequiredKeyedService&lt;IReadOnlyList&lt;ZabbixAgentStatus&gt;&gt;(name)</c>.
+    /// <c>GetRequiredKeyedService&lt;IReadOnlyList&lt;ZabbixComponentStatus&gt;&gt;(name)</c>.
     /// </remarks>
     /// <example>
     /// <code language="csharp">
@@ -59,12 +59,12 @@ public static class ZabbixActiveAgentServiceCollectionExtensions
         // Disposed with the container, which stops the bundled keys' sampling with the agent.
         services.TryAddSingleton(static provider => new ZabbixItemCollector(ZabbixHostFiles.Host, provider.GetRequiredService<TimeProvider>()));
         // The name is the agent's host unless a later Configure or Bind says otherwise: this runs first.
-        services.AddOptions<ZabbixActiveAgentOptions>(name).Configure(options => options.Hostname = name).ValidateOnStart();
+        services.AddOptions<ZabbixActiveAgentOptions>(name).Configure(options => options.HostName = name).ValidateOnStart();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<ZabbixActiveAgentOptions>, ZabbixActiveAgentOptionsValidator>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<ZabbixActiveAgentOptions>, ZabbixActiveAgentServersValidator>());
-        services.AddKeyedSingleton<ZabbixActiveAgent>(name, static (provider, key) => Create(provider, NameOf(key)));
+        ZabbixComponentRegistration.AddShared<ZabbixActiveAgent>(services, name, static (provider, key) => Create(provider, NameOf(key)));
         services.AddSingleton<IHostedService>(provider => new ZabbixHostedComponent(provider.GetRequiredKeyedService<ZabbixActiveAgent>(name)));
-        services.AddKeyedTransient<IReadOnlyList<ZabbixAgentStatus>>(name, static (provider, key) => provider.GetRequiredKeyedService<ZabbixActiveAgent>(key).Statuses);
+        services.AddKeyedTransient<IReadOnlyList<ZabbixComponentStatus>>(name, static (provider, key) => provider.GetRequiredKeyedService<ZabbixActiveAgent>(key).Statuses);
         return builder;
     }
 

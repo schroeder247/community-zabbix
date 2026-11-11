@@ -33,9 +33,9 @@ public sealed class NewZbxProxyDataCommand : ZabbixCmdlet
     [ValidateRange(0, long.MaxValue)]
     public long ProxyDelay { get; set; }
 
-    /// <summary>The protocol version to announce.</summary>
+    /// <summary>The protocol version to announce: <c>7.4.0</c> unless given.</summary>
     [Parameter]
-    public string Version { get; set; } = ZabbixProxyUplink.DefaultVersion;
+    public Version Version { get; set; } = ZabbixProxyUplink.DefaultVersion;
 
     /// <inheritdoc/>
     protected override void ProcessRecord()

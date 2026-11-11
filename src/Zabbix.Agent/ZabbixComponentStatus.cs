@@ -7,12 +7,13 @@ using Community.Zabbix.Storage;
 namespace Community.Zabbix;
 
 /// <summary>
-/// Represents an agent's state as a health check sees it: how full its store is, what its send loop holds, when it last delivered or
-/// was refused, and whether one of its loops is faulting. Written by the agent's send loop through
-/// <see cref="IProgress{T}"/> (every report also counted on the agents' <c>zabbix.agent.values</c> instrument when
-/// the host built it), read by <see cref="ZabbixAgentHealthCheck"/> or anything the host wires.
+/// Represents an agent's or a proxy's state as a health check sees it: how full its store is, what its send loop holds, when it
+/// last delivered or was refused, and whether one of its loops is faulting. Agents and proxies report the same states, so
+/// both have this status: a push or active agent one per destination, a proxy one. Written by the component's send loop
+/// through <see cref="IProgress{T}"/> (an agent's reports are also counted on the agents' <c>zabbix.agent.values</c>
+/// instrument when the host built it), read by <see cref="ZabbixComponentHealthCheck"/> or anything the host wires.
 /// </summary>
-public sealed class ZabbixAgentStatus : IProgress<ZabbixSendProgress>
+public sealed class ZabbixComponentStatus : IProgress<ZabbixSendProgress>
 {
     private readonly ZabbixAgentTelemetry? _telemetry;
     private readonly ConcurrentDictionary<string, Exception> _faults = new(StringComparer.Ordinal);
@@ -31,21 +32,21 @@ public sealed class ZabbixAgentStatus : IProgress<ZabbixSendProgress>
     private long _watchedAt;                   // that clock's monotonic timestamp when the proof was first seen
     private TimeSpan _watchedAge;              // the proof's age then
 
-    /// <summary>A status for the agent named <paramref name="name"/>; its reports are not counted anywhere.</summary>
-    /// <param name="name">The agent's name.</param>
-    public ZabbixAgentStatus(string name)
+    /// <summary>A status for the agent or proxy named <paramref name="name"/>; its reports are not counted anywhere.</summary>
+    /// <param name="name">The agent's or the proxy's name.</param>
+    public ZabbixComponentStatus(string name)
         : this(name, telemetry: null)
     {
     }
 
     // The hosts pass the agents' telemetry, so every report is also counted on the host's meters.
-    internal ZabbixAgentStatus(string name, ZabbixAgentTelemetry? telemetry)
+    internal ZabbixComponentStatus(string name, ZabbixAgentTelemetry? telemetry)
     {
         Name = name;
         _telemetry = telemetry;
     }
 
-    /// <summary>The agent's name.</summary>
+    /// <summary>The agent's or the proxy's name.</summary>
     public string Name { get; }
 
     /// <summary>Values held in the store now.</summary>
@@ -66,7 +67,7 @@ public sealed class ZabbixAgentStatus : IProgress<ZabbixSendProgress>
     /// <summary>Values lost at stop since start (neither delivered nor taken back by the source).</summary>
     public long Abandoned => Interlocked.Read(ref _abandoned);
 
-    /// <summary>When the agent started; <see langword="null"/> before.</summary>
+    /// <summary>When the component started; <see langword="null"/> before.</summary>
     public DateTimeOffset? StartedAt => At(ref _startedTicks);
 
     /// <summary>When a batch was last acknowledged; <see langword="null"/> before the first. A rejected batch does not move it.</summary>
@@ -81,7 +82,7 @@ public sealed class ZabbixAgentStatus : IProgress<ZabbixSendProgress>
     /// <inheritdoc/>
     void IProgress<ZabbixSendProgress>.Report(ZabbixSendProgress value) => Report(value);
 
-    /// <summary>Counts a delivery outcome the agent's send loop reports.</summary>
+    /// <summary>Counts a delivery outcome the component's send loop reports.</summary>
     /// <param name="value">The outcome, how many values and when.</param>
     internal void Report(ZabbixSendProgress value)
     {
@@ -109,7 +110,7 @@ public sealed class ZabbixAgentStatus : IProgress<ZabbixSendProgress>
                 Volatile.Write(ref _held, 0);
                 break;
             default:
-                throw new ArgumentOutOfRangeException(nameof(value), value.Outcome, "The delivery outcome is not one the agent knows.");
+                throw new ArgumentOutOfRangeException(nameof(value), value.Outcome, "The delivery outcome is not one the status knows.");
         }
         _telemetry?.Values(Name, value.Outcome, value.Count);
     }
@@ -124,7 +125,7 @@ public sealed class ZabbixAgentStatus : IProgress<ZabbixSendProgress>
         _stored = () => store.Count;
     }
 
-    /// <summary>Marks the start, from which a never-delivering agent's grace is measured.</summary>
+    /// <summary>Marks the start, from which a never-delivering component's grace is measured.</summary>
     /// <param name="at">The instant.</param>
     internal void Started(DateTimeOffset at) => Interlocked.Exchange(ref _startedTicks, at.UtcTicks);
 

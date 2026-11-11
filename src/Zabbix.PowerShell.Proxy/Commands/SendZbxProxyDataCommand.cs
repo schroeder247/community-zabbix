@@ -50,7 +50,7 @@ public sealed class SendZbxProxyDataCommand : ZabbixWireCmdlet
     /// proxy version is not supported by server"), as a 7.0 server does with the 7.4 default.
     /// </summary>
     [Parameter]
-    public ZabbixComponentVersion? Version { get; set; }
+    public Version? Version { get; set; }
 
     private readonly List<ZabbixProxyHistoryItem> _history = [];
 
@@ -72,8 +72,9 @@ public sealed class SendZbxProxyDataCommand : ZabbixWireCmdlet
             {
                 // The connection lives for the upload: disposing it releases what certificate mode read.
                 using ZabbixWireLink link = ZabbixWireLinks.Open(nodes, options, time, loggers: null);
-                var uplink = new ZabbixProxyUplink(link.AsExchange(followRedirects: false), ProxyName, Version, time: time);
-                return await uplink.UploadAsync(new ZabbixProxyDataPage(History: history), More, ProxyDelay, cancellationToken).ConfigureAwait(false);
+                var uplink = new ZabbixProxyUplink(link.AsExchange(), ProxyName, Version, session: null, loggers: null, time);
+                return await uplink.UploadAsync(new ZabbixProxyDataPage(History: history), More ? ZabbixProxyBacklog.More : ZabbixProxyBacklog.None,
+                    TimeSpan.FromSeconds(ProxyDelay), cancellationToken).ConfigureAwait(false);
             }, out ZabbixProxyResponse? response, ProxyName))
         {
             WriteObject(response);

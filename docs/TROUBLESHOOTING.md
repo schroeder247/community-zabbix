@@ -15,7 +15,7 @@ Without a logger factory, the SDK logs nothing. Pass one to any class. `AddConso
 ```csharp
 using ILoggerFactory loggers = LoggerFactory.Create(logging => logging.AddConsole().SetMinimumLevel(LogLevel.Debug));
 
-using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder().AddServer("zbx-server-01").UseLogging(loggers).Build();
+await using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder().WithServer("zbx-server-01").UseLogging(loggers).Build();
 ```
 
 - `ZabbixClient` and the agents and proxies take it the same way, in their longest constructor. In a host, they use the host's logging.
@@ -61,7 +61,7 @@ A send can succeed and still report failed values. Check `Failed` on the respons
 | What you see | What it means | What to do |
 | --- | --- | --- |
 | An answer with `Error` set | The agent doesn't support the key, or its rules don't allow it. | Check the key and its parameters, and the agent's `AllowKey` and `DenyKey` rules. |
-| `ZabbixAgentRefusedException` | The agent refused the request as a whole. | Read `Info`. |
+| `ZabbixAgentRefusedException` | The agent refused the request as a whole. | Read `Error`, the agent's reason. |
 | `IOException`, with no reply | The agent closed the connection, usually because it doesn't allow your address. | Add your address to the agent's `Server` setting. |
 | `SocketException` | The agent couldn't be reached. | Check the address, port 10050, and any firewall. |
 
@@ -71,7 +71,7 @@ A send can succeed and still report failed values. Check `Failed` on the respons
 | --- | --- | --- |
 | `ZabbixServerRefusedException` with `Permission denied.` | Your address isn't one `StatsAllowedIP` admits. | Add it to the server's `StatsAllowedIP`, for `GetStatsAsync` and `GetQueueSizeAsync`. |
 | `ZabbixServerRefusedException` about the session | The session isn't valid, or isn't a super admin's. | Pass a super admin's API token. `GetStatusAsync` answers almost nothing for anyone else. |
-| `InvalidOperationException` that says none is set | The request goes to a server, and the client has none. | Pass it to the constructor, or set `Options.Server`. |
+| `InvalidOperationException` that says none is set | The request goes to a server, and the client has none. | Pass it to the constructor, or set it with the builder's `WithServer`. |
 
 ## Agents and proxies
 

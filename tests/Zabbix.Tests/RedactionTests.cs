@@ -187,7 +187,7 @@ public sealed partial class RedactionTests
             logging(builder);
         });
         using ServiceProvider provider = services.BuildValidated();
-        WireLog.GetterRefused(provider.GetRequiredService<ILoggerFactory>().CreateLogger("test"), "agent:10050", ZabbixItemKey.Parse("system.uptime", null), PeerInfo);
+        WireLog.GetterRefused(provider.GetRequiredService<ILoggerFactory>().CreateLogger("test"), "agent:10050", ZabbixItemKey.Parse("system.uptime"), PeerInfo);
         return provider.GetFakeLogCollector().LatestRecord;
     }
 
@@ -200,7 +200,7 @@ public sealed partial class RedactionTests
             logging(builder);
         });
         using ServiceProvider provider = services.BuildValidated();
-        WireLog.GetterAnswered(provider.GetRequiredService<ILoggerFactory>().CreateLogger("test"), "agent:10050", ZabbixItemKey.Parse(SecretKey, null), supported: true);
+        WireLog.GetterAnswered(provider.GetRequiredService<ILoggerFactory>().CreateLogger("test"), "agent:10050", ZabbixItemKey.Parse(SecretKey), supported: true);
         return provider.GetFakeLogCollector().LatestRecord;
     }
 }

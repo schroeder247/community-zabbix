@@ -20,7 +20,7 @@ You must create the proxy on the server first, with the same name. A proxy start
 using System.Net;
 
 await using ZabbixActiveProxy proxy = ZabbixActiveProxy.CreateBuilder("proxy-01")
-    .AddServer("zbx-server-01")
+    .WithServer("zbx-server-01")
     .AllowPeer(IPNetwork.Parse("10.0.0.0/8"))
     .Configure(o => o.OfflineBuffer = TimeSpan.FromHours(24))
     .Build();
@@ -28,7 +28,7 @@ await proxy.StartAsync();
 ```
 
 - `CreateBuilder` takes the proxy's name as the server knows it.
-- `AddServer` names the server the proxy reports to.
+- `WithServer` sets the server the proxy reports to.
 - `AllowPeer` says who may reach the proxy's trapper: an `IPNetwork`, an `IPAddress`, or a DNS name. The trapper listens on 10051
   unless `AddTrapper` sets another port, and follows the rules in [Choose who may connect](listeners.md#choose-who-may-connect).
 - `Build()` checks the options with the rules a host checks at start, and throws `InvalidOperationException` saying what to set.
@@ -63,15 +63,15 @@ For its values, the proxy:
 using System.Net;
 
 await using ZabbixActiveProxy proxy = ZabbixActiveProxy.CreateBuilder("proxy-01")
-    .AddServer("zbx-server-01;zbx-server-02")                     // one cluster: its nodes, in the order they're tried
+    .WithServer("zbx-server-01;zbx-server-02")                    // one cluster: its nodes, in the order they're tried
     .AllowPeer(IPNetwork.Parse("10.0.0.0/8"))
     .Build();
 ```
 
-A proxy reports to one server or one HA cluster, as Zabbix's proxy does. Give `AddServer` all of a cluster's nodes at once: joined by
-`;`, or as `DnsEndPoint`s. Each `AddServer` names a server, so `Build()` refuses a second one, as Zabbix's proxy refuses a `,` in its
-`Server` setting. The proxy walks the nodes as [the wire client](wire-client.md#ha-nodes-and-redirects) does, but it never follows a
-redirect.
+A proxy reports to one server or one HA cluster, as Zabbix's proxy does. Give `WithServer` all of a cluster's nodes at once: joined
+by `;`, or as `DnsEndPoint`s. A later `WithServer` replaces the server, and a `,` in a bound `Server` setting fails at start, as
+Zabbix's proxy refuses it. The proxy walks the nodes as [the wire client](wire-client.md#ha-nodes-and-redirects) does, but it never
+follows a redirect.
 
 ## Run a passive proxy
 
@@ -116,7 +116,7 @@ using Microsoft.EntityFrameworkCore;
 using Community.Zabbix.Storage.EntityFrameworkCore;
 
 await using ZabbixActiveProxy proxy = ZabbixActiveProxy.CreateBuilder("proxy-01")
-    .AddServer("zbx-server-01")
+    .WithServer("zbx-server-01")
     .AllowPeer(IPNetwork.Parse("10.0.0.0/8"))
     .UseEntityFrameworkStore(db => db.UseNpgsql(connectionString))
     .Build();
@@ -136,7 +136,7 @@ using System.Net;
 using Community.Zabbix.Proxy;
 
 await using ZabbixActiveProxy proxy = ZabbixActiveProxy.CreateBuilder("proxy-01")
-    .AddServer("zbx-server-01")
+    .WithServer("zbx-server-01")
     .AllowPeer(IPNetwork.Parse("10.0.0.0/8"))
     .OnTask((task, cancellationToken) => ValueTask.FromResult(new ZabbixProxyTaskResult(
         ZabbixProxyTaskType.RemoteCommandResult, task.Clock, task.Ttl, Status: 0, "done", task.ParentTaskId ?? 0UL)))
@@ -147,7 +147,7 @@ await using ZabbixActiveProxy proxy = ZabbixActiveProxy.CreateBuilder("proxy-01"
 | --- | --- | --- |
 | `OnTask` | Both | Runs a task the server hands back, and returns the result to upload. Without it, tasks are only logged (event 7015). A handler that throws is logged (event 7018), and the task is reported as failed. |
 | `AddProvider` | Both | Adds a page of your own values to each upload. A provider that throws is skipped for that turn (event 7017). |
-| `OnConfig` | Passive | Can veto a pushed configuration: return the reason, or `null` to accept it. A veto keeps the configuration held (event 7032). |
+| `OnConfig` | Passive | Can veto a pushed configuration: return `ZabbixProxyConfigVerdict.Refuse(reason)`, or `ZabbixProxyConfigVerdict.Accepted` to take it. A veto keeps the configuration held, and the server reads the reason (event 7032). |
 | `OnStats` | Passive | Answers `zabbix.stats`. Without it, the reply's `data` is empty. |
 
 A later `OnTask`, `OnConfig`, or `OnStats` replaces an earlier one, and each `AddProvider` adds one. A proxy's handlers are set when
@@ -191,10 +191,9 @@ make `Build()` throw `InvalidOperationException`, or `StartAsync` on a proxy you
 | Option | Default | Meaning |
 | --- | --- | --- |
 | `Name` | None | The proxy's name as the server knows it. Required on a class you construct. A registration's name takes its place. |
-| `Mode` | `Active` | `Active` or `Passive`. Only `AddZabbixProxies` reads it, to choose the class. |
-| `Server` | None | Active only. The server, or the nodes of one HA cluster joined by `;`, as Zabbix's `Server` spells them. `AddServer` sets it. |
+| `Server` | None | Active only. The server, or the nodes of one HA cluster joined by `;`, as Zabbix's `Server` spells them. `WithServer` sets it. |
 | `Connection` | See [Set options](wire-client.md#set-options) | Active only. How the proxy connects to the server. |
-| `Version` | 7.4.0 when active, none when passive | `major.minor[.patch]`. Required on a passive proxy. `WithVersion` sets it. |
+| `Version` | 7.4.0 when active, none when passive | `major.minor[.patch]`. Required on a passive proxy. `WithVersion` sets it from a `Version` or from Zabbix's spelling. |
 | `ConfigInterval` | 10 s | Active only. How often to pull the configuration. |
 | `DataInterval` | 1 s | Active only. How often to send history when no more is waiting. |
 | `PageSize` | 1000 | The most values one page carries: 1 to 100,000. |
@@ -215,7 +214,7 @@ using System.Net;
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.AddZabbixActiveProxy("proxy-01")
-    .AddServer("zbx-server-01")
+    .WithServer("zbx-server-01")
     .AllowPeer(IPNetwork.Parse("10.0.0.0/8"))
     .AddHealthCheck();
 
@@ -229,13 +228,14 @@ await builder.Build().RunAsync();
 
 - The proxy is a keyed service under its name: `GetRequiredKeyedService<ZabbixActiveProxy>("proxy-01")`, or
   `GetRequiredKeyedService<ZabbixPassiveProxy>("dmz-proxy")`. Registering a name again continues setting up the same proxy.
+- The container owns the proxy. Disposing the one you resolve leaves it running, and the container disposes it at shutdown.
 - `UseStore` also takes the container, as `(provider, policy, services)`.
 - `AddHealthCheck` adds `zabbix-active-proxy-{name}` or `zabbix-passive-proxy-{name}`, with the `zabbix` and `proxy` tags. An active
   proxy's check reports its uploads as an agent's check does, and a passive proxy's check reports whether it listens.
 - Options that can't be used throw `OptionsValidationException` at start.
 
-From a configuration file, `AddZabbixProxies` registers every `Zabbix:Proxies:{name}` row and chooses the class by its `Mode`. See
-[Configuration](configuration.md).
+From a configuration file, `AddZabbixProxies` registers every `Zabbix:Proxies:{name}` row and chooses the class by the row's `Mode`
+key, `Active` (the default) or `Passive`, as Zabbix's `ProxyMode` does. See [Configuration](configuration.md).
 
 ```csharp
 builder.Services.AddZabbixProxies(builder.Configuration);

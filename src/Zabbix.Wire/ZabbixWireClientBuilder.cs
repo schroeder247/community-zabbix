@@ -21,8 +21,7 @@ namespace Community.Zabbix;
 /// <example>
 /// <code language="csharp">
 /// using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder()
-///     .AddServer("zbx-server-01")
-///     .AddServer("zbx-server-02")
+///     .WithServer("zbx-server-01;zbx-server-02")
 ///     .WithPsk("web-01", key)
 ///     .WithTimeout(TimeSpan.FromSeconds(5))
 ///     .Build();

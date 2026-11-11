@@ -21,7 +21,7 @@ namespace Community.Zabbix;
 /// <param name="Major">The major version.</param>
 /// <param name="Minor">The minor version.</param>
 /// <param name="Patch">The patch (Zabbix's third group); 0 when the text has none.</param>
-public readonly record struct ZabbixComponentVersion(int Major, int Minor, int Patch)
+internal readonly record struct ZabbixComponentVersion(int Major, int Minor, int Patch)
     : ISpanParsable<ZabbixComponentVersion>, ISpanFormattable, IUtf8SpanFormattable, IComparable<ZabbixComponentVersion>, IComparable
 {
     /// <summary>A version without a patch: <paramref name="major"/>.<paramref name="minor"/>.0.</summary>

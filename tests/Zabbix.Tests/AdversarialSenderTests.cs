@@ -17,7 +17,7 @@ namespace Community.Zabbix.Tests;
 /// The trapper protocol from both ends — the sender and the server wire reading replies a server
 /// should never send (counters that overflow, the wrong JSON kinds, a reply past the cap, a port that resets), and the
 /// SDK's own trapper reading frames a sender should never send. A sender's reply always ends in a verdict for the send
-/// loop (<see cref="ZabbixDelivery"/>) and a documented exception for a direct caller; a trapper always answers
+/// loop (<see cref="ZabbixSendOutcome"/>) and a documented exception for a direct caller; a trapper always answers
 /// <c>success</c> or <c>failed</c>.
 /// </summary>
 [Collection("Adversarial wire stress")]
@@ -42,7 +42,7 @@ public sealed class AdversarialSenderTests
         using ZabbixSender sender = Answering(reply);
 
         await Assert.ThrowsAsync<ZabbixTrapperRefusedException>(() => sender.SendAsync(OneValue, TestContext.Current.CancellationToken));
-        Assert.Equal(ZabbixDelivery.Rejected, await sender.DeliverAsync(OneValue, TestContext.Current.CancellationToken));
+        Assert.Equal(ZabbixSendOutcome.Rejected, await sender.DeliverAsync(OneValue, TestContext.Current.CancellationToken));
     }
 
     [Theory]
@@ -60,7 +60,7 @@ public sealed class AdversarialSenderTests
         using ZabbixSender sender = Answering(reply);
 
         await Assert.ThrowsAsync<InvalidDataException>(() => sender.SendAsync(OneValue, TestContext.Current.CancellationToken));
-        Assert.Equal(ZabbixDelivery.Retried, await sender.DeliverAsync(OneValue, TestContext.Current.CancellationToken));
+        Assert.Equal(ZabbixSendOutcome.Retried, await sender.DeliverAsync(OneValue, TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -87,7 +87,7 @@ public sealed class AdversarialSenderTests
         using ZabbixSender sender = Answering("{\"response\":\"success\",\"info\":\"" + info + "\"}");
 
         await Assert.ThrowsAsync<ZabbixTrapperRefusedException>(() => sender.SendAsync(OneValue, TestContext.Current.CancellationToken));
-        Assert.Equal(ZabbixDelivery.Rejected, await sender.DeliverAsync(OneValue, TestContext.Current.CancellationToken));
+        Assert.Equal(ZabbixSendOutcome.Rejected, await sender.DeliverAsync(OneValue, TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -99,7 +99,7 @@ public sealed class AdversarialSenderTests
         using var sender = new ZabbixSender([peer.Node], new ZabbixConnectionOptions { MaxPayloadBytes = 1024 }, null, new FakeLogger<ZabbixSender>(logs));
 
         await Assert.ThrowsAsync<InvalidDataException>(() => sender.SendAsync(OneValue, TestContext.Current.CancellationToken));
-        Assert.Equal(ZabbixDelivery.Retried, await sender.DeliverAsync(OneValue, TestContext.Current.CancellationToken));
+        Assert.Equal(ZabbixSendOutcome.Retried, await sender.DeliverAsync(OneValue, TestContext.Current.CancellationToken));
         Assert.Contains(logs.GetSnapshot(), record => record.Id.Id == 1104);                          // the frame was refused, and said why
     }
 
@@ -120,11 +120,11 @@ public sealed class AdversarialSenderTests
         using var sender = new ZabbixSender([new ZabbixServerNode("127.0.0.1", ((IPEndPoint)listener.LocalEndpoint).Port)], null, null, new FakeLogger<ZabbixSender>(logs));
 
         Exception failure = await Assert.ThrowsAnyAsync<Exception>(() => sender.SendAsync(OneValue, TestContext.Current.CancellationToken));
-        ZabbixDelivery verdict = await sender.DeliverAsync(OneValue, TestContext.Current.CancellationToken);
+        ZabbixSendOutcome verdict = await sender.DeliverAsync(OneValue, TestContext.Current.CancellationToken);
         await resetting;
 
         Assert.True(ZabbixFrames.IsExchangeFailure(failure), failure.GetType().FullName);
-        Assert.Equal(ZabbixDelivery.Retried, verdict);
+        Assert.Equal(ZabbixSendOutcome.Retried, verdict);
         Assert.Contains(logs.GetSnapshot(), record => record.Id.Id == 1003);
     }
 

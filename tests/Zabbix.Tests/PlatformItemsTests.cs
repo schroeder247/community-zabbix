@@ -41,14 +41,14 @@ public sealed class PlatformItemsTests : IDisposable
 
     private static async Task<string> ValueAsync(ZabbixItemProvider items, string key)
     {
-        ZabbixAgentAnswer answer = await items.GetValueAsync(ZabbixItemKey.Parse(key, null), Ct);
+        ZabbixAgentAnswer answer = await items.GetValueAsync(ZabbixItemKey.Parse(key), Ct);
         Assert.True(answer.IsSupported, $"{key}: {answer.Error}");
         return answer.Value!;
     }
 
     private static async Task<string?> ErrorAsync(ZabbixItemProvider items, string key)
     {
-        ZabbixAgentAnswer answer = await items.GetValueAsync(ZabbixItemKey.Parse(key, null), Ct);
+        ZabbixAgentAnswer answer = await items.GetValueAsync(ZabbixItemKey.Parse(key), Ct);
         Assert.False(answer.IsSupported, $"{key} answered {answer.Value}");
         return answer.Error;
     }
@@ -352,7 +352,7 @@ public sealed class PlatformItemsTests : IDisposable
         Assert.Equal("The key has more parameters than it takes.", await ErrorAsync(_files, $"vfs.dir.size[{tree},,,,,,extra]"));
     }
 
-    private static long StatSize(string path) => JsonDocument.Parse(new ZabbixFileItems().GetValueAsync(ZabbixItemKey.Parse($"vfs.file.get[{path}]", null), Ct).AsTask().GetAwaiter().GetResult().Value!).RootElement.GetProperty("size").GetInt64();
+    private static long StatSize(string path) => JsonDocument.Parse(new ZabbixFileItems().GetValueAsync(ZabbixItemKey.Parse($"vfs.file.get[{path}]"), Ct).AsTask().GetAwaiter().GetResult().Value!).RootElement.GetProperty("size").GetInt64();
 
     [Fact]
     public async Task A_directorys_size_on_Windows_is_its_files()
@@ -372,7 +372,7 @@ public sealed class PlatformItemsTests : IDisposable
         Write("file");
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await _files.GetValueAsync(ZabbixItemKey.Parse($"vfs.dir.count[{_root}]", null), cancelled.Token));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await _files.GetValueAsync(ZabbixItemKey.Parse($"vfs.dir.count[{_root}]"), cancelled.Token));
     }
 
     [Fact]

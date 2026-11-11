@@ -7,4 +7,4 @@ namespace Community.Zabbix.Proxy;
 /// <param name="Host">The technical name, which senders and agents use.</param>
 /// <param name="Name">The visible name.</param>
 /// <param name="Status">Whether it is monitored.</param>
-public sealed record ZabbixProxyConfigHost(ulong HostId, string Host, string Name, ZabbixProxyHostStatus Status);
+public sealed record ZabbixProxyConfigHost(ulong HostId, string Host, string Name, ZabbixHostStatus Status);

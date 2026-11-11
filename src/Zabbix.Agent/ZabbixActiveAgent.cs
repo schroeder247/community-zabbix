@@ -34,9 +34,9 @@ public class ZabbixActiveAgent : ZabbixComponent
     private readonly ZabbixAgentTelemetry? _containerTelemetry;
     private readonly ZabbixWireTelemetry? _wire;
     private readonly ZabbixItemCollector? _containerCollector;
-    private readonly ZabbixAgentStatus _notStarted;
+    private readonly ZabbixComponentStatus _notStarted;
     private ZabbixActiveAgentDestination[] _destinations = [];
-    private IReadOnlyList<ZabbixAgentStatus> _statuses;
+    private IReadOnlyList<ZabbixComponentStatus> _statuses;
     private ZabbixItemCollector? _collector;    // this agent's own, when no container gave one
     private ZabbixAgentTelemetry? _telemetry;   // this agent's own, when no container gave one
     private int _released;
@@ -78,17 +78,17 @@ public class ZabbixActiveAgent : ZabbixComponent
         _wire = wire;
         _containerCollector = collector;
         Items = new ZabbixItemDictionary { Owner = this };
-        _notStarted = new ZabbixAgentStatus(Name);
+        _notStarted = new ZabbixComponentStatus(Name);
         _statuses = [_notStarted];
     }
 
     /// <summary>
-    /// Starts a builder for the agent of <paramref name="hostname"/>: its servers, its items, and its logging.
+    /// Starts a builder for the agent of <paramref name="hostName"/>: its servers, its items, and its logging.
     /// </summary>
-    /// <param name="hostname">The agent's name, and the host as the server knows it unless <c>Configure</c> sets another.</param>
+    /// <param name="hostName">The agent's name, and the host as the server knows it unless <c>Configure</c> sets another.</param>
     /// <returns>A builder whose <see cref="ZabbixActiveAgentBuilder.Build"/> returns the agent.</returns>
-    /// <exception cref="ArgumentException"><paramref name="hostname"/> is empty.</exception>
-    /// <exception cref="ArgumentNullException"><paramref name="hostname"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException"><paramref name="hostName"/> is empty.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="hostName"/> is <see langword="null"/>.</exception>
     /// <example>
     /// <code language="csharp">
     /// await using ZabbixActiveAgent agent = ZabbixActiveAgent.CreateBuilder("web-01")
@@ -97,7 +97,7 @@ public class ZabbixActiveAgent : ZabbixComponent
     ///     .Build();
     /// </code>
     /// </example>
-    public static ZabbixActiveAgentBuilder CreateBuilder(string hostname) => new(hostname);
+    public static ZabbixActiveAgentBuilder CreateBuilder(string hostName) => new(hostName);
 
     /// <summary>What the agent reads when it starts.</summary>
     public ZabbixActiveAgentOptions Options { get; }
@@ -109,13 +109,13 @@ public class ZabbixActiveAgent : ZabbixComponent
     public ZabbixItemDictionary Items { get; }
 
     /// <summary>What the agent is doing, for its first destination.</summary>
-    public ZabbixAgentStatus Status => _statuses[0];
+    public ZabbixComponentStatus Status => _statuses[0];
 
     /// <summary>What the agent is doing for each destination, in <see cref="ZabbixActiveAgentOptions.ServerActive"/> order; before it starts, one status with nothing to report.</summary>
-    public IReadOnlyList<ZabbixAgentStatus> Statuses => Volatile.Read(ref _statuses);
+    public IReadOnlyList<ZabbixComponentStatus> Statuses => Volatile.Read(ref _statuses);
 
     /// <inheritdoc/>
-    private protected override string DefaultName => Options.Name ?? Options.Hostname;
+    private protected override string DefaultName => Options.Name ?? Options.HostName;
 
     /// <summary>Each destination's own loop, for what a test reads of it.</summary>
     internal IReadOnlyList<ZabbixActiveAgentDestination> Sessions => _destinations;
@@ -125,6 +125,7 @@ public class ZabbixActiveAgent : ZabbixComponent
     protected override async ValueTask DisposeAsyncCore()
 #pragma warning restore IDE1006
     {
+        if (IsKept) return;                                          // shared: its container releases it
         await base.DisposeAsyncCore().ConfigureAwait(false);          // stops a running component first, so it drains
         if (Interlocked.Exchange(ref _released, 1) != 0) return;
         foreach (ZabbixActiveAgentDestination destination in _destinations) await destination.DisposeAsync().ConfigureAwait(false);
@@ -136,6 +137,7 @@ public class ZabbixActiveAgent : ZabbixComponent
     /// <inheritdoc/>
     protected override void Dispose(bool disposing)
     {
+        if (IsKept) return;                                          // shared: its container releases it
         if (disposing && Interlocked.Exchange(ref _released, 1) == 0)
         {
             foreach (ZabbixActiveAgentDestination destination in _destinations) destination.Dispose();
@@ -155,7 +157,7 @@ public class ZabbixActiveAgent : ZabbixComponent
         ZabbixItemCollector? collector = _containerCollector;
         if (collector is null && Options.BundledItems) collector = _collector = new ZabbixItemCollector(ZabbixHostFiles.Host, Time);
         Items.KeyRules = ZabbixKeyRules.Parse(Options.KeyRules);
-        Items.AddDefaults(Options.Hostname, Options.HostMetadata, Options.BundledItems, collector);
+        Items.AddDefaults(Options.HostName, Options.HostMetadata, Options.BundledItems, collector);
         ZabbixAgentTelemetry telemetry = _containerTelemetry ?? (_telemetry = new ZabbixAgentTelemetry(_meters, Time));
         int count = Math.Max(ZabbixServerActiveValidation.Parse(Options.ServerActive).Count, 1);
         string name = Name;

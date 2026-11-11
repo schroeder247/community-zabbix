@@ -16,9 +16,9 @@ public sealed record ZabbixConnectorValue : ZabbixConnectorRecord
     [JsonPropertyName("name")]
     public string? Name { get; init; }
 
-    /// <summary>The value type.</summary>
+    /// <summary>The value type, as the API's items carry it.</summary>
     [JsonPropertyName("type")]
-    public ZabbixConnectorValueType Type { get; init; }
+    public ZabbixItemValueType Type { get; init; }
 
     /// <summary>The value, in whatever JSON form the type takes.</summary>
     [JsonPropertyName("value")]

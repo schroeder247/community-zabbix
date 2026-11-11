@@ -58,6 +58,21 @@ public sealed class ZabbixTlsOptions : IValidatableObject
     [ZabbixSecret]
     public string? Psk { get; set; }
 
+    /// <summary>A copy that changes to these options don't reach.</summary>
+    /// <returns>The copy.</returns>
+    internal ZabbixTlsOptions Clone() => new()
+    {
+        Mode = Mode,
+        CertificateFile = CertificateFile,
+        KeyFile = KeyFile,
+        CaFile = CaFile,
+        CrlFile = CrlFile,
+        PeerCertificateIssuer = PeerCertificateIssuer,
+        PeerCertificateSubject = PeerCertificateSubject,
+        PskIdentity = PskIdentity,
+        Psk = Psk,
+    };
+
     /// <inheritdoc/>
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {

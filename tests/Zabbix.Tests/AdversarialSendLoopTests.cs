@@ -31,7 +31,7 @@ public sealed class AdversarialSendLoopTests
                 attempts[batch[0]] = attempts.GetValueOrDefault(batch[0]) + 1;
                 if (batch[0] == 0) throw new NotSupportedException("the handler cannot serialise this value");
                 delivered.AddRange(batch);
-                return ValueTask.FromResult(ZabbixDelivery.Delivered);
+                return ValueTask.FromResult(ZabbixSendOutcome.Delivered);
             }, new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { BatchSize = 2, RetryDelay = TimeSpan.FromMilliseconds(1) }, Time = TimeProvider.System, Logger = new FakeLogger(logs) }, cancellationToken: TestContext.Current.CancellationToken)
             .WaitAsync(Guard, TimeProvider.System, TestContext.Current.CancellationToken);
 
@@ -55,7 +55,7 @@ public sealed class AdversarialSendLoopTests
             {
                 if (Interlocked.Increment(ref attempts) <= ZabbixSendLoop.MaxDefectAttempts + 3) throw new SocketException((int)SocketError.ConnectionRefused);
                 delivered.AddRange(batch);
-                return ValueTask.FromResult(ZabbixDelivery.Delivered);
+                return ValueTask.FromResult(ZabbixSendOutcome.Delivered);
             }, new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { RetryDelay = TimeSpan.FromMilliseconds(1), MaxRetryDelay = TimeSpan.FromMilliseconds(2) }, Time = TimeProvider.System }, cancellationToken: TestContext.Current.CancellationToken)
             .WaitAsync(Guard, TimeProvider.System, TestContext.Current.CancellationToken);
 

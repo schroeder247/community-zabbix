@@ -67,7 +67,7 @@ public sealed class ServerActiveTests
         var services = new ServiceCollection();
         services.AddZabbixPushAgent("edge").AddServer(new DnsEndPoint("zbx1", 10051), new DnsEndPoint("zbx2", 10051)).AddServer("proxy-b").AddServer("dr:10052");
         services.AddZabbixActiveAgent("active").AddServer(new DnsEndPoint("zbx1", 10052)).AddServer("zbx2;zbx3");
-        services.AddZabbixActiveProxy("proxy").AddServer(new DnsEndPoint("zbx1", 10051), new DnsEndPoint("zbx2", 10051)).AllowPeer(IPAddress.Loopback);
+        services.AddZabbixActiveProxy("proxy").WithServer(new DnsEndPoint("zbx1", 10051), new DnsEndPoint("zbx2", 10051)).AllowPeer(IPAddress.Loopback);
         using ServiceProvider provider = services.BuildServiceProvider();
 
         Assert.Equal("zbx1:10051;zbx2:10051,proxy-b:10051,dr:10052", provider.GetRequiredService<IOptionsMonitor<ZabbixPushAgentOptions>>().Get("edge").ServerActive);

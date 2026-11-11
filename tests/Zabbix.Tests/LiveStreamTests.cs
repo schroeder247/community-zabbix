@@ -201,7 +201,7 @@ public sealed class LiveStreamTests
         await LiveFixtures.SendWhenKnownAsync(sender, [new ZabbixValue(source.Host, "zbxtest.src", "0", new ZabbixClock(DateTimeOffset.UtcNow.AddHours(-1).ToUnixTimeSeconds(), 0))]);
         await using ZabbixStore<ZabbixValue> buffer = store(scope.Run);
         await using IZabbixWatcher watcher = scope.Server.Hosts[source.Host].Item("zbxtest.src").Watch(new ZabbixWatchPlan(TimeSpan.FromSeconds(1)) { AllowedLateness = TimeSpan.FromSeconds(30) });
-        ZabbixItemKey dst = ZabbixItemKey.Parse("zbxtest.dst", CultureInfo.InvariantCulture);
+        ZabbixItemKey dst = ZabbixItemKey.Parse("zbxtest.dst");
         // Attached before anything is sent, and sent only after the first poll: a watcher starts at its first poll.
         await using IAsyncEnumerator<ZabbixValue> reader = watcher.GetAsyncEnumerator(Cancel);
         await LiveApi.EventuallyAsync(() => Task.FromResult<string?>(watcher.SucceededPolls > 0 ? "polled" : null), "the watcher's first poll");

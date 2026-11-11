@@ -26,9 +26,9 @@ public static class ZabbixActiveProxyBuilderExtensions
     extension<TBuilder>(TBuilder builder) where TBuilder : IZabbixActiveProxyBuilder
     {
         /// <summary>
-        /// Adds the server the proxy reports to, in Zabbix's spelling: one server, or the nodes of one HA cluster joined by
-        /// <c>;</c>, tried in order. A proxy reports to one server or cluster, as Zabbix's proxy does, so it takes one
-        /// <c>AddServer</c>: a second one is refused when the proxy is built or its host starts.
+        /// Sets the server the proxy reports to, in Zabbix's spelling: one server, or the nodes of one HA cluster joined by
+        /// <c>;</c>, tried in order. A proxy reports to one server or cluster, as Zabbix's proxy does, so a later call
+        /// replaces it.
         /// </summary>
         /// <param name="server">
         /// The server: <c>host</c> or <c>host:port</c>, on port 10051 when it names none, or the nodes of one HA cluster:
@@ -37,27 +37,26 @@ public static class ZabbixActiveProxyBuilderExtensions
         /// <returns>The builder.</returns>
         /// <exception cref="ArgumentException"><paramref name="server"/> is empty, isn't a node, names a node twice, or names more than one server (<c>,</c>).</exception>
         /// <exception cref="ArgumentNullException"><paramref name="server"/> is <see langword="null"/>.</exception>
-        public TBuilder AddServer(string server)
+        public TBuilder WithServer(string server)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            string destination = ZabbixServerActiveText.Destination(server, nameof(server));
-            builder.Services.Configure<ZabbixProxyOptions>(builder.Name, options => options.Server = ZabbixServerActiveText.Add(options.Server, destination));
+            string text = ZabbixServerActiveText.Server(server, nameof(server));
+            builder.Services.Configure<ZabbixProxyOptions>(builder.Name, options => options.Server = text);
             return builder;
         }
 
         /// <summary>
-        /// Adds the server the proxy reports to: one server, or the nodes of one HA cluster, tried in order. A proxy reports to
-        /// one server or cluster, as Zabbix's proxy does, so it takes one <c>AddServer</c>: a second one is refused when the
-        /// proxy is built or its host starts.
+        /// Sets the server the proxy reports to: one server, or the nodes of one HA cluster, tried in order. A proxy reports
+        /// to one server or cluster, as Zabbix's proxy does, so a later call replaces it.
         /// </summary>
         /// <param name="nodes">The server's nodes, in failover order.</param>
         /// <returns>The builder.</returns>
         /// <exception cref="ArgumentException">No node, a node named twice, or a node that isn't a host and port.</exception>
-        public TBuilder AddServer(params ReadOnlySpan<DnsEndPoint> nodes)
+        public TBuilder WithServer(params ReadOnlySpan<DnsEndPoint> nodes)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            string destination = ZabbixServerActiveText.Destination(nodes, nameof(nodes));
-            builder.Services.Configure<ZabbixProxyOptions>(builder.Name, options => options.Server = ZabbixServerActiveText.Add(options.Server, destination));
+            string text = ZabbixServerActiveText.Destination(nodes, nameof(nodes));
+            builder.Services.Configure<ZabbixProxyOptions>(builder.Name, options => options.Server = text);
             return builder;
         }
 
@@ -96,13 +95,13 @@ public static class ZabbixActiveProxyBuilderExtensions
         /// <param name="configure">Sets the thresholds.</param>
         /// <returns>The builder.</returns>
         /// <exception cref="OptionsValidationException">The thresholds don't validate.</exception>
-        public TBuilder AddHealthCheck(Action<ZabbixAgentHealthCheckOptions> configure)
+        public TBuilder AddHealthCheck(Action<ZabbixComponentHealthCheckOptions> configure)
         {
             ArgumentNullException.ThrowIfNull(builder);
             ArgumentNullException.ThrowIfNull(configure);
             string name = builder.Name;
-            ZabbixAgentHealthChecks.Add(builder.Services, "zabbix-active-proxy-" + name, provider => [provider.GetRequiredKeyedService<ZabbixActiveProxy>(name).Status],
-                configure, ZabbixAgentHealthChecks.Proxy);
+            ZabbixComponentHealthChecks.Add(builder.Services, "zabbix-active-proxy-" + name, provider => [provider.GetRequiredKeyedService<ZabbixActiveProxy>(name).Status],
+                configure, ZabbixComponentHealthChecks.Proxy);
             return builder;
         }
     }

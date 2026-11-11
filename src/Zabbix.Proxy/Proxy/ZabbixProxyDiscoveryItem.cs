@@ -10,13 +10,13 @@ namespace Community.Zabbix.Proxy;
 /// </summary>
 /// <remarks>
 /// The rows are a protocol, not independent records: for each address, its service rows, then one row with
-/// <see cref="DcheckId"/> 0, port 0 and value "" that closes the host; the server processes the services only when that
+/// <see cref="NetworkDiscoveryCheckId"/> 0, port 0 and value "" that closes the host; the server processes the services only when that
 /// row arrives. Most callers write a <see cref="ZabbixProxyDiscoveredHost"/>, which emits exactly these rows
 /// (<see cref="ZabbixProxyDiscovery.WriteAsync(System.Threading.Channels.ChannelWriter{ZabbixProxyDiscoveryItem}, ZabbixProxyDiscoveredHost, CancellationToken)"/>).
 /// </remarks>
 /// <param name="Clock">When the check ran.</param>
-/// <param name="DruleId">The discovery rule (wire tag <c>drule</c>).</param>
-/// <param name="DcheckId">
+/// <param name="NetworkDiscoveryRuleId">The discovery rule (wire tag <c>drule</c>).</param>
+/// <param name="NetworkDiscoveryCheckId">
 /// The check within the rule (wire tag <c>dcheck</c>); 0 for the row that closes a host and for a finalized rule's row, as
 /// upstream's proxy writes them. Always sent: every server refuses a whole <c>proxy data</c> message with a service row that
 /// lacks it ("cannot find pair with name "dcheck"", on 7.0, 7.4 and 8.0).
@@ -29,8 +29,8 @@ namespace Community.Zabbix.Proxy;
 /// <param name="Error">Why a finalized rule stopped, when it did.</param>
 public sealed record ZabbixProxyDiscoveryItem(
     [property: JsonPropertyName("clock"), JsonConverter(typeof(ZabbixUnixTimeConverter))] DateTimeOffset Clock,
-    [property: JsonPropertyName("drule")] ulong DruleId,
-    [property: JsonPropertyName("dcheck")] ulong DcheckId,
+    [property: JsonPropertyName("drule")] ulong NetworkDiscoveryRuleId,
+    [property: JsonPropertyName("dcheck")] ulong NetworkDiscoveryCheckId,
     [property: JsonPropertyName("ip")] string Ip,
     [property: JsonPropertyName("dns")] string? Dns,
     [property: JsonPropertyName("port")] int Port,

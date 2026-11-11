@@ -41,8 +41,8 @@ public sealed class ItemProviderTests
         items.AddDefaults("edge-01", null, bundled: true, s_collector);
 
         Assert.Same(added, items["app.added"]);                                          // an AddItem set
-        Assert.Equal("provided", (await items["app.provided"](ZabbixItemKey.Parse("app.provided", null), Ct)).Value);
-        Assert.Equal("provided", (await items["agent.ping"](ZabbixItemKey.Parse("agent.ping", null), Ct)).Value);   // over a built-in
+        Assert.Equal("provided", (await items["app.provided"](ZabbixItemKey.Parse("app.provided"), Ct)).Value);
+        Assert.Equal("provided", (await items["agent.ping"](ZabbixItemKey.Parse("agent.ping"), Ct)).Value);   // over a built-in
         Assert.True(items.ContainsKey("agent.version"));                                 // the built-ins it does not list
     }
 
@@ -129,7 +129,7 @@ public sealed class ItemProviderTests
         Assert.Same(agent.Items, chained);
         Assert.Same(registry, registry.Register(items => items.AddItem("app.four", _ => "4")));
         Assert.Equal(["app.four", "app.one", "app.three", "app.two"], agent.Items.Keys.Order(StringComparer.Ordinal));
-        Assert.Equal("3", (await agent.Items.AnswerAsync(ZabbixItemKey.Parse("app.three", null), TimeSpan.FromSeconds(3), Ct)).Value);
+        Assert.Equal("3", (await agent.Items.AnswerAsync(ZabbixItemKey.Parse("app.three"), TimeSpan.FromSeconds(3), Ct)).Value);
     }
 
     [Fact]
@@ -160,7 +160,7 @@ public sealed class ItemProviderTests
     {
         options.Address = "127.0.0.1";
         options.Port = 0;
-        options.Hostname = "edge-01";
+        options.HostName = "edge-01";
         options.AllowedPeers.Add("127.0.0.1");
     }
 

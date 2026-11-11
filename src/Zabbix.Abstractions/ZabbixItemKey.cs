@@ -111,23 +111,28 @@ public readonly struct ZabbixItemKey : IEquatable<ZabbixItemKey>, ISpanParsable<
         return TryParse(text.Append(']').ToString(), out result, out reason);
     }
 
-    /// <inheritdoc/>
-    /// <remarks>The exception's message names the rule the text breaks and where, never the text: a key's parameters can carry a secret.</remarks>
-    public static ZabbixItemKey Parse([ZabbixItemKeyData] string s, IFormatProvider? provider)
+    /// <summary>Parses an item key with its parameters: <c>vfs.fs.size[/,pfree]</c>.</summary>
+    /// <param name="s">The key's text.</param>
+    /// <returns>The key.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="s"/> is <see langword="null"/>.</exception>
+    /// <exception cref="FormatException">
+    /// <paramref name="s"/> isn't an item key. The message names the rule the text breaks and where, never the text: a key's
+    /// parameters can carry a secret.
+    /// </exception>
+    public static ZabbixItemKey Parse([ZabbixItemKeyData] string s)
     {
         ArgumentNullException.ThrowIfNull(s);
         return TryParse(s, out ZabbixItemKey key, out string? reason) ? key : throw new FormatException($"The text is not a Zabbix item key: {reason}.");
     }
 
-    /// <inheritdoc/>
-    public static ZabbixItemKey Parse([ZabbixItemKeyData] ReadOnlySpan<char> s, IFormatProvider? provider) => Parse(s.ToString(), provider);
+    /// <summary>Parses an item key with its parameters from a span of characters.</summary>
+    /// <param name="s">The key's text.</param>
+    /// <returns>The key.</returns>
+    /// <exception cref="FormatException"><paramref name="s"/> isn't an item key.</exception>
+    public static ZabbixItemKey Parse([ZabbixItemKeyData] ReadOnlySpan<char> s) => Parse(s.ToString());
 
-    /// <inheritdoc/>
-    public static bool TryParse([NotNullWhen(true), ZabbixItemKeyData] string? s, IFormatProvider? provider, out ZabbixItemKey result)
-        => TryParse(s, out result);
-
-    /// <summary>Parse without a provider.</summary>
-    /// <param name="s">The text.</param>
+    /// <summary>Parses an item key, and says whether the text was one.</summary>
+    /// <param name="s">The key's text.</param>
     /// <param name="result">The key, when the text was one.</param>
     /// <returns>Whether the text is a key.</returns>
     public static bool TryParse([NotNullWhen(true), ZabbixItemKeyData] string? s, out ZabbixItemKey result)
@@ -136,9 +141,25 @@ public readonly struct ZabbixItemKey : IEquatable<ZabbixItemKey>, ISpanParsable<
         return TryParse(s, out result, out _);
     }
 
-    /// <inheritdoc/>
-    public static bool TryParse([ZabbixItemKeyData] ReadOnlySpan<char> s, IFormatProvider? provider, out ZabbixItemKey result)
+    /// <summary>Parses an item key from a span of characters, and says whether the text was one.</summary>
+    /// <param name="s">The key's text.</param>
+    /// <param name="result">The key, when the text was one.</param>
+    /// <returns>Whether the text is a key.</returns>
+    public static bool TryParse([ZabbixItemKeyData] ReadOnlySpan<char> s, out ZabbixItemKey result)
         => TryParse(s.ToString(), out result, out _);
+
+    // An item key has no culture: the provider the interfaces pass is ignored, and the public forms take none.
+    /// <inheritdoc/>
+    static ZabbixItemKey IParsable<ZabbixItemKey>.Parse(string s, IFormatProvider? provider) => Parse(s);
+
+    /// <inheritdoc/>
+    static bool IParsable<ZabbixItemKey>.TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, out ZabbixItemKey result) => TryParse(s, out result);
+
+    /// <inheritdoc/>
+    static ZabbixItemKey ISpanParsable<ZabbixItemKey>.Parse(ReadOnlySpan<char> s, IFormatProvider? provider) => Parse(s);
+
+    /// <inheritdoc/>
+    static bool ISpanParsable<ZabbixItemKey>.TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, out ZabbixItemKey result) => TryParse(s, out result);
 
     /// <summary>
     /// <c>zbx_parse_key</c> over the whole text. Parsing validates and keeps the text; the name and the parameters are read

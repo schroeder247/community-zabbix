@@ -216,8 +216,7 @@ public sealed class FluentApiTests
     public void A_wire_builder_sets_what_a_wire_client_reads()
     {
         using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder()
-            .AddServer("zbx-1")
-            .AddServer("zbx-2:10052")
+            .WithServer("zbx-1;zbx-2:10052")
             .WithToken("token")
             .WithPsk("web-01", Convert.FromHexString("0123456789ABCDEF0123456789ABCDEF"))
             .WithTimeout(TimeSpan.FromSeconds(5))
@@ -242,8 +241,7 @@ public sealed class FluentApiTests
     public void A_wire_builder_takes_endpoints_and_certificates()
     {
         using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder()
-            .AddServer(new System.Net.DnsEndPoint("zbx-1", 10052))
-            .AddServer(new System.Net.DnsEndPoint("::1", 10051))
+            .WithServer(new System.Net.DnsEndPoint("zbx-1", 10052), new System.Net.DnsEndPoint("::1", 10051))
             .WithCertificate("c.pem", "k.pem", "ca.pem")
             .Build();
 
@@ -252,24 +250,40 @@ public sealed class FluentApiTests
     }
 
     [Fact]
-    public void Add_server_appends_a_node_after_the_ones_set_before_it()
+    public void With_server_sets_the_one_server_and_a_later_call_replaces_it()
     {
         using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder()
             .Configure(options => options.Server = "zbx-0")
-            .AddServer("zbx-1")
-            .AddServer(new System.Net.DnsEndPoint("zbx-2", 10052))
+            .WithServer("zbx-1")
+            .WithServer(new System.Net.DnsEndPoint("zbx-2", 10052), new System.Net.DnsEndPoint("zbx-3", 10052))
             .Build();
 
-        Assert.Equal("zbx-0;zbx-1:10051;zbx-2:10052", wire.Options.Server);
+        Assert.Equal("zbx-2:10052;zbx-3:10052", wire.Options.Server);    // one HA cluster, in failover order
+    }
+
+    [Fact]
+    public void With_server_takes_the_nodes_of_one_cluster_in_zabbix_s_spelling()
+    {
+        using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder().WithServer("zbx-1;zbx-2:10052").Build();
+
+        Assert.Equal("zbx-1:10051;zbx-2:10052", wire.Options.Server);
     }
 
     [Theory]
-    [InlineData("zbx-1;zbx-2")]      // a cluster is one call per node
     [InlineData("zbx-1,zbx-2")]      // two destinations are two clients
+    [InlineData("zbx-1;zbx-1")]      // a node named twice
     [InlineData("a b")]
     [InlineData(" ")]
-    public void Add_server_takes_one_node_and_refuses_anything_else_where_it_is_passed(string server)
-        => Assert.Equal("server", Assert.ThrowsAny<ArgumentException>(() => ZabbixWireClient.CreateBuilder().AddServer(server)).ParamName);
+    public void With_server_takes_one_server_and_refuses_anything_else_where_it_is_passed(string server)
+        => Assert.Equal("server", Assert.ThrowsAny<ArgumentException>(() => ZabbixWireClient.CreateBuilder().WithServer(server)).ParamName);
+
+    [Fact]
+    public void With_server_refuses_no_node_or_a_node_named_twice_where_they_are_passed()
+    {
+        Assert.Equal("nodes", Assert.Throws<ArgumentException>(() => ZabbixWireClient.CreateBuilder().WithServer(Array.Empty<System.Net.DnsEndPoint>())).ParamName);
+        Assert.Equal("nodes", Assert.Throws<ArgumentException>(() => ZabbixWireClient.CreateBuilder()
+            .WithServer(new System.Net.DnsEndPoint("zbx-1", 10051), new System.Net.DnsEndPoint("zbx-1", 10051))).ParamName);
+    }
 
     [Theory]
     [InlineData(15)]
@@ -280,19 +294,19 @@ public sealed class FluentApiTests
     [Fact]
     public void A_wire_builder_builds_once_and_what_it_built_does_not_change()
     {
-        ZabbixWireClientBuilder builder = ZabbixWireClient.CreateBuilder().AddServer("zbx-server-01");
+        ZabbixWireClientBuilder builder = ZabbixWireClient.CreateBuilder().WithServer("zbx-server-01");
         using ZabbixWireClient wire = builder.Build();
 
         Assert.Equal("zbx-server-01:10051", wire.Options.Server);
         Assert.Throws<InvalidOperationException>(() => builder.Build().Dispose());
-        Assert.Throws<InvalidOperationException>(() => builder.AddServer("zbx-server-02"));
+        Assert.Throws<InvalidOperationException>(() => builder.WithServer("zbx-server-02"));
         Assert.Throws<InvalidOperationException>(() => builder.UseTimeProvider(TimeProvider.System));
     }
 
     [Fact]
     public void A_wire_builder_checks_the_options_with_the_rules_a_host_checks_at_start()
     {
-        ZabbixWireClientBuilder builder = ZabbixWireClient.CreateBuilder().AddServer("zbx-server-01").WithBatchSize(0);
+        ZabbixWireClientBuilder builder = ZabbixWireClient.CreateBuilder().WithServer("zbx-server-01").WithBatchSize(0);
 
         InvalidOperationException refused = Assert.Throws<InvalidOperationException>(() => builder.Build().Dispose());
 
@@ -312,11 +326,11 @@ public sealed class FluentApiTests
 
         using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder()
             .Bind(section)
-            .AddServer("zbx-2")
+            .WithServer("zbx-2")
             .WithBatchSize(20)
             .Build();
 
-        Assert.Equal("zbx-1;zbx-2:10051", wire.Options.Server);
+        Assert.Equal("zbx-2:10051", wire.Options.Server);                // the verb after the section replaces its server
         Assert.Equal(20, wire.Options.BatchSize);
         Assert.Equal(TimeSpan.FromSeconds(7), wire.Options.Connection.Timeout);
     }
@@ -326,11 +340,10 @@ public sealed class FluentApiTests
     {
         var services = new ServiceCollection();
         IZabbixWireClientBuilder prod = services.AddZabbixWireClient("prod")
-            .AddServer("zbx-1")
-            .AddServer(new System.Net.DnsEndPoint("zbx-2", 10052))
+            .WithServer(new System.Net.DnsEndPoint("zbx-1", 10051), new System.Net.DnsEndPoint("zbx-2", 10052))
             .WithToken("token")
             .WithBatchSize(10);
-        services.AddZabbixWireClient("lab").AddServer("zbx-lab");
+        services.AddZabbixWireClient("lab").WithServer("zbx-lab");
         using ServiceProvider provider = services.BuildValidated();
         IZabbixWireClientFactory clients = provider.GetRequiredService<IZabbixWireClientFactory>();
 
@@ -349,14 +362,14 @@ public sealed class FluentApiTests
     public void The_unnamed_wire_client_is_the_plain_service_and_a_name_registered_again_is_the_same_client()
     {
         var services = new ServiceCollection();
-        services.AddZabbixWireClient().AddServer("zbx-1");
-        services.AddZabbixWireClient().AddServer("zbx-2");
+        services.AddZabbixWireClient().WithServer("zbx-1");
+        services.AddZabbixWireClient().WithServer("zbx-2");
         using ServiceProvider provider = services.BuildValidated();
 
         ZabbixWireClient wire = provider.GetRequiredService<ZabbixWireClient>();
 
         Assert.Same(wire, provider.GetRequiredService<IZabbixWireClientFactory>().Create(Options.DefaultName));
-        Assert.Equal("zbx-1:10051;zbx-2:10051", wire.Options.Server);
+        Assert.Equal("zbx-2:10051", wire.Options.Server);                 // the second registration's verb replaces the first's server
         Assert.Single(services, descriptor => descriptor.IsKeyedService && descriptor.ServiceType == typeof(ZabbixWireClient));
     }
 
@@ -364,7 +377,7 @@ public sealed class FluentApiTests
     public void A_registered_wire_client_s_options_are_checked_when_the_host_starts()
     {
         var services = new ServiceCollection();
-        services.AddZabbixWireClient("prod").AddServer("zbx-1").WithBatchSize(0);
+        services.AddZabbixWireClient("prod").WithServer("zbx-1").WithBatchSize(0);
         using ServiceProvider provider = services.BuildValidated();
 
         OptionsValidationException refused = Assert.Throws<OptionsValidationException>(() => provider.GetRequiredService<IStartupValidator>().Validate());
@@ -391,7 +404,7 @@ public sealed class FluentApiTests
     public async Task A_built_wire_client_logs_through_the_logging_it_was_given_and_leaves_it_to_the_application()
     {
         using var loggers = new LoggingProbe();
-        using (ZabbixWireClient wire = ZabbixWireClient.CreateBuilder().AddServer($"127.0.0.1:{FramesTests.ClosedPort()}").UseLogging(loggers).Build())
+        using (ZabbixWireClient wire = ZabbixWireClient.CreateBuilder().WithServer($"127.0.0.1:{FramesTests.ClosedPort()}").UseLogging(loggers).Build())
         {
             await Assert.ThrowsAsync<System.Net.Sockets.SocketException>(() => wire.SendAsync("web-01", new ZabbixItemKey<long>("app.requests"), 1, TestContext.Current.CancellationToken));
         }
@@ -411,9 +424,9 @@ public sealed class FluentApiTests
         await using ZabbixActiveAgent active = ZabbixActiveAgent.CreateBuilder("web-02").AddServer("zbx-1").Configure(o => o.HostMetadata = "Linux").Build();
         await using ZabbixPassiveAgent passive = ZabbixPassiveAgent.CreateBuilder("web-03").AllowPeer(IPAddress.Loopback).Build();
 
-        Assert.Equal(("web-01", "web-01", "zbx-1:10051", 10), (push.Name, push.Options.Hostname, push.Options.ServerActive, push.Options.Send.BatchSize));
-        Assert.Equal(("web-02", "web-02", "Linux"), (active.Name, active.Options.Hostname, active.Options.HostMetadata));
-        Assert.Equal(("web-03", "web-03", "127.0.0.1"), (passive.Name, passive.Options.Hostname, Assert.Single(passive.Options.AllowedPeers)));
+        Assert.Equal(("web-01", "web-01", "zbx-1:10051", 10), (push.Name, push.Options.HostName, push.Options.ServerActive, push.Options.Send.BatchSize));
+        Assert.Equal(("web-02", "web-02", "Linux"), (active.Name, active.Options.HostName, active.Options.HostMetadata));
+        Assert.Equal(("web-03", "web-03", "127.0.0.1"), (passive.Name, passive.Options.HostName, Assert.Single(passive.Options.AllowedPeers)));
     }
 
     [Fact]
@@ -460,20 +473,20 @@ public sealed class FluentApiTests
     {
         IConfiguration section = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> { ["Hostname"] = "bound", ["ServerActive"] = "zbx-1" }).Build();
         using ZabbixActiveAgent named = ZabbixActiveAgent.CreateBuilder("web-01").AddServer("zbx-1").Build();
-        using ZabbixActiveAgent configured = ZabbixActiveAgent.CreateBuilder("web-01").AddServer("zbx-1").Configure(o => o.Hostname = "other").Build();
+        using ZabbixActiveAgent configured = ZabbixActiveAgent.CreateBuilder("web-01").AddServer("zbx-1").Configure(o => o.HostName = "other").Build();
         using ZabbixActiveAgent bound = ZabbixActiveAgent.CreateBuilder("web-01").Bind(section).Build();
         var services = new ServiceCollection();
         services.AddZabbixPushAgent("edge-01").AddServer("zbx-1");
         services.AddZabbixPassiveAgent("probe-01").AllowPeer(IPAddress.Loopback);
-        services.AddZabbixActiveAgent("roaming-01").AddServer("zbx-1").Configure(o => o.Hostname = "roamer");
+        services.AddZabbixActiveAgent("roaming-01").AddServer("zbx-1").Configure(o => o.HostName = "roamer");
         services.AddZabbixActiveAgent("roaming-01");                                             // a name registered again keeps what was set
         using ServiceProvider provider = services.BuildValidated();
 
-        Assert.Equal(("web-01", "other", "bound"), (named.Options.Hostname, configured.Options.Hostname, bound.Options.Hostname));
+        Assert.Equal(("web-01", "other", "bound"), (named.Options.HostName, configured.Options.HostName, bound.Options.HostName));
         Assert.Equal("web-01", configured.Name);                                                  // the name stays the agent's
-        Assert.Equal("edge-01", provider.GetRequiredService<IOptionsMonitor<ZabbixPushAgentOptions>>().Get("edge-01").Hostname);
-        Assert.Equal("probe-01", provider.GetRequiredService<IOptionsMonitor<ZabbixPassiveAgentOptions>>().Get("probe-01").Hostname);
-        Assert.Equal("roamer", provider.GetRequiredService<IOptionsMonitor<ZabbixActiveAgentOptions>>().Get("roaming-01").Hostname);
+        Assert.Equal("edge-01", provider.GetRequiredService<IOptionsMonitor<ZabbixPushAgentOptions>>().Get("edge-01").HostName);
+        Assert.Equal("probe-01", provider.GetRequiredService<IOptionsMonitor<ZabbixPassiveAgentOptions>>().Get("probe-01").HostName);
+        Assert.Equal("roamer", provider.GetRequiredService<IOptionsMonitor<ZabbixActiveAgentOptions>>().Get("roaming-01").HostName);
     }
 
     [Fact]
@@ -600,7 +613,7 @@ public sealed class FluentApiTests
     public async Task Each_proxy_s_builder_builds_the_proxy_it_describes()
     {
         await using ZabbixActiveProxy active = ZabbixActiveProxy.CreateBuilder("proxy-01")
-            .AddServer("zbx-1;zbx-2:10052")
+            .WithServer("zbx-1;zbx-2:10052")
             .AllowPeer(IPNetwork.Parse("10.0.0.0/8"))
             .AddTrapper(10060)
             .Configure(o => o.OfflineBuffer = TimeSpan.FromHours(24))
@@ -620,7 +633,7 @@ public sealed class FluentApiTests
     [Fact]
     public void A_proxy_s_builder_builds_once_and_what_it_built_does_not_change()
     {
-        ZabbixActiveProxyBuilder active = ZabbixActiveProxy.CreateBuilder("proxy-01").AddServer("zbx-1").AllowPeer(IPAddress.Loopback);
+        ZabbixActiveProxyBuilder active = ZabbixActiveProxy.CreateBuilder("proxy-01").WithServer("zbx-1").AllowPeer(IPAddress.Loopback);
         ZabbixPassiveProxyBuilder passive = ZabbixPassiveProxy.CreateBuilder("proxy-dmz").WithVersion("7.4").AllowPeer(IPAddress.Loopback);
         using ZabbixActiveProxy built = active.Build();
         using ZabbixPassiveProxy builtPassive = passive.Build();
@@ -649,26 +662,25 @@ public sealed class FluentApiTests
     }
 
     [Fact]
-    public void A_proxy_reports_to_one_server_or_one_cluster_so_a_second_add_server_is_refused()
+    public void A_proxy_reports_to_one_server_or_one_cluster_so_a_later_with_server_replaces_it()
     {
         // Zabbix's active proxy takes one Server, a node or one HA cluster's nodes joined by ';', and refuses a ',' at start
-        // (proxy.c zbx_validate_config). Each AddServer is one destination, as on an agent, so a second one is that comma.
-        using ZabbixActiveProxy joined = ZabbixActiveProxy.CreateBuilder("proxy-01").AddServer("zbx-1;zbx-2").AllowPeer(IPAddress.Loopback).Build();
-        using ZabbixActiveProxy nodes = ZabbixActiveProxy.CreateBuilder("proxy-01").AddServer(new DnsEndPoint("zbx-1", 10051), new DnsEndPoint("zbx-2", 10052)).AllowPeer(IPAddress.Loopback).Build();
-        InvalidOperationException twice = Assert.Throws<InvalidOperationException>(() =>
-            ZabbixActiveProxy.CreateBuilder("proxy-01").AddServer("zbx-1").AddServer("zbx-2").AllowPeer(IPAddress.Loopback).Build().Dispose());
+        // (proxy.c zbx_validate_config). WithServer sets that one server, so a second call replaces the first.
+        using ZabbixActiveProxy joined = ZabbixActiveProxy.CreateBuilder("proxy-01").WithServer("zbx-1;zbx-2").AllowPeer(IPAddress.Loopback).Build();
+        using ZabbixActiveProxy nodes = ZabbixActiveProxy.CreateBuilder("proxy-01").WithServer(new DnsEndPoint("zbx-1", 10051), new DnsEndPoint("zbx-2", 10052)).AllowPeer(IPAddress.Loopback).Build();
+        using ZabbixActiveProxy replaced = ZabbixActiveProxy.CreateBuilder("proxy-01").WithServer("zbx-1").WithServer("zbx-2").AllowPeer(IPAddress.Loopback).Build();
         var services = new ServiceCollection();
-        services.AddZabbixActiveProxy("proxy-02").AddServer("zbx-1").AddServer("zbx-2").AllowPeer(IPAddress.Loopback);
+        services.AddZabbixActiveProxy("proxy-02").WithServer("zbx-1").WithServer("zbx-2;zbx-3").AllowPeer(IPAddress.Loopback);
         using ServiceProvider provider = services.BuildServiceProvider();
         IConfiguration bound = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> { ["Server"] = "zbx-1,zbx-2", ["Trapper:AllowedPeers:0"] = "127.0.0.1" }).Build();
 
         Assert.Equal("zbx-1:10051;zbx-2:10051", joined.Options.Server);
         Assert.Equal("zbx-1:10051;zbx-2:10052", nodes.Options.Server);
-        Assert.Contains("names 2 servers", twice.Message, StringComparison.Ordinal);
-        Assert.Contains("one AddServer call", twice.Message, StringComparison.Ordinal);
-        Assert.Throws<OptionsValidationException>(() => provider.GetRequiredService<IOptionsMonitor<ZabbixProxyOptions>>().Get("proxy-02"));     // the host refuses it at start
-        Assert.Throws<InvalidOperationException>(() => ZabbixActiveProxy.CreateBuilder("proxy-03").Bind(bound).Build().Dispose());                  // a file's comma too
-        Assert.Throws<ArgumentException>(() => ZabbixActiveProxy.CreateBuilder("proxy-04").AddServer("zbx-1,zbx-2"));                              // where it is passed
+        Assert.Equal("zbx-2:10051", replaced.Options.Server);
+        Assert.Equal("zbx-2:10051;zbx-3:10051", provider.GetRequiredService<IOptionsMonitor<ZabbixProxyOptions>>().Get("proxy-02").Server);
+        InvalidOperationException comma = Assert.Throws<InvalidOperationException>(() => ZabbixActiveProxy.CreateBuilder("proxy-03").Bind(bound).Build().Dispose());  // a file's comma
+        Assert.Contains("names 2 servers", comma.Message, StringComparison.Ordinal);
+        Assert.Equal("server", Assert.Throws<ArgumentException>(() => ZabbixActiveProxy.CreateBuilder("proxy-04").WithServer("zbx-1,zbx-2")).ParamName);   // where it's passed
     }
 
     [Fact]
@@ -678,7 +690,7 @@ public sealed class FluentApiTests
             => builder.AllowPeer(IPNetwork.Parse("10.0.0.0/8")).AllowPeer(IPAddress.IPv6Loopback).AllowPeer("zbx.example");
 
         using ZabbixPassiveAgent agent = Peers(ZabbixPassiveAgent.CreateBuilder("web-01")).Build();
-        using ZabbixActiveProxy active = Peers(ZabbixActiveProxy.CreateBuilder("proxy-01").AddServer("zbx-1")).Build();
+        using ZabbixActiveProxy active = Peers(ZabbixActiveProxy.CreateBuilder("proxy-01").WithServer("zbx-1")).Build();
         using ZabbixPassiveProxy passive = Peers(ZabbixPassiveProxy.CreateBuilder("proxy-dmz").WithVersion("7.4")).Build();
         using Listening.ZabbixListener listener = Peers(Listening.ZabbixListener.CreateBuilder()).OnRequest((_, _) => ValueTask.FromResult(ReadOnlyMemory<byte>.Empty)).Build();
         var services = new ServiceCollection();
@@ -696,17 +708,19 @@ public sealed class FluentApiTests
     }
 
     // The one peer a listener's builder lets in.
-    private static string Peered(Listening.ZabbixListenerBuilder builder)
+    private static string Peered(Listening.ZabbixListenerBuilder builder) => Assert.Single(Listened(builder).AllowedPeers);
+
+    // The options a listener's builder holds, read from its container as Build reads them.
+    private static ZabbixListenerOptions Listened(Listening.ZabbixListenerBuilder builder)
     {
-        string? peer = null;
-        builder.Configure(options => peer = Assert.Single(options.AllowedPeers));
-        return peer!;
+        using ServiceProvider services = builder.Services.BuildServiceProvider();
+        return services.GetRequiredService<IOptionsMonitor<ZabbixListenerOptions>>().Get(builder.Name);
     }
 
     [Fact]
     public void With_psk_is_the_proxy_s_own_key_and_allow_psk_a_peer_s_both_kept_as_hex()
     {
-        using ZabbixActiveProxy active = ZabbixActiveProxy.CreateBuilder("proxy-01").AddServer("zbx-1").AllowPeer(IPAddress.Loopback)
+        using ZabbixActiveProxy active = ZabbixActiveProxy.CreateBuilder("proxy-01").WithServer("zbx-1").AllowPeer(IPAddress.Loopback)
             .WithPsk("proxy-01", Psk)
             .AllowPsk("web-01", Psk)
             .Build();
@@ -737,7 +751,7 @@ public sealed class FluentApiTests
     public async Task On_task_on_config_on_stats_and_add_provider_reach_the_proxy_they_build()
     {
         ZabbixProxyTaskCallback onTask = (task, _) => ValueTask.FromResult(new ZabbixProxyTaskResult(ZabbixProxyTaskType.RemoteCommandResult, task.Clock, task.Ttl, 0, "ok", 0));
-        Func<ZabbixProxyConfig, ZabbixProxyConfig, CancellationToken, ValueTask<string?>> onConfig = (_, _, _) => ValueTask.FromResult<string?>("not today");
+        Func<ZabbixProxyConfig, ZabbixProxyConfig, CancellationToken, ValueTask<ZabbixProxyConfigVerdict>> onConfig = (_, _, _) => ValueTask.FromResult(ZabbixProxyConfigVerdict.Refuse("not today"));
         ZabbixProxyDataCallback provider = (_, _) => ValueTask.FromResult<ZabbixProxyDataPage?>(null);
         await using ZabbixPassiveProxy proxy = ZabbixPassiveProxy.CreateBuilder("proxy-dmz")
             .WithVersion("7.4")
@@ -748,7 +762,7 @@ public sealed class FluentApiTests
             .OnStats((_, _) => ValueTask.FromResult<IReadOnlyDictionary<string, JsonElement>?>(new Dictionary<string, JsonElement> { ["uptime"] = JsonSerializer.SerializeToElement(42) }))
             .AddProvider(provider)
             .Build();
-        await using ZabbixActiveProxy active = ZabbixActiveProxy.CreateBuilder("proxy-01").AddServer("zbx-1").AllowPeer(IPAddress.Loopback).OnTask(onTask).AddProvider(provider).Build();
+        await using ZabbixActiveProxy active = ZabbixActiveProxy.CreateBuilder("proxy-01").WithServer("zbx-1").AllowPeer(IPAddress.Loopback).OnTask(onTask).AddProvider(provider).Build();
 
         await proxy.StartAsync(TestContext.Current.CancellationToken);
         JsonElement stats = await AskAsync(proxy, Stats);
@@ -795,7 +809,7 @@ public sealed class FluentApiTests
         Action<ZabbixListenerOptions> trapper = o => { o.AllowedPeers.Add("10.0.0.0/8"); o.MaxConcurrentConnections = 64; };
         var services = new ServiceCollection();
         services.AddZabbixPushAgent("relay").AddServer("zbx-1").AddTrapper(10052, trapper);
-        services.AddZabbixActiveProxy("proxy-01").AddServer("zbx-1").AddTrapper(10053, trapper);
+        services.AddZabbixActiveProxy("proxy-01").WithServer("zbx-1").AddTrapper(10053, trapper);
         services.AddZabbixPassiveProxy("proxy-dmz").WithVersion("7.4").AddTrapper(10054, trapper);
         using ServiceProvider provider = services.BuildValidated();
 
@@ -814,9 +828,9 @@ public sealed class FluentApiTests
                 .UseStore((policy, services) => new Storage.ZabbixMemoryStore<ZabbixValue>(policy, services))
                 .AddProvider((_, _) => ValueTask.FromResult<ZabbixProxyDataPage?>(null)).Configure(o => o.PageSize = 10);
         static TBuilder Active<TBuilder>(TBuilder builder) where TBuilder : IZabbixActiveProxyBuilder
-            => Shared(builder).AddServer("zbx-1;zbx-2").WithPsk("proxy-01", Psk);
+            => Shared(builder).WithServer("zbx-1;zbx-2").WithPsk("proxy-01", Psk);
         static TBuilder Passive<TBuilder>(TBuilder builder) where TBuilder : IZabbixPassiveProxyBuilder
-            => Shared(builder).WithVersion(new ZabbixComponentVersion(7, 4)).WithPsk("proxy-dmz", Psk).OnConfig((_, _, _) => ValueTask.FromResult<string?>(null));
+            => Shared(builder).WithVersion(new Version(7, 4)).WithPsk("proxy-dmz", Psk).OnConfig((_, _, _) => ValueTask.FromResult(ZabbixProxyConfigVerdict.Accepted));
 
         using ZabbixActiveProxy active = Active(ZabbixActiveProxy.CreateBuilder("proxy-01")).Build();
         using ZabbixPassiveProxy passive = Passive(ZabbixPassiveProxy.CreateBuilder("proxy-dmz")).Build();
@@ -843,10 +857,10 @@ public sealed class FluentApiTests
     [Fact]
     public void Use_entity_framework_store_serves_a_proxy_s_builder_as_it_serves_a_push_agent_s()
     {
-        using ZabbixActiveProxy proxy = ZabbixActiveProxy.CreateBuilder("proxy-01").AddServer("zbx-1").AllowPeer(IPAddress.Loopback)
+        using ZabbixActiveProxy proxy = ZabbixActiveProxy.CreateBuilder("proxy-01").WithServer("zbx-1").AllowPeer(IPAddress.Loopback)
             .UseEntityFrameworkStore(db => db.UseSqlite("Data Source=:memory:"))
             .Build();
-        using ZabbixActiveProxy memory = ZabbixActiveProxy.CreateBuilder("proxy-01").AddServer("zbx-1").AllowPeer(IPAddress.Loopback)
+        using ZabbixActiveProxy memory = ZabbixActiveProxy.CreateBuilder("proxy-01").WithServer("zbx-1").AllowPeer(IPAddress.Loopback)
             .UseEntityFrameworkStore(db => db.UseSqlite("Data Source=:memory:"))
             .UseMemoryStore()
             .Build();
@@ -859,7 +873,7 @@ public sealed class FluentApiTests
     public async Task A_proxy_s_health_check_is_its_role_s()
     {
         var services = new ServiceCollection();
-        services.AddZabbixActiveProxy("proxy-01").AddServer("zbx-1").AllowPeer(IPAddress.Loopback).AddHealthCheck();
+        services.AddZabbixActiveProxy("proxy-01").WithServer("zbx-1").AllowPeer(IPAddress.Loopback).AddHealthCheck();
         services.AddZabbixPassiveProxy("proxy-dmz").WithVersion("7.4").AllowPeer(IPAddress.Loopback).AddHealthCheck();
         await using ServiceProvider provider = services.BuildValidated();
 
@@ -943,6 +957,34 @@ public sealed class FluentApiTests
     }
 
     [Fact]
+    public async Task A_listener_takes_what_its_builder_s_container_holds_and_disposes_that_container_but_not_the_application_s_logging()
+    {
+        LoggerFactory? built = null;
+        using var application = new LoggerFactory();
+        Listening.ZabbixListenerBuilder owned = Listening.ZabbixListener.CreateBuilder()
+            .AllowPeer(IPAddress.Loopback)
+            .OnRequest((_, _) => ValueTask.FromResult(ReadOnlyMemory<byte>.Empty));
+        owned.Services.AddSingleton<ILoggerFactory>(_ => built = new LoggerFactory());     // the container builds it, so owns it
+        Listening.ZabbixListenerBuilder given = Listening.ZabbixListener.CreateBuilder()
+            .AllowPeer(IPAddress.Loopback)
+            .UseLogging(application)
+            .OnRequest((_, _) => ValueTask.FromResult(ReadOnlyMemory<byte>.Empty));
+
+        await using (owned.Build())
+        {
+            Assert.NotNull(built);                                                         // Build read it from the container
+            Assert.Throws<InvalidOperationException>(() => owned.Services.AddSingleton(TimeProvider.System));   // fixed once built
+        }
+        await using (given.Build())
+        {
+        }
+
+        Assert.Equal(Options.DefaultName, owned.Name);
+        Assert.Throws<ObjectDisposedException>(() => built!.CreateLogger("after"));        // went with the listener
+        Assert.NotNull(application.CreateLogger("after"));                                  // the application's stays its own
+    }
+
+    [Fact]
     public void A_listener_s_socket_transport_port_binds_every_interface_and_its_credentials_set_what_it_accepts()
     {
         Listening.ZabbixListenerBuilder builder = Listening.ZabbixListener.CreateBuilder()
@@ -951,10 +993,9 @@ public sealed class FluentApiTests
             .AllowPeer(IPAddress.Loopback)
             .WithCertificate("/etc/zabbix/listener.crt", "/etc/zabbix/listener.key", "/etc/zabbix/ca.crt")
             .AllowPsk("web-01", Psk);
-        ZabbixListenerOptions? seen = null;
-        builder.Configure(o => seen = o);
+        ZabbixListenerOptions seen = Listened(builder);
 
-        Assert.Equal(("0.0.0.0", 10062), (seen!.Address, seen.Port));
+        Assert.Equal(("0.0.0.0", 10062), (seen.Address, seen.Port));
 
         Assert.Equal(ZabbixTlsAcceptModes.Certificate | ZabbixTlsAcceptModes.Psk, seen.TlsAccept);
         Assert.Equal(("/etc/zabbix/listener.crt", "/etc/zabbix/listener.key", "/etc/zabbix/ca.crt"), (seen.Tls!.CertificateFile, seen.Tls.KeyFile, seen.Tls.CaFile));

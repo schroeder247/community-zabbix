@@ -73,8 +73,7 @@ public sealed class CallerScenarioTests
         _ = load + free;
 
         using ZabbixWireClient secured = ZabbixWireClient.CreateBuilder()
-            .AddServer("zbx-1")
-            .AddServer("zbx-2")
+            .WithServer("zbx-1;zbx-2")
             .WithPsk("web-01", Convert.FromHexString("0123456789abcdef0123456789abcdef"))
             .WithTimeout(TimeSpan.FromSeconds(5))
             .Build();

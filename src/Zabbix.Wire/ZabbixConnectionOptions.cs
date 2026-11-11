@@ -43,6 +43,16 @@ public sealed class ZabbixConnectionOptions : IValidatableObject
     /// <summary>The cap a reply is read with: <see cref="MaxPayloadBytes"/> when set; otherwise <see cref="DefaultMaxPayloadBytes"/>, or the large cap where a large frame is accepted.</summary>
     internal long? ReplyCap(bool allowLarge) => MaxPayloadBytes ?? (allowLarge ? null : DefaultMaxPayloadBytes);
 
+    /// <summary>A copy that changes to these options don't reach.</summary>
+    /// <returns>The copy, with a copy of <see cref="Tls"/>.</returns>
+    internal ZabbixConnectionOptions Clone() => new()
+    {
+        Timeout = Timeout,
+        Tls = Tls?.Clone(),
+        Compress = Compress,
+        MaxPayloadBytes = MaxPayloadBytes,
+    };
+
     /// <inheritdoc/>
     /// <remarks>
     /// <see cref="Timeout"/> is checked here and not by a <see cref="RangeAttribute"/>: a range over a

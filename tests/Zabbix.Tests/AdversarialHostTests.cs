@@ -152,7 +152,7 @@ public sealed class AdversarialHostTests
         services.AddZabbixActiveAgent("adv").AddServer(new DnsEndPoint(node.Host, node.Port)).AddItem("adv.one", _ => "1").AddItem("adv.two", _ => "2")
             .Configure(o =>
             {
-                o.Hostname = "adv-01";
+                o.HostName = "adv-01";
                 o.Connection.Timeout = TimeSpan.FromDays(1);
                 o.RefreshInterval = TimeSpan.FromDays(1);
                 o.HeartbeatInterval = TimeSpan.Zero;
@@ -230,12 +230,12 @@ public sealed class AdversarialHostTests
     public async Task A_health_check_reports_a_dead_destination_even_after_the_wall_clock_stepped_back()
     {
         var clock = new AdversarialSteppedClock(DateTimeOffset.FromUnixTimeSeconds(1_700_000_000));
-        var status = new ZabbixAgentStatus("adv");
+        var status = new ZabbixComponentStatus("adv");
         await using var store = new ZabbixMemoryStore<ZabbixValue>();
         status.Attach(store);
         status.Report(new ZabbixSendProgress(ZabbixSendOutcome.Delivered, 1, clock.GetUtcNow()));
         store.TryWrite(new ZabbixValue("h", "k", "1", clock.GetUtcNow()));
-        var check = new ZabbixAgentHealthCheck(status, clock) { StaleAfter = TimeSpan.FromMinutes(5) };
+        var check = new ZabbixComponentHealthCheck(status, clock) { StaleAfter = TimeSpan.FromMinutes(5) };
         clock.Step(TimeSpan.FromHours(-1));                                                 // NTP steps the wall clock back
         clock.Advance(TimeSpan.FromMinutes(10));                                            // ten real minutes with nothing delivered
 
@@ -269,7 +269,7 @@ public sealed class AdversarialHostTests
         collection.AddMetrics();
         services?.Invoke(collection);
         IZabbixActiveProxyBuilder proxy = collection.AddZabbixActiveProxy("adv-proxy")
-            .AddServer(server.ToDnsEndPoint())
+            .WithServer(server.ToDnsEndPoint())
             .AddTrapper(0, o => o.Address = "127.0.0.1")
             .AllowPeer(System.Net.IPAddress.Loopback)
             .Configure(o => { o.DataInterval = TimeSpan.FromMilliseconds(20); o.ConfigInterval = TimeSpan.FromMinutes(1); configure?.Invoke(o); });

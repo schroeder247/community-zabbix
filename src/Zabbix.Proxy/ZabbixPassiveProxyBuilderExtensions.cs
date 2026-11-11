@@ -51,13 +51,21 @@ public static class ZabbixPassiveProxyBuilderExtensions
 
         /// <summary>
         /// Shows each configuration the server pushes to <paramref name="handler"/> before it replaces the one held, which it
-        /// may refuse: a reason refuses it, and the server reads the reason in its <c>failed</c> answer, and
-        /// <see langword="null"/> takes it. Without it, every configuration is taken. A later <c>OnConfig</c> replaces it.
+        /// may refuse: <see cref="ZabbixProxyConfigVerdict.Refuse"/> keeps the one held, and the server reads the reason in
+        /// the proxy's <c>failed</c> answer; <see cref="ZabbixProxyConfigVerdict.Accepted"/> takes it. Without it, every
+        /// configuration is taken. A later <c>OnConfig</c> replaces it.
         /// </summary>
-        /// <param name="handler">Takes the configuration pushed and the one held, and answers why it refuses, or <see langword="null"/>.</param>
+        /// <param name="handler">Takes the configuration pushed and the one held, and answers whether to take it.</param>
         /// <returns>The builder.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="handler"/> is <see langword="null"/>.</exception>
-        public TBuilder OnConfig(Func<ZabbixProxyConfig, ZabbixProxyConfig, CancellationToken, ValueTask<string?>> handler)
+        /// <example>
+        /// <code language="csharp">
+        /// builder.OnConfig((incoming, held, cancellationToken) => ValueTask.FromResult(incoming.Hosts.Count > 10_000
+        ///     ? ZabbixProxyConfigVerdict.Refuse("This proxy takes at most 10,000 hosts.")
+        ///     : ZabbixProxyConfigVerdict.Accepted));
+        /// </code>
+        /// </example>
+        public TBuilder OnConfig(Func<ZabbixProxyConfig, ZabbixProxyConfig, CancellationToken, ValueTask<ZabbixProxyConfigVerdict>> handler)
         {
             ArgumentNullException.ThrowIfNull(builder);
             ArgumentNullException.ThrowIfNull(handler);
@@ -92,11 +100,11 @@ public static class ZabbixPassiveProxyBuilderExtensions
         {
             ArgumentNullException.ThrowIfNull(builder);
             string name = builder.Name;
-            ZabbixAgentHealthChecks.Add(builder.Services, "zabbix-passive-proxy-" + name, provider =>
+            ZabbixComponentHealthChecks.Add(builder.Services, "zabbix-passive-proxy-" + name, provider =>
             {
                 ZabbixPassiveProxy proxy = provider.GetRequiredKeyedService<ZabbixPassiveProxy>(name);
                 return new ZabbixListenerHealthCheck(proxy.Name, "proxy", () => proxy.Listener);
-            }, ZabbixAgentHealthChecks.Proxy);
+            }, ZabbixComponentHealthChecks.Proxy);
             return builder;
         }
     }

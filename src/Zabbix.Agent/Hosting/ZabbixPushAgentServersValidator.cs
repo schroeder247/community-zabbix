@@ -16,8 +16,8 @@ internal sealed class ZabbixPushAgentServersValidator : IValidateOptions<ZabbixP
         ArgumentNullException.ThrowIfNull(options);
         // An agent's sources run on a cadence: a slow sender must cost counted drops, never a late poll.
         if (options.Overflow == BoundedChannelFullMode.Wait) return ValidateOptionsResult.Fail("Overflow cannot be Wait for an agent: its sources are on a schedule; use DropOldest or DropWrite");
-        if (options.ReportsForHost && string.IsNullOrWhiteSpace(options.Hostname))
-            return ValidateOptionsResult.Fail("Hostname is required: the agent's typed polls and meters report for it");
+        if (options.ReportsForHost && string.IsNullOrWhiteSpace(options.HostName))
+            return ValidateOptionsResult.Fail("HostName is required: the agent's typed polls and meters report for it");
         return ZabbixServerActiveValidation.Validate(options.ServerActive);
     }
 }

@@ -22,8 +22,8 @@ public sealed class ModuleRedactionTests
     private static void Log(ILoggerFactory loggers)
     {
         ILogger logger = loggers.CreateLogger("Community.Zabbix.Tests.Probe");
-        WireLog.GetterRefused(logger, "agent:10050", ZabbixItemKey.Parse("system.uptime", null), PeerInfo);
-        WireLog.GetterRefused(logger, "agent:10050", ZabbixItemKey.Parse("web.page.get[intranet,/admin,user:hunter2]", null), PeerInfo);
+        WireLog.GetterRefused(logger, "agent:10050", ZabbixItemKey.Parse("system.uptime"), PeerInfo);
+        WireLog.GetterRefused(logger, "agent:10050", ZabbixItemKey.Parse("web.page.get[intranet,/admin,user:hunter2]"), PeerInfo);
     }
 
     private static string[] Messages(ZabbixPowerShellLoggerProvider logs)

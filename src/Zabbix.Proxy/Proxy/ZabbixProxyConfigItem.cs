@@ -12,7 +12,7 @@ namespace Community.Zabbix.Proxy;
 /// <param name="AllowTraps">For an HTTP agent item: whether it also takes traps.</param>
 /// <param name="Delay">The update interval, macros unresolved; what <c>active checks</c> answers with.</param>
 /// <param name="Timeout">The item's own check timeout, macros unresolved; <see langword="null"/> when the item has none.</param>
-public sealed record ZabbixProxyConfigItem(ulong ItemId, ulong HostId, string Key, ZabbixProxyItemType Type, ZabbixProxyItemStatus Status, IReadOnlyList<ZabbixPeer> TrapperHosts, bool AllowTraps, ZabbixInterval Delay = default, ZabbixDuration? Timeout = null)
+public sealed record ZabbixProxyConfigItem(ulong ItemId, ulong HostId, string Key, ZabbixItemType Type, ZabbixItemStatus Status, IReadOnlyList<ZabbixPeer> TrapperHosts, bool AllowTraps, ZabbixInterval Delay = default, ZabbixDuration? Timeout = null)
 {
     /// <summary>Whether <paramref name="other"/> is the same item: every member equal, the trapper hosts in the same order.</summary>
     /// <param name="other">The item to compare with this one; <see langword="null"/> is never equal.</param>

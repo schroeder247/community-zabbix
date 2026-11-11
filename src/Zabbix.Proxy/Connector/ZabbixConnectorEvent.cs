@@ -15,9 +15,9 @@ public sealed record ZabbixConnectorEvent : ZabbixConnectorRecord
     [JsonPropertyName("name")]
     public string? Name { get; init; }
 
-    /// <summary>The severity.</summary>
+    /// <summary>The event's severity, as the API's problems carry it.</summary>
     [JsonPropertyName("severity")]
-    public int? Severity { get; init; }
+    public ZabbixSeverity? Severity { get; init; }
 
     /// <summary>1 for a problem, 0 for its recovery.</summary>
     [JsonPropertyName("value")]

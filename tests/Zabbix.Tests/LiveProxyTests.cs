@@ -27,7 +27,7 @@ public sealed class LiveProxyTests
         LiveFixtures.LiveItem active = await LiveFixtures.ItemAsync(scope, host, "zbxtest.answer", ZabbixItemValueType.Unsigned, ZabbixItemType.ZabbixActive, ""","delay":"1s" """);
 
         IHost app = await LiveHosting.StartAsync(services => services.AddZabbixActiveProxy(proxyName)
-            .AddServer(new System.Net.DnsEndPoint(trapper.Host, trapper.Port))
+            .WithServer(new System.Net.DnsEndPoint(trapper.Host, trapper.Port))
             .AddTrapper(0, o => o.Address = "127.0.0.1")
             .AllowPeer(System.Net.IPAddress.Loopback)
             .Configure(o => { o.ConfigInterval = TimeSpan.FromSeconds(1); o.DataInterval = TimeSpan.FromSeconds(1); }));
@@ -57,7 +57,7 @@ public sealed class LiveProxyTests
             agent = await LiveHosting.StartAsync(services => services.AddZabbixActiveAgent("zbx")
                 .AddServer(new DnsEndPoint("127.0.0.1", port))
                 .AddItem("zbxtest.answer", _ => "44")
-                .Configure(o => { o.Hostname = host.Host; o.RefreshInterval = TimeSpan.FromSeconds(1); o.HeartbeatInterval = TimeSpan.Zero; o.Send.FlushInterval = TimeSpan.FromSeconds(1); }));
+                .Configure(o => { o.HostName = host.Host; o.RefreshInterval = TimeSpan.FromSeconds(1); o.HeartbeatInterval = TimeSpan.Zero; o.Send.FlushInterval = TimeSpan.FromSeconds(1); }));
 
             Assert.Equal((1, 0), (sent.Processed, sent.Failed));
             Assert.Equal("2.5", trapped[0].Value);
@@ -92,7 +92,7 @@ public sealed class LiveProxyTests
         await using var relay = new LiveRelay(trapper, payload => payload.Contains("\"history data\"", StringComparison.Ordinal) && payload.Contains("\"itemid\":" + host["zbxtest.trap"].ItemId, StringComparison.Ordinal) && Interlocked.Exchange(ref cuts, 1) == 0);
 
         IHost app = await LiveHosting.StartAsync(services => services.AddZabbixActiveProxy(proxyName)
-            .AddServer(new System.Net.DnsEndPoint(relay.Node.Host, relay.Node.Port))
+            .WithServer(new System.Net.DnsEndPoint(relay.Node.Host, relay.Node.Port))
             .AddTrapper(0, o => o.Address = "127.0.0.1")
             .AllowPeer(System.Net.IPAddress.Loopback)
             .Configure(o => { o.ConfigInterval = TimeSpan.FromSeconds(1); o.DataInterval = TimeSpan.FromSeconds(1); }));
@@ -155,7 +155,7 @@ public sealed class LiveProxyTests
             await LiveFixtures.SendWhenKnownAsync(direct, [new ZabbixValue(cached.Host, "zbxtest.probe", "1", DateTimeOffset.UtcNow)]);
 
         IHost app = await LiveHosting.StartAsync(services => services.AddZabbixActiveProxy(proxyName)
-            .AddServer(new System.Net.DnsEndPoint(trapper.Host, trapper.Port))
+            .WithServer(new System.Net.DnsEndPoint(trapper.Host, trapper.Port))
             .AddTrapper(0, o => o.Address = "127.0.0.1")
             .AllowPeer(System.Net.IPAddress.Loopback)
             .Configure(o => { o.ConfigInterval = TimeSpan.FromSeconds(1); o.DataInterval = TimeSpan.FromSeconds(1); }));
@@ -201,7 +201,7 @@ public sealed class LiveProxyTests
         ulong dcheckId = ulong.Parse(check[0].GetProperty("dcheckid").GetString()!, System.Globalization.CultureInfo.InvariantCulture);
 
         IHost app = await LiveHosting.StartAsync(services => services.AddZabbixActiveProxy(proxyName)
-            .AddServer(new System.Net.DnsEndPoint(trapper.Host, trapper.Port))
+            .WithServer(new System.Net.DnsEndPoint(trapper.Host, trapper.Port))
             .AddTrapper(0, o => o.Address = "127.0.0.1")
             .AllowPeer(System.Net.IPAddress.Loopback)
             .Configure(o => { o.ConfigInterval = TimeSpan.FromSeconds(1); o.DataInterval = TimeSpan.FromSeconds(1); }));

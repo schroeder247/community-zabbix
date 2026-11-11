@@ -180,7 +180,7 @@ public sealed class AdversarialStressHostTests
         builder.Services.AddZabbixActiveAgent("stress")
             .AddServer(new DnsEndPoint(first.Node.Host, first.Node.Port)).AddServer(new DnsEndPoint(second.Node.Host, second.Node.Port))
             .AddItem("stress.value", key => key.Parameters.Count > 0 ? key.Parameters[0] : "0")
-            .Configure(o => { o.Hostname = "stress-01"; o.HeartbeatInterval = TimeSpan.Zero; o.Send.BatchSize = 10; o.Send.FlushInterval = TimeSpan.FromMilliseconds(20); });
+            .Configure(o => { o.HostName = "stress-01"; o.HeartbeatInterval = TimeSpan.Zero; o.Send.BatchSize = 10; o.Send.FlushInterval = TimeSpan.FromMilliseconds(20); });
         using IHost host = builder.Build();
         await host.StartAsync(TestContext.Current.CancellationToken);
         using var producers = new CancellationTokenSource();                                          // the agent's own checks are the producers here
@@ -209,7 +209,7 @@ public sealed class AdversarialStressHostTests
             await server.StartAsync();
             HostApplicationBuilder builder = Builder();
             builder.Services.AddZabbixActiveProxy("stress-proxy")
-                .AddServer(server.Node.ToDnsEndPoint())
+                .WithServer(server.Node.ToDnsEndPoint())
                 .AddTrapper(0, o => o.Address = "127.0.0.1")
                 .AllowPeer(IPAddress.Loopback)
                 .UseEntityFrameworkStore(o => o.UseSqlite($"Data Source={file};Pooling=False"))
@@ -305,7 +305,7 @@ public sealed class AdversarialStressHostTests
     public async Task A_passive_agent_under_many_getters_stopped_mid_traffic_ends_every_conversation()
     {
         HostApplicationBuilder builder = Builder();
-        builder.Services.AddZabbixPassiveAgent("stress").Configure(o => { o.Address = "127.0.0.1"; o.Port = 0; o.Hostname = "stress-01"; o.AllowedPeers.Add("127.0.0.1"); });
+        builder.Services.AddZabbixPassiveAgent("stress").Configure(o => { o.Address = "127.0.0.1"; o.Port = 0; o.HostName = "stress-01"; o.AllowedPeers.Add("127.0.0.1"); });
         using IHost host = builder.Build();
         await host.StartAsync(TestContext.Current.CancellationToken);
         var bound = (IPEndPoint)host.Services.GetRequiredKeyedService<ZabbixPassiveAgent>("stress").Listener!.LocalEndPoint!;
@@ -416,7 +416,7 @@ public sealed class AdversarialStressHostTests
         {
             "agent" => (object)services.AddZabbixPushAgent("never").AddTrapper(0, o => o.AllowedPeers.Add("127.0.0.1")).AddServer(new DnsEndPoint("127.0.0.1", 1)),
             "active agent" => services.AddZabbixActiveAgent("never").AddServer(new DnsEndPoint("127.0.0.1", 1)),
-            "proxy" => services.AddZabbixActiveProxy("never").AddServer(new DnsEndPoint("127.0.0.1", 1)).AddTrapper(0).AllowPeer(IPAddress.Loopback),
+            "proxy" => services.AddZabbixActiveProxy("never").WithServer(new DnsEndPoint("127.0.0.1", 1)).AddTrapper(0).AllowPeer(IPAddress.Loopback),
             "passive proxy" => services.AddZabbixPassiveProxy("never").AddTrapper(0).AllowPeer(IPAddress.Loopback).WithVersion("7.4.0"),
             "passive agent" => services.AddZabbixPassiveAgent("never").Configure(o => { o.Port = 0; o.AllowedPeers.Add("127.0.0.1"); }),
             _ => throw new ArgumentOutOfRangeException(nameof(registration), registration, "no such registration"),

@@ -84,8 +84,11 @@ public sealed partial class DesignConformanceTests
     /// The proxy is the one library on the ASP.NET Core shared framework, for the connection layer its listeners accept on
     /// and the routing its connector endpoint maps onto the caller's application. Its compiled references name exactly the
     /// ASP.NET Core assemblies that serves: a new one (MVC, a web host, authentication) is a decision, not a drift. From
-    /// <c>Zabbix.Api</c> it takes three generated words: <c>ZabbixTlsAcceptModes</c> (a listener's <c>TlsAccept</c>) and
-    /// <c>ZabbixTag</c> with its <c>ZabbixTagOrigin</c> (the connector's item and event tags).
+    /// <c>Zabbix.Api</c> it takes generated words, never a copy of one
+    /// (docs/adr/0013-builders-verbs-and-typed-values.md, section 7): a listener's <c>ZabbixTlsAcceptModes</c>; the
+    /// connector's <c>ZabbixTag</c> with its <c>ZabbixTagOrigin</c>, <c>ZabbixSeverity</c> and <c>ZabbixItemValueType</c>;
+    /// the proxy configuration's <c>ZabbixHostStatus</c>, <c>ZabbixItemStatus</c> and <c>ZabbixItemType</c>; and the
+    /// <c>ZabbixProxyOperatingMode</c> a configured proxy runs in.
     /// </summary>
     private static readonly string[] ProxyAspNetCoreAssemblies =
     [
@@ -94,13 +97,18 @@ public sealed partial class DesignConformanceTests
     ];
 
     [Fact]
-    public void The_proxy_takes_the_aspnetcore_connection_and_routing_layer_and_three_api_words_only()
+    public void The_proxy_takes_the_aspnetcore_connection_and_routing_layer_and_the_api_words_it_names_only()
     {
         (List<string> assemblies, List<string> apiTypes) = References("Zabbix.Proxy");
 
         Assert.Equal(["Microsoft.AspNetCore.App", "Microsoft.NETCore.App"], FrameworkReferences("Zabbix.Proxy"));
         Assert.Equal(ProxyAspNetCoreAssemblies.AsEnumerable(), assemblies.Where(name => name.StartsWith("Microsoft.AspNetCore.", StringComparison.Ordinal)));
-        Assert.Equal(["Community.Zabbix.ZabbixTag", "Community.Zabbix.ZabbixTagOrigin", "Community.Zabbix.ZabbixTlsAcceptModes"], apiTypes);
+        Assert.Equal(
+        [
+            "Community.Zabbix.ZabbixHostStatus", "Community.Zabbix.ZabbixItemStatus", "Community.Zabbix.ZabbixItemType",
+            "Community.Zabbix.ZabbixItemValueType", "Community.Zabbix.ZabbixProxyOperatingMode", "Community.Zabbix.ZabbixSeverity",
+            "Community.Zabbix.ZabbixTag", "Community.Zabbix.ZabbixTagOrigin", "Community.Zabbix.ZabbixTlsAcceptModes",
+        ], apiTypes);
     }
 
     /// <summary>

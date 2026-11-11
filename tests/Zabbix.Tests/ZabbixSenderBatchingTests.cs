@@ -206,9 +206,9 @@ public sealed class ZabbixSenderBatchingTests
         List<byte[]> sent = [];
         using var sender = new ZabbixSender(Recording(sent), "scripted") { BatchSize = 2 };
 
-        ZabbixDelivery delivery = await sender.DeliverAsync(Values(5), TestContext.Current.CancellationToken);
+        ZabbixSendOutcome delivery = await sender.DeliverAsync(Values(5), TestContext.Current.CancellationToken);
 
-        Assert.Equal(ZabbixDelivery.Delivered, delivery);
+        Assert.Equal(ZabbixSendOutcome.Delivered, delivery);
         Assert.Equal(5, MockTrapper.Values(Assert.Single(sent)));
     }
 

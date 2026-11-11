@@ -21,7 +21,7 @@ namespace Community.Zabbix;
 /// <example>
 /// <code language="csharp">
 /// await using ZabbixActiveProxy proxy = ZabbixActiveProxy.CreateBuilder("proxy-01")
-///     .AddServer("zbx-server-01")
+///     .WithServer("zbx-server-01")
 ///     .AllowPeer(IPNetwork.Parse("10.0.0.0/8"))
 ///     .Build();
 /// await proxy.StartAsync();

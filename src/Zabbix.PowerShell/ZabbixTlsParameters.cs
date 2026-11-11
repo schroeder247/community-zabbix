@@ -68,7 +68,7 @@ internal static class ZabbixTlsParameters
     public static void Check(ZabbixTlsOptions tls, TimeProvider time)
     {
         ArgumentNullException.ThrowIfNull(tls);
-        using var probe = new ZabbixWireLink([new DnsEndPoint("localhost", ZabbixWireClient.DefaultServerPort)], new ZabbixConnectionOptions { Tls = tls }, time, logger: null);
+        using var probe = new ZabbixWireLink([new DnsEndPoint("localhost", ZabbixWireClient.DefaultServerPort)], new ZabbixConnectionOptions { Tls = tls }, loggers: null, time);
     }
 
     /// <summary>

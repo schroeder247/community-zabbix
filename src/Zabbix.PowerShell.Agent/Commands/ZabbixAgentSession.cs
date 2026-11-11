@@ -27,12 +27,12 @@ public sealed class ZabbixAgentSession : IZabbixSession, IZabbixLoggedSession
     private ZabbixScriptRunspace? _bridge;
     private int _stopped;
 
-    private ZabbixAgentSession(string name, string kind, string hostname, DateTimeOffset started, ZabbixSessionHost host, IReadOnlyList<ZabbixAgentStatus> statuses, ZabbixListener? listener,
+    private ZabbixAgentSession(string name, string kind, string hostName, DateTimeOffset started, ZabbixSessionHost host, IReadOnlyList<ZabbixComponentStatus> statuses, ZabbixListener? listener,
         ZabbixItemDictionary handlers)
     {
         Name = name;
         Kind = kind;
-        Hostname = hostname;
+        HostName = hostName;
         Started = started;
         _host = host;
         AgentStatus = statuses.Count > 0 ? statuses[0] : null;
@@ -63,7 +63,7 @@ public sealed class ZabbixAgentSession : IZabbixSession, IZabbixLoggedSession
             .ToFrozenSet(StringComparer.Ordinal);
 
     /// <summary>What <c>agent.hostname</c> answers, and (for an active agent) the host the server assigns items to — the same value <c>Initialize-ZbxAgentHost</c> defaults <c>-HostName</c> to.</summary>
-    internal string Hostname { get; }
+    internal string HostName { get; }
 
     /// <summary>
     /// What <c>Initialize-</c>/<c>Publish-ZbxAgentHost</c> provisioned on the server for this session — the host,
@@ -134,13 +134,13 @@ public sealed class ZabbixAgentSession : IZabbixSession, IZabbixLoggedSession
     public DateTimeOffset Started { get; }
 
     /// <summary>What an active agent's send loop is doing (deliveries, drops, faults) for its first destination; <see langword="null"/> for a passive agent.</summary>
-    public ZabbixAgentStatus? AgentStatus { get; }
+    public ZabbixComponentStatus? AgentStatus { get; }
 
     /// <summary>
     /// What an active agent's send loop is doing for each of its destinations, in <c>-Server</c> order: one per
     /// <c>,</c>-separated destination, each with its own connection and delivery accounting; empty for a passive agent.
     /// </summary>
-    public IReadOnlyList<ZabbixAgentStatus> DestinationStatus { get; }
+    public IReadOnlyList<ZabbixComponentStatus> DestinationStatus { get; }
 
     /// <summary>A passive agent's listener (its local endpoint, connections in flight); <see langword="null"/> for an active agent.</summary>
     public ZabbixListener? Listener { get; }
@@ -168,7 +168,7 @@ public sealed class ZabbixAgentSession : IZabbixSession, IZabbixLoggedSession
             return new ZabbixSessionComponent(agent.StartAsync, agent.StopAsync, agent.DisposeAsync);
         }, cancellationToken).ConfigureAwait(false);
         ZabbixActiveAgent started = agent ?? throw new System.Diagnostics.UnreachableException("The session builds its agent before it returns.");
-        return new ZabbixAgentSession(name, "active", started.Options.Hostname, time.GetUtcNow(), host, started.Statuses, listener: null, started.Items);
+        return new ZabbixAgentSession(name, "active", started.Options.HostName, time.GetUtcNow(), host, started.Statuses, listener: null, started.Items);
     }
 
     /// <summary>A passive agent: the SDK's class, built by its builder, its listener on the SDK's socket transport.</summary>
@@ -188,7 +188,7 @@ public sealed class ZabbixAgentSession : IZabbixSession, IZabbixLoggedSession
             return new ZabbixSessionComponent(agent.StartAsync, agent.StopAsync, agent.DisposeAsync);
         }, cancellationToken).ConfigureAwait(false);
         ZabbixPassiveAgent started = agent ?? throw new System.Diagnostics.UnreachableException("The session builds its agent before it returns.");
-        return new ZabbixAgentSession(name, "passive", started.Options.Hostname, time.GetUtcNow(), host, statuses: [], started.Listener, started.Items);
+        return new ZabbixAgentSession(name, "passive", started.Options.HostName, time.GetUtcNow(), host, statuses: [], started.Listener, started.Items);
     }
 
     /// <inheritdoc/>

@@ -38,7 +38,7 @@ internal sealed class ZabbixProxyDataSender
     private readonly ZabbixProxyTelemetry _telemetry;
     private readonly ILogger _logger;
     private readonly TimeProvider _time;
-    private readonly ZabbixAgentStatus? _status;
+    private readonly ZabbixComponentStatus? _status;
     private readonly List<ZabbixStoreEntry<ZabbixValue>> _history;
     private readonly List<ZabbixStoreEntry<ZabbixProxyDiscoveryItem>> _discovery = [];
     private readonly List<ZabbixStoreEntry<ZabbixProxyAutoregistrationItem>> _autoregistration = [];
@@ -56,7 +56,7 @@ internal sealed class ZabbixProxyDataSender
     public delegate Task<ZabbixProxyResponse> Exchange(ZabbixProxyDataPage page, bool more, long delay, CancellationToken cancellationToken);
 
     public ZabbixProxyDataSender(string proxy, ZabbixProxyStores stores, int pageSize, Func<ZabbixProxyConfig> config, Func<IReadOnlyList<ZabbixProxyDataCallback>> providers,
-        Func<ZabbixProxyTaskCallback?> taskHandler, ZabbixProxyTelemetry telemetry, ILogger logger, TimeProvider time, ZabbixAgentStatus? status)
+        Func<ZabbixProxyTaskCallback?> taskHandler, ZabbixProxyTelemetry telemetry, ILogger logger, TimeProvider time, ZabbixComponentStatus? status)
     {
         _proxy = proxy;
         _stores = stores;

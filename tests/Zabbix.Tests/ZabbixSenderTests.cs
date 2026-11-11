@@ -133,9 +133,9 @@ public sealed class ZabbixSenderTests
         listener.Stop();
         using var sender = new ZabbixSender([new ZabbixServerNode("127.0.0.1", port)], new ZabbixConnectionOptions { Timeout = RefusedWithin });
 
-        ZabbixDelivery delivery = await sender.DeliverAsync([new ZabbixValue("h", "k", "1", DateTimeOffset.UnixEpoch)], TestContext.Current.CancellationToken);
+        ZabbixSendOutcome delivery = await sender.DeliverAsync([new ZabbixValue("h", "k", "1", DateTimeOffset.UnixEpoch)], TestContext.Current.CancellationToken);
 
-        Assert.Equal(ZabbixDelivery.Retried, delivery);
+        Assert.Equal(ZabbixSendOutcome.Retried, delivery);
     }
 
     [Fact]
@@ -156,9 +156,9 @@ public sealed class ZabbixSenderTests
         var logs = new FakeLogCollector();
         using var sender = new ZabbixSender([new ZabbixServerNode("127.0.0.1", port)], null, null, new FakeLogger<ZabbixSender>(logs));
 
-        ZabbixDelivery delivery = await sender.DeliverAsync([new ZabbixValue("h", "k", "1", DateTimeOffset.UnixEpoch)], TestContext.Current.CancellationToken);
+        ZabbixSendOutcome delivery = await sender.DeliverAsync([new ZabbixValue("h", "k", "1", DateTimeOffset.UnixEpoch)], TestContext.Current.CancellationToken);
 
-        Assert.Equal(ZabbixDelivery.Rejected, delivery);
+        Assert.Equal(ZabbixSendOutcome.Rejected, delivery);
         Assert.Contains("sender data", await request, StringComparison.Ordinal);
         FakeLogRecord refused = Assert.Single(logs.GetSnapshot(), record => record.Id.Id == 1007);
         Assert.Equal(LogLevel.Warning, refused.Level);
@@ -175,7 +175,7 @@ public sealed class ZabbixSenderTests
         ZabbixTrapperRefusedException refused = await Assert.ThrowsAsync<ZabbixTrapperRefusedException>(() => sender.SendAsync([new ZabbixValue("h", "k", "1", DateTimeOffset.UnixEpoch)], TestContext.Current.CancellationToken));
 
         Assert.True(refused.IsPaused);
-        Assert.Equal(ZabbixDelivery.Retried, await sender.DeliverAsync([new ZabbixValue("h", "k", "1", DateTimeOffset.UnixEpoch)], TestContext.Current.CancellationToken));
+        Assert.Equal(ZabbixSendOutcome.Retried, await sender.DeliverAsync([new ZabbixValue("h", "k", "1", DateTimeOffset.UnixEpoch)], TestContext.Current.CancellationToken));
     }
 
     [Fact]

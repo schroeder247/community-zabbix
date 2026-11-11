@@ -18,8 +18,8 @@ dotnet add package Community.Zabbix.Proxy    # what listens
 ```csharp
 byte[] key = Convert.FromHexString(File.ReadAllText("/etc/zabbix/web-01.psk").Trim());   // a TLSPSKFile holds the key as hex
 
-using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder()
-    .AddServer("zabbix.example")
+await using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder()
+    .WithServer("zabbix.example")
     .WithPsk("web-01", key)
     .Build();
 ```
@@ -87,7 +87,7 @@ A proxy's builder takes the proxy's own key as bytes, as Zabbix's `TLSPSKIdentit
 using System.Net;
 
 await using ZabbixActiveProxy proxy = ZabbixActiveProxy.CreateBuilder("proxy-01")
-    .AddServer("zabbix.example")
+    .WithServer("zabbix.example")
     .AllowPeer(IPNetwork.Parse("10.0.0.0/8"))
     .WithPsk("proxy-01", proxyKey)
     .Build();

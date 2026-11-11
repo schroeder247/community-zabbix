@@ -589,7 +589,7 @@ public sealed class BundledItemsTests : IDisposable
         return resolved;
     }
 
-    private static ZabbixItemKey Key(string text) => ZabbixItemKey.Parse(text, null);
+    private static ZabbixItemKey Key(string text) => ZabbixItemKey.Parse(text);
 
     // Each key within a deadline, as an agent asks it: a service that never answers is down, not a hung test.
     [Fact]

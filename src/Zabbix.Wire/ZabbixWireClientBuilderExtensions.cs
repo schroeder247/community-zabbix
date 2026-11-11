@@ -2,6 +2,7 @@
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
+using Community.Zabbix.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -28,31 +29,44 @@ public static class ZabbixWireClientBuilderExtensions
     extension<TBuilder>(TBuilder builder) where TBuilder : IZabbixWireClientBuilder
     {
         /// <summary>
-        /// Adds a node of the server or proxy, tried after the nodes added before it: the nodes of an HA cluster, or a proxy and
-        /// its fallback. The client moves to the next node only when it can't connect to one.
+        /// Sets the server or proxy the client talks to, in Zabbix's spelling: one node, or the nodes of one HA cluster joined
+        /// by <c>;</c>, tried in order. The client moves to the next node only when it can't connect to one. A client has one
+        /// server, so a later call replaces it.
         /// </summary>
-        /// <param name="server">The node to add: its host name or IP address, and its port.</param>
+        /// <param name="server">
+        /// The server: <c>host</c> or <c>host:port</c>, on port 10051 when it names none, or the nodes of one HA cluster:
+        /// <c>"zbx-1;zbx-2"</c>. An IPv6 address with a port is bracketed: <c>[::1]:10051</c>.
+        /// </param>
         /// <returns>The builder.</returns>
-        /// <exception cref="ArgumentException">The node's host is neither an IP address nor a host name, or its port is 0.</exception>
-        public TBuilder AddServer(DnsEndPoint server)
+        /// <exception cref="ArgumentException"><paramref name="server"/> is empty, isn't a node, names a node twice, or names more than one server (<c>,</c>).</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="server"/> is <see langword="null"/>.</exception>
+        public TBuilder WithServer(string server)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            ArgumentNullException.ThrowIfNull(server);
-            string node = ZabbixEndPoint.Format(server);
-            builder.Services.Configure<ZabbixWireOptions>(builder.Name, options => options.Server = string.IsNullOrWhiteSpace(options.Server) ? node : $"{options.Server};{node}");
+            string text = ZabbixServerActiveText.Server(server, nameof(server));
+            builder.Services.Configure<ZabbixWireOptions>(builder.Name, options => options.Server = text);
             return builder;
         }
 
-        /// <summary>Adds a node of the server or proxy, in Zabbix's spelling, tried after the nodes added before it.</summary>
-        /// <param name="server">
-        /// The node: <c>host</c> or <c>host:port</c>, on port 10051 when it names none. An IPv6 address with a port is bracketed:
-        /// <c>[::1]:10051</c>.
-        /// </param>
+        /// <summary>
+        /// Sets the server or proxy the client talks to: one node, or the nodes of one HA cluster, tried in order. A client has
+        /// one server, so a later call replaces it.
+        /// </summary>
+        /// <param name="nodes">The server's nodes, in failover order: their host names or IP addresses, and their ports.</param>
         /// <returns>The builder.</returns>
-        /// <exception cref="ArgumentException"><paramref name="server"/> is empty, or doesn't name one node.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="server"/> is <see langword="null"/>.</exception>
-        public TBuilder AddServer(string server)
-            => builder.AddServer(ZabbixServerNode.Parse(server, ZabbixServerNode.DefaultPort, nameof(server)).ToDnsEndPoint());
+        /// <exception cref="ArgumentException">No node, a node named twice, or a node that isn't a host and port.</exception>
+        /// <example>
+        /// <code language="csharp">
+        /// builder.WithServer(new DnsEndPoint("zbx-1", 10051), new DnsEndPoint("zbx-2", 10051));
+        /// </code>
+        /// </example>
+        public TBuilder WithServer(params ReadOnlySpan<DnsEndPoint> nodes)
+        {
+            ArgumentNullException.ThrowIfNull(builder);
+            string text = ZabbixServerActiveText.Destination(nodes, nameof(nodes));
+            builder.Services.Configure<ZabbixWireOptions>(builder.Name, options => options.Server = text);
+            return builder;
+        }
 
         /// <summary>
         /// Sets the API token that the server's requests carry: the ping, the status, the queue, and the tests. A

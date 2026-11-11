@@ -53,7 +53,7 @@ public sealed class ProxyTests
         services.AddLogging(logging => logging.AddFakeLogging().SetMinimumLevel(LogLevel.Debug));
         services.AddMetrics();
         IZabbixActiveProxyBuilder proxy = services.AddZabbixActiveProxy("proxy-01")
-            .AddServer(server.ToDnsEndPoint())
+            .WithServer(server.ToDnsEndPoint())
             .AddTrapper(0, o => o.Address = "127.0.0.1")
             .AllowPeer(IPAddress.Loopback)
             .Configure(o => { o.DataInterval = TimeSpan.FromMilliseconds(20); o.ConfigInterval = TimeSpan.FromMinutes(1); configure?.Invoke(o); });
@@ -109,7 +109,7 @@ public sealed class ProxyTests
         await using Running proxy = await StartAsync(server.Node);
         using var exchanges = new MetricCollector<double>(proxy.Provider.GetRequiredService<IMeterFactory>(), ZabbixTelemetryNames.Wire, ZabbixWireTelemetry.DurationInstrument);
 
-        proxy.Proxy.DiscoveryStore!.TryWrite(new ZabbixProxyDiscoveryItem(DateTimeOffset.FromUnixTimeSeconds(1_700_000_000), DruleId: 5, DcheckId: 6, Ip: "10.0.0.1", Dns: null, Port: 22, Value: "ssh", Status: 0));
+        proxy.Proxy.DiscoveryStore!.TryWrite(new ZabbixProxyDiscoveryItem(DateTimeOffset.FromUnixTimeSeconds(1_700_000_000), NetworkDiscoveryRuleId: 5, NetworkDiscoveryCheckId: 6, Ip: "10.0.0.1", Dns: null, Port: 22, Value: "ssh", Status: 0));
         await exchanges.WaitForMeasurementsAsync(1, TestContext.Current.CancellationToken).WaitAsync(TimeSpan.FromSeconds(30), TestContext.Current.CancellationToken);   // the upload it causes
 
         Assert.All(exchanges.GetMeasurementSnapshot(), sample => Assert.True(sample.Value >= 0));
@@ -122,7 +122,7 @@ public sealed class ProxyTests
         await using Running proxy = await StartAsync(server.Node);
         using var records = new MetricCollector<long>(proxy.Provider.GetRequiredService<IMeterFactory>(), ZabbixTelemetryNames.Proxy, ZabbixProxyTelemetry.ValuesInstrument);
 
-        proxy.Proxy.DiscoveryStore!.TryWrite(new ZabbixProxyDiscoveryItem(DateTimeOffset.FromUnixTimeSeconds(1_700_000_000), DruleId: 5, DcheckId: 6, Ip: "10.0.0.1", Dns: null, Port: 22, Value: "ssh", Status: 0));
+        proxy.Proxy.DiscoveryStore!.TryWrite(new ZabbixProxyDiscoveryItem(DateTimeOffset.FromUnixTimeSeconds(1_700_000_000), NetworkDiscoveryRuleId: 5, NetworkDiscoveryCheckId: 6, Ip: "10.0.0.1", Dns: null, Port: 22, Value: "ssh", Status: 0));
         using ZabbixSender sender = proxy.Sender();
         await sender.SendAsync([new ZabbixValue("web-01", "cpu", "0.5", DateTimeOffset.FromUnixTimeSeconds(1_700_000_000))], TestContext.Current.CancellationToken);
         while (true)
@@ -144,7 +144,7 @@ public sealed class ProxyTests
         await using FakeZabbixServer server = await ServerAsync();
         await using Running proxy = await StartAsync(server.Node);
 
-        proxy.Proxy.DiscoveryStore!.TryWrite(new ZabbixProxyDiscoveryItem(DateTimeOffset.FromUnixTimeSeconds(1_700_000_000), DruleId: 5, DcheckId: 6, Ip: "10.0.0.1", Dns: null, Port: 22, Value: "ssh", Status: 0));
+        proxy.Proxy.DiscoveryStore!.TryWrite(new ZabbixProxyDiscoveryItem(DateTimeOffset.FromUnixTimeSeconds(1_700_000_000), NetworkDiscoveryRuleId: 5, NetworkDiscoveryCheckId: 6, Ip: "10.0.0.1", Dns: null, Port: 22, Value: "ssh", Status: 0));
         proxy.Proxy.AutoregistrationStore!.TryWrite(new ZabbixProxyAutoregistrationItem(DateTimeOffset.FromUnixTimeSeconds(1_700_000_000), "new-host", Ip: "10.0.0.2", Dns: null, Port: 10050, HostMetadata: "linux", Flags: 0, TlsAccepted: 1));
 
         JsonElement page = await FrameAsync(server, "discovery data");
@@ -175,8 +175,8 @@ public sealed class ProxyTests
     {
         await using FakeZabbixServer server = await ServerAsync();
         await using Running proxy = await StartAsync(server.Node);
-        var found = new ZabbixProxyDiscoveredHost(DruleId: 5, Ip: "10.0.0.1", Clock: DateTimeOffset.FromUnixTimeSeconds(1_700_000_000),
-            Services: [new ZabbixProxyDiscoveredService(DcheckId: 6, Port: 22, IsUp: true, Value: "ssh"), new ZabbixProxyDiscoveredService(DcheckId: 7, Port: 80, IsUp: false)],
+        var found = new ZabbixProxyDiscoveredHost(NetworkDiscoveryRuleId: 5, Ip: "10.0.0.1", Clock: DateTimeOffset.FromUnixTimeSeconds(1_700_000_000),
+            Services: [new ZabbixProxyDiscoveredService(NetworkDiscoveryCheckId: 6, Port: 22, IsUp: true, Value: "ssh"), new ZabbixProxyDiscoveredService(NetworkDiscoveryCheckId: 7, Port: 80, IsUp: false)],
             Dns: "web-01.example");
 
         await proxy.Proxy.DiscoveryStore!.WriteAsync(found, TestContext.Current.CancellationToken);
@@ -205,8 +205,8 @@ public sealed class ProxyTests
         await using Running proxy = await StartAsync(server.Node, o => o.PageSize = 1);
         using var records = new MetricCollector<long>(proxy.Provider.GetRequiredService<IMeterFactory>(), ZabbixTelemetryNames.Proxy, ZabbixProxyTelemetry.ValuesInstrument);
 
-        // With DcheckId a long, only null! still writes a row the server cannot read: here, one without its ip.
-        proxy.Proxy.DiscoveryStore!.TryWrite(new ZabbixProxyDiscoveryItem(DateTimeOffset.FromUnixTimeSeconds(1_700_000_000), DruleId: 5, DcheckId: 6, Ip: null!, Dns: null, Port: 22, Value: "ssh", Status: 0));
+        // With NetworkDiscoveryCheckId a long, only null! still writes a row the server cannot read: here, one without its ip.
+        proxy.Proxy.DiscoveryStore!.TryWrite(new ZabbixProxyDiscoveryItem(DateTimeOffset.FromUnixTimeSeconds(1_700_000_000), NetworkDiscoveryRuleId: 5, NetworkDiscoveryCheckId: 6, Ip: null!, Dns: null, Port: 22, Value: "ssh", Status: 0));
         using ZabbixSender sender = proxy.Sender();
         await sender.SendAsync([new ZabbixValue("web-01", "cpu", "1", DateTimeOffset.UnixEpoch)], TestContext.Current.CancellationToken);
         using ZabbixSender second = proxy.Sender();
@@ -235,7 +235,7 @@ public sealed class ProxyTests
         server.RefuseProxy = true;
         await using Running proxy = await StartAsync(server.Node);
 
-        proxy.Proxy.DiscoveryStore!.TryWrite(new ZabbixProxyDiscoveryItem(DateTimeOffset.FromUnixTimeSeconds(1_700_000_000), DruleId: 5, DcheckId: 6, Ip: "10.0.0.1", Dns: null, Port: 22, Value: "ssh", Status: 0));
+        proxy.Proxy.DiscoveryStore!.TryWrite(new ZabbixProxyDiscoveryItem(DateTimeOffset.FromUnixTimeSeconds(1_700_000_000), NetworkDiscoveryRuleId: 5, NetworkDiscoveryCheckId: 6, Ip: "10.0.0.1", Dns: null, Port: 22, Value: "ssh", Status: 0));
         using ZabbixSender sender2 = proxy.Sender();
         await sender2.SendAsync([new ZabbixValue("web-01", "cpu", "1", DateTimeOffset.UnixEpoch)], TestContext.Current.CancellationToken);
         JsonElement both;
@@ -328,7 +328,7 @@ public sealed class ProxyTests
         await using FakeZabbixServer server = await ServerAsync("7.0.31");
         await using Running proxy = await StartAsync(server.Node);                           // announces 7.4.0 first
 
-        Assert.Equal(new ZabbixComponentVersion(7, 0, 31), proxy.Proxy.Uplink!.Version);
+        Assert.Equal(new Version(7, 0, 31), proxy.Proxy.Uplink!.Version);
         Assert.Single(proxy.Proxy.Config.Items);
         FakeLogRecord refused = Assert.Single(proxy.Logs.GetSnapshot(), record => record.Id.Id == 7002);
         Assert.Equal(LogLevel.Warning, refused.Level);
@@ -453,7 +453,7 @@ public sealed class ProxyTests
     public void An_invalid_version_or_offline_buffer_fails_at_start()
     {
         var services = new ServiceCollection();
-        services.AddZabbixActiveProxy("proxy-01").AddServer("zbx").Configure(o => { o.Version = "latest"; o.OfflineBuffer = TimeSpan.FromMinutes(5); });
+        services.AddZabbixActiveProxy("proxy-01").WithServer("zbx").Configure(o => { o.Version = "latest"; o.OfflineBuffer = TimeSpan.FromMinutes(5); });
         using ServiceProvider provider = services.BuildValidated();
 
         var failure = Assert.Throws<Microsoft.Extensions.Options.OptionsValidationException>(() => provider.GetRequiredService<Microsoft.Extensions.Options.IOptionsMonitor<ZabbixProxyOptions>>().Get("proxy-01"));
@@ -517,7 +517,7 @@ public sealed class ProxyTests
         services.AddLogging();
         services.AddMetrics();
         services.AddZabbixActiveAgent("edge").AddServer(new DnsEndPoint(bound.Address.ToString(), bound.Port)).AddItem("agent.answer", _ => "44")
-            .Configure(o => { o.Hostname = "web-01"; o.RefreshInterval = TimeSpan.FromMinutes(1); o.HeartbeatInterval = TimeSpan.Zero; o.Send.FlushInterval = TimeSpan.FromMilliseconds(50); });
+            .Configure(o => { o.HostName = "web-01"; o.RefreshInterval = TimeSpan.FromMinutes(1); o.HeartbeatInterval = TimeSpan.Zero; o.Send.FlushInterval = TimeSpan.FromMilliseconds(50); });
         await using ServiceProvider agent = services.BuildValidated();
         var hosted = (IHostedLifecycleService)agent.GetServices<IHostedService>().Single();
         await hosted.StartingAsync(TestContext.Current.CancellationToken);

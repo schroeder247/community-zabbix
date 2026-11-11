@@ -49,7 +49,7 @@ public sealed class GetZbxAgentItemCommand : ZabbixWireCmdlet
         // what certificate mode read.
         if (!TryRun(_ => Task.FromResult(ZabbixWireLinks.Open([node], connection, time, loggers.Factory)), out ZabbixWireLink? link, node)) return;
         using ZabbixWireLink owned = link;
-        using var wire = new ZabbixWireClient(owned.AsExchange(followRedirects: false), new ZabbixWireOptions(), loggers.Factory, time);
+        using var wire = new ZabbixWireClient(owned.AsExchange(), new ZabbixWireOptions(), loggers.Factory, time);
         foreach (string key in Key!)
         {
             if (TryRun(cancellationToken => wire.GetAgentItemAsync(ZabbixEndPoint.Format(node), key, cancellationToken), out ZabbixAgentAnswer? answer, key))

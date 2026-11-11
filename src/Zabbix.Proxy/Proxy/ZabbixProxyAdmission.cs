@@ -40,7 +40,7 @@ public sealed partial class ZabbixProxyAdmission
     private ZabbixProxyAdmission(ZabbixProxyConfig config, ZabbixComponentVersion protocol, FrozenDictionary<ulong, PeerList> peers)
     {
         _config = config;
-        Protocol = protocol;
+        ProtocolVersion = protocol;
         _peers = peers;
     }
 
@@ -50,19 +50,36 @@ public sealed partial class ZabbixProxyAdmission
     /// <summary>The configuration the rule was built from.</summary>
     public ZabbixProxyConfig Config => _config;
 
-    /// <summary>The protocol version whose rules apply.</summary>
-    public ZabbixComponentVersion Protocol { get; }
+    /// <summary>Gets the protocol version whose rules apply.</summary>
+    public Version Protocol => ProtocolVersion.ToVersion();
+
+    /// <summary>The protocol version whose rules apply, as the protocol compares it.</summary>
+    internal ZabbixComponentVersion ProtocolVersion { get; }
 
     /// <summary>
     /// Builds the rule for a configuration: resolves every trap item's <c>trapper_hosts</c> (macros, then DNS names)
     /// once, so a trap costs a lookup and a prefix compare.
     /// </summary>
-    /// <param name="config">The configuration.</param>
+    /// <param name="config">The proxy's configuration, whose trap items' <c>trapper_hosts</c> the rule resolves.</param>
     /// <param name="protocol">The protocol version the proxy speaks.</param>
     /// <param name="resolve">DNS; <see cref="Dns.GetHostAddressesAsync(string, CancellationToken)"/> when <see langword="null"/>.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The rule.</returns>
-    public static ValueTask<ZabbixProxyAdmission> BuildAsync(ZabbixProxyConfig config, ZabbixComponentVersion protocol, ZabbixPeerResolverCallback? resolve = null, CancellationToken cancellationToken = default)
+    /// <exception cref="ArgumentNullException"><paramref name="config"/> or <paramref name="protocol"/> is <see langword="null"/>.</exception>
+    public static ValueTask<ZabbixProxyAdmission> BuildAsync(ZabbixProxyConfig config, Version protocol, ZabbixPeerResolverCallback? resolve = null, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(config);
+        ArgumentNullException.ThrowIfNull(protocol);
+        return BuildCoreAsync(config, ZabbixComponentVersion.FromVersion(protocol), resolve, cancellationToken);
+    }
+
+    /// <summary>Builds the rule for a configuration, for the protocol version as the protocol compares it.</summary>
+    /// <param name="config">The proxy's configuration, whose trap items' <c>trapper_hosts</c> the rule resolves.</param>
+    /// <param name="protocol">The protocol version the proxy speaks.</param>
+    /// <param name="resolve">DNS; the system's when <see langword="null"/>.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>The rule.</returns>
+    internal static ValueTask<ZabbixProxyAdmission> BuildAsync(ZabbixProxyConfig config, ZabbixComponentVersion protocol, ZabbixPeerResolverCallback? resolve, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(config);
         return BuildCoreAsync(config, protocol, resolve, cancellationToken);
@@ -80,7 +97,7 @@ public sealed partial class ZabbixProxyAdmission
         var peers = new Dictionary<ulong, PeerList>();
         foreach (ZabbixProxyConfigItem item in config.Items.Values)
         {
-            if (item.Type is not (ZabbixProxyItemType.Trapper or ZabbixProxyItemType.HttpAgent)) continue;
+            if (item.Type is not (ZabbixItemType.Trapper or ZabbixItemType.HttpAgent)) continue;
             if (item.TrapperHosts.Count == 0 && !strict)
             {
                 peers[item.ItemId] = PeerList.Everyone;
@@ -105,8 +122,8 @@ public sealed partial class ZabbixProxyAdmission
     {
         ArgumentNullException.ThrowIfNull(value);
         return _config.ItemsByKey.TryGetValue((value.Host, value.Key.ToString()), out ZabbixProxyConfigItem? item)
-               && item.Status == ZabbixProxyItemStatus.Active && _config.Hosts[item.HostId].Status == ZabbixProxyHostStatus.Monitored
-               && item.Type is ZabbixProxyItemType.Trapper or ZabbixProxyItemType.HttpAgent or ZabbixProxyItemType.ZabbixAgentActive;
+               && item.Status == ZabbixItemStatus.Active && _config.Hosts[item.HostId].Status == ZabbixHostStatus.Enabled
+               && item.Type is ZabbixItemType.Trapper or ZabbixItemType.HttpAgent or ZabbixItemType.ZabbixActive;
     }
 
     /// <summary>The whole rule for one value of one request: why it is refused, or <see langword="null"/> when it is admitted.</summary>
@@ -118,16 +135,16 @@ public sealed partial class ZabbixProxyAdmission
     {
         ArgumentNullException.ThrowIfNull(value);
         if (!_config.ItemsByKey.TryGetValue((value.Host, value.Key.ToString()), out ZabbixProxyConfigItem? item)) return "no such host and key in the configuration";
-        if (_config.Hosts[item.HostId].Status != ZabbixProxyHostStatus.Monitored) return "the host is not monitored";
-        if (item.Status != ZabbixProxyItemStatus.Active) return "the item is disabled";
+        if (_config.Hosts[item.HostId].Status != ZabbixHostStatus.Enabled) return "the host is not monitored";
+        if (item.Status != ZabbixItemStatus.Active) return "the item is disabled";
         if (string.Equals(request, "agent data", StringComparison.Ordinal))
-            return item.Type == ZabbixProxyItemType.ZabbixAgentActive ? null : string.Create(CultureInfo.InvariantCulture, $"item type \"{(int)item.Type}\" does not take agent data");
+            return item.Type == ZabbixItemType.ZabbixActive ? null : string.Create(CultureInfo.InvariantCulture, $"item type \"{(int)item.Type}\" does not take agent data");
         switch (item.Type)
         {
-            case ZabbixProxyItemType.HttpAgent when !item.AllowTraps:
+            case ZabbixItemType.HttpAgent when !item.AllowTraps:
                 return "trapping is not enabled";
-            case ZabbixProxyItemType.HttpAgent:
-            case ZabbixProxyItemType.Trapper:
+            case ZabbixItemType.HttpAgent:
+            case ZabbixItemType.Trapper:
                 break;
             default:
                 return string.Create(CultureInfo.InvariantCulture, $"item type \"{(int)item.Type}\" cannot be used with traps");

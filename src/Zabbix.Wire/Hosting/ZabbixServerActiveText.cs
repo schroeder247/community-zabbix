@@ -6,8 +6,9 @@ using System.Net;
 namespace Community.Zabbix.Hosting;
 
 /// <summary>
-/// <c>ServerActive</c> text written by the builders' <c>AddServer</c>: each call one destination, <c>,</c>-joined after the
-/// ones before it, its HA nodes <c>;</c>-joined. The options' validator parses the whole at start.
+/// Server text written by the builders' verbs: an agent's <c>AddServer</c> adds one destination, <c>,</c>-joined after the
+/// ones before it, and a <c>WithServer</c> sets the one server of a wire client or an active proxy. A destination's HA
+/// nodes are <c>;</c>-joined. The options' validator parses the whole at start.
 /// </summary>
 internal static class ZabbixServerActiveText
 {
@@ -17,20 +18,24 @@ internal static class ZabbixServerActiveText
     public static string Add(string? serverActive, string destination)
         => string.IsNullOrWhiteSpace(serverActive) ? destination : $"{serverActive},{destination}";
 
-    /// <summary>One destination in Zabbix's spelling: a node, or the HA nodes of one cluster, <c>;</c>-joined.</summary>
-    /// <param name="server">The text.</param>
+    /// <summary>One destination in Zabbix's spelling, for an agent's <c>AddServer</c>: a node, or the HA nodes of one cluster, <c>;</c>-joined.</summary>
+    /// <param name="server">The text: a node, or the nodes of one cluster joined by <c>;</c>.</param>
     /// <param name="parameter">The caller's parameter, which an exception names.</param>
     /// <returns>The destination's nodes, each with its port.</returns>
     /// <exception cref="ArgumentException">The text isn't one destination.</exception>
     public static string Destination(string server, string parameter)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(server, parameter);
-        if (!ZabbixServerActive.TryParse(server, CultureInfo.InvariantCulture, out ZabbixServerActive? parsed, out string? error))
-            throw new ArgumentException(error, parameter);
-        if (parsed.Count != 1)
-            throw new ArgumentException($"\"{server}\" names {parsed.Count} destinations, and each AddServer adds one: call it once for each.", parameter);
-        return parsed.ToString();
-    }
+        => One(server, parameter, "and each AddServer adds one: call it once for each");
+
+    /// <summary>
+    /// The one server of a wire client or an active proxy, in Zabbix's spelling, for <c>WithServer</c>: a node, or the HA
+    /// nodes of one cluster, <c>;</c>-joined.
+    /// </summary>
+    /// <param name="server">The text: a node, or the nodes of one cluster joined by <c>;</c>.</param>
+    /// <param name="parameter">The caller's parameter, which an exception names.</param>
+    /// <returns>The server's nodes, each with its port.</returns>
+    /// <exception cref="ArgumentException">The text isn't one server.</exception>
+    public static string Server(string server, string parameter)
+        => One(server, parameter, "and this talks to one server or proxy: you must join the nodes of an HA cluster with ';'");
 
     /// <summary>One destination of <paramref name="nodes"/>, in failover order.</summary>
     /// <param name="nodes">The nodes; two or more are one HA cluster.</param>
@@ -54,5 +59,15 @@ internal static class ZabbixServerActiveText
         {
             throw new ArgumentException(refused.Message, parameter, refused);
         }
+    }
+
+    private static string One(string server, string parameter, string why)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(server, parameter);
+        if (!ZabbixServerActive.TryParse(server, CultureInfo.InvariantCulture, out ZabbixServerActive? parsed, out string? error))
+            throw new ArgumentException(error, parameter);
+        if (parsed.Count != 1)
+            throw new ArgumentException($"\"{server}\" names {parsed.Count} destinations, {why}.", parameter);
+        return parsed.ToString();
     }
 }

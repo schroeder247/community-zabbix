@@ -20,7 +20,7 @@ public sealed class AgentItemsTests
     public async Task A_key_added_to_a_registered_agent_after_the_start_is_answered()
     {
         using IHost host = await TestHost.StartAsync(services => services.AddZabbixPassiveAgent("edge")
-            .Configure(o => { o.Address = "127.0.0.1"; o.Port = 0; o.Hostname = "edge-01"; o.AllowedPeers.Add("127.0.0.1"); }), Ct);
+            .Configure(o => { o.Address = "127.0.0.1"; o.Port = 0; o.HostName = "edge-01"; o.AllowedPeers.Add("127.0.0.1"); }), Ct);
         try
         {
             ZabbixPassiveAgent agent = host.Services.GetRequiredKeyedService<ZabbixPassiveAgent>("edge");
@@ -70,27 +70,29 @@ public sealed class AgentItemsTests
     [InlineData(-7L, "-7")]
     public async Task A_whole_number_answer_is_formatted_as_Zabbix_reads_it(long value, string expected)
     {
-        var items = new ZabbixItemDictionary().Add("app.count", _ => value).Add("app.count.async", (_, _) => ValueTask.FromResult(value));
+        var items = new ZabbixItemDictionary()
+            .Add(new ZabbixItemKey<long>("app.count"), _ => value)
+            .Add(new ZabbixItemKey<long>("app.count.async"), (_, _) => ValueTask.FromResult(value));
 
-        Assert.Equal(expected, (await items.AnswerAsync(ZabbixItemKey.Parse("app.count", null), TimeSpan.FromSeconds(3), Ct)).Value);
-        Assert.Equal(expected, (await items.AnswerAsync(ZabbixItemKey.Parse("app.count.async", null), TimeSpan.FromSeconds(3), Ct)).Value);
+        Assert.Equal(expected, (await items.AnswerAsync(ZabbixItemKey.Parse("app.count"), TimeSpan.FromSeconds(3), Ct)).Value);
+        Assert.Equal(expected, (await items.AnswerAsync(ZabbixItemKey.Parse("app.count.async"), TimeSpan.FromSeconds(3), Ct)).Value);
     }
 
     [Fact]
     public async Task A_number_answer_ignores_the_current_culture_and_refuses_what_Zabbix_cannot_store()
     {
-        var items = new ZabbixItemDictionary().Add("app.ratio", _ => 1.5).Add("app.nan", _ => double.NaN);
+        var items = new ZabbixItemDictionary().Add(new ZabbixItemKey<double>("app.ratio"), () => 1.5).Add(new ZabbixItemKey<double>("app.nan"), () => double.NaN);
         System.Globalization.CultureInfo before = System.Globalization.CultureInfo.CurrentCulture;
         System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.GetCultureInfo("de-DE");
         try
         {
-            Assert.Equal("1.5", (await items.AnswerAsync(ZabbixItemKey.Parse("app.ratio", null), TimeSpan.FromSeconds(3), Ct)).Value);
+            Assert.Equal("1.5", (await items.AnswerAsync(ZabbixItemKey.Parse("app.ratio"), TimeSpan.FromSeconds(3), Ct)).Value);
         }
         finally
         {
             System.Globalization.CultureInfo.CurrentCulture = before;
         }
-        Assert.False((await items.AnswerAsync(ZabbixItemKey.Parse("app.nan", null), TimeSpan.FromSeconds(3), Ct)).IsSupported);
+        Assert.False((await items.AnswerAsync(ZabbixItemKey.Parse("app.nan"), TimeSpan.FromSeconds(3), Ct)).IsSupported);
     }
 
     [Fact]
@@ -115,13 +117,13 @@ public sealed class AgentItemsTests
         await denying.StartAsync(Ct);
         await answering.StartAsync(Ct);
 
-        Assert.False((await denying.Items.AnswerAsync(ZabbixItemKey.Parse("agent.ping", null), TimeSpan.FromSeconds(3), Ct)).IsSupported);
-        Assert.Equal("1", (await answering.Items.AnswerAsync(ZabbixItemKey.Parse("agent.ping", null), TimeSpan.FromSeconds(3), Ct)).Value);
+        Assert.False((await denying.Items.AnswerAsync(ZabbixItemKey.Parse("agent.ping"), TimeSpan.FromSeconds(3), Ct)).IsSupported);
+        Assert.Equal("1", (await answering.Items.AnswerAsync(ZabbixItemKey.Parse("agent.ping"), TimeSpan.FromSeconds(3), Ct)).Value);
     }
 
     private static ZabbixPassiveAgentOptions Loopback(string hostname, params string[] rules)
     {
-        var options = new ZabbixPassiveAgentOptions { Hostname = hostname, Address = "127.0.0.1", Port = 0 };
+        var options = new ZabbixPassiveAgentOptions { HostName = hostname, Address = "127.0.0.1", Port = 0 };
         options.AllowedPeers.Add("127.0.0.1");
         foreach (string rule in rules) options.KeyRules.Add(rule);
         return options;

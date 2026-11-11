@@ -14,10 +14,13 @@ namespace Community.Zabbix.Hosting;
 /// flush cadence, and delivers each batch in order, so the source is paced by the wire.
 /// </summary>
 /// <remarks>
-/// <para><see cref="ZabbixDelivery.Delivered"/> and <see cref="ZabbixDelivery.Rejected"/> end a batch;
-/// <see cref="ZabbixDelivery.Retried"/>, <see cref="ZabbixDelivery.Held"/> and a handler that throws keep it and offer it
-/// again after an exponential backoff with jitter (a throw is also logged at Error, event 3100). A cancellation the
-/// handler throws is the handler's failure (a client's own timeout), not a stop: only the loop's own token stops it.</para>
+/// <para>A delivery answers a batch with a <see cref="ZabbixSendOutcome"/>. <see cref="ZabbixSendOutcome.Delivered"/> and
+/// <see cref="ZabbixSendOutcome.Rejected"/> end a batch; <see cref="ZabbixSendOutcome.Retried"/>,
+/// <see cref="ZabbixSendOutcome.Held"/> and a handler that throws keep it and offer it again after an exponential backoff with
+/// jitter (a throw is also logged at Error, event 3100). <see cref="ZabbixSendOutcome.Returned"/> and
+/// <see cref="ZabbixSendOutcome.Abandoned"/> are what a stopping loop reports, so a delivery that answers with one is the
+/// handler's defect, as a throw is. A cancellation the handler throws is the handler's failure (a client's own timeout), not
+/// a stop: only the loop's own token stops it.</para>
 /// <para>
 /// A store is read through its acknowledged face: a batch is leased, and acknowledged once it has its final answer, so a
 /// durable store keeps a batch in flight until the destination took it. Any other source is read as a stream.
@@ -36,7 +39,7 @@ public static class ZabbixSendLoop
     /// <param name="source">The values.</param>
     /// <param name="deliver">The destination.</param>
     /// <returns>How many values were delivered or rejected: every value that reached a final answer.</returns>
-    public static Task<long> RunAsync<T>(IAsyncEnumerable<T> source, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixDelivery>> deliver)
+    public static Task<long> RunAsync<T>(IAsyncEnumerable<T> source, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixSendOutcome>> deliver)
         => RunAsync(source, deliver, CancellationToken.None);
 
     /// <summary>Runs until <paramref name="source"/> ends.</summary>
@@ -45,7 +48,7 @@ public static class ZabbixSendLoop
     /// <param name="deliver">The destination.</param>
     /// <param name="options">The batching, the backoff, the drain window, the clock, the logger, and where progress goes.</param>
     /// <returns>How many values were delivered or rejected: every value that reached a final answer.</returns>
-    public static Task<long> RunAsync<T>(IAsyncEnumerable<T> source, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixDelivery>> deliver, ZabbixSendLoopOptions options)
+    public static Task<long> RunAsync<T>(IAsyncEnumerable<T> source, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixSendOutcome>> deliver, ZabbixSendLoopOptions options)
         => RunAsync(source, deliver, options, CancellationToken.None);
 
     /// <summary>Runs until <paramref name="store"/> is complete and empty, with the default options.</summary>
@@ -53,7 +56,7 @@ public static class ZabbixSendLoop
     /// <param name="store">The store, read through its acknowledged face.</param>
     /// <param name="deliver">The destination.</param>
     /// <returns>How many values were delivered or rejected: every value that reached a final answer.</returns>
-    public static Task<long> RunAsync<T>(ZabbixStore<T> store, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixDelivery>> deliver)
+    public static Task<long> RunAsync<T>(ZabbixStore<T> store, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixSendOutcome>> deliver)
         => RunAsync(store, deliver, CancellationToken.None);
 
     /// <summary>Runs until <paramref name="store"/> is complete and empty.</summary>
@@ -62,7 +65,7 @@ public static class ZabbixSendLoop
     /// <param name="deliver">The destination.</param>
     /// <param name="options">The batching, the backoff, the drain window, the clock, the logger, and where progress goes.</param>
     /// <returns>How many values were delivered or rejected: every value that reached a final answer.</returns>
-    public static Task<long> RunAsync<T>(ZabbixStore<T> store, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixDelivery>> deliver, ZabbixSendLoopOptions options)
+    public static Task<long> RunAsync<T>(ZabbixStore<T> store, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixSendOutcome>> deliver, ZabbixSendLoopOptions options)
         => RunAsync(store, deliver, options, CancellationToken.None);
 
     /// <summary>Runs until <paramref name="source"/> ends, or until <paramref name="cancellationToken"/> stops it and the drain is over, with the default options.</summary>
@@ -71,7 +74,7 @@ public static class ZabbixSendLoop
     /// <param name="deliver">The destination.</param>
     /// <param name="cancellationToken">Stops waiting for values; the drain follows.</param>
     /// <returns>How many values were delivered or rejected: every value that reached a final answer.</returns>
-    public static Task<long> RunAsync<T>(IAsyncEnumerable<T> source, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixDelivery>> deliver, CancellationToken cancellationToken)
+    public static Task<long> RunAsync<T>(IAsyncEnumerable<T> source, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixSendOutcome>> deliver, CancellationToken cancellationToken)
         => RunAsync(source, deliver, new ZabbixSendLoopOptions(), cancellationToken);
 
     /// <summary>Runs until <paramref name="source"/> ends, or until <paramref name="cancellationToken"/> stops it and the drain is over.</summary>
@@ -82,7 +85,7 @@ public static class ZabbixSendLoop
     /// <param name="cancellationToken">Stops waiting for values; the drain follows.</param>
     /// <returns>How many values were delivered or rejected: every value that reached a final answer.</returns>
     /// <remarks>A source that faults ends the run with its exception, rethrown once everything it yielded before the fault has been delivered.</remarks>
-    public static Task<long> RunAsync<T>(IAsyncEnumerable<T> source, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixDelivery>> deliver, ZabbixSendLoopOptions options, CancellationToken cancellationToken)
+    public static Task<long> RunAsync<T>(IAsyncEnumerable<T> source, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixSendOutcome>> deliver, ZabbixSendLoopOptions options, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(deliver);
@@ -98,7 +101,7 @@ public static class ZabbixSendLoop
     /// <param name="deliver">The destination.</param>
     /// <param name="cancellationToken">Stops waiting for values; the drain follows.</param>
     /// <returns>How many values were delivered or rejected: every value that reached a final answer.</returns>
-    public static Task<long> RunAsync<T>(ZabbixStore<T> store, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixDelivery>> deliver, CancellationToken cancellationToken)
+    public static Task<long> RunAsync<T>(ZabbixStore<T> store, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixSendOutcome>> deliver, CancellationToken cancellationToken)
         => RunAsync(store, deliver, new ZabbixSendLoopOptions(), cancellationToken, CancellationToken.None);
 
     /// <summary>
@@ -114,11 +117,11 @@ public static class ZabbixSendLoop
     /// <param name="cancellationToken">Stops waiting for values; the drain follows.</param>
     /// <returns>How many values were delivered or rejected: every value that reached a final answer.</returns>
     /// <remarks>A lease wait that faults (the store completed with an error, a backend that cannot load) ends the run with its exception, once what was leased before it has been delivered.</remarks>
-    public static Task<long> RunAsync<T>(ZabbixStore<T> store, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixDelivery>> deliver, ZabbixSendLoopOptions options, CancellationToken cancellationToken)
+    public static Task<long> RunAsync<T>(ZabbixStore<T> store, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixSendOutcome>> deliver, ZabbixSendLoopOptions options, CancellationToken cancellationToken)
         => RunAsync(store, deliver, options, cancellationToken, CancellationToken.None);
 
     /// <summary>The store form a host stops with: <paramref name="abandoning"/> closes the drain window at once (a disposal, or a host that gave up waiting).</summary>
-    internal static Task<long> RunAsync<T>(ZabbixStore<T> store, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixDelivery>> deliver, ZabbixSendLoopOptions options, CancellationToken cancellationToken, CancellationToken abandoning)
+    internal static Task<long> RunAsync<T>(ZabbixStore<T> store, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixSendOutcome>> deliver, ZabbixSendLoopOptions options, CancellationToken cancellationToken, CancellationToken abandoning)
     {
         ArgumentNullException.ThrowIfNull(store);
         ArgumentNullException.ThrowIfNull(deliver);
@@ -203,11 +206,11 @@ public static class ZabbixSendLoop
     /// <summary>One run's retry pipeline and reporting: what the loop does with a batch.</summary>
     internal sealed class Run<T>
     {
-        private readonly Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixDelivery>> _deliver;
+        private readonly Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixSendOutcome>> _deliver;
         private readonly TimeProvider _time;
         private readonly ILogger _logger;
         private readonly IProgress<ZabbixSendProgress>? _progress;
-        private readonly ResiliencePipeline<ZabbixDelivery> _retry;
+        private readonly ResiliencePipeline<ZabbixSendOutcome> _retry;
 
         // DeliverAsync runs one batch at a time (RunAsync never starts the next before this one has a final answer), so a
         // plain field — not a boxed int in the ResilienceContext's Properties bag, set and read once per batch either way
@@ -219,14 +222,14 @@ public static class ZabbixSendLoop
             "AOT",
             "IL3050:RequiresDynamicCode",
             Justification = "AddRetry keeps every member of its result type for its options' validation, which for an enum takes in the base class's Enum.GetValues(Type). Nothing calls it: the pipeline only compares the result's values.")]
-        public Run(Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixDelivery>> deliver, ZabbixSendOptions options, TimeProvider time, ILogger logger, IProgress<ZabbixSendProgress>? progress)
+        public Run(Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixSendOutcome>> deliver, ZabbixSendOptions options, TimeProvider time, ILogger logger, IProgress<ZabbixSendProgress>? progress)
         {
             _deliver = deliver;
             _time = time;
             _logger = logger;
             _progress = progress;
-            _retry = new ResiliencePipelineBuilder<ZabbixDelivery> { TimeProvider = time }
-                .AddRetry(new RetryStrategyOptions<ZabbixDelivery>
+            _retry = new ResiliencePipelineBuilder<ZabbixSendOutcome> { TimeProvider = time }
+                .AddRetry(new RetryStrategyOptions<ZabbixSendOutcome>
                 {
                     // Retry and Held keep the batch; so does a failure of the exchange or a server's refusal, for as long
                     // as it lasts, as upstream's sender retries. Any other throw is the handler's own defect (a value it
@@ -235,7 +238,7 @@ public static class ZabbixSendLoop
                     // attempts; a cancellation the handler raised itself (an HttpClient timeout) is a failed exchange.
                     ShouldHandle = static arguments => ValueTask.FromResult(arguments.Outcome.Exception switch
                     {
-                        null => arguments.Outcome.Result is ZabbixDelivery.Retried or ZabbixDelivery.Held,
+                        null => arguments.Outcome.Result is ZabbixSendOutcome.Retried or ZabbixSendOutcome.Held,
                         OperationCanceledException when arguments.Context.CancellationToken.IsCancellationRequested => false,
                         OperationCanceledException => true,
                         { } failure when IsTransient(failure) => true,
@@ -251,6 +254,13 @@ public static class ZabbixSendLoop
                 .Build();
         }
 
+        // A delivery answers with one of the four verdicts; Returned and Abandoned are what a stopping loop reports, never a
+        // destination's answer, so a handler that gives one has a defect, as one that throws does.
+        private static ZabbixSendOutcome Verdict(ZabbixSendOutcome outcome)
+            => outcome is ZabbixSendOutcome.Delivered or ZabbixSendOutcome.Rejected or ZabbixSendOutcome.Retried or ZabbixSendOutcome.Held
+                ? outcome
+                : throw new InvalidOperationException($"A delivery answers Delivered, Rejected, Retried or Held; {outcome} is what a stopping send loop reports.");
+
         /// <summary>A failure that is the destination's, not the handler's: worth retrying for as long as it lasts.</summary>
         internal static bool IsTransient(Exception failure)
             => Protocol.ZabbixFrames.IsExchangeFailure(failure) || failure is ZabbixTrapperRefusedException or ZabbixServerRefusedException or System.Text.Json.JsonException;
@@ -265,19 +275,19 @@ public static class ZabbixSendLoop
             _heldLogged = false;
             try
             {
-                ZabbixDelivery outcome;
+                ZabbixSendOutcome outcome;
                 try
                 {
                     outcome = await _retry.ExecuteAsync(
-                        static async (context, state) => await state.Deliver(state.Batch, context.CancellationToken).ConfigureAwait(false),
+                        static async (context, state) => Verdict(await state.Deliver(state.Batch, context.CancellationToken).ConfigureAwait(false)),
                         context, (Deliver: _deliver, Batch: (IReadOnlyList<T>)batch)).ConfigureAwait(false);
                 }
                 catch (Exception defect) when (!(defect is OperationCanceledException && cancellationToken.IsCancellationRequested) && !IsTransient(defect))
                 {
                     AgentLog.DeliveryDefect(_logger, batch.Count, MaxDefectAttempts, defect);
-                    outcome = ZabbixDelivery.Rejected;
+                    outcome = ZabbixSendOutcome.Rejected;
                 }
-                if (outcome == ZabbixDelivery.Rejected)
+                if (outcome == ZabbixSendOutcome.Rejected)
                 {
                     AgentLog.DeliveryRejected(_logger, batch.Count);
                     Report(ZabbixSendOutcome.Rejected, batch.Count);
@@ -327,7 +337,7 @@ public static class ZabbixSendLoop
             Report(ZabbixSendOutcome.Abandoned, count);
         }
 
-        private ValueTask OnRetryAsync(OnRetryArguments<ZabbixDelivery> arguments)
+        private ValueTask OnRetryAsync(OnRetryArguments<ZabbixSendOutcome> arguments)
         {
             int count = _batchSize;
             if (arguments.Outcome.Exception is { } failure)
@@ -335,7 +345,7 @@ public static class ZabbixSendLoop
                 AgentLog.DeliveryFaulted(_logger, count, arguments.AttemptNumber + 1, failure);
                 Report(ZabbixSendOutcome.Retried, count);
             }
-            else if (arguments.Outcome.Result == ZabbixDelivery.Held)
+            else if (arguments.Outcome.Result == ZabbixSendOutcome.Held)
             {
                 if (!_heldLogged)
                 {

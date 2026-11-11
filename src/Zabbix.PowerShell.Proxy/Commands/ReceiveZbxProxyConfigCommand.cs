@@ -48,7 +48,7 @@ public sealed class ReceiveZbxProxyConfigCommand : ZabbixWireCmdlet
                 // The connection lives for the pull: disposing it releases what certificate mode read. Large replies:
                 // upstream's proxy receives its configuration as a large frame (zbx_tcp_recv_large).
                 using ZabbixWireLink link = ZabbixWireLinks.Open(nodes, options, time, loggers: null);
-                var uplink = new ZabbixProxyUplink(link.AsExchange(followRedirects: false, acceptLargeReplies: true), ProxyName, time: time);
+                var uplink = new ZabbixProxyUplink(link.AsExchange(ZabbixExchangeOptions.AcceptLargeReplies), ProxyName, version: null, session: null, loggers: null, time);
                 return await uplink.GetConfigAsync(Held ?? ZabbixProxyConfig.Empty, cancellationToken).ConfigureAwait(false);
             }, out ZabbixProxyConfig? config, ProxyName))
         {

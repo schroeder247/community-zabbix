@@ -202,6 +202,27 @@ public sealed partial class AdversarialDesignConformanceTests
     }
 
     /// <summary>
+    /// No public interface is empty (docs/adr/0013-builders-verbs-and-typed-values.md, section 7): a builder capability
+    /// carries <c>Name</c> and <c>Services</c>, as <c>IHttpClientBuilder</c> does, so an extension written against it can
+    /// register what it adds. An interface counts the members it inherits; its internal members don't count, since no
+    /// extension outside the library can call them.
+    /// </summary>
+    [Fact]
+    public void No_public_interface_is_empty()
+        => DesignConformanceTests.AssertNone(EmptyInterfaces(Libraries.PublicTypes));
+
+    [Fact]
+    public void The_interface_rule_finds_an_empty_one_and_spares_one_that_inherits_its_members()
+        => Assert.Equal([typeof(IEmptyProbe).FullName!, typeof(IStillEmptyProbe).FullName!],
+            EmptyInterfaces([typeof(IEmptyProbe), typeof(IStillEmptyProbe), typeof(ICapabilityProbe), typeof(IDerivedCapabilityProbe)]));
+
+    internal static IEnumerable<string> EmptyInterfaces(IEnumerable<Type> types)
+        => types.Where(type => type.IsInterface && !type.GetInterfaces().Prepend(type).Any(contract =>
+                contract.GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly).Length > 0))
+            .Select(type => type.FullName!)
+            .Order(StringComparer.Ordinal);
+
+    /// <summary>
     /// Every public KEYED indexer throws for a missing key and has a <c>TryGet*</c> sibling. A
     /// positional one (<see cref="int"/>/<c>Index</c>) is the list idiom: bounds-checked, its count beside it. One that
     /// hands out a node looks nothing up: <c>zabbix.Hosts["web-01"]</c> makes no call until it's asked.
@@ -583,6 +604,30 @@ public sealed class SecretProbe
     public string? Psk { get; set; }
 }
 #pragma warning restore CA1852, CA1812, CA1822, CA1515
+
+#pragma warning disable CA1040 // the probes are deliberately empty
+/// <summary>An interface the interface rule must find: no member.</summary>
+public interface IEmptyProbe
+{
+}
+
+/// <summary>An interface the interface rule must find: it inherits no member either.</summary>
+public interface IStillEmptyProbe : IEmptyProbe
+{
+}
+#pragma warning restore CA1040
+
+/// <summary>A builder capability the interface rule spares.</summary>
+public interface ICapabilityProbe
+{
+    /// <summary>Gets the name.</summary>
+    string Name { get; }
+}
+
+/// <summary>A capability whose members are inherited, which the interface rule spares.</summary>
+public interface IDerivedCapabilityProbe : ICapabilityProbe
+{
+}
 
 /// <summary>Violations the logged-item-key rule must find: a parameter named <c>key</c> and one typed <see cref="ZabbixItemKey"/>, each unclassified.</summary>
 public static class ItemKeyLogProbe

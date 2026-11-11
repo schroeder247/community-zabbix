@@ -137,7 +137,7 @@ bind them. `Configure` sets any option, and `Bind` binds a configuration section
 
 | `ZabbixPushAgentOptions` | Default | Meaning |
 | --- | --- | --- |
-| `Hostname` | The builder's name | The host typed polls and meters report for. A `ZabbixValue` names its own host. |
+| `HostName` | The builder's name | The host typed polls and meters report for. A `ZabbixValue` names its own host. |
 | `ServerActive` | None | The destinations, which `AddServer` adds to. |
 | `Connection` | 10 s, no TLS | Timeout, [TLS](tls-and-psk.md), compression, and reply cap. |
 | `MaxItems` | 100,000 | The store's cap, per destination, and the most values a trapper's intake holds. |
@@ -184,9 +184,9 @@ goes back to the store: a durable store keeps it for the next process, and a mem
 nothing can keep is counted and logged as abandoned (events 3008 and 3106). The default windows fit inside `StopTimeout` and the
 generic host's 30-second `HostOptions.ShutdownTimeout`.
 
-- A source is any `IAsyncEnumerable<ZabbixValue>`. `ZabbixPoll.Every(interval, collect, time, logger)` is the agent's own cadence:
-  a cycle every `interval`, holding up to 4,096 values (`DefaultMaxItems`) for a slow reader and shedding the oldest beyond that.
-- `ZabbixSendLoop.RunAsync` drains into a destination of your own, a `ZabbixDeliveryCallback<T>`.
+- A source is any `IAsyncEnumerable<ZabbixValue>`, or a store, read through its acknowledged face.
+- `ZabbixSendLoop.RunAsync` drains into a destination of your own: a delegate that takes a batch and a `CancellationToken` and
+  answers a `ZabbixSendOutcome`, `Delivered`, `Rejected`, `Retried`, or `Held`. `DeliverAsync` on a `ZabbixWireClient` is one.
 - `ZabbixSendLoopOptions` also takes a `Logger`, a clock (`Time`), and a `Progress` that receives a `ZabbixSendProgress` (an
   outcome, a count, and a time) for every batch.
 - Each of these takes a `CancellationToken` last, which stops reading and starts the drain window; without one, the loop runs until
@@ -230,8 +230,8 @@ On the server, `web-01` must have items of type "Zabbix agent (active)" with the
 
 | `ZabbixActiveAgentOptions` | Default | Meaning |
 | --- | --- | --- |
-| `Hostname` | The builder's name | The Zabbix host. An agent you construct has the machine's name. |
-| `Name` | `Hostname` | The agent's name in logs, metrics, and status, for an agent you construct. A builder's name takes its place. |
+| `HostName` | The builder's name | The Zabbix host. An agent you construct has the machine's name. |
+| `Name` | `HostName` | The agent's name in logs, metrics, and status, for an agent you construct. A builder's name takes its place. |
 | `HostMetadata` | None | What autoregistration matches on. |
 | `RefreshInterval` | 5 s | How often the item list is refreshed. Zabbix's `RefreshActiveChecks`. |
 | `HeartbeatInterval` | 60 s | How often a heartbeat goes: whole seconds, 1 to 3600. Zero turns it off. |
@@ -270,8 +270,8 @@ await agent.StartAsync();
 
 | `ZabbixPassiveAgentOptions` | Default | Meaning |
 | --- | --- | --- |
-| `Hostname` | The builder's name | What `agent.hostname` answers. An agent you construct has the machine's name. |
-| `Name` | `Hostname` | The agent's name in logs, metrics, and status, for an agent you construct. A builder's name takes its place. |
+| `HostName` | The builder's name | What `agent.hostname` answers. An agent you construct has the machine's name. |
+| `Name` | `HostName` | The agent's name in logs, metrics, and status, for an agent you construct. A builder's name takes its place. |
 | `AllowedPeers` | None (required) | Who may poll this agent, as Zabbix's `Server=` text, which `AllowPeer` adds to. |
 | `Address`, `Port` | `0.0.0.0`, 10050 | Where to bind. Port `0` lets the platform pick, and `agent.Listener.LocalEndPoint` then names it. |
 | `CheckTimeout` | 3 s | How long one key may take when the request doesn't say. |
@@ -340,11 +340,12 @@ and disposes it. An application that sets the options itself constructs the agen
 
 ## Read an agent's status
 
-A push or active agent keeps a `ZabbixAgentStatus` for each destination, with its `Delivered`, `Rejected`, `Abandoned`, `Stored`,
-`Held`, `LastDelivered`, and `Fault`, among others. `Statuses` lists them, in `ServerActive` order, and `Status` is the first.
+A push or active agent keeps a `ZabbixComponentStatus` for each destination, with its `Delivered`, `Rejected`, `Abandoned`, `Stored`,
+`Held`, `LastDelivered`, and `Fault`, among others. `Statuses` lists them, in `ServerActive` order, and `Status` is the first. An
+active proxy reports the same states, so it has a `ZabbixComponentStatus` too.
 
 ```csharp
-foreach (ZabbixAgentStatus status in agent.Statuses)
+foreach (ZabbixComponentStatus status in agent.Statuses)
     Console.WriteLine($"{status.Name}: {status.Delivered} delivered, {status.Stored} stored, {status.Held} held");
 ```
 
@@ -399,7 +400,9 @@ await builder.Build().RunAsync();
 - **The name is the agent's identity.** It's the name of its options, its key in the container, and its host name unless `Configure`
   or `Bind` sets another. Registering a name again continues setting up the same agent, as `AddHttpClient` does.
 - **Resolve an agent** by its name: `GetRequiredKeyedService<ZabbixPushAgent>("edge-01")`, and likewise for the other two. A push
-  or active agent's statuses are also the keyed service `GetRequiredKeyedService<IReadOnlyList<ZabbixAgentStatus>>(name)`.
+  or active agent's statuses are also the keyed service `GetRequiredKeyedService<IReadOnlyList<ZabbixComponentStatus>>(name)`.
+- **The container owns the agent.** Disposing the one you resolve leaves it running, as disposing an `HttpClient` from
+  `IHttpClientFactory` leaves its handler, and the container disposes it at shutdown.
 - **An active and a passive agent of one name answer the same items**, as one Zabbix agent answers a key whether the server polls
   it or the agent sends it. Above, the passive agent `web-01` answers `app.version` too.
 - **Services.** A delegate that takes a service resolves it from the application's container.

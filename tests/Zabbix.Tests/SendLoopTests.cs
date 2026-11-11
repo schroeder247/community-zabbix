@@ -21,18 +21,33 @@ public sealed class SendLoopTests
 {
     private static readonly TimeSpan Guard = TimeSpan.FromSeconds(10);
 
-    private static ValueTask<ZabbixDelivery> Answer(ZabbixDelivery delivery) => new(delivery);
+    private static ValueTask<ZabbixSendOutcome> Answer(ZabbixSendOutcome delivery) => new(delivery);
 
-    [Fact]
-    public void A_delivery_verdict_is_the_send_outcome_of_the_same_name_and_value()
-        => Assert.All(Enum.GetValues<ZabbixDelivery>(), verdict => Assert.Equal(verdict.ToString(), ((ZabbixSendOutcome)(int)verdict).ToString()));
+    [Theory]
+    [InlineData(ZabbixSendOutcome.Returned)]
+    [InlineData(ZabbixSendOutcome.Abandoned)]
+    public async Task A_delivery_that_answers_what_only_a_stopping_loop_reports_is_a_defect_and_its_batch_is_rejected(ZabbixSendOutcome answer)
+    {
+        var logs = new FakeLogCollector();
+        await using var store = new ZabbixMemoryStore<int>();
+        store.TryWrite(1);
+        store.Complete();
+
+        long taken = await ZabbixSendLoop.RunAsync<int>(store, (_, _) => Answer(answer), new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { RetryDelay = TimeSpan.Zero }, Time = new FakeTimeProvider(), Logger = new FakeLogger(logs) }, TestContext.Current.CancellationToken).WaitAsync(Guard, TestContext.Current.CancellationToken);
+
+        FakeLogRecord defect = Assert.Single(logs.GetSnapshot(), record => record.Id.Id == 3103);
+        Assert.Equal(1, taken);
+        Assert.Contains(answer.ToString(), Assert.IsType<InvalidOperationException>(defect.Exception).Message, StringComparison.Ordinal);
+        Assert.Contains(logs.GetSnapshot(), record => record.Id.Id == 3105);                 // rejected, so the loop goes on
+        Assert.Equal(0, store.Count);
+    }
 
     [Fact]
     public async Task A_full_batch_is_delivered_at_once_and_the_stream_s_end_flushes_the_rest()
     {
         var batches = new List<IReadOnlyList<int>>();
         await using var store = new ZabbixMemoryStore<int>();
-        Task<long> loop = ZabbixSendLoop.RunAsync<int>(store, (batch, _) => { batches.Add(batch); return Answer(ZabbixDelivery.Delivered); }, new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { BatchSize = 3 }, Time = new FakeTimeProvider() }, cancellationToken: TestContext.Current.CancellationToken);
+        Task<long> loop = ZabbixSendLoop.RunAsync<int>(store, (batch, _) => { batches.Add(batch); return Answer(ZabbixSendOutcome.Delivered); }, new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { BatchSize = 3 }, Time = new FakeTimeProvider() }, cancellationToken: TestContext.Current.CancellationToken);
 
         for (int i = 1; i <= 5; i++) store.TryWrite(i);
         store.Complete();
@@ -47,7 +62,7 @@ public sealed class SendLoopTests
         var time = new FakeTimeProvider();
         var source = new ProbeSource<int>();
         var delivered = new TaskCompletionSource<IReadOnlyList<int>>(TaskCreationOptions.RunContinuationsAsynchronously);
-        Task<long> loop = ZabbixSendLoop.RunAsync<int>(source, (batch, _) => { delivered.TrySetResult(batch); return Answer(ZabbixDelivery.Delivered); }, new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { BatchSize = 100, FlushInterval = TimeSpan.FromSeconds(5) }, Time = time }, cancellationToken: TestContext.Current.CancellationToken);
+        Task<long> loop = ZabbixSendLoop.RunAsync<int>(source, (batch, _) => { delivered.TrySetResult(batch); return Answer(ZabbixSendOutcome.Delivered); }, new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { BatchSize = 100, FlushInterval = TimeSpan.FromSeconds(5) }, Time = time }, cancellationToken: TestContext.Current.CancellationToken);
         await source.Waits.ReadAsync(TestContext.Current.CancellationToken).AsTask().WaitAsync(Guard, TestContext.Current.CancellationToken);                   // idle on the empty source
         source.Write(1);
         await source.Waits.ReadAsync(TestContext.Current.CancellationToken).AsTask().WaitAsync(Guard, TestContext.Current.CancellationToken);                   // took it, waiting for more
@@ -69,9 +84,9 @@ public sealed class SendLoopTests
         await using var store = new ZabbixMemoryStore<int>();
         Task<long> loop = ZabbixSendLoop.RunAsync<int>(store, (batch, _) =>
             {
-                if (Interlocked.Increment(ref attempts) < 3) return Answer(ZabbixDelivery.Retried);
+                if (Interlocked.Increment(ref attempts) < 3) return Answer(ZabbixSendOutcome.Retried);
                 delivered.Add(batch);
-                return Answer(ZabbixDelivery.Delivered);
+                return Answer(ZabbixSendOutcome.Delivered);
             }, new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { BatchSize = 2, RetryDelay = TimeSpan.Zero }, Time = new FakeTimeProvider(), Logger = new FakeLogger(logs) }, cancellationToken: TestContext.Current.CancellationToken);
         store.TryWrite(1);
         store.TryWrite(2);
@@ -99,7 +114,7 @@ public sealed class SendLoopTests
             {
                 if (Interlocked.Increment(ref attempts) <= 2) throw new InvalidOperationException("the destination broke");
                 delivered.AddRange(batch);
-                return Answer(ZabbixDelivery.Delivered);
+                return Answer(ZabbixSendOutcome.Delivered);
             }, new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { BatchSize = 100, RetryDelay = TimeSpan.Zero }, Time = new FakeTimeProvider(), Logger = new FakeLogger(logs) }, cancellationToken: TestContext.Current.CancellationToken).WaitAsync(Guard, TestContext.Current.CancellationToken);
 
         Assert.Equal(250, taken);
@@ -117,7 +132,7 @@ public sealed class SendLoopTests
         store.TryWrite(1);
         store.Complete();
 
-        long taken = await ZabbixSendLoop.RunAsync<int>(store, (_, _) => Answer(Interlocked.Increment(ref attempts) <= 3 ? ZabbixDelivery.Held : ZabbixDelivery.Delivered), new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { RetryDelay = TimeSpan.Zero }, Time = new FakeTimeProvider(), Logger = new FakeLogger(logs), Progress = new Progress(reports) }, TestContext.Current.CancellationToken).WaitAsync(Guard, TestContext.Current.CancellationToken);
+        long taken = await ZabbixSendLoop.RunAsync<int>(store, (_, _) => Answer(Interlocked.Increment(ref attempts) <= 3 ? ZabbixSendOutcome.Held : ZabbixSendOutcome.Delivered), new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { RetryDelay = TimeSpan.Zero }, Time = new FakeTimeProvider(), Logger = new FakeLogger(logs), Progress = new Progress(reports) }, TestContext.Current.CancellationToken).WaitAsync(Guard, TestContext.Current.CancellationToken);
 
         Assert.Equal(1, taken);
         Assert.Single(logs.GetSnapshot(), record => record.Id.Id == 3101);
@@ -130,7 +145,7 @@ public sealed class SendLoopTests
     {
         var logs = new FakeLogCollector();
         await using var store = new ZabbixMemoryStore<int>();
-        Task<long> loop = ZabbixSendLoop.RunAsync<int>(store, (_, _) => Answer(ZabbixDelivery.Rejected), new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { BatchSize = 2 }, Time = new FakeTimeProvider(), Logger = new FakeLogger(logs) }, cancellationToken: TestContext.Current.CancellationToken);
+        Task<long> loop = ZabbixSendLoop.RunAsync<int>(store, (_, _) => Answer(ZabbixSendOutcome.Rejected), new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { BatchSize = 2 }, Time = new FakeTimeProvider(), Logger = new FakeLogger(logs) }, cancellationToken: TestContext.Current.CancellationToken);
         store.TryWrite(1);
         store.TryWrite(2);
         store.Complete();
@@ -148,7 +163,7 @@ public sealed class SendLoopTests
         var source = new ProbeSource<int>();
         var delivered = new List<int>();
         using var stop = new CancellationTokenSource();
-        Task<long> loop = ZabbixSendLoop.RunAsync<int>(source, (batch, _) => { delivered.AddRange(batch); return Answer(ZabbixDelivery.Delivered); }, new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { BatchSize = 100 }, Time = new FakeTimeProvider() }, cancellationToken: stop.Token);
+        Task<long> loop = ZabbixSendLoop.RunAsync<int>(source, (batch, _) => { delivered.AddRange(batch); return Answer(ZabbixSendOutcome.Delivered); }, new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { BatchSize = 100 }, Time = new FakeTimeProvider() }, cancellationToken: stop.Token);
         source.Write(1);
         source.Write(2);
         await source.Waits.ReadAsync(TestContext.Current.CancellationToken).AsTask().WaitAsync(Guard, TestContext.Current.CancellationToken);                   // idle before the writes
@@ -174,7 +189,7 @@ public sealed class SendLoopTests
                 entered.TrySetResult();
                 await release.Task.WaitAsync(token);
                 delivered.AddRange(batch);
-                return ZabbixDelivery.Delivered;
+                return ZabbixSendOutcome.Delivered;
             }, new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { BatchSize = 1, DrainTimeout = TimeSpan.FromSeconds(30) }, Time = time }, cancellationToken: stop.Token);
         store.TryWrite(1);
         await entered.Task.WaitAsync(Guard, TestContext.Current.CancellationToken);
@@ -202,7 +217,7 @@ public sealed class SendLoopTests
                 Interlocked.Increment(ref attempts);
                 entered.TrySetResult();
                 await Task.Delay(Timeout.InfiniteTimeSpan, token);                    // the destination hangs
-                return ZabbixDelivery.Delivered;
+                return ZabbixSendOutcome.Delivered;
             }, new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { BatchSize = 1, DrainTimeout = TimeSpan.FromSeconds(30) }, Time = time, Logger = new FakeLogger(logs) }, cancellationToken: stop.Token);
         store.TryWrite(7);
         await entered.Task.WaitAsync(Guard, TestContext.Current.CancellationToken);
@@ -230,7 +245,7 @@ public sealed class SendLoopTests
             {
                 entered.TrySetResult();
                 await Task.Delay(Timeout.InfiniteTimeSpan, token);
-                return ZabbixDelivery.Delivered;
+                return ZabbixSendOutcome.Delivered;
             }, new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { BatchSize = 1, DrainTimeout = TimeSpan.FromSeconds(30) }, Time = time, Logger = new FakeLogger(logs), Progress = new Progress(reports) }, stop.Token);
         source.Write(7);
         await entered.Task.WaitAsync(Guard, TestContext.Current.CancellationToken);
@@ -254,7 +269,7 @@ public sealed class SendLoopTests
         }
         var delivered = new List<int>();
 
-        await Assert.ThrowsAsync<InvalidDataException>(() => ZabbixSendLoop.RunAsync(Faulty(), (batch, _) => { delivered.AddRange(batch); return Answer(ZabbixDelivery.Delivered); }, new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { BatchSize = 10 }, Time = new FakeTimeProvider() }, cancellationToken: TestContext.Current.CancellationToken).WaitAsync(Guard, TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<InvalidDataException>(() => ZabbixSendLoop.RunAsync(Faulty(), (batch, _) => { delivered.AddRange(batch); return Answer(ZabbixSendOutcome.Delivered); }, new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { BatchSize = 10 }, Time = new FakeTimeProvider() }, cancellationToken: TestContext.Current.CancellationToken).WaitAsync(Guard, TestContext.Current.CancellationToken));
         Assert.Equal([1], delivered);
     }
 
@@ -291,14 +306,14 @@ public sealed class SendLoopTests
         IMeterFactory meters = provider.GetRequiredService<IMeterFactory>();
         using var values = new MetricCollector<long>(meters, ZabbixAgentTelemetry.MeterName, ZabbixAgentTelemetry.ValuesInstrument);
         using var telemetry = new ZabbixAgentTelemetry(meters);
-        var status = new ZabbixAgentStatus("send-loop-probe", telemetry);
+        var status = new ZabbixComponentStatus("send-loop-probe", telemetry);
         int attempts = 0;
         await using var store = new ZabbixMemoryStore<int>();
         store.TryWrite(1);
         store.TryWrite(2);
         store.Complete();
 
-        await ZabbixSendLoop.RunAsync<int>(store, (_, _) => Answer(Interlocked.Increment(ref attempts) == 1 ? ZabbixDelivery.Retried : ZabbixDelivery.Delivered), new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { RetryDelay = TimeSpan.Zero }, Time = new FakeTimeProvider(), Progress = status }, cancellationToken: TestContext.Current.CancellationToken).WaitAsync(Guard, TestContext.Current.CancellationToken);
+        await ZabbixSendLoop.RunAsync<int>(store, (_, _) => Answer(Interlocked.Increment(ref attempts) == 1 ? ZabbixSendOutcome.Retried : ZabbixSendOutcome.Delivered), new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { RetryDelay = TimeSpan.Zero }, Time = new FakeTimeProvider(), Progress = status }, cancellationToken: TestContext.Current.CancellationToken).WaitAsync(Guard, TestContext.Current.CancellationToken);
 
         IReadOnlyList<CollectedMeasurement<long>> measured = values.GetMeasurementSnapshot();
         Assert.Contains(measured, m => m.Value == 2 && m.MatchesTags(new KeyValuePair<string, object?>(ZabbixAgentTelemetry.OutcomeTag, "retried"), new KeyValuePair<string, object?>(ZabbixAgentTelemetry.AgentTag, "send-loop-probe")));
@@ -360,7 +375,7 @@ public sealed class SendLoopTests
                 {
                     entered.TrySetResult();
                     await Task.Delay(Timeout.InfiniteTimeSpan, token);                // the destination is down
-                    return ZabbixDelivery.Delivered;
+                    return ZabbixSendOutcome.Delivered;
                 }, new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { BatchSize = 5, DrainTimeout = TimeSpan.FromSeconds(1) }, Time = time }, cancellationToken: stop.Token);
             await entered.Task.WaitAsync(Guard, TestContext.Current.CancellationToken);
             await store.FlushAsync().WaitAsync(Guard, TestContext.Current.CancellationToken);   // any removal the reads asked for has reached the backend
@@ -389,7 +404,7 @@ public sealed class SendLoopTests
 
         long taken = await ZabbixSendLoop.RunAsync<int>(store, (_, _) => Interlocked.Increment(ref attempts) == 1
                 ? throw new TaskCanceledException("The request was canceled due to the configured HttpClient.Timeout of 100 seconds elapsing.")
-                : Answer(ZabbixDelivery.Delivered), new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { RetryDelay = TimeSpan.Zero }, Time = new FakeTimeProvider() }, cancellationToken: TestContext.Current.CancellationToken).WaitAsync(Guard, TestContext.Current.CancellationToken);
+                : Answer(ZabbixSendOutcome.Delivered), new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { RetryDelay = TimeSpan.Zero }, Time = new FakeTimeProvider() }, cancellationToken: TestContext.Current.CancellationToken).WaitAsync(Guard, TestContext.Current.CancellationToken);
 
         Assert.Equal(2, taken);
         Assert.Equal(2, attempts);
@@ -401,7 +416,7 @@ public sealed class SendLoopTests
         var logs = new FakeLogCollector();
         var read = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         await using var source = new StubbornSource(read.Task) { FailDisposal = true };
-        var run = new ZabbixSendLoop.Run<int>((_, _) => Answer(ZabbixDelivery.Delivered), new ZabbixSendOptions(), new FakeTimeProvider(), new FakeLogger(logs), null);
+        var run = new ZabbixSendLoop.Run<int>((_, _) => Answer(ZabbixSendOutcome.Delivered), new ZabbixSendOptions(), new FakeTimeProvider(), new FakeLogger(logs), null);
         var batches = new ZabbixSendLoop.Batcher<int>(source, 10, TimeSpan.FromSeconds(5), new FakeTimeProvider(), run);
         using var stop = new CancellationTokenSource();
         ValueTask<List<int>?> next = batches.NextAsync(stop.Token);

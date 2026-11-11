@@ -30,7 +30,7 @@ public sealed class LiveAgentTests
             .AddItem("zbxtest.answer", _ => "42")
             .Configure(o =>
             {
-                o.Hostname = host.Host;
+                o.HostName = host.Host;
                 o.RefreshInterval = TimeSpan.FromSeconds(2);                               // the host reaches the cache within a refresh or two
                 o.HeartbeatInterval = TimeSpan.FromSeconds(2);
                 o.Send.FlushInterval = TimeSpan.FromSeconds(1);
@@ -73,7 +73,7 @@ public sealed class LiveAgentTests
             .AddItem("zbxtest.seq", _ => Interlocked.Increment(ref collected).ToString(System.Globalization.CultureInfo.InvariantCulture))
             .Configure(o =>
             {
-                o.Hostname = host.Host;
+                o.HostName = host.Host;
                 o.RefreshInterval = TimeSpan.FromSeconds(2);
                 o.HeartbeatInterval = TimeSpan.FromSeconds(2);
                 o.Send.FlushInterval = TimeSpan.FromSeconds(1);
@@ -114,7 +114,7 @@ public sealed class LiveAgentTests
             .AddItem("zbxtest.answer", _ => "43")
             .Configure(o =>
             {
-                o.Hostname = host.Host;
+                o.HostName = host.Host;
                 o.RefreshInterval = TimeSpan.FromSeconds(2);
                 o.HeartbeatInterval = TimeSpan.Zero;
                 o.Send.FlushInterval = TimeSpan.FromSeconds(1);

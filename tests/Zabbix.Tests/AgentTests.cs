@@ -207,7 +207,9 @@ public sealed class AgentTests
         var (port, received) = MockTrapper.Collect(2);
         await using var storage = new ZabbixMemoryStore<ZabbixValue>();
         var wire = new ZabbixWireClient($"127.0.0.1:{port}");
+#pragma warning disable CA2025 // the drain is awaited to its end before the client is disposed
         Task<long> draining = wire.DrainAsync(storage, new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { BatchSize = 2 } }, cancellationToken: TestContext.Current.CancellationToken);
+#pragma warning restore CA2025
 
         storage.TryWrite(new ZabbixValue("web01", "k1", "1", DateTimeOffset.UnixEpoch));
         storage.TryWrite(new ZabbixValue("web01", "k2", "2", DateTimeOffset.UnixEpoch));
@@ -215,7 +217,7 @@ public sealed class AgentTests
 
         Assert.Equal(2, await received.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
         Assert.Equal(2, await draining.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
-        wire.Dispose();                                                                   // after the drain that uses it
+        await wire.DisposeAsync();                                                                   // after the drain that uses it
     }
 
     [Fact]
@@ -227,19 +229,21 @@ public sealed class AgentTests
         var wire = new ZabbixWireClient($"127.0.0.1:{port}");
         var other = new ZabbixWireClient($"127.0.0.1:{otherPort}");
 #pragma warning disable xUnit1051 // the overloads without a token are what this test calls
+#pragma warning disable CA2025 // the drain is awaited to its end before the client is disposed
         Task<long> draining = wire.DrainAsync(storage);
+#pragma warning restore CA2025
 
         storage.TryWrite(new ZabbixValue("web01", "k1", "1", DateTimeOffset.UnixEpoch));
         storage.TryWrite(new ZabbixValue("web01", "k2", "2", DateTimeOffset.UnixEpoch));
         storage.Complete();
-        ZabbixDelivery delivered = await other.DeliverAsync([new ZabbixValue("web01", "k3", "3", DateTimeOffset.UnixEpoch)]);
+        ZabbixSendOutcome delivered = await other.DeliverAsync([new ZabbixValue("web01", "k3", "3", DateTimeOffset.UnixEpoch)]);
 #pragma warning restore xUnit1051
 
         Assert.Equal(2, await received.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
         Assert.Equal(2, await draining.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
-        Assert.Equal((ZabbixDelivery.Delivered, 1), (delivered, await otherReceived.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken)));
-        wire.Dispose();                                                                   // after the drain that uses it
-        other.Dispose();
+        Assert.Equal((ZabbixSendOutcome.Delivered, 1), (delivered, await otherReceived.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken)));
+        await wire.DisposeAsync();                                                                   // after the drain that uses it
+        await other.DisposeAsync();
     }
 
     /// <summary>A pass that fails for a reason the loop's own contract does not translate is a defect: logged at Error and shown on the status until the next good pass.</summary>
@@ -247,7 +251,7 @@ public sealed class AgentTests
     public async Task A_loop_pass_that_is_not_an_exchange_failure_is_logged_at_error_and_faults_the_status()
     {
         var logs = new FakeLogCollector();
-        var status = new ZabbixAgentStatus("edge");
+        var status = new ZabbixComponentStatus("edge");
         var defect = new InvalidOperationException("not an exchange failure");
 
         await ZabbixAgentLoop.PassAsync("edge", "refresh", status, new FakeLogger<AgentTests>(logs), _ => throw defect, TestContext.Current.CancellationToken);

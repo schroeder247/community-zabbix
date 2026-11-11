@@ -20,7 +20,7 @@ namespace Community.Zabbix.Storage;
 /// process; a memory store keeps nothing across a restart.</para>
 /// <para>Every record the store does not keep is counted on <c>zabbix.store.dropped</c> (meter
 /// <see cref="ZabbixTelemetryNames.Store"/>), tagged with the store's name and the reason (<c>refused</c>,
-/// <c>discarded</c>, <c>expired</c>, or the overflow mode that shed it).</para>
+/// <c>discarded</c>, <c>expired</c>, or the overflow mode that shed it: <see cref="ZabbixStoreDropReason"/>).</para>
 /// </remarks>
 /// <typeparam name="T">The record.</typeparam>
 public abstract class ZabbixStore<T> : ChannelWriter<T>, IAsyncEnumerable<T>, IAsyncDisposable, IZabbixDurableWriter<T>, IZabbixTakingWriter<T>
@@ -112,7 +112,7 @@ public abstract class ZabbixStore<T> : ChannelWriter<T>, IAsyncEnumerable<T>, IA
     /// <exception cref="ChannelClosedException">The writer face was completed.</exception>
     public override ValueTask WriteAsync(T item, CancellationToken cancellationToken = default)
     {
-        if (!IsCompleted && RefusalOf(item) is { } reason)
+        if (!IsCompleted && GetRefusalReason(item) is { } reason)
         {
             Drop(reason);
             return ValueTask.CompletedTask;
@@ -154,29 +154,52 @@ public abstract class ZabbixStore<T> : ChannelWriter<T>, IAsyncEnumerable<T>, IA
         return ValueTask.CompletedTask;
     }
 
-    /// <summary>The policy's gate: the reason the record may not enter, or <see langword="null"/> when it may.</summary>
+    /// <summary>Gets why the policy's gate keeps a record out of the store, if it does.</summary>
     /// <param name="item">The record.</param>
-    /// <returns><c>refused</c>, <c>discarded</c>, or <see langword="null"/>.</returns>
-    protected string? RefusalOf(T item)
+    /// <returns>
+    /// <see cref="ZabbixStoreDropReason.Refused"/> or <see cref="ZabbixStoreDropReason.Discarded"/>; <see langword="null"/>
+    /// when the record may enter.
+    /// </returns>
+    protected ZabbixStoreDropReason? GetRefusalReason(T item)
         => Policy.Admit is { } admit && !admit(item) ? ZabbixStoreDropReason.Refused
         : Policy.Discard is { } discard && discard(item) ? ZabbixStoreDropReason.Discarded
         : null;
 
-    /// <summary>The policy's way out: the reason a held record is dropped instead of handed out, or <see langword="null"/>.</summary>
+    /// <summary>Gets why the policy drops a held record instead of handing it out, if it does.</summary>
     /// <param name="entry">The held record.</param>
-    /// <returns><c>expired</c>, <c>discarded</c>, or <see langword="null"/>.</returns>
-    protected string? ExpiryOf(in ZabbixStoreEntry<T> entry)
+    /// <returns>
+    /// <see cref="ZabbixStoreDropReason.Expired"/> or <see cref="ZabbixStoreDropReason.Discarded"/>; <see langword="null"/>
+    /// when the record may be handed out.
+    /// </returns>
+    protected ZabbixStoreDropReason? GetExpiryReason(in ZabbixStoreEntry<T> entry)
         => Policy.MaxAge is { } age && Services.Time.GetUtcNow() - entry.Stored > age ? ZabbixStoreDropReason.Expired
         : Policy.Discard is { } discard && discard(entry.Record) ? ZabbixStoreDropReason.Discarded
         : null;
 
-    /// <summary>Counts one record the store did not keep, and warns at 1, 10, 100, … of each reason.</summary>
-    /// <param name="reason">A <see cref="ZabbixStoreDropReason"/> value.</param>
-    protected void Drop(string reason)
+    /// <summary>Counts one record the store didn't keep, and warns at 1, 10, 100, … of each reason.</summary>
+    /// <param name="reason">Why the store didn't keep it.</param>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="reason"/> isn't one of <see cref="ZabbixStoreDropReason"/>'s.</exception>
+    protected void Drop(ZabbixStoreDropReason reason)
     {
-        long dropped = _telemetry.Dropped(Name, reason);
-        if (ZabbixLogSampling.IsPowerOfTen(dropped)) StoreLog.StorageDropping(Logger, Name, reason, dropped);
+        string tag = TagOf(reason);
+        long dropped = _telemetry.Dropped(Name, tag);
+        if (ZabbixLogSampling.IsPowerOfTen(dropped)) StoreLog.StorageDropping(Logger, Name, tag, dropped);
     }
+
+    /// <summary>The reason as the <c>zabbix.store.reason</c> tag spells it.</summary>
+    /// <param name="reason">Why the store dropped items.</param>
+    /// <returns>The tag's value.</returns>
+    internal static string TagOf(ZabbixStoreDropReason reason) => reason switch
+    {
+        ZabbixStoreDropReason.Refused => "refused",
+        ZabbixStoreDropReason.Discarded => "discarded",
+        ZabbixStoreDropReason.Expired => "expired",
+        ZabbixStoreDropReason.DropOldest => "drop_oldest",
+        ZabbixStoreDropReason.DropNewest => "drop_newest",
+        ZabbixStoreDropReason.DropWrite => "drop_write",
+        ZabbixStoreDropReason.Faulted => "faulted",
+        _ => throw new ArgumentOutOfRangeException(nameof(reason), reason, "The drop reason is not one the store knows."),
+    };
 
     /// <summary>Counts records the consumer acknowledged.</summary>
     /// <param name="count">How many.</param>
@@ -185,7 +208,7 @@ public abstract class ZabbixStore<T> : ChannelWriter<T>, IAsyncEnumerable<T>, IA
     /// <summary>The drop reason a channel full mode sheds under.</summary>
     /// <param name="mode">The mode.</param>
     /// <returns>The reason.</returns>
-    private protected static string DropReasonOf(BoundedChannelFullMode mode) => mode switch
+    private protected static ZabbixStoreDropReason DropReasonOf(BoundedChannelFullMode mode) => mode switch
     {
         BoundedChannelFullMode.DropOldest => ZabbixStoreDropReason.DropOldest,
         BoundedChannelFullMode.DropNewest => ZabbixStoreDropReason.DropNewest,

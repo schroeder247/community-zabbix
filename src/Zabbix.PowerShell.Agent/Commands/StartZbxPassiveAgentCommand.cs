@@ -70,7 +70,7 @@ public sealed class StartZbxPassiveAgentCommand : ZabbixAgentSessionCommand
         // The SDK's options, as an application's builder writes them with Configure(...).
         void Configure(ZabbixPassiveAgentOptions options)
         {
-            options.Hostname = HostName;
+            options.HostName = HostName;
             options.Address = Address;
             options.Port = Port;
             options.CheckTimeout = CheckTimeout;

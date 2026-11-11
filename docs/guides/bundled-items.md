@@ -30,7 +30,7 @@ bool up = await zabbix.Hosts["web-01"].GetLastAsync(ZabbixItemKeys.Agent.Ping);
 
 | Group | What it reads | For example |
 | --- | --- | --- |
-| `Agent` | The agent itself | `Ping`, `Version`, `Hostname` |
+| `Agent` | The agent itself | `Ping`, `Version`, `HostName` |
 | `Host` | The host | `Uptime`, `LocalTime`, `OsVersion` |
 | `Cpu` | Processors | `Load()`, `Count` |
 | `Memory`, `Swap` | Memory and swap | `FreeBytes`, `Memory.AvailablePercent` |
@@ -39,7 +39,7 @@ bool up = await zabbix.Hosts["web-01"].GetLastAsync(ZabbixItemKeys.Agent.Ping);
 | `Process` | Processes | `Count()` |
 | `Kernel` | Kernel limits | `MaxFiles`, `OpenFiles` |
 | `Network` | Interfaces and connections | `BytesReceived(name)` |
-| `Web` | Web pages and certificates | `Page(host)`, `Certificate(hostname)` |
+| `Web` | Web pages and certificates | `Page(host)`, `Certificate(hostName)` |
 
 `vfs.fs.size[/,free]` is a whole number and `vfs.fs.size[/,pfree]` a decimal, so the catalogue has an entry for each. It's in
 `Community.Zabbix.Abstractions`, so a read needs no agent package.
@@ -84,14 +84,14 @@ await agent.StartAsync();
 
 ## Read a bundled key from code
 
-Read it through any agent's table (`ZabbixItemDictionary.BuiltIn(hostname)` and `AnswerAsync`), or from its family's provider,
+Read it through any agent's table (`ZabbixItemDictionary.BuiltIn(hostName)` and `AnswerAsync`), or from its family's provider,
 which a handler or a provider of your own can call:
 
 ```csharp
 using Community.Zabbix.Items;
 
 var system = new ZabbixSystemItems();
-ZabbixAgentAnswer available = await system.GetValueAsync(ZabbixItemKey.Parse("vm.memory.size[pavailable]", null), CancellationToken.None);
+ZabbixAgentAnswer available = await system.GetValueAsync(ZabbixItemKey.Parse("vm.memory.size[pavailable]"), CancellationToken.None);
 ```
 
 In PowerShell, `Test-ZbxAgentItem` answers a bundled key without a session, and a scriptblock handler builds a key of its own from

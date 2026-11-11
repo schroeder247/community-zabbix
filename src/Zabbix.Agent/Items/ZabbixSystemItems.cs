@@ -56,7 +56,7 @@ public sealed partial class ZabbixSystemItems : ZabbixItemProvider, IDisposable
         _owned = owned ? collector : null;
         _files = collector.Files;
         _time = collector.Time;
-        _set.Add("system.hostname", "The host's name", Hostname, "system.hostname[host]")
+        _set.Add("system.hostname", "The host's name", HostName, "system.hostname[host]")
             .Add("system.localtime", "The host's time: seconds since the epoch, or its local time and offset", LocalTime, "system.localtime[local]")
             .Add("system.uptime", "Seconds since the host started", _ => ZabbixItemSet.Integer(Uptime()))
             .Add("system.boottime", "When the host started, in seconds since the epoch", _ => ZabbixItemSet.Integer(BootTime()))
@@ -90,7 +90,7 @@ public sealed partial class ZabbixSystemItems : ZabbixItemProvider, IDisposable
     /// <summary>Stops <c>system.cpu.util</c>'s sampling.</summary>
     public void Dispose() => _owned?.Dispose();
 
-    private static string Hostname(ZabbixItemKey key)
+    private static string HostName(ZabbixItemKey key)
     {
         ZabbixItemSet.AtMost(key, 2);
         string type = ZabbixItemSet.Parameter(key, 0);

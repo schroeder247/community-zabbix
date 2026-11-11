@@ -28,10 +28,10 @@ namespace Community.Zabbix.Proxy;
 public sealed class ZabbixProxyUplink
 {
     /// <summary>
-    /// The protocol version an uplink announces when it is given none, until a server refuses it and names its own: the
-    /// same default as <see cref="ZabbixProxyOptions.Version"/>.
+    /// Gets the protocol version an uplink announces when it's given none, until a server refuses it and names its own:
+    /// 7.4.0, the same default as <see cref="ZabbixProxyOptions.Version"/>.
     /// </summary>
-    public const string DefaultVersion = ZabbixProxyProtocol.DefaultVersion;
+    public static Version DefaultVersion { get; } = ZabbixProxyProtocol.Default.ToVersion();
 
     private readonly ZabbixExchangeCallback _exchange;
     private readonly TimeProvider _time;
@@ -40,15 +40,30 @@ public sealed class ZabbixProxyUplink
     private readonly Lock _versionGate = new();
     private ZabbixComponentVersion _version;
 
-    /// <summary>An uplink for the proxy named <paramref name="proxyName"/> over <paramref name="exchange"/>.</summary>
-    /// <param name="exchange">The wire.</param>
+    /// <summary>
+    /// An uplink for the proxy named <paramref name="proxyName"/> over <paramref name="exchange"/>: it announces
+    /// <see cref="DefaultVersion"/> first, in a new session, on the system's clock, and logs nowhere.
+    /// </summary>
+    /// <param name="exchange">What carries a request to the server and returns its reply, such as a link's <c>AsExchange()</c>.</param>
     /// <param name="proxyName">The proxy's name as the server knows it.</param>
-    /// <param name="version">The protocol version to announce first; <c>7.4.0</c> when <see langword="null"/>.</param>
-    /// <param name="time">The clock.</param>
-    /// <param name="logger">Where to log.</param>
+    /// <exception cref="ArgumentException"><paramref name="proxyName"/> is empty.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="exchange"/> or <paramref name="proxyName"/> is <see langword="null"/>.</exception>
+    public ZabbixProxyUplink(ZabbixExchangeCallback exchange, string proxyName)
+        : this(exchange, proxyName, version: null, session: null, loggers: null, time: null)
+    {
+    }
+
+    /// <summary>An uplink for the proxy named <paramref name="proxyName"/> over <paramref name="exchange"/>, with the application's logging and clock.</summary>
+    /// <param name="exchange">What carries a request to the server and returns its reply, such as a link's <c>AsExchange()</c>.</param>
+    /// <param name="proxyName">The proxy's name as the server knows it.</param>
+    /// <param name="version">The protocol version to announce first; <see cref="DefaultVersion"/> when <see langword="null"/>.</param>
     /// <param name="session">The session; a new random 32-hex-digit one when <see langword="null"/> (the server refuses any other length).</param>
-    public ZabbixProxyUplink(ZabbixExchangeCallback exchange, string proxyName, ZabbixComponentVersion? version = null, TimeProvider? time = null, ILogger<ZabbixProxyUplink>? logger = null, string? session = null)
-        : this(exchange, proxyName, version, time, logger, session, telemetry: null)
+    /// <param name="loggers">Where to log; nowhere when <see langword="null"/>. The caller keeps owning it.</param>
+    /// <param name="time">The clock; the system's when <see langword="null"/>.</param>
+    /// <exception cref="ArgumentException"><paramref name="proxyName"/> is empty.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="exchange"/> or <paramref name="proxyName"/> is <see langword="null"/>.</exception>
+    public ZabbixProxyUplink(ZabbixExchangeCallback exchange, string proxyName, Version? version, string? session, ILoggerFactory? loggers, TimeProvider? time)
+        : this(exchange, proxyName, version is null ? null : ZabbixComponentVersion.FromVersion(version), time, loggers?.CreateLogger<ZabbixProxyUplink>(), session, telemetry: null)
     {
     }
 
@@ -71,8 +86,11 @@ public sealed class ZabbixProxyUplink
     /// <summary>The session the server de-duplicates history on; new per process unless given, as the upstream proxy's token is.</summary>
     public string Session { get; }
 
-    /// <summary>The protocol version announced now.</summary>
-    public ZabbixComponentVersion Version
+    /// <summary>Gets the protocol version announced now: the one it was given, or the server's once a server refused it and named its own.</summary>
+    public Version Version => ProtocolVersion.ToVersion();
+
+    /// <summary>The protocol version announced now, as the protocol compares it.</summary>
+    internal ZabbixComponentVersion ProtocolVersion
     {
         get { lock (_versionGate) return _version; }
     }
@@ -109,7 +127,7 @@ public sealed class ZabbixProxyUplink
 
     private async Task<ZabbixProxyConfig> PullAsync(ZabbixProxyConfig held, bool adopt, CancellationToken cancellationToken)
     {
-        ZabbixComponentVersion version = Version;
+        ZabbixComponentVersion version = ProtocolVersion;
         string announced = version.ToString();
         var request = new ZabbixProxyConfigRequest("proxy config", ProxyName, announced, Session, held.ConfigRevision, held.HostmapRevision is 0 ? null : held.HostmapRevision);
         ReadOnlyMemory<byte> reply;
@@ -140,7 +158,8 @@ public sealed class ZabbixProxyUplink
                 ProxyLog.ProxyVersionAdopted(_logger, ProxyName, adopted, announced, serverVersion);
                 return await PullAsync(held, adopt: false, cancellationToken).ConfigureAwait(false);
             }
-            throw new ZabbixProxyRefusedException("proxy config", info, serverVersion);
+            throw new ZabbixProxyRefusedException("proxy config", info,
+                ZabbixComponentVersion.TryParse(serverVersion, CultureInfo.InvariantCulture, out ZabbixComponentVersion parsed) ? parsed.ToVersion() : null);
         }
         ZabbixProxyConfig merged = held.Merge(root);
         bool fullSync = ZabbixProxyConfig.IsFullSync(root);
@@ -158,16 +177,27 @@ public sealed class ZabbixProxyUplink
         _ => value.GetRawText(),
     };
 
-    /// <summary>Pushes one page — history, discovery, auto-registration, interface availability, task results; the server's answer says whether it took it and whether uploads are on.</summary>
-    /// <param name="page">The page: whichever of its lists are not empty.</param>
-    /// <param name="more">Whether more is held behind this page.</param>
-    /// <param name="proxyDelay">How old, in seconds, the oldest value left behind is (upstream <c>proxy_delay</c>); omitted when 0.</param>
+    /// <summary>
+    /// Pushes one page — history, discovery, auto-registration, interface availability, task results; the server's answer
+    /// says whether it took it and whether uploads are on.
+    /// </summary>
+    /// <param name="page">The page: whichever of its lists aren't empty.</param>
+    /// <param name="backlog">Whether more is held behind this page (upstream's <c>more</c>), so the server expects the next one at once.</param>
+    /// <param name="proxyDelay">How long the oldest value left behind has waited (upstream's <c>proxy_delay</c>), in whole seconds; omitted when under one.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The server's answer.</returns>
-    public Task<ZabbixProxyResponse> UploadAsync(ZabbixProxyDataPage page, bool more, long proxyDelay, CancellationToken cancellationToken = default)
+    /// <exception cref="ArgumentNullException"><paramref name="page"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="proxyDelay"/> is negative.</exception>
+    /// <example>
+    /// <code language="csharp">
+    /// ZabbixProxyResponse answer = await uplink.UploadAsync(page, ZabbixProxyBacklog.More, TimeSpan.FromSeconds(30));
+    /// </code>
+    /// </example>
+    public Task<ZabbixProxyResponse> UploadAsync(ZabbixProxyDataPage page, ZabbixProxyBacklog backlog, TimeSpan proxyDelay, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(page);
-        return SendAsync(page, more, proxyDelay, cancellationToken);
+        ArgumentOutOfRangeException.ThrowIfLessThan(proxyDelay, TimeSpan.Zero);
+        return SendAsync(page, backlog == ZabbixProxyBacklog.More, (long)proxyDelay.TotalSeconds, cancellationToken);
     }
 
     /// <summary>Asks a server that has disabled uploads whether it has enabled them: a <c>proxy data</c> with every list empty.</summary>
@@ -175,7 +205,8 @@ public sealed class ZabbixProxyUplink
     /// <returns>The server's answer.</returns>
     public Task<ZabbixProxyResponse> ProbeAsync(CancellationToken cancellationToken = default) => SendAsync(ZabbixProxyDataPage.Empty, more: false, proxyDelay: 0, cancellationToken);
 
-    private async Task<ZabbixProxyResponse> SendAsync(ZabbixProxyDataPage page, bool more, long proxyDelay, CancellationToken cancellationToken)
+    /// <summary>The upload in the protocol's own terms, for the proxies' send turn.</summary>
+    internal async Task<ZabbixProxyResponse> SendAsync(ZabbixProxyDataPage page, bool more, long proxyDelay, CancellationToken cancellationToken)
     {
         ZabbixOperation operation = _telemetry.StartData(ProxyName, passive: false);
         try
@@ -187,7 +218,7 @@ public sealed class ZabbixProxyUplink
                 page.Autoregistration is { Count: > 0 } autoreg ? autoreg : null,
                 page.Availability is { Count: > 0 } availability ? availability : null,
                 page.Tasks is { Count: > 0 } tasks ? tasks : null,
-                more ? 1 : null, Version.ToString(), now, proxyDelay > 0 ? proxyDelay : null);
+                more ? 1 : null, Version, now, proxyDelay > 0 ? proxyDelay : null);
             ReadOnlyMemory<byte> reply = await _exchange(JsonSerializer.SerializeToUtf8Bytes(request, ZabbixProxyJson.Default.ZabbixProxyDataRequest), cancellationToken).ConfigureAwait(false);
             ZabbixProxyResponse response = JsonSerializer.Deserialize(reply.Span, ZabbixProxyJson.Default.ZabbixProxyResponse)
                 ?? throw new JsonException("The server answered proxy data with null.");

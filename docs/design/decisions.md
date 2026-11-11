@@ -89,7 +89,7 @@ ADRs: a lower document may add to a higher one and never contradicts it. Where t
 | a time of day (seconds after midnight, a `start_time`) | `TimeOnly` | mated |
 | object id (`bigint unsigned`; the API's decimal string, the framed protocol's number; `0` for none) | `ulong(ulong)`: `ISpanParsable`, `IUtf8SpanParsable`, `ISpanFormattable`, `IUtf8SpanFormattable`; one type on the API's records, the wire's rows and the hosts' assignments; `0UL` is `0`; a CUID id (`auditid`, `recordsetid`, `ha_nodeid`: a 25-character string, `ZBX_TYPE_CUID`) is a `string`, never a `ulong` | owned (a `ulong` carries the number but neither JSON form nor the one name across packages) |
 | API version | `System.Version`; methods gated by `ZabbixSupportedAttribute`, refused with `ZabbixVersionException` | mated |
-| proxy and server component version | `ZabbixComponentVersion` over `System.Version`, upstream's parse rules | owned parse, mated value |
+| proxy and server component version | `System.Version` in the public members; the internal `ZabbixComponentVersion` reads upstream's spelling into it | owned parse, mated value |
 | allowed peers / `Server=` / `trapper_hosts` | `ZabbixPeer` per entry, `IPNetwork` for an address or a block; a listener's list names resolved per check, empty refused | owned |
 | TLS certificate mode (`tls_openssl.c`) | `SslStream` + `CertificateChainPolicy` + `CustomRootTrust`; revocation from `TLSCRLFile` only | mated |
 | certificate issuer/subject pins | `ZabbixCertificateName` over `EnumerateRelativeDistinguishedNames` and `AsnReader` | owned |
@@ -105,7 +105,7 @@ ADRs: a lower document may add to a higher one and never contradicts it. Where t
 | passive proxy (conversations) | `ZabbixConversationCallback` owning the connection | owned |
 | proxy config (tables, deltas) | `ZabbixProxyConfig`: merged by id, a `FrozenDictionary` per revision | mated |
 | a value computed at `proxy data` time; a task; a pushed config; `zabbix.stats` | `ZabbixProxyDataCallback`, `ZabbixProxyTaskCallback`, `ZabbixPassiveProxyConfigCallback`, `ZabbixProxyStatsCallback` delegates | mated |
-| upload state | `ZabbixDelivery.Held` | owned |
+| upload state | `ZabbixSendOutcome.Held` | owned |
 | store / durable store | `ZabbixStore<T> : ChannelWriter<T>, IAsyncEnumerable<T>` / `ZabbixEntityFrameworkStore<T>` (a table per store) | mated |
 | telemetry | `ZabbixLayerTelemetry` per layer on `ActivitySource`/`IMeterFactory`; `[LoggerMessage]` per layer; `DataClassification` + the redactor | mated |
 | lifecycle / limits / health / cadence | `IHostedLifecycleService` / `RateLimiting` / `IHealthCheck` / `PeriodicTimer` over `TimeProvider` | mated |
@@ -254,9 +254,10 @@ every type, and a refusal thrown as an `InvalidDataException` is indistinguishab
 | `ZabbixApiException` | `ZabbixRefusedException` | the API answered with an error object (`Kind` classifies it) |
 | `ZabbixTrapperRefusedException` | `ZabbixRefusedException` | the trapper did not answer a counted `success` |
 | `ZabbixServerRefusedException` | `ZabbixRefusedException` | the server answered a wire request `failed` |
-| `ZabbixAgentRefusedException` | `ZabbixRefusedException` | a passive agent refused the request as a whole |
+| `ZabbixAgentRefusedException` | `ZabbixRefusedException` | a passive agent refused the request as a whole; `Error` is its reason |
+| `ZabbixItemNotSupportedException` | `ZabbixRefusedException` | an agent answered a typed read that it doesn't support the key; `Error` is its reason, as on `ZabbixAgentAnswer` |
 | `ZabbixProxyRefusedException` | `ZabbixRefusedException` | the server refused a proxy's `proxy config` or `proxy data` |
-| `ZabbixWireException` (abstract, `Zabbix.Wire`) | `IOException` | the base of the wire's own exchange failures, which name the endpoint or the redirect |
+| `ZabbixWireException` (internal, abstract, `Zabbix.Wire`) | `IOException` | the base of the wire's own exchange failures, which name the endpoint or the redirect; a caller catches them as the `IOException` they are |
 | `ZabbixSenderIncompleteException` | `IOException` | a send of several frames stopped at a failed one after earlier frames were taken; it carries what was taken and what was not confirmed, the failed frame's exception inside |
 | `ZabbixSenderCanceledException` | `OperationCanceledException` | the caller cancelled a send of several frames after earlier frames were taken; it carries the same as the incomplete send, and its `CancellationToken` is the caller's |
 | `ZabbixVersionException` | `NotSupportedException` | the server's version does not have the method or field; nothing was sent |
@@ -729,7 +730,7 @@ Re-measure a fact when .NET or Zabbix changes.
 | BouncyCastle fails a retried hello carrying an external PSK; Zabbix servers allow only P-256 | the PSK client offers P-256 only |
 | OpenSSL has no ECDHE-PSK GCM suite; upstream's TLS 1.2 string expands to CBC, GCM (plain PSK) and CCM suites | six TLS 1.2 suites offered |
 | the shared framework has no `Stream` over an `IBufferWriter<byte>` | `BufferWriterStream` stays |
-| `System.Version` rejects `"+7.-4.1"` and `"8.0.0rc1"` | `ZabbixComponentVersion` parses upstream's form |
+| `System.Version` rejects `"+7.-4.1"` and `"8.0.0rc1"` | the internal `ZabbixComponentVersion` parses upstream's form into a `System.Version` |
 | `JsonNumberEnumConverter<T>` refuses `"3"` even with `AllowReadingFromString`; `JsonStringEnumConverter<T>` writes names | an owned enum converter |
 | System.Text.Json ignores unmapped members silently | read records carry an `AdditionalFields` bag |
 | standard resilience timeouts end at the response headers | `ZabbixResponseBufferingHandler` buffers the body inside the deadline |
@@ -765,7 +766,7 @@ one deletes its line in the same commit, and follows the compatibility rules abo
 
 | Divergence | The guidance | The change it needs |
 | --- | --- | --- |
-| public constructors of `Zabbix.Agent` and `Zabbix.Proxy` take default arguments: `ZabbixAgentHealthCheck`, `ZabbixMemoryStore<T>`, `ZabbixPersistentStore<T>`, `ZabbixStore<T>`, `ZabbixPassiveCheckResponder`, `ZabbixTrapper`, `ZabbixTrapperSource`, `ZabbixProxyUplink` (the agent and proxy classes and `ZabbixItemAssignment` take overloads) | "DO use member overloading rather than defining members with default arguments" and "DO make only the longest overload virtual" ([member overloading](https://learn.microsoft.com/dotnet/standard/design-guidelines/member-overloading)); a default is compiled into the caller | each constructor's shorter forms become overloads that call the longest, and `Zabbix.Agent` and `Zabbix.Proxy` join the libraries `No_public_constructor_of_a_client_library_takes_a_default_argument` reads |
+| public constructors of `Zabbix.Agent` and the EF Core store take default arguments: `ZabbixMemoryStore<T>`, `ZabbixPersistentStore<T>`, `ZabbixStore<T>`, `ZabbixEntityFrameworkStore<T>`, and the bundled items' classes (`ZabbixFileItems`, `ZabbixFileSystemItems`, `ZabbixNetworkItems`, `ZabbixProcessItems`, `ZabbixSystemItems`, `ZabbixWebItems`); the agent and proxy classes, the listener's pieces, `ZabbixComponentHealthCheck`, `ZabbixProxyUplink` and `ZabbixItemAssignment` take overloads | "DO use member overloading rather than defining members with default arguments" and "DO make only the longest overload virtual" ([member overloading](https://learn.microsoft.com/dotnet/standard/design-guidelines/member-overloading)); a default is compiled into the caller | each constructor's shorter forms become overloads that call the longest, and `Zabbix.Agent`, `Zabbix.Proxy` and the EF Core store join the libraries `No_public_constructor_of_a_client_library_takes_a_default_argument` reads |
 | `*GetParameters.Filter` and `.Search` are the generated `Zabbix*GetFilter` and `Zabbix*GetSearch`, never `null`, so `q.Filter.TechnicalName = ["web-01"]` binds, and the indexer sets a field they do not name. |
 | `ZabbixItemAssignment.Key` and `ZabbixItem.Key` are `string` beside `ZabbixItemKey` | a value with a parsed form is exposed as its type, not as text the caller parses (the reasoning of [CA1056](https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1056), "URI properties should not be strings", applied to the SDK's own value types) | an assignment's key is parsed when the agent schedules the item, so one it cannot read is that item's "not supported" and never a refusal of the whole list (upstream's agent answers it so), as its delay is: a `ZabbixInterval` keeps text it can't read, and the schedule refuses that item alone. The typed key needs the same form (`ZabbixItemKey.TryParse` kept beside the raw text, or a `ZabbixItemKey?` with the text alongside), then the hosts read the typed member; `ZabbixItem.Key` follows through the generator's table of typed fields (`ZabbixTypedFields`), with a `key` kind and its converter |
 | the wire counts failovers and redirects as `zabbix.wire.failovers`/`zabbix.wire.redirects` beside the span events `zabbix.wire.failover`/`zabbix.wire.redirect`; the instrument, tag and event names are internal constants on each layer's telemetry type (the trapper's on `ZabbixTrapper`), not on the public `ZabbixTelemetryNames` | use the OpenTelemetry naming guidelines, and give a consumer the names it filters by ([creating metrics, best practices](https://learn.microsoft.com/dotnet/core/diagnostics/metrics-instrumentation#best-practices)) | one name per concept (the counter and its event under one word, the counter's `{failover}` unit saying what it counts) and nested `ZabbixTelemetryNames.Instruments`/`.Events`/`.Tags` with every public name, each layer's telemetry reading them; the trapper's in `Zabbix.Proxy` move in the same change |

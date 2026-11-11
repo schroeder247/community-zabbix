@@ -178,7 +178,7 @@ public sealed class ZabbixTrapper
         {
             value = null;
             return row is not null                                                        // "data":[null]: upstream cannot open the row either
-                   && row.Host is { Length: > 0 } host && row.Key is { Length: > 0 } key && ZabbixItemKey.TryParse(key, null, out ZabbixItemKey parsed)
+                   && row.Host is { Length: > 0 } host && row.Key is { Length: > 0 } key && ZabbixItemKey.TryParse(key, out ZabbixItemKey parsed)
                    && TryRead(row, host, parsed, now, out value);
         }, cancellationToken).ConfigureAwait(false);
         return Answer("success", processed, failed, started);

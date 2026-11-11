@@ -400,7 +400,8 @@ public sealed class TlsTests : IDisposable
         options.AllowedPeers.Add("127.0.0.1");
         options.Tls = new ZabbixTlsOptions { CaFile = server.CaFile, CertificateFile = server.CertificateFile, KeyFile = server.KeyFile, CrlFile = crlFile };
         var logs = new FakeLogCollector();
-        var listener = new Zabbix.Listening.ZabbixListener(options, (request, _) => ValueTask.FromResult(request.Payload), ListenerTests.Transport(), new FakeTimeProvider(now.AddDays(daysLater)), new FakeLogger<Zabbix.Listening.ZabbixListener>(logs), meters: null);
+        using var loggers = new SingleLoggerFactory(new FakeLogger<Zabbix.Listening.ZabbixListener>(logs));
+        var listener = new Zabbix.Listening.ZabbixListener(options, (request, _) => ValueTask.FromResult(request.Payload), ListenerTests.Transport(), loggers, new FakeTimeProvider(now.AddDays(daysLater)), meters: null);
         await listener.StartingAsync(TestContext.Current.CancellationToken);
         await listener.StartAsync(TestContext.Current.CancellationToken);
         try

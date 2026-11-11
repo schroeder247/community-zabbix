@@ -12,13 +12,14 @@ dotnet add package Community.Zabbix.Wire
 ```csharp
 using Community.Zabbix;
 
-using var wire = new ZabbixWireClient("zabbix.example:10051");                 // or "zabbix.example", on 10051
+await using var wire = new ZabbixWireClient("zabbix.example:10051");           // or "zabbix.example", on 10051
 ZabbixSenderResponse response = await wire.SendAsync("web-01", new ZabbixItemKey<long>("app.queue.depth"), 17);
 Console.WriteLine($"processed {response.Processed}, failed {response.Failed}");
 ```
 
-`ZabbixWireClient.CreateBuilder()` sets more than the server, such as HA nodes, a token and TLS, and `AddZabbixWireClient("prod")`
-registers a named client in a host with the same verbs.
+`ZabbixWireClient.CreateBuilder().WithServer("zbx-1;zbx-2")` sets more than the server, such as an HA cluster's nodes, a token and
+TLS, and `AddZabbixWireClient("prod")` registers a named client in a host with the same verbs. The container owns the client it
+hands out, so disposing it leaves it running for the rest of the application.
 
 Requires .NET 10 (`net10.0`). Works with Zabbix 7.0, 7.4 and 8.0 ([known limitations](https://github.com/schroeder247/community-zabbix/blob/main/docs/KNOWN-LIMITATIONS.md)).
 

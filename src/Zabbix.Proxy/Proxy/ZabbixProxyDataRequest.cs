@@ -21,7 +21,7 @@ public sealed record ZabbixProxyDataRequest(
     [property: JsonPropertyName("interface availability")] IReadOnlyList<ZabbixProxyAvailabilityItem>? Availability,
     [property: JsonPropertyName("tasks")] IReadOnlyList<ZabbixProxyTaskResult>? Tasks,
     [property: JsonPropertyName("more")] int? More,
-    [property: JsonPropertyName("version")] string Version,
+    [property: JsonPropertyName("version"), JsonConverter(typeof(ZabbixVersionTextConverter))] Version Version,
     DateTimeOffset Clock,
     [property: JsonPropertyName("proxy_delay")] long? ProxyDelay)
 {
@@ -46,7 +46,7 @@ public sealed record ZabbixProxyDataRequest(
             && string.Equals(Session, other.Session, StringComparison.Ordinal)
             && ZabbixValueEquality.ListEqual(History, other.History) && ZabbixValueEquality.ListEqual(Discovery, other.Discovery)
             && ZabbixValueEquality.ListEqual(Autoregistration, other.Autoregistration) && ZabbixValueEquality.ListEqual(Availability, other.Availability)
-            && ZabbixValueEquality.ListEqual(Tasks, other.Tasks) && More == other.More && string.Equals(Version, other.Version, StringComparison.Ordinal)
+            && ZabbixValueEquality.ListEqual(Tasks, other.Tasks) && More == other.More && Equals(Version, other.Version)
             && Exact == other.Exact && ProxyDelay == other.ProxyDelay;
 
     /// <inheritdoc/>

@@ -32,7 +32,7 @@ namespace Community.Zabbix;
 /// <example>
 /// <code language="csharp">
 /// await using ZabbixActiveProxy proxy = ZabbixActiveProxy.CreateBuilder("proxy-01")
-///     .AddServer("zbx-server-01")
+///     .WithServer("zbx-server-01")
 ///     .AllowPeer(IPNetwork.Parse("10.0.0.0/8"))
 ///     .Build();
 /// await proxy.StartAsync();
@@ -106,7 +106,7 @@ public class ZabbixActiveProxy : ZabbixComponent
         _wire = wire;
         _telemetry = new ZabbixProxyTelemetry(meters, Time);
         _agentSessions = new ZabbixAgentSessions(Time);
-        Status = new ZabbixAgentStatus(Name);
+        Status = new ZabbixComponentStatus(Name);
     }
 
     /// <summary>
@@ -120,7 +120,7 @@ public class ZabbixActiveProxy : ZabbixComponent
     /// <example>
     /// <code language="csharp">
     /// await using ZabbixActiveProxy proxy = ZabbixActiveProxy.CreateBuilder("proxy-01")
-    ///     .AddServer("zbx-server-01;zbx-server-02")
+    ///     .WithServer("zbx-server-01;zbx-server-02")
     ///     .AllowPeer(IPNetwork.Parse("10.0.0.0/8"))
     ///     .UseEntityFrameworkStore(db =&gt; db.UseSqlite("Data Source=proxy.db"))
     ///     .Build();
@@ -151,13 +151,13 @@ public class ZabbixActiveProxy : ZabbixComponent
     internal ZabbixNodeLink? Link => Volatile.Read(ref _link);
 
     /// <summary>The uplink; <see langword="null"/> before start.</summary>
-    public ZabbixProxyUplink? Uplink => _running?.Uplink;
+    internal ZabbixProxyUplink? Uplink => _running?.Uplink;
 
     /// <summary>The trapper's listener; <see langword="null"/> before start.</summary>
-    public ZabbixListener? Trapper => _running?.Trapper;
+    internal ZabbixListener? Trapper => _running?.Trapper;
 
-    /// <summary>The store; <see langword="null"/> before start and after stop.</summary>
-    public ZabbixStore<ZabbixValue>? Store => _stores?.History;
+    /// <summary>The history store; <see langword="null"/> before start and after stop.</summary>
+    internal ZabbixStore<ZabbixValue>? Store => _stores?.History;
 
     /// <summary>
     /// Where a caller writes discovery check results to be uploaded as <c>discovery data</c>; <see langword="null"/> before
@@ -180,8 +180,8 @@ public class ZabbixActiveProxy : ZabbixComponent
     /// <summary>Whether the server has disabled uploads and the proxy is holding its history.</summary>
     public bool IsHeld => _running?.Sender.IsHeld ?? false;
 
-    /// <summary>What the proxy is doing.</summary>
-    public ZabbixAgentStatus Status { get; private set; }
+    /// <summary>What the proxy is doing: its store, its uploads and its faults, as an agent reports them.</summary>
+    public ZabbixComponentStatus Status { get; private set; }
 
     private protected override Task OnStartingAsync(CancellationToken cancellationToken) => PrepareAsync(cancellationToken);
 
@@ -191,7 +191,7 @@ public class ZabbixActiveProxy : ZabbixComponent
         ZabbixStorePolicy<ZabbixValue> policy = Options.StoragePolicy(value => Admission.Knows(value));    // a host the server never named is refused at the door
         ZabbixProxyStores stores = ZabbixProxyStores.Create(Name, Options, _history, policy, Loggers, _meters, Time);
         _stores = stores;
-        Status = new ZabbixAgentStatus(Name);
+        Status = new ZabbixComponentStatus(Name);
         Status.Attach(stores.History);
         // The one server or HA cluster: the start has checked that Server names one.
         IReadOnlyList<ZabbixServerNode> nodes = ZabbixServerActive.Parse(Options.Server!, CultureInfo.InvariantCulture)[0];
@@ -203,7 +203,7 @@ public class ZabbixActiveProxy : ZabbixComponent
         Interlocked.Exchange(ref _link, link)?.Dispose();
         var uplink = new ZabbixProxyUplink(link.Exchange(followRedirects: false, allowLarge: true), Name,
             Options.ProtocolVersion, Time, Loggers.CreateLogger<ZabbixProxyUplink>(), session: null, _telemetry);
-        _trapper = new ZabbixListener(Options.Trapper, (request, cancellation) => HandleAsync(stores, request, cancellation), _transport ?? ZabbixSocketTransport.Create(Loggers), Time, Loggers.CreateLogger<ZabbixListener>(), _meters);
+        _trapper = new ZabbixListener(Options.Trapper, (request, cancellation) => HandleAsync(stores, request, cancellation), _transport ?? ZabbixSocketTransport.Create(Loggers), Loggers, Time, _meters);
         ZabbixListener trapper = _trapper;
         // What the builder's AddProvider and OnTask gave, read with the rest of the options at start.
         IReadOnlyList<ZabbixProxyDataCallback> providers = [.. Options.Providers];
@@ -261,6 +261,7 @@ public class ZabbixActiveProxy : ZabbixComponent
     protected override async ValueTask DisposeAsyncCore()
 #pragma warning restore IDE1006
     {
+        if (IsKept) return;                                          // shared: its container releases it
         await base.DisposeAsyncCore().ConfigureAwait(false);          // stops a running component first, so it drains
         if (Interlocked.Exchange(ref _released, 1) != 0) return;
         await _stoppingConfig.CancelAsync().ConfigureAwait(false);
@@ -276,6 +277,7 @@ public class ZabbixActiveProxy : ZabbixComponent
     /// <inheritdoc/>
     protected override void Dispose(bool disposing)
     {
+        if (IsKept) return;                                          // shared: its container releases it
         if (disposing && Interlocked.Exchange(ref _released, 1) == 0)
         {
             _stoppingConfig.Cancel();
@@ -314,8 +316,8 @@ public class ZabbixActiveProxy : ZabbixComponent
         try
         {
             ZabbixProxyConfig pulled = await uplink.GetConfigAsync(held.Config, cancellationToken).ConfigureAwait(false);
-            if (ReferenceEquals(pulled, held.Config) && held.Protocol == uplink.Version) return;
-            Volatile.Write(ref _admission, await ZabbixProxyAdmission.BuildAsync(pulled, uplink.Version, Options.Resolve, cancellationToken).ConfigureAwait(false));
+            if (ReferenceEquals(pulled, held.Config) && held.ProtocolVersion == uplink.ProtocolVersion) return;
+            Volatile.Write(ref _admission, await ZabbixProxyAdmission.BuildAsync(pulled, uplink.ProtocolVersion, Options.Resolve, cancellationToken).ConfigureAwait(false));
         }
         catch (ZabbixProxyRefusedException)
         {
@@ -334,7 +336,7 @@ public class ZabbixActiveProxy : ZabbixComponent
         using var timer = new PeriodicTimer(Options.DataInterval, Time);
         ZabbixStore<ZabbixValue> store = running.Stores.History;
         ZabbixProxyDataSender sender = running.Sender;
-        ZabbixProxyDataSender.Exchange upload = running.Uplink.UploadAsync;
+        ZabbixProxyDataSender.Exchange upload = running.Uplink.SendAsync;
         // PeriodicTimer allows exactly one outstanding WaitForNextTickAsync at a time: a second call while one is still
         // pending throws. `tick` is the single call in flight, shared between the "nothing leased yet" wait below and the
         // "wait for the next turn" wait at the loop's end, and is never discarded uncompleted. `waiting` (the store's own

@@ -37,7 +37,7 @@ public sealed class PropertyTests
             // the one refusal the quoting rule names: a parameter that needs quotes and ends with a backslash
             Assert.Equal(!parameters.Any(p => needsQuotes(p) && p.EndsWith('\\')), made);
             if (!made) return;
-            ZabbixItemKey back = ZabbixItemKey.Parse(key.ToString(), CultureInfo.InvariantCulture);
+            ZabbixItemKey back = ZabbixItemKey.Parse(key.ToString());
             Assert.Equal(key, back);
             Assert.Equal(name, back.Name);
             Assert.Equal(parameters, back.Parameters);

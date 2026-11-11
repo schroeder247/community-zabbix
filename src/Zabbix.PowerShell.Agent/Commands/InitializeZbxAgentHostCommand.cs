@@ -42,7 +42,7 @@ public sealed class InitializeZbxAgentHostCommand : ZabbixServerCmdlet
     [ValidateNotNullOrEmpty]
     public string[]? Key { get; set; }
 
-    /// <summary>The monitored host's technical name. Default: the session's own <c>Hostname</c>.</summary>
+    /// <summary>The monitored host's technical name. Default: the session's own <c>HostName</c>.</summary>
     [Parameter(Position = 1)]
     [ValidateNotNullOrWhiteSpace]
     public string? HostName { get; set; }
@@ -92,7 +92,7 @@ public sealed class InitializeZbxAgentHostCommand : ZabbixServerCmdlet
             }
         }
 
-        string? hostName = HostName ?? session?.Hostname;
+        string? hostName = HostName ?? session?.HostName;
         if (string.IsNullOrWhiteSpace(hostName))
         {
             WriteError(new ErrorRecord(new PSArgumentException("No -HostName and the session carries none."), "ZabbixAgentHostNoHostName", ErrorCategory.InvalidArgument, null));

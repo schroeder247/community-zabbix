@@ -1,6 +1,5 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
-using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 
 namespace Community.Zabbix.Storage.EntityFrameworkCore;
@@ -51,7 +50,7 @@ internal sealed class RecordContext<T>(DbContextOptions<RecordContext<T>> option
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "EF Core instantiates the converter from HaveConversion<TConverter>() in ConfigureConventions.")]
     private sealed class ZabbixItemKeyConverter() : Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<ZabbixItemKey, string>(
-        key => key.ToString(), text => ZabbixItemKey.Parse(text, CultureInfo.InvariantCulture));
+        key => key.ToString(), text => ZabbixItemKey.Parse(text));
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "EF Core instantiates the converter from HaveConversion<TConverter>() in ConfigureConventions.")]
     private sealed class ZabbixClockConverter() : Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<ZabbixClock, long>(

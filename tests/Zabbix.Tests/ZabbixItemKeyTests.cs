@@ -1,7 +1,5 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
-using System.Globalization;
-
 namespace Community.Zabbix.Tests;
 
 /// <summary>
@@ -90,7 +88,7 @@ public sealed class ZabbixItemKeyTests
     [MemberData(nameof(UpstreamValidKeys))]
     public void Every_key_upstream_accepts_parses_into_upstream_s_name_parameters_and_types(string text, string name, string[] parameters, ZabbixItemKeyParameterType[] types)
     {
-        ZabbixItemKey key = ZabbixItemKey.Parse(text, CultureInfo.InvariantCulture);
+        ZabbixItemKey key = ZabbixItemKey.Parse(text);
 
         Assert.Equal(name, key.Name);
         Assert.Equal(parameters, key.Parameters);
@@ -103,14 +101,14 @@ public sealed class ZabbixItemKeyTests
     public void Every_key_upstream_refuses_is_refused_and_TryParse_never_throws(string text)
     {
         Assert.False(ZabbixItemKey.TryParse(text, out _));
-        Assert.Throws<FormatException>(() => ZabbixItemKey.Parse(text, CultureInfo.InvariantCulture));
+        Assert.Throws<FormatException>(() => ZabbixItemKey.Parse(text));
     }
 
     [Fact]
     public void A_quoted_parameter_keeps_its_quotes_on_the_wire_and_is_a_different_key_from_the_unquoted_one()
     {
-        ZabbixItemKey quoted = ZabbixItemKey.Parse("k[\"a\"]", CultureInfo.InvariantCulture);
-        ZabbixItemKey bare = ZabbixItemKey.Parse("k[a]", CultureInfo.InvariantCulture);
+        ZabbixItemKey quoted = ZabbixItemKey.Parse("k[\"a\"]");
+        ZabbixItemKey bare = ZabbixItemKey.Parse("k[a]");
 
         Assert.Equal("k[\"a\"]", quoted.ToString());
         Assert.Equal(quoted.Parameters, bare.Parameters);                                  // the same view…
@@ -118,13 +116,27 @@ public sealed class ZabbixItemKeyTests
     }
 
     [Fact]
+    public void Parse_takes_the_text_alone_and_the_parsing_interfaces_read_a_key_as_it_does()
+    {
+        // A key has one spelling whatever the culture, so the provider ISpanParsable<T> passes is taken and ignored.
+        static T Read<T>(string text) where T : IParsable<T> => T.Parse(text, System.Globalization.CultureInfo.GetCultureInfo("tr-TR"));
+        static bool TryRead<T>(ReadOnlySpan<char> text, out T? value) where T : ISpanParsable<T> => T.TryParse(text, provider: null, out value);
+
+        Assert.Equal(ZabbixItemKey.Parse("vfs.fs.size[/,free]"), Read<ZabbixItemKey>("vfs.fs.size[/,free]"));
+        Assert.True(TryRead("agent.ping", out ZabbixItemKey ping));
+        Assert.Equal(ZabbixItemKey.Parse("agent.ping".AsSpan()), ping);
+        Assert.False(TryRead<ZabbixItemKey>("a b", out _));
+        Assert.Null(typeof(ZabbixItemKey).GetMethod(nameof(ZabbixItemKey.Parse), [typeof(string), typeof(IFormatProvider)]));
+    }
+
+    [Fact]
     public void Spacing_is_part_of_the_identity()
-        => Assert.NotEqual(ZabbixItemKey.Parse("k[a, b]", CultureInfo.InvariantCulture), ZabbixItemKey.Parse("k[a,b]", CultureInfo.InvariantCulture));
+        => Assert.NotEqual(ZabbixItemKey.Parse("k[a, b]"), ZabbixItemKey.Parse("k[a,b]"));
 
     [Fact]
     public void Keys_are_equal_by_text_and_index_their_parameters()
     {
-        ZabbixItemKey parsed = ZabbixItemKey.Parse("net.if.in[eth0,bytes]", CultureInfo.InvariantCulture);
+        ZabbixItemKey parsed = ZabbixItemKey.Parse("net.if.in[eth0,bytes]");
         ZabbixItemKey created = ZabbixItemKey.Create("net.if.in", "eth0", "bytes");
 
         Assert.Equal(parsed, created);
@@ -172,7 +184,7 @@ public sealed class ZabbixItemKeyTests
     public void A_parse_failure_names_the_rule_and_the_position_never_the_text(string text, string reason)
     {
         // A key's parameters can carry a credential, and an exception's message reaches every log and span unredacted.
-        FormatException failure = Assert.Throws<FormatException>(() => ZabbixItemKey.Parse(text, CultureInfo.InvariantCulture));
+        FormatException failure = Assert.Throws<FormatException>(() => ZabbixItemKey.Parse(text));
 
         Assert.DoesNotContain("s3cret", failure.Message, StringComparison.Ordinal);
         Assert.Equal($"The text is not a Zabbix item key: {reason}.", failure.Message);

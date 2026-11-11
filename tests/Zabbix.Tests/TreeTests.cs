@@ -1,7 +1,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
 using System.Diagnostics;
-using System.Globalization;
 using System.Text.Json;
 using Community.Zabbix.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
@@ -82,7 +81,7 @@ public sealed class TreeTests
 
         Assert.Equal(2, values.Count);                                                  // the never-collected item yields nothing
         Assert.Equal("web-01", values[0].Host);
-        Assert.Equal(ZabbixItemKey.Parse("system.cpu.load[all,avg1]", CultureInfo.InvariantCulture), values[0].Key);
+        Assert.Equal(ZabbixItemKey.Parse("system.cpu.load[all,avg1]"), values[0].Key);
         Assert.Equal("0.42", values[0].Value);
         Assert.Equal(new ZabbixClock(1_700_000_000, 501), values[0].Clock);                 // to the nanosecond, not the tick
     }

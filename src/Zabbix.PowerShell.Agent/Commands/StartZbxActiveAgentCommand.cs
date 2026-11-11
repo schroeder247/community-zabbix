@@ -86,7 +86,7 @@ public sealed class StartZbxActiveAgentCommand : ZabbixAgentSessionCommand
         // The SDK's options, as an application's builder writes them with Configure(...).
         void Configure(ZabbixActiveAgentOptions options)
         {
-            options.Hostname = HostName;
+            options.HostName = HostName;
             options.HostMetadata = HostMetadata;
             options.ServerActive = Server;
             options.RefreshInterval = RefreshInterval;

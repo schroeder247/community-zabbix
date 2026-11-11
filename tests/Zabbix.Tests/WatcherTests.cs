@@ -112,7 +112,7 @@ public sealed class WatcherTests
         var values = new List<string>();
         for (int n = 0; n < 3; n++) { Assert.True(await reading.MoveNextAsync()); values.Add(reading.Current.Value); }
         Assert.Equal(["2", "3", "4"], values);                                               // 3 collected, 3 yielded, none skipped
-        Assert.Equal("4", watcher.Current[("web-01", ZabbixItemKey.Parse("cpu", CultureInfo.InvariantCulture))].Value);
+        Assert.Equal("4", watcher.Current[("web-01", ZabbixItemKey.Parse("cpu"))].Value);
         Assert.Equal(0, watcher.DroppedCount);
         Assert.Equal(2, watcher.SucceededPolls);
     }
@@ -134,7 +134,7 @@ public sealed class WatcherTests
         for (int n = 0; n < 3; n++) { Assert.True(await reading.MoveNextAsync().AsTask().WaitAsync(Wait, TestContext.Current.CancellationToken)); values.Add(reading.Current.Value); }
 
         Assert.Equal(["2", "3", "4"], values);                                               // "1" was collected before the watch: not a new value
-        Assert.Equal("4", watcher.Current[("web-01", ZabbixItemKey.Parse("cpu", CultureInfo.InvariantCulture))].Value);
+        Assert.Equal("4", watcher.Current[("web-01", ZabbixItemKey.Parse("cpu"))].Value);
     }
 
     /// <summary>Holds every request until <paramref name="release"/> completes.</summary>

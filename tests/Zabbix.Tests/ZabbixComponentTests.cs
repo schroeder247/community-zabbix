@@ -39,7 +39,7 @@ public sealed class ZabbixComponentTests
     [Fact]
     public async Task A_constructed_passive_agent_answers_a_client_named_by_host_and_port()
     {
-        var options = new ZabbixPassiveAgentOptions { Hostname = "edge-01", Address = "127.0.0.1", Port = 0 };
+        var options = new ZabbixPassiveAgentOptions { HostName = "edge-01", Address = "127.0.0.1", Port = 0 };
         options.AllowedPeers.Add("127.0.0.1");
         await using var agent = new ZabbixPassiveAgent(options);
         agent.Items.Add("custom.answer", _ => "42");
@@ -58,13 +58,13 @@ public sealed class ZabbixComponentTests
         agent.Items.Add("custom.answer", _ => "42");
         agent.Options.Port = 0;
         agent.Options.AllowedPeers.Add("127.0.0.1");
-        agent.Options.Hostname = "edge-01";
+        agent.Options.HostName = "edge-01";
         agent.Options.Address = "127.0.0.1";
 
         await agent.StartAsync(Ct);
 
         Assert.Equal("edge-01", agent.Name);
-        Assert.Equal("1", (await agent.Items.AnswerAsync(ZabbixItemKey.Parse("agent.ping", null), TimeSpan.FromSeconds(3), Ct)).Value);
+        Assert.Equal("1", (await agent.Items.AnswerAsync(ZabbixItemKey.Parse("agent.ping"), TimeSpan.FromSeconds(3), Ct)).Value);
     }
 
     [Fact]
@@ -294,14 +294,14 @@ public sealed class ZabbixComponentTests
     {
         await using var agent = new DerivedAgent();
 
-        Assert.Equal("web-01", agent.Options.Hostname);
+        Assert.Equal("web-01", agent.Options.HostName);
         agent.Items.Add("app.version", _ => "2.4.1");
     }
 
     private sealed class DerivedAgent : ZabbixActiveAgent
     {
         public DerivedAgent()
-            : base(new ZabbixActiveAgentOptions { ServerActive = "zbx-server-01", Hostname = "web-01" })
+            : base(new ZabbixActiveAgentOptions { ServerActive = "zbx-server-01", HostName = "web-01" })
         {
         }
     }

@@ -32,7 +32,7 @@ public sealed class ZabbixPushAgentOptions
     /// The host, as Zabbix knows it, that typed polls and meters report for: the agent's name, in a builder, unless set. A
     /// <see cref="ZabbixValue"/> names its own host.
     /// </summary>
-    public string? Hostname { get; set; }
+    public string? HostName { get; set; }
 
     /// <inheritdoc cref="ZabbixConnectionOptions"/>
     [ValidateObjectMembers(typeof(Protocol.ZabbixConnectionOptionsValidator))]
@@ -55,7 +55,7 @@ public sealed class ZabbixPushAgentOptions
     /// <summary>A store other than the in-memory default, built per destination from the agent's policy and services; code only.</summary>
     internal Func<IServiceProvider, ZabbixStorePolicy<ZabbixValue>, ZabbixStoreServices, ZabbixStore<ZabbixValue>>? Storage { get; set; }
 
-    /// <summary>Whether a source reports for <see cref="Hostname"/> (a typed poll, a meter), which the validator then requires.</summary>
+    /// <summary>Whether a source reports for <see cref="HostName"/> (a typed poll, a meter), which the validator then requires.</summary>
     internal bool ReportsForHost { get; set; }
 
     /// <summary>The services the polls read, by the item that reads each: the agent's container must have them when it's built.</summary>

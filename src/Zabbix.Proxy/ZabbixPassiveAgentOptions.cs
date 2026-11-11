@@ -12,7 +12,7 @@ public sealed class ZabbixPassiveAgentOptions : ZabbixListenerOptions, IValidata
     public ZabbixPassiveAgentOptions() => Port = ZabbixWireClient.DefaultAgentPort;
 
     /// <summary>
-    /// What this agent is called in its logs, metrics and status when it is constructed directly: <see cref="Hostname"/> when
+    /// What this agent is called in its logs, metrics and status when it is constructed directly: <see cref="HostName"/> when
     /// unset. A registration's name takes its place.
     /// </summary>
     public string? Name { get; set; }
@@ -21,7 +21,7 @@ public sealed class ZabbixPassiveAgentOptions : ZabbixListenerOptions, IValidata
     /// What <c>agent.hostname</c> answers: the agent's name in a builder, unless set, and the machine's name for an agent
     /// constructed directly.
     /// </summary>
-    public string Hostname { get; set; } = Environment.MachineName;
+    public string HostName { get; set; } = Environment.MachineName;
 
     /// <summary>How long one key may take when the request does not say.</summary>
     public TimeSpan CheckTimeout { get; set; } = TimeSpan.FromSeconds(3);

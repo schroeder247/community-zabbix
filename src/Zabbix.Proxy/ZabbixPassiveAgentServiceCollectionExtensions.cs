@@ -60,9 +60,9 @@ public static class ZabbixPassiveAgentServiceCollectionExtensions
         // Disposed with the container, which stops the bundled keys' sampling with the agent.
         services.TryAddSingleton(static provider => new ZabbixItemCollector(ZabbixHostFiles.Host, provider.GetRequiredService<TimeProvider>()));
         // The name is the agent's host unless a later Configure or Bind says otherwise: this runs first.
-        services.AddOptions<ZabbixPassiveAgentOptions>(name).Configure(options => options.Hostname = name).ValidateOnStart();
+        services.AddOptions<ZabbixPassiveAgentOptions>(name).Configure(options => options.HostName = name).ValidateOnStart();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<ZabbixPassiveAgentOptions>, ZabbixPassiveAgentOptionsValidator>());
-        services.AddKeyedSingleton<ZabbixPassiveAgent>(name, static (provider, key) => Create(provider, NameOf(key)));
+        ZabbixComponentRegistration.AddShared<ZabbixPassiveAgent>(services, name, static (provider, key) => Create(provider, NameOf(key)));
         services.AddSingleton<IHostedService>(provider => new ZabbixHostedComponent(provider.GetRequiredKeyedService<ZabbixPassiveAgent>(name)));
         return builder;
     }

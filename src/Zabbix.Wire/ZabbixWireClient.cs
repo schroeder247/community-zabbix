@@ -1,6 +1,5 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
-using System.Globalization;
 using System.Security.Cryptography;
 using System.Text.Json;
 using Community.Zabbix.Hosting;
@@ -28,19 +27,26 @@ namespace Community.Zabbix;
 /// registers one in an application's container, with the same verbs.
 /// </para>
 /// <para>
-/// <see cref="Options"/> is read at the first request, which is where certificate mode's files are read. Options that cannot
-/// be used, a certificate file that cannot be read among them, throw <see cref="InvalidOperationException"/> there, with the
-/// cause inside, as does a request to the server when none is set.
+/// A client's settings are fixed when it's built: the constructors copy the options they're given, so a later change to
+/// that object doesn't reach the client. The options are checked at the first request, which is where certificate mode's
+/// files are read. Options that can't be used, a certificate file that can't be read among them, throw
+/// <see cref="InvalidOperationException"/> there, with the cause inside, as does a request to the server when none is set.
+/// </para>
+/// <para>
+/// A client from a container, injected or returned by <see cref="IZabbixWireClientFactory"/>, is shared: the container owns
+/// it and disposes it when it's disposed, and a caller's <see cref="Dispose()"/> or <see cref="DisposeAsync"/> leaves it
+/// running, as disposing an <c>HttpClient</c> from <c>IHttpClientFactory</c> leaves its handler. A client you construct, or
+/// build with <see cref="CreateBuilder"/>, is yours to dispose.
 /// </para>
 /// </remarks>
 /// <example>
 /// <code language="csharp">
-/// using var wire = new ZabbixWireClient("zbx-server-01");
-/// await wire.SendAsync([new ZabbixValue("web-01", "app.requests", 42L, DateTimeOffset.UtcNow)]);
+/// await using var wire = new ZabbixWireClient("zbx-server-01");
+/// await wire.SendAsync("web-01", pending, 42);
 /// ZabbixAgentAnswer uname = await wire.GetAgentItemAsync("web-01", "system.uname");
 /// </code>
 /// </example>
-public class ZabbixWireClient : IDisposable
+public class ZabbixWireClient : IDisposable, IAsyncDisposable
 {
     /// <summary>The port an agent listens on unless its address names another.</summary>
     public const int DefaultAgentPort = ZabbixGetter.DefaultPort;
@@ -58,8 +64,10 @@ public class ZabbixWireClient : IDisposable
     private IDisposable? _container;
     private bool _checked;
     private bool _disposed;
+    private bool _shared;                                                // the container's: a caller's dispose leaves it running
+    private bool _released;                                              // the container's owner let it go
 
-    /// <summary>A client to set up through <see cref="Options"/>; one that only reads from agents needs no server.</summary>
+    /// <summary>A client with the default options, which reads from agents: it has no server to send to.</summary>
     public ZabbixWireClient()
         : this(new ZabbixWireOptions())
     {
@@ -75,7 +83,7 @@ public class ZabbixWireClient : IDisposable
     }
 
     /// <summary>A client as <paramref name="options"/> says.</summary>
-    /// <param name="options">The client's options, read at the first request.</param>
+    /// <param name="options">The client's options, copied: a later change to them doesn't reach the client.</param>
     /// <exception cref="ArgumentNullException"><paramref name="options"/> is <see langword="null"/>.</exception>
     public ZabbixWireClient(ZabbixWireOptions options)
         : this(options, null, null)
@@ -83,14 +91,14 @@ public class ZabbixWireClient : IDisposable
     }
 
     /// <summary>A client as <paramref name="options"/> says, with the application's logging and clock.</summary>
-    /// <param name="options">The client's options, read at the first request.</param>
+    /// <param name="options">The client's options, copied: a later change to them doesn't reach the client.</param>
     /// <param name="loggers">Where to log; nowhere when <see langword="null"/>. The caller keeps owning it.</param>
     /// <param name="time">The clock the deadlines run on; the system's when <see langword="null"/>.</param>
     /// <exception cref="ArgumentNullException"><paramref name="options"/> is <see langword="null"/>.</exception>
     public ZabbixWireClient(ZabbixWireOptions options, ILoggerFactory? loggers, TimeProvider? time)
     {
         ArgumentNullException.ThrowIfNull(options);
-        Options = options;
+        Options = options.Clone();
         _loggers = loggers ?? NullLoggerFactory.Instance;
         _time = time ?? TimeProvider.System;
     }
@@ -108,7 +116,7 @@ public class ZabbixWireClient : IDisposable
 
     /// <summary>A client whose every request goes over <paramref name="exchange"/>, with the application's options, logging and clock.</summary>
     /// <param name="exchange">The transport. It decides where a request goes, and the caller keeps owning it.</param>
-    /// <param name="options">The client's options, read at the first request. <see cref="ZabbixWireOptions.Connection"/> does not apply, because the transport has its own, and <see cref="ZabbixWireOptions.Server"/> only names the other end in logs and failures.</param>
+    /// <param name="options">The client's options, copied. <see cref="ZabbixWireOptions.Connection"/> doesn't apply, because the transport has its own, and <see cref="ZabbixWireOptions.Server"/> only names the other end in logs and failures.</param>
     /// <param name="loggers">Where to log; nowhere when <see langword="null"/>. The caller keeps owning it.</param>
     /// <param name="time">The clock the deadlines run on; the system's when <see langword="null"/>.</param>
     /// <exception cref="ArgumentNullException"><paramref name="exchange"/> or <paramref name="options"/> is <see langword="null"/>.</exception>
@@ -119,8 +127,8 @@ public class ZabbixWireClient : IDisposable
         _exchange = exchange;
     }
 
-    /// <summary>What the client reads at the first request. You must set it before then; what a request has read stays.</summary>
-    public virtual ZabbixWireOptions Options { get; }
+    /// <summary>The client's own copy of its options, fixed when it was built.</summary>
+    internal ZabbixWireOptions Options { get; }
 
     /// <summary>
     /// Starts a builder for a client with more than a server to set: more nodes, TLS, a token, deadlines, or logging.
@@ -129,7 +137,7 @@ public class ZabbixWireClient : IDisposable
     /// <example>
     /// <code language="csharp">
     /// using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder()
-    ///     .AddServer("zbx-server-01")
+    ///     .WithServer("zbx-server-01")
     ///     .WithToken(token)
     ///     .WithTimeout(TimeSpan.FromSeconds(5))
     ///     .Build();
@@ -266,7 +274,7 @@ public class ZabbixWireClient : IDisposable
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The value, or why the agent does not support the key.</returns>
     /// <inheritdoc cref="GetAgentItemAsync(string, ZabbixItemKey, CancellationToken)" path="/exception"/>
-    public Task<ZabbixAgentAnswer> GetAgentItemAsync(string agent, string key, CancellationToken cancellationToken) => GetAgentItemAsync(agent, ZabbixItemKey.Parse(key, CultureInfo.InvariantCulture), cancellationToken);
+    public Task<ZabbixAgentAnswer> GetAgentItemAsync(string agent, string key, CancellationToken cancellationToken) => GetAgentItemAsync(agent, ZabbixItemKey.Parse(key), cancellationToken);
 
     /// <summary>Reads an item from an agent, as <c>zabbix_get</c> does.</summary>
     /// <param name="agent">The agent: <c>host</c> or <c>host:port</c> (port <see cref="DefaultAgentPort"/> when omitted).</param>
@@ -375,7 +383,8 @@ public class ZabbixWireClient : IDisposable
 
     /// <summary>
     /// Releases what the client built: its connections, what certificate mode read from their files, and the container a
-    /// <see cref="ZabbixWireClientBuilder"/> built it in. A given exchange stays the caller's.
+    /// <see cref="ZabbixWireClientBuilder"/> built it in. A given exchange stays the caller's. A shared client, one a
+    /// container handed out, is left running: the container disposes it.
     /// </summary>
     public void Dispose()
     {
@@ -383,15 +392,43 @@ public class ZabbixWireClient : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    /// <summary>Releases what the client holds; see <see cref="Dispose()"/>.</summary>
-    /// <param name="disposing">Whether this is <see cref="Dispose()"/>.</param>
+    /// <summary>
+    /// Releases what the client built, as <see cref="Dispose()"/> does. A shared client, one a container handed out, is left
+    /// running: the container disposes it.
+    /// </summary>
+    /// <returns>A task that completes when the client is released.</returns>
+    public async ValueTask DisposeAsync()
+    {
+        await DisposeAsyncCore().ConfigureAwait(false);
+        Dispose(disposing: false);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Releases what the client holds, as <see cref="Dispose(bool)"/> does: nothing it holds needs to be awaited. A shared
+    /// client is released only by its container.
+    /// </summary>
+    /// <returns>A task that completes when the client is released.</returns>
+    protected virtual ValueTask DisposeAsyncCore()
+    {
+        ReleaseHeld();
+        return ValueTask.CompletedTask;
+    }
+
+    /// <summary>Releases what the client holds; see <see cref="Dispose()"/>. A shared client is released only by its container.</summary>
+    /// <param name="disposing">Whether this is <see cref="Dispose()"/>, rather than the end of <see cref="DisposeAsync"/>.</param>
     protected virtual void Dispose(bool disposing)
     {
-        if (!disposing) return;
+        if (disposing) ReleaseHeld();
+    }
+
+    // The connections, the getters, the links and the builder's container, once, and not while a container shares the client.
+    private void ReleaseHeld()
+    {
         IDisposable? container;
         lock (_gate)
         {
-            if (_disposed) return;
+            if (_disposed || (_shared && !_released)) return;
             _disposed = true;
             if (_connected is { } connected)
             {
@@ -407,11 +444,39 @@ public class ZabbixWireClient : IDisposable
         container?.Dispose();
     }
 
-    /// <summary>Gives the client the container a <see cref="ZabbixWireClientBuilder"/> built it in, to dispose with itself.</summary>
+    /// <summary>Whether a container shares the client: it owns it, and a caller's dispose leaves it running.</summary>
+    internal bool IsShared
+    {
+        get { lock (_gate) return _shared; }
+    }
+
+    /// <summary>Makes the client the container's, which <see cref="ZabbixWireClientOwner"/> releases when the container is disposed.</summary>
+    /// <returns>This client.</returns>
+    internal ZabbixWireClient Share()
+    {
+        lock (_gate) _shared = true;
+        return this;
+    }
+
+    /// <summary>Releases the client, shared or not: the container's disposal, through <see cref="ZabbixWireClientOwner"/>.</summary>
+    internal void Release()
+    {
+        lock (_gate) _released = true;
+        Dispose();
+    }
+
+    /// <summary>
+    /// Gives the client the container a <see cref="ZabbixWireClientBuilder"/> built it in, to dispose with itself. The client
+    /// is the caller's from then on, not shared.
+    /// </summary>
     /// <param name="container">The builder's container, which built this client.</param>
     internal void OwnContainer(IDisposable container)
     {
-        lock (_gate) _container = container;
+        lock (_gate)
+        {
+            _container = container;
+            _shared = false;
+        }
     }
 
     private static ZabbixWireOptions ForServer(string server)
@@ -432,7 +497,7 @@ public class ZabbixWireClient : IDisposable
     private IReadOnlyList<ZabbixServerNode> ServerNodes()
     {
         if (string.IsNullOrWhiteSpace(Options.Server))
-            throw new InvalidOperationException("This request goes to a server or proxy, and none is set. You must pass it to the constructor, or set Options.Server before the first request.");
+            throw new InvalidOperationException("This request goes to a server or proxy, and none is set. You must give the client one: pass it to the constructor, or set it with WithServer.");
         return ZabbixWireOptions.TryParseServer(Options.Server, out IReadOnlyList<ZabbixServerNode>? nodes, out string? reason) ? nodes : throw new InvalidOperationException(reason);
     }
 

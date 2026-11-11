@@ -73,7 +73,7 @@ public sealed class ZabbixActiveProxySession : IZabbixSession, IZabbixLoggedSess
     public string Session => _uplink.Session;
 
     /// <summary>The protocol version last announced (adopted from a server refusal, when one named itself).</summary>
-    public ZabbixComponentVersion Version => _uplink.Version;
+    public Version Version => _uplink.Version;
 
     /// <summary>The configuration revision last pulled.</summary>
     public long ConfigRevision => Volatile.Read(ref _held).ConfigRevision;
@@ -181,7 +181,7 @@ public sealed class ZabbixActiveProxySession : IZabbixSession, IZabbixLoggedSess
             failure => ZabbixPowerShellLog.SessionTickFailed(_log, "ActiveProxy", Name, failure), stopping).ConfigureAwait(false);
         ZabbixProxyDataPage merged = ZabbixProxyDataProviders.Merge(ZabbixProxyDataPage.Empty, pages);
         if (merged.IsEmpty) return;
-        ZabbixProxyResponse response = await _uplink.UploadAsync(merged, more: false, proxyDelay: 0, stopping).ConfigureAwait(false);
+        ZabbixProxyResponse response = await _uplink.UploadAsync(merged, ZabbixProxyBacklog.None, TimeSpan.Zero, stopping).ConfigureAwait(false);
         if (!response.IsSuccess || response.TaskCount == 0) return;
         ZabbixProxyTaskCallback? handler = Volatile.Read(ref _taskHandler);
         if (handler is null) return;
@@ -189,7 +189,7 @@ public sealed class ZabbixActiveProxySession : IZabbixSession, IZabbixLoggedSess
         foreach (ZabbixProxyTask task in response.DeserializeTasks())
             results.Add(await handler(task, stopping).ConfigureAwait(false));
         if (results.Count > 0)
-            await _uplink.UploadAsync(new ZabbixProxyDataPage(Tasks: results), more: false, proxyDelay: 0, stopping).ConfigureAwait(false);
+            await _uplink.UploadAsync(new ZabbixProxyDataPage(Tasks: results), ZabbixProxyBacklog.None, TimeSpan.Zero, stopping).ConfigureAwait(false);
     }
 
     internal static ZabbixActiveProxySession Start(string name, string proxyName, IReadOnlyList<DnsEndPoint> nodes, TimeProvider time, TimeSpan refreshInterval, ZabbixConnectionOptions? connection = null)
@@ -201,12 +201,11 @@ public sealed class ZabbixActiveProxySession : IZabbixSession, IZabbixLoggedSess
         ZabbixWireLink? link = null;
         try
         {
-            ILogger<ZabbixProxyUplink> logger = loggers.CreateLogger<ZabbixProxyUplink>();
             // The session owns its connection and disposes it when it stops, which releases what certificate mode read.
             // Large replies: upstream's proxy receives its configuration as a large frame (zbx_tcp_recv_large), as the
             // proxy host's uplink does.
             link = ZabbixWireLinks.Open(nodes, connection ?? new ZabbixConnectionOptions(), time, loggers);
-            var uplink = new ZabbixProxyUplink(link.AsExchange(followRedirects: false, acceptLargeReplies: true), proxyName, time: time, logger: logger);
+            var uplink = new ZabbixProxyUplink(link.AsExchange(ZabbixExchangeOptions.AcceptLargeReplies), proxyName, version: null, session: null, loggers, time);
             telemetry.FinishSessionPhase(started);
             return new ZabbixActiveProxySession(name, time.GetUtcNow(), link, uplink, ZabbixProxyConfig.Empty, time, refreshInterval, logs, loggers,
                 telemetry, started.Activity?.Context);

@@ -81,7 +81,7 @@ public sealed class ChannelsProbeTests
         var watch = Stopwatch.StartNew();
         long delivered = 0;
         await using var store = new ZabbixMemoryStore<int>(new ZabbixStorePolicy<int> { MaxItems = size * 4, Overflow = BoundedChannelFullMode.Wait });
-        Task loop = ZabbixSendLoop.RunAsync<int>(store, (batch, _) => { delivered += batch.Count; return new ValueTask<ZabbixDelivery>(ZabbixDelivery.Delivered); }, new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { BatchSize = size }, Time = new FakeTimeProvider() }, cancellationToken: TestContext.Current.CancellationToken);
+        Task loop = ZabbixSendLoop.RunAsync<int>(store, (batch, _) => { delivered += batch.Count; return new ValueTask<ZabbixSendOutcome>(ZabbixSendOutcome.Delivered); }, new ZabbixSendLoopOptions { Send = new ZabbixSendOptions { BatchSize = size }, Time = new FakeTimeProvider() }, cancellationToken: TestContext.Current.CancellationToken);
         for (int i = 0; i < N; i++) await store.WriteAsync(i, TestContext.Current.CancellationToken);
         store.Complete();
         await loop;

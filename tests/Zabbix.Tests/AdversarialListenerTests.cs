@@ -36,7 +36,8 @@ public sealed class AdversarialListenerTests
         var options = new ZabbixListenerOptions { Address = "127.0.0.1", Port = 0, Timeout = TimeSpan.FromSeconds(5) };
         options.AllowedPeers.Add("127.0.0.1");
         configure?.Invoke(options);
-        var listener = new ZabbixListener(options, handler, ListenerTests.Transport(), time, logger, meters);
+        using ILoggerFactory? loggers = SingleLoggerFactory.Of(logger);
+        var listener = new ZabbixListener(options, handler, ListenerTests.Transport(), loggers, time, meters);
         await listener.StartingAsync(TestContext.Current.CancellationToken);
         await listener.StartAsync(TestContext.Current.CancellationToken);
         return (listener, (IPEndPoint)listener.LocalEndPoint!);

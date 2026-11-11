@@ -326,7 +326,7 @@ public sealed class ItemCollectorTests : IDisposable
         ZabbixItemCollector collector;
         using (IHost host = await TestHost.StartAsync(services => services.AddZabbixPassiveAgent("edge").Configure(options =>
         {
-            options.Hostname = "edge-01";
+            options.HostName = "edge-01";
             options.Address = "127.0.0.1";
             options.Port = 0;
             options.AllowedPeers.Add("127.0.0.1");
@@ -372,7 +372,7 @@ public sealed class ItemCollectorTests : IDisposable
         File.WriteAllText(resolved, text, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
     }
 
-    private static ZabbixItemKey Key(string text) => ZabbixItemKey.Parse(text, null);
+    private static ZabbixItemKey Key(string text) => ZabbixItemKey.Parse(text);
 
     private static async Task<string> ValueAsync(ZabbixItemProvider items, string key)
     {

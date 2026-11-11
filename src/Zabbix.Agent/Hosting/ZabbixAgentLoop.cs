@@ -12,7 +12,7 @@ namespace Community.Zabbix.Hosting;
 /// <item>the exchange with the server failed (<see cref="IsExchangeFailure"/>): expected, answered by the loop's own
 /// contract (retry the batch, keep the item list) and logged by the loop's own Warning event;</item>
 /// <item>anything else: nothing translated it, so it is a defect. <see cref="PassAsync"/> logs it at Error (3003), shows it
-/// on the agent's <see cref="ZabbixAgentStatus.Fault"/> (so its health says so) until the loop's next good pass, and lets
+/// on the agent's <see cref="ZabbixComponentStatus.Fault"/> (so its health says so) until the loop's next good pass, and lets
 /// the cadence continue: one bad pass must not stop the loop.</item>
 /// </list>
 /// The loop's own stop is neither: it propagates, because cancellation is not an error.
@@ -41,7 +41,7 @@ internal static class ZabbixAgentLoop
     /// <param name="logger">Where it is logged.</param>
     /// <param name="pass">The pass.</param>
     /// <param name="stopping">The loop's stop, which propagates.</param>
-    public static async Task PassAsync(string agent, string loop, ZabbixAgentStatus status, ILogger logger, Func<CancellationToken, Task> pass, CancellationToken stopping)
+    public static async Task PassAsync(string agent, string loop, ZabbixComponentStatus status, ILogger logger, Func<CancellationToken, Task> pass, CancellationToken stopping)
     {
         try
         {
