@@ -11,17 +11,25 @@ proxy session running instead. -WhatIf shows what would be sent.
 #>
 # proxy-01 (active) monitors web-01. The server answers a proxy only once its configuration cache has loaded it (up to
 # CacheUpdateFrequency, 60 s by default), and a cache that still holds a deleted proxy-01 or web-01 of the same name
-# answers with their stale ids: wait until a pull returns this web-01's own id.
-$null = New-ZbxProxy -Name 'proxy-01' -OperatingMode Active -Host 'web-01'
+# answers with their stale ids: wait until a pull returns this web-01's own id. web-01 moves onto proxy-01 only once
+# the server has answered a pull for it: a host assigned in the call that creates the proxy can reach the cache before
+# the proxy does, and then stays out of the proxy's configuration.
+$null = New-ZbxProxy -Name 'proxy-01' -OperatingMode Active
 $web = Get-ZbxHost -Name 'web-01'
 Start-ZbxActiveProxy -Name 'cache-wait' -ProxyName 'proxy-01' -Server 'zabbix.example:10051' -RefreshInterval '1s'
 $deadline = [DateTime]::UtcNow.AddSeconds(120)
+$assigned = $false
+$config = $null
 while ($true) {
     if ((Get-ZbxActiveProxyStatus -Name 'cache-wait' -WarningAction SilentlyContinue).LastPulledAt) {
+        if (-not $assigned) { Set-ZbxProxy 'proxy-01' -Host 'web-01'; $assigned = $true }
         $config = Receive-ZbxProxyConfig -ProxyName 'proxy-01' -Server 'zabbix.example:10051'
         if ($config.HostsByName.ContainsKey('web-01') -and "$($config.HostsByName['web-01'].HostId)" -eq "$($web.HostId)") { break }
     }
-    if ([DateTime]::UtcNow -gt $deadline) { throw 'the server did not load proxy-01 in time' }
+    if ([DateTime]::UtcNow -gt $deadline) {
+        $last = if ($config) { "$($config.Hosts.Count) host(s) in the last pull" } else { 'no pull answered' }
+        throw "the server did not load proxy-01 in time ($last)"
+    }
     Start-Sleep -Seconds 1
 }
 Stop-ZbxActiveProxy -Name 'cache-wait' -WarningAction SilentlyContinue
