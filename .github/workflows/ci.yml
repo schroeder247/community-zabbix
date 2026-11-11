@@ -1,0 +1,162 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  # The live matrix (job `live`) runs nightly and on demand, not per push: ~15 minutes a version on real servers.
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+# Least privilege: CI only needs to read the repo.
+permissions:
+  contents: read
+
+jobs:
+  # The whole solution under -warnaserror on the .NET 10 SDK, the Microsoft.Testing.Platform runner with a
+  # per-project minimum test count, formatting as a build gate, and a pack so package validation runs. The other operating
+  # systems build and run both suites, on the paths only they reach (the sockets, SChannel, the bundled items' platform
+  # calls, the modules under their pwsh); the gates that read or package the tree are the same everywhere, so Linux runs them.
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    # The EF store's tests run against their own throwaway database, never a Zabbix one. Only a Linux runner has service
+    # containers; on the others an empty image starts none, the variable is empty, and those tests skip.
+    services:
+      postgres:
+        image: ${{ matrix.os == 'ubuntu-latest' && 'docker.io/library/postgres:16' || '' }}
+        env:
+          POSTGRES_DB: zbxtest
+          POSTGRES_USER: zbxtest
+          POSTGRES_PASSWORD: zbxtest
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U zbxtest" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      ZABBIX_TEST_POSTGRES: ${{ matrix.os == 'ubuntu-latest' && 'Host=127.0.0.1;Port=5432;Database=zbxtest;Username=zbxtest;Password=zbxtest;Timeout=5' || '' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false   # no step pushes, so the token is not kept in .git/config
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          global-json-file: global.json
+      # The repository's shell scripts (the schema and public-API tools, the lab) under shellcheck; ubuntu-latest has it.
+      - name: shellcheck
+        if: runner.os == 'Linux'
+        run: shellcheck tools/*.sh tests/lab/*.sh
+      - run: dotnet restore Zabbix.slnx
+      # Debug, because `dotnet format` opens the solution in its default configuration and does not build: it loads the
+      # generator (Zabbix.Generator, an analyzer ProjectReference) and the intermediate inputs (the JSON context, the
+      # cmdlet description) from bin/obj/Debug. After a Release-only build those do not exist, every generated type is
+      # missing, and the public-API analyzer reports each generated-type member as "not part of the declared public API".
+      # The tests run on the same Debug build, as they
+      # do locally (`dotnet test --solution Zabbix.slnx`) and in the live job; the pack is Release and builds its own.
+      - run: dotnet build Zabbix.slnx --no-restore -warnaserror
+      - if: runner.os == 'Linux'
+        run: dotnet format Zabbix.slnx --verify-no-changes --no-restore
+      # The clean-tree gate (dotnet/runtime applies the same to generated sources): a build writes nothing into the
+      # source tree, so after the build and the format check `git status` must be empty (docs/adr/0004-conventions.md).
+      - name: The build left the tree clean
+        if: runner.os == 'Linux'
+        run: |
+          if ! git diff --exit-code --stat; then
+            echo "::error::the build or dotnet format changed tracked files (listed above); generated output belongs under obj/ or bin/"
+            exit 1
+          fi
+          untracked="$(git status --porcelain)"
+          if [ -n "$untracked" ]; then
+            echo "$untracked"
+            echo "::error::the build left files in the source tree (listed above); write generated output under obj/ or bin/, or ignore it"
+            exit 1
+          fi
+      - run: dotnet test --solution Zabbix.slnx --no-build --results-directory trx -- --report-trx
+      # The pack writes each package's SBOM (ZabbixSbom, Directory.Build.targets), serially: generation hangs when several
+      # MSBuild nodes run it at once.
+      - if: runner.os == 'Linux'
+        run: dotnet pack Zabbix.slnx --configuration Release --no-restore -warnaserror -m:1 -p:ZabbixSbom=true --output packages
+      # The packages' version, the module manifests' ModuleVersion and their Prerelease label agree
+      # (CONTRIBUTING.md, "Releasing"); the release checks the same with its tag.
+      - name: The versions agree
+        if: runner.os == 'Linux'
+        shell: pwsh
+        run: ./tools/Test-ZbxReleaseVersion.ps1
+      # The three modules, staged as the release stages them, publish to a local feed and install from it: a sibling's
+      # RequiredModules that the published Community.Zabbix does not satisfy fails here, not on the Gallery.
+      - name: The modules install from a feed
+        if: runner.os == 'Linux'
+        shell: pwsh
+        run: |
+          ./tools/Stage-ZbxModules.ps1 -Destination "$env:RUNNER_TEMP/stage"
+          ./tools/Test-ZbxModuleInstall.ps1 -Stage "$env:RUNNER_TEMP/stage"
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: test-results-${{ matrix.os }}
+          path: trx/
+
+  # The Native AOT composition: the analyzers see each library alone, a publish proves they compose. Any ILLink or ILC
+  # warning (IL2xxx, IL3xxx) fails the publish (-warnaserror), and the binary runs to the socket.
+  aot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false   # no step pushes, so the token is not kept in .git/config
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          global-json-file: global.json
+      - run: dotnet publish tests/probes/Zabbix.AotSmoke/Zabbix.AotSmoke.csproj --configuration Release -warnaserror --output aot
+      - run: ./aot/Zabbix.AotSmoke
+
+  # The live matrix (tests/lab: lab.sh and live.sh document it in their headers): one Zabbix version per job, created
+  # on the runner with podman from the lab's own definitions, then every live suite against it through
+  # tests/lab/live.sh — the C# live classes and the EF store on PostgreSQL, the Pester live suite, every Get-Help
+  # example (tools/Test-ZbxHelpExamples.ps1) — and the leak sweep. LiveDefectTests and the Pester cases named after a
+  # defect are regression tests: each defect is fixed, and its test fails if it returns.
+  live:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ["7.0", "7.4", "8.0"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false   # no step pushes, so the token is not kept in .git/config
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          global-json-file: global.json
+      - name: Pester 5.7.1
+        shell: pwsh
+        run: Install-Module Pester -RequiredVersion 5.7.1 -Force -Scope CurrentUser -SkipPublisherCheck
+      - name: Start Zabbix ${{ matrix.version }} and the EF store's PostgreSQL
+        env:
+          ZBX_LAB_STATE: ${{ runner.temp }}/zbxlab
+        run: tests/lab/lab.sh start ${{ matrix.version }} pg && tests/lab/lab.sh status
+      - run: dotnet build Zabbix.slnx -warnaserror
+      - name: Live matrix on ${{ matrix.version }}
+        env:
+          ZBX_LAB_STATE: ${{ runner.temp }}/zbxlab
+          LIVE_RESULTS: ${{ runner.temp }}/live
+        run: tests/lab/live.sh --no-build --versions ${{ matrix.version }}
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: live-${{ matrix.version }}
+          path: ${{ runner.temp }}/live/
+      - if: always()
+        env:
+          ZBX_LAB_STATE: ${{ runner.temp }}/zbxlab
+        run: tests/lab/lab.sh stop

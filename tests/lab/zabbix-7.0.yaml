@@ -1,0 +1,73 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+#
+# Zabbix 7.0.31 LTS: a throwaway server for the live matrix, one pod (its own PostgreSQL, the server, the frontend) sharing
+# one network namespace, so every component reaches the others on 127.0.0.1 as the official compose files do.
+# API http://localhost:18070/api_jsonrpc.php, trapper 127.0.0.1:18051.
+#
+# Not played directly: lab.sh renders @PKI@ (the directory holding the lab's CA, server certificate and key, made by
+# `lab.sh pki`) and plays the result, then creates the Admin API token. `podman kube play` names the containers
+# <pod>-<container> (zbxlab-70-db, -server, -web), the names lab.sh addresses.
+#
+# Server settings beyond the image defaults, each for one live test:
+#   ZBX_CACHEUPDATEFREQUENCY=1     a created item is in the configuration cache within a second, so a sender test's
+#                                  wait for "processed: 1" is short (the default is 10 s)
+#   ZBX_PROXYCONFIGFREQUENCY=5     the passive-proxy test sees the server push configuration within seconds
+#   ZBX_STARTCONNECTORS=1          streaming connectors run at all (the default, 0, starts no connector worker)
+#   ZBX_STATSALLOWEDIP             zabbix.stats answers the host (rootless podman presents the host as a pod-side peer)
+#   ZBX_TLSCAFILE/CERTFILE/KEYFILE the certificate path of the agent, sender and proxy tests (TLS PSK needs no server
+#                                  setting: the key is set per host or proxy through the API)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: zbxlab-70
+  labels:
+    app: zbxlab
+    zabbix-version: "7.0"
+    zabbix-release: "7.0.31"
+spec:
+  restartPolicy: Always
+  containers:
+    - name: db
+      # postgres:16-alpine
+      image: docker.io/library/postgres@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea
+      env:
+        - { name: POSTGRES_USER, value: zabbix }
+        - { name: POSTGRES_PASSWORD, value: zabbix }
+        - { name: POSTGRES_DB, value: zabbix }
+    - name: server
+      # zabbix-server-pgsql:alpine-7.0.31
+      image: docker.io/zabbix/zabbix-server-pgsql@sha256:bdfe90847bd259a6da448db1e6ae83f5f439224654ed767296a8d57a088975b9
+      env:
+        - { name: DB_SERVER_HOST, value: 127.0.0.1 }
+        - { name: POSTGRES_USER, value: zabbix }
+        - { name: POSTGRES_PASSWORD, value: zabbix }
+        - { name: POSTGRES_DB, value: zabbix }
+        - { name: ZBX_CACHEUPDATEFREQUENCY, value: "1" }
+        - { name: ZBX_PROXYCONFIGFREQUENCY, value: "5" }
+        - { name: ZBX_STARTCONNECTORS, value: "1" }
+        - { name: ZBX_STATSALLOWEDIP, value: "0.0.0.0/0,::/0" }
+        - { name: ZBX_TLSCAFILE, value: /var/lib/zabbix/enc/ca.crt }
+        - { name: ZBX_TLSCERTFILE, value: /var/lib/zabbix/enc/server.crt }
+        - { name: ZBX_TLSKEYFILE, value: /var/lib/zabbix/enc/server.key }
+      ports:
+        - { containerPort: 10051, hostPort: 18051 }
+      volumeMounts:
+        - { name: pki, mountPath: /var/lib/zabbix/enc, readOnly: true }
+    - name: web
+      # zabbix-web-nginx-pgsql:alpine-7.0.31
+      image: docker.io/zabbix/zabbix-web-nginx-pgsql@sha256:d9ce0774cb6036ce5d49c9c8d46bf1474dad98aae810350de0d5068dd679b92d
+      env:
+        - { name: DB_SERVER_HOST, value: 127.0.0.1 }
+        - { name: POSTGRES_USER, value: zabbix }
+        - { name: POSTGRES_PASSWORD, value: zabbix }
+        - { name: POSTGRES_DB, value: zabbix }
+        - { name: ZBX_SERVER_HOST, value: 127.0.0.1 }
+        - { name: PHP_TZ, value: UTC }
+      ports:
+        - { containerPort: 8080, hostPort: 18070 }
+  volumes:
+    - name: pki
+      hostPath:
+        path: "@PKI@"
+        type: Directory

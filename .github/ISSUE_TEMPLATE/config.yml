@@ -1,0 +1,8 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+# A question is a blank issue (there is no Discussions forum); bugs and features have their own forms.
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/schroeder247/community-zabbix/blob/main/SECURITY.md
+    about: Report security issues privately (private vulnerability reporting, see SECURITY.md), never in a public issue.

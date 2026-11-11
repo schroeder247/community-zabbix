@@ -1,0 +1,58 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+name: Schema drift
+
+# The API model (schema/zabbix-api.json) is extracted from the Zabbix sources tools/zabbix-sources.lock pins. This job
+# fetches those sources from Zabbix's own repository, regenerates the model and fails when it differs from the committed
+# one, so a moved tag, a rewritten commit or an extractor change that was not regenerated shows up as a reviewable diff.
+# Weekly, on demand, and on every pull request that changes the model, the extractor or the pin (not per push: it
+# clones three sparse trees from Zabbix's public GitHub repository and runs the extractor, ~2 minutes; a pull request
+# from a fork can fetch them too, no secret is involved). A second step checks that the overlay's descriptions, which
+# become the XML documentation and the help, are the project's own words and not Zabbix's documentation wording.
+on:
+  schedule:
+    - cron: "41 5 * * 1"
+  pull_request:
+    branches: [main]
+    paths:
+      - 'schema/**'
+      - 'tools/ZabbixApiExtract/**'
+      - 'tools/zabbix-sources.lock'
+      - 'tools/fetch-zabbix-sources.sh'
+      - 'tools/regenerate-schema.sh'
+      - 'tools/check-doc-wording.py'
+      - 'tools/doc-wording-allow.txt'
+      - '.github/workflows/schema-drift.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  schema-drift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false   # no step pushes, so the token is not kept in .git/config
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: "3.12"
+      - name: Regenerate the model from the pinned sources and compare
+        id: regenerate
+        # The extractor iterates Python sets; a fixed hash seed makes their order, and so the output, the same each run.
+        env:
+          PYTHONHASHSEED: "0"
+        run: tools/regenerate-schema.sh --check
+      - if: failure() && steps.regenerate.outcome == 'failure'
+        name: The model diff
+        run: git diff -- schema/zabbix-api.json | head -400
+      - name: Check that every overlay description is the project's own wording
+        # Zabbix's documentation is proprietary. The tool fetches the API reference pages into the runner's temporary
+        # folder (never into the repository) and fails on any overlay sentence or clause of six words or more that
+        # equals the documentation's wording or comes within a difflib ratio of 0.85 of it (tools/check-doc-wording.py).
+        if: ${{ !cancelled() }}
+        env:
+          ZABBIX_DOC_CACHE: ${{ runner.temp }}/zabbix-doc-wording
+        run: python3 tools/check-doc-wording.py --fetch

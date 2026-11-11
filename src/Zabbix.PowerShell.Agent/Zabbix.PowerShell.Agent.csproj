@@ -1,0 +1,30 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The module Community.Zabbix.Agent (docs/adr/0003-powershell-module-split.md): the active and passive agent sessions, their
+    item handlers, and the agent-host provisioning commands, over the SDK's hosts (Zabbix.Agent). It requires the module
+    Community.Zabbix (RequiredModules in Community.Zabbix.Agent.psd1) and builds on its infrastructure through InternalsVisibleTo. The
+    passive agent listens through Zabbix.Proxy's listener (the SDK keeps every listener together), so this module carries
+    Community.Zabbix.Proxy.dll and the socket transport too; EF Core and its providers are Zabbix.Proxy's only.
+  -->
+  <PropertyGroup>
+    <RootNamespace>Community.Zabbix.PowerShell</RootNamespace>
+    <AssemblyName>Community.Zabbix.PowerShell.Agent</AssemblyName>
+    <Description>Zabbix PowerShell module Community.Zabbix.Agent: agent sessions and agent-host provisioning.</Description>
+    <ZabbixModuleName>Community.Zabbix.Agent</ZabbixModuleName>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Zabbix.PowerShell.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Zabbix.PowerShell/Zabbix.PowerShell.csproj" />
+    <ProjectReference Include="../Zabbix.Agent/Zabbix.Agent.csproj" />
+    <ProjectReference Include="../Zabbix.Proxy/Zabbix.Proxy.csproj" />
+    <ProjectReference Include="../Zabbix.Agent.Plugins/Zabbix.Agent.Plugins.csproj" />
+  </ItemGroup>
+  <Import Project="../Zabbix.PowerShell.AspNetCoreTransport.targets" />
+  <Import Project="../Zabbix.PowerShell.Module.targets" />
+</Project>

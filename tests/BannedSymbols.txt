@@ -1,0 +1,10 @@
+# Symbols test code may not use (RS0030 is an error): a test waits on a signal the code under test gives (a log record
+# through FakeLogCollector.GetLogsAsync, a TaskCompletionSource a fake completes, a channel), never for an amount of
+# time, and never reads the machine's local clock. A site that has no signal to wait on says why beside its waiver.
+M:System.Threading.Thread.Sleep(System.Int32);Wait on a signal (a TaskCompletionSource, a channel), never for time
+M:System.Threading.Thread.Sleep(System.TimeSpan);Wait on a signal (a TaskCompletionSource, a channel), never for time
+M:System.Threading.Tasks.Task.Delay(System.Int32);A polling sleep: wait on a signal (FakeLogCollector.GetLogsAsync, a TaskCompletionSource)
+M:System.Threading.Tasks.Task.Delay(System.Int32,System.Threading.CancellationToken);A polling sleep: wait on a signal (FakeLogCollector.GetLogsAsync, a TaskCompletionSource)
+P:System.DateTime.Now;The machine's local clock: use a FakeTimeProvider or a fixed instant
+P:System.DateTime.Today;The machine's local clock: use a FakeTimeProvider or a fixed instant
+P:System.DateTimeOffset.Now;The machine's local clock: use a FakeTimeProvider or a fixed instant

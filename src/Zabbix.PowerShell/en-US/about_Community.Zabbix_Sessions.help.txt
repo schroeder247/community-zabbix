@@ -1,0 +1,128 @@
+TOPIC
+    about_Community.Zabbix_Sessions
+
+SHORT DESCRIPTION
+    How the Community.Zabbix module keeps connections and running sessions (watchers,
+    agents, proxies) per runspace, and how a cmdlet picks its server.
+
+LONG DESCRIPTION
+    The context
+        Each runspace has its own Zabbix context: the servers it is connected
+        to, by name, and the current one. Get-ZbxContext shows it:
+
+            PS> Get-ZbxContext
+
+            Current          : localhost:18070
+            Servers          : localhost:18070
+            Sessions         : 0
+            ExportsTelemetry : False
+
+        Nothing is shared between runspaces. A background job, a
+        ForEach-Object -Parallel branch or a new runspace starts
+        unconnected, and a cmdlet there fails with ZabbixNotConnected until
+        it connects itself:
+
+            1..3 | ForEach-Object -Parallel {
+                Import-Module Community.Zabbix
+                Connect-ZbxServer -Uri $using:uri -ApiToken $using:token
+                Get-ZbxHost -Id $_
+            }
+
+        Closing the runspace, or Remove-Module Community.Zabbix, closes its
+        connections and stops its sessions.
+
+    Connecting
+        Connect-ZbxServer composes the server, asks it for its API version
+        (apiinfo.version), proves the credential with one authenticated
+        read, and adds it under -Name — by default the
+        endpoint's host and port. The new server becomes the current one,
+        unless -NoDefault is given (a first server always becomes current).
+        -PassThru writes the connection.
+
+            Connect-ZbxServer -Uri https://zabbix.example/ -ApiToken $token
+            Connect-ZbxServer -Uri https://zabbix-dr.example/ -ApiToken $drToken -Name dr -NoDefault
+
+        -Uri takes the frontend URL or the API endpoint
+        (.../api_jsonrpc.php). Authentication is an API token (-ApiToken,
+        a SecureString) or a user name and password (-Credential, a
+        PSCredential: Connect-ZbxServer logs in and the session id is used
+        from then on; the password stays in the PSCredential). A token or
+        password the server refuses ends Connect-ZbxServer with an
+        AuthenticationError and adds nothing
+        (about_Community.Zabbix_ErrorHandling). With neither, only the
+        unauthenticated calls work (Get-ZbxApiVersion).
+
+        Connecting again under a name already in use replaces that
+        connection; a call still in flight on the old one finishes first.
+
+        -Trapper names the server's trapper (host:port) for the cmdlets that
+        speak the server's own protocol (Send-ZbxData, the server-info
+        cmdlets). Without it they ask the API for the active HA node's
+        address, as the frontend does.
+
+    Choosing the server for one call
+        Every cmdlet that talks to a server has -Connection: a connection
+        name from Get-ZbxContext, or the connection object. Without it the
+        current server is used.
+
+            Get-ZbxApiVersion                   # the current server
+            Get-ZbxApiVersion -Connection dr    # the one named dr
+
+        Disconnect-ZbxServer closes a connection (the current one when no
+        -Name is given); the current server is then none until the next
+        Connect-ZbxServer.
+
+    Running sessions
+        Some cmdlets start something that keeps running after they return:
+        Watch-ZbxItem (a watcher), Start-ZbxActiveAgent,
+        Start-ZbxPassiveAgent, Start-ZbxActiveProxy, Start-ZbxPassiveProxy.
+        Each is kept in the runspace's context under the -Name it was
+        started with (unique per kind), found by that name by the next
+        command (Receive-ZbxWatch -Name, Get-ZbxActiveAgentStatus -Name,
+        Register-ZbxActiveAgentHandler -Name, ...) and stopped by the
+        matching Stop- cmdlet, by Remove-Module, or by the runspace
+        closing. (Get-ZbxContext).SessionCount counts them.
+
+            Watch-ZbxItem -Name cpu -HostName 'web-01' -Key 'system.cpu.load'
+            Receive-ZbxWatch -Name cpu | Select-Object -First 5   # waits for each value
+            Stop-ZbxWatch -Name cpu
+
+        The agent and proxy cmdlets are the modules Community.Zabbix.Agent and
+        Community.Zabbix.Proxy; see about_Community.Zabbix. Their sessions live in
+        the same runspace context as the module Community.Zabbix's.
+
+    Handlers and scriptblocks
+        A scriptblock handler registered with an agent or proxy session
+        (Register-ZbxActiveAgentHandler, Register-ZbxPassiveAgentHandler,
+        Register-Zbx*Proxy*Provider/Handler) runs in the session's own
+        runspace, on the session's thread, not in the caller's: variables
+        of the calling scope are not visible to it, and neither are the
+        Zabbix cmdlets (the runspace starts with PowerShell's default
+        commands only). The runspace lives as long as the session, so $script:
+        variables persist from one call to the next, and the session's
+        handlers run one at a time. A handler registered after the session
+        started can miss the first check; the server marks that item
+        unsupported until the next one.
+
+    Logging
+        Records the SDK logs while one of your commands is running go to
+        that command's streams (-Verbose, -Debug, warnings, errors).
+        Warnings and errors a background session logs while no command is
+        running wait, bounded, and are written by the next command in the
+        runspace.
+
+EXAMPLES
+    Work against two servers:
+
+        Connect-ZbxServer -Uri https://zabbix.example/ -ApiToken $token
+        Connect-ZbxServer -Uri https://zabbix-dr.example/ -ApiToken $drToken -Name dr -NoDefault
+        Get-ZbxHost -Name 'web-01'                  # current server
+        Get-ZbxHost -Name 'web-01' -Connection dr   # the DR server
+        Disconnect-ZbxServer -Name dr
+
+SEE ALSO
+    about_Community.Zabbix
+    Connect-ZbxServer
+    Disconnect-ZbxServer
+    Get-ZbxContext
+    Watch-ZbxItem

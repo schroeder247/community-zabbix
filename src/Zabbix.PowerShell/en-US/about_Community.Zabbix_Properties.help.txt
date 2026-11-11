@@ -1,0 +1,106 @@
+TOPIC
+    about_Community.Zabbix_Properties
+
+SHORT DESCRIPTION
+    How object properties map to Zabbix API fields: hashtables and casts as
+    input, -AdditionalProperty for any field a cmdlet has no parameter for,
+    -Filter for the full .get grammar, and fields the SDK does not model.
+
+LONG DESCRIPTION
+    Two names for one field
+        Every API field has its wire name (host, name, key_, groupids) and
+        the SDK's property name (TechnicalName, VisibleName, Key, GroupIds).
+        Objects the module writes use the property names:
+
+            PS> Get-ZbxHost -Name 'web-01' | Select-Object HostId, TechnicalName, VisibleName
+
+        Everything the module reads from you accepts either name: a key in a
+        hashtable may be the wire name or the property name, compared
+        case-insensitively.
+
+    Hashtables bind to typed parameters
+        A parameter whose type is a request record (-Filter, -Interface,
+        -Tag, -Macro, -Preprocessing, ...) accepts a hashtable, or an
+        array of hashtables, nested to any depth. The module registers its
+        own PowerShell type converter for every request, parameters and
+        nested record, so the conversion is PowerShell's ordinary parameter
+        binding, and a cast works the same way:
+
+            $request = [Community.Zabbix.ZabbixHostGroupCreateRequest]@{ name = 'Databases' }
+            New-ZbxHost -Host 'web-02' -Group 'Linux servers' `
+                -Tag @{ tag = 'env'; value = 'prod' }, @{ tag = 'role'; value = 'web' }
+
+        -Tag also takes a single hashtable of tag = value pairs,
+        @{ env = 'prod'; role = 'web' }, one tag per key.
+
+    -Filter: the whole .get grammar
+        Every Get- cmdlet's -Filter takes that object's typed .get
+        parameters (ZabbixHostGetParameters for Get-ZbxHost, ...). As a
+        hashtable, its keys are the API's own parameter names:
+
+            Get-ZbxHost -Filter @{ filter = @{ status = 1 }; selectTags = 'extend' }
+            Get-ZbxItem -Filter @{ hostids = '10084'; search = @{ key_ = 'vfs.fs' } }
+
+        -Filter is its own parameter set: it cannot be combined with -Id or
+        -Name, but the sort, search, -Select* and reference-filter
+        parameters (-Group, -Host, ...) still add to it.
+
+    -AdditionalProperty: any field, last word
+        Every generated New- and Set- cmdlet but the builders takes
+        -AdditionalProperty, a hashtable merged onto the request after
+        every other parameter, so it wins over a named parameter. Use it
+        for a field the cmdlet has no parameter for, a required field, or a
+        nested structure:
+
+            New-ZbxHostGroup -Name 'Databases' -AdditionalProperty @{ name = 'Databases-EU' }
+            # creates Databases-EU: -AdditionalProperty wins
+
+            New-ZbxHost -Host 'db-02' -Group 'Databases' -AdditionalProperty @{
+                description = 'primary'; inventory_mode = 0 }
+
+        A key that matches no field of the request is still sent, as that
+        key — for a field newer than the SDK's description of the server.
+        The server rejects a key it does not know ("unexpected parameter").
+
+        A key whose value is $null takes the field out of the request: the
+        field is not sent at all, whatever a named parameter set it to
+        (-Description 'x' -AdditionalProperty @{ description = $null } sends no
+        description). [ordered] hashtables, nested hashtables and arrays of
+        hashtables bind as the field's own nested records.
+
+    Fields the SDK does not model
+        When a server sends a field the record does not model (a newer
+        Zabbix release, a module), it is kept, and it reads as an ordinary
+        property of the object, next to the modelled ones:
+
+            (Get-ZbxHost -Name 'web-01').some_newer_field
+
+        Get-Member lists the modelled properties first, then these.
+
+    Version-specific fields
+        A property the connected server's version does not have (for
+        example a field added in 7.4, used against 7.0) fails before the
+        call is sent, naming the versions that have it.
+
+    Enumerations
+        Fields with a fixed set of values are enums with readable names
+        (-Status Enabled/Disabled, -InterfaceType Agent/Snmp/Ipmi/Jmx). A
+        [Flags] field such as -TlsAccept takes several names:
+        -TlsAccept Unencrypted, Psk. Tab completion lists the names.
+
+EXAMPLES
+    Create a host with two interfaces, a macro and an inventory field:
+
+        New-ZbxHost -Host 'db-02' -Group 'Databases' -Interface @(
+            @{ type = 1; main = 1; useip = 1; ip = '10.0.0.12'; dns = ''; port = '10050' }
+            @{ type = 2; main = 1; useip = 1; ip = '10.0.0.12'; dns = ''; port = '161';
+               details = @{ version = 2; community = '{$SNMP_COMMUNITY}' } }
+        ) -Macro @{ macro = '{$DB.PORT}'; value = '5432' } -AdditionalProperty @{
+            inventory_mode = 0; inventory = @{ location = 'rack 12' } }
+
+SEE ALSO
+    about_Community.Zabbix
+    about_Community.Zabbix_Pipeline
+    about_Type_Conversion
+    New-ZbxHost
+    Get-ZbxHost

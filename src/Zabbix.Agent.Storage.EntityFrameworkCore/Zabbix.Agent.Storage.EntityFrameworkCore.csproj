@@ -1,0 +1,26 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The durable store: EF Core behind ZabbixPersistentStore<T>'s asynchronous members, so any provider (Npgsql, SQLite, SQL Server…)
+       is a `new ZabbixEntityFrameworkStore<T>(o => o.UseX(…), …)` away. The store contract is Zabbix.Agent's (the first host that needs a store),
+       so this package depends on it and on nothing of the proxy's: an agent takes a durable store without the
+       listeners (docs/adr/0006-protocol-split.md). The namespace is the store's, not the package's. -->
+  <PropertyGroup>
+    <RootNamespace>Community.Zabbix.Storage.EntityFrameworkCore</RootNamespace>
+    <AssemblyName>Community.Zabbix.Agent.Storage.EntityFrameworkCore</AssemblyName>
+    <PackageId>Community.Zabbix.Agent.Storage.EntityFrameworkCore</PackageId>
+    <Description>A durable Zabbix store on EF Core: one table per store, the record's properties as its columns, a leased batch kept until its destination acknowledges it.</Description>
+    <PackageTags>zabbix;monitoring;entityframeworkcore;store</PackageTags>
+    <!-- EF Core is not trim/AOT-compatible (its model building is reflection); the opt-out is the package's, not ours. -->
+    <IsAotCompatible>false</IsAotCompatible>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <ProjectReference Include="../Zabbix.Agent/Zabbix.Agent.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <AdditionalFiles Include="BannedSymbols.txt" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,216 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+
+The build of a PowerShell module project (docs/adr/0003-powershell-module-split.md): imported by the three module
+projects — src/Zabbix.PowerShell (module Community.Zabbix), src/Zabbix.PowerShell.Agent (module Community.Zabbix.Agent) and
+src/Zabbix.PowerShell.Proxy (module Community.Zabbix.Proxy) — after each has said, in its own body:
+
+  ZabbixModuleName             the module's name, and so its manifest's file name (<name>.psd1)
+  ZabbixModuleGeneratedCmdlets true where Zabbix.Generator's CRUD cmdlets compile into the assembly (Community.Zabbix only):
+                               their obj/generated sources join the hand-written Commands/**/*.cs as the manifest's
+                               and the help's input
+  ZabbixModuleTypesFromSchema  true where the record type converters, adapters and views are generated from the schema
+                               (Community.Zabbix only: <name>.types.ps1xml and <name>.format.ps1xml)
+
+Each module's build output IS its module folder: the manifest, the module assembly and its dependencies, the MAML help
+(en-US/<assembly>.dll-Help.xml), the about_ topics and the format/types files, side by side. Nothing generated is written
+into the source tree (docs/adr/0004-conventions.md; CI fails a build that leaves `git status` dirty): the completed
+manifest, the MAML help and the types/format files are written under $(IntermediateOutputPath)module/ after CoreCompile
+and before the output copy, and join the project's None items there, so the ordinary copy puts them in $(OutDir) and a
+referencing project's transitive copy carries them too (the test project's own output is a module folder of all three).
+The one exception is the per-command reference: its Markdown pages are written to docs/reference/<module>/, committed so
+the reference reads on GitHub, and published by docfx (docfx.json). A page is written only when its text changes and a
+page whose command is gone is deleted, so a change that alters a command's help without committing its regenerated page
+fails CI's clean-tree check.
+-->
+<Project>
+  <PropertyGroup>
+    <!-- Shipped through the PowerShell Gallery as module folders, never as NuGet libraries. -->
+    <IsPackable>false</IsPackable>
+    <!-- pwsh loads a binary module by reflection and JIT-compiles it; the engine itself is neither trimmed nor AOT, and
+         System.Management.Automation is not annotated. The SDK stays AOT-analysed in its own projects. -->
+    <IsAotCompatible>false</IsAotCompatible>
+    <!-- The module folder is the build output: the manifest, the module assembly and its dependencies, side by side. -->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <!-- pwsh ships no ASP.NET Core shared framework: with Zabbix.Proxy's FrameworkReference flowing, the SDK resolves
+         Microsoft.Extensions.* to the framework and stops copying them into the module folder (Import-Module
+         then fails on Microsoft.Extensions.Logging.Abstractions 10.0.0.0). -->
+    <DisableTransitiveFrameworkReferences>true</DisableTransitiveFrameworkReferences>
+    <!-- The hand-written manifest: everything but the two export arrays, which the build fills in its own copy. -->
+    <ZabbixModuleManifest>$(MSBuildProjectDirectory)/$(ZabbixModuleName).psd1</ZabbixModuleManifest>
+    <ZabbixModuleHelpFile>$(AssemblyName).dll-Help.xml</ZabbixModuleHelpFile>
+    <!-- The per-command reference pages Get-Help -Online opens: one folder per module on the
+         documentation site, where docfx publishes docs/reference/<module>/ (docfx.json). -->
+    <ZabbixHelpOnlineBase Condition="'$(ZabbixHelpOnlineBase)' == ''">https://schroeder247.github.io/community-zabbix/reference/$(ZabbixModuleName)/</ZabbixHelpOnlineBase>
+    <ZabbixHelpGenAssembly>$(MSBuildThisFileDirectory)../tools/Zabbix.PowerShell.HelpGen/bin/$(Configuration)/net10.0/Zabbix.PowerShell.HelpGen.dll</ZabbixHelpGenAssembly>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Referenced, never shipped: the host supplies System.Management.Automation at run time. The modules target
+         net10.0, which only pwsh 7.6 runs (7.4 is .NET 8, 7.5 is .NET 9), so the reference is 7.6's own surface —
+         Microsoft Learn, "Choosing the right PowerShell NuGet package": a module that needs version-specific APIs references the
+         SDK or System.Management.Automation "as reference assemblies so you don't publish the PowerShell dependencies"
+         (PowerShellStandard.Library is the 5.1 ∩ 7 intersection and would forbid IArgumentCompleterFactory and
+         ArgumentCompleterFactoryAttribute). -->
+    <PackageReference Include="System.Management.Automation" PrivateAssets="all" ExcludeAssets="runtime" />
+    <!-- PowerShell's own JSON converters (ConvertFrom-Json / ConvertTo-Json: JsonObject), referenced the same way: pwsh
+         loads the assembly itself. -->
+    <PackageReference Include="Microsoft.PowerShell.Commands.Utility" PrivateAssets="all" ExcludeAssets="runtime" />
+    <!-- The help-build task (ZabbixBuildHelp below): a ProjectReference with ReferenceOutputAssembly="false" so MSBuild
+         builds it before this project's own targets run without adding it to References. HelpGen is in Zabbix.slnx
+         (/tools/): a solution build unsets the parent configuration for a project outside the solution, so
+         `dotnet build Zabbix.slnx -c Release` would build it as Debug while the UsingTasks below load
+         bin/$(Configuration) (MSB4062). -->
+    <ProjectReference Include="$(MSBuildThisFileDirectory)../tools/Zabbix.PowerShell.HelpGen/Zabbix.PowerShell.HelpGen.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <!--
+    PowerShell's own native files: System.Management.Automation and Microsoft.PowerShell.Commands.Utility are referenced
+    for compilation only (ExcludeAssets="runtime"), but their package graph still brings the host's natives as runtime
+    targets (libpsl-native, pwrshplugin.dll, PowerShell.Core.Instrumentation.dll, getfilesiginforedist.dll, the MI
+    *.unmanaged.dll), for every runtime identifier. pwsh loads its own copies from its own folder; a module folder that
+    carries them only grows. Removed from what the build copies, by the package that brings them.
+  -->
+  <PropertyGroup>
+    <ZabbixHostOwnedPackages>;Microsoft.PowerShell.Native;Microsoft.Management.Infrastructure.Runtime.Win;Microsoft.Management.Infrastructure.Runtime.Unix;Microsoft.Security.Extensions;</ZabbixHostOwnedPackages>
+  </PropertyGroup>
+  <Target Name="ZabbixRemoveHostOwnedNatives" AfterTargets="ResolvePackageAssets">
+    <ItemGroup>
+      <RuntimeTargetsCopyLocalItems Remove="@(RuntimeTargetsCopyLocalItems)" Condition="$(ZabbixHostOwnedPackages.Contains(';%(RuntimeTargetsCopyLocalItems.NuGetPackageId);'))" />
+      <NativeCopyLocalItems Remove="@(NativeCopyLocalItems)" Condition="$(ZabbixHostOwnedPackages.Contains(';%(NativeCopyLocalItems.NuGetPackageId);'))" />
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup>
+    <!-- The hand-written format files, copied into the module folder (and, transitively, into a referencing project's
+         output — the test project imports all three modules from its own). The manifest template is not copied: the
+         build's completed manifest is (ZabbixModuleGeneratedFiles below). -->
+    <None Update="*.ps1xml" CopyToOutputDirectory="PreserveNewest" />
+    <!-- The hand-written about_ topics (Get-Help about_Community.Zabbix*): pwsh finds them, and the MAML help the build writes, in
+         the en-US folder beside the module assembly. -->
+    <None Update="en-US/**" CopyToOutputDirectory="PreserveNewest" />
+    <!-- The module's own licence (LICENSE, MPL-2.0, with its disclaimer of warranty) and the credits and the licences of
+         the assemblies a module folder carries (THIRD-PARTY-NOTICES.md), in each folder; tools/Stage-ZbxModules.ps1 keeps
+         a sibling's copies although Community.Zabbix's folder has the same files. -->
+    <None Include="$(MSBuildThisFileDirectory)../LICENSE" Link="LICENSE" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+    <None Include="$(MSBuildThisFileDirectory)../THIRD-PARTY-NOTICES.md" Link="THIRD-PARTY-NOTICES.md" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+  </ItemGroup>
+
+  <!--
+    The module build's tasks (tools/Zabbix.PowerShell.HelpGen): the manifest's exports, the MAML help and reference pages,
+    and the types/format files. TaskHostFactory runs each in a task host process that exits with it, so the long-lived
+    MSBuild node a build reuses never loads HelpGen.dll and never holds it locked against HelpGen's own next build.
+  -->
+  <UsingTask TaskName="ZabbixWriteManifestExportsTask" AssemblyFile="$(ZabbixHelpGenAssembly)" TaskFactory="TaskHostFactory" />
+  <UsingTask TaskName="ZabbixBuildHelpTask" AssemblyFile="$(ZabbixHelpGenAssembly)" TaskFactory="TaskHostFactory" />
+  <UsingTask TaskName="ZabbixWriteTypesPs1XmlTask" AssemblyFile="$(ZabbixHelpGenAssembly)" TaskFactory="TaskHostFactory" />
+
+  <!-- Every generated module file is written under $(IntermediateOutputPath)module/ and becomes a None item with its target
+       path, before the project's own output copy reads the None items (and before a referencing project asks for them). -->
+  <Target Name="ZabbixModuleGeneratedFiles" DependsOnTargets="ZabbixModulePaths;CoreCompile;ZabbixGenerateManifest;ZabbixBuildHelp;ZabbixGenerateTypesPs1Xml" BeforeTargets="_GetCopyToOutputDirectoryItemsFromThisProject">
+    <ItemGroup>
+      <_ZabbixModuleGenerated Include="$(ZabbixModuleGeneratedDirectory)**" />
+      <_NoneWithTargetPath Include="@(_ZabbixModuleGenerated)" TargetPath="%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+      <FileWrites Include="@(_ZabbixModuleGenerated)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Set in a target: IntermediateOutputPath is defined by the SDK's targets, after this file is evaluated. -->
+  <Target Name="ZabbixModulePaths">
+    <PropertyGroup>
+      <ZabbixModuleGeneratedDirectory>$(MSBuildProjectDirectory)/$(IntermediateOutputPath)module/</ZabbixModuleGeneratedDirectory>
+      <ZabbixReferenceDirectory>$(MSBuildThisFileDirectory)../docs/reference/$(ZabbixModuleName)</ZabbixReferenceDirectory>
+      <!-- The generated commands' examples, for tools/Test-ZbxHelpExamples.ps1 (Community.Zabbix only: the siblings have none). -->
+      <ZabbixGeneratedExamplesPath Condition="'$(ZabbixModuleGeneratedCmdlets)' == 'true'">$(MSBuildProjectDirectory)/$(IntermediateOutputPath)examples/generated-examples.json</ZabbixGeneratedExamplesPath>
+    </PropertyGroup>
+  </Target>
+
+  <!--
+    CmdletsToExport / AliasesToExport, derived at build (README "Manifest"): ModuleShapeTests requires both arrays to
+    match exactly what the assembly compiles. Every [Cmdlet] class and its own [Alias] attributes are read from the
+    hand-written sources (Commands/*.cs) and, in the Community.Zabbix module, the generator's own output (obj/generated/**,
+    EmitCompilerGeneratedFiles) by HelpGen's Roslyn source reader, the one the help is built from: syntax, not a
+    reflection load of the assembly the target is itself building (that would lock the file this same Build is about
+    to write).
+  -->
+  <Target Name="ZabbixGenerateManifest" DependsOnTargets="ZabbixModulePaths;CoreCompile">
+    <ItemGroup>
+      <!-- Globbed inside the target: obj/generated exists only after CoreCompile, after evaluation on a clean build. -->
+      <ZabbixManifestSource Include="Commands/**/*.cs" />
+      <ZabbixManifestSource Include="obj/generated/**/*.g.cs" Condition="'$(ZabbixModuleGeneratedCmdlets)' == 'true'" />
+      <ZabbixManifestOutputPath Include="$(ZabbixModuleGeneratedDirectory)$(ZabbixModuleName).psd1" />
+    </ItemGroup>
+    <!-- A release pins each required module to the family's version (the task's RequiredVersion); a prerelease names it. -->
+    <PropertyGroup>
+      <ZabbixModuleRequiredVersion Condition="'$(VersionSuffix)' == ''">$(VersionPrefix)</ZabbixModuleRequiredVersion>
+    </PropertyGroup>
+    <ZabbixWriteManifestExportsTask Sources="@(ZabbixManifestSource)" Template="$(ZabbixModuleManifest)" OutputPaths="@(ZabbixManifestOutputPath)"
+                                    RequiredVersion="$(ZabbixModuleRequiredVersion)" />
+  </Target>
+
+  <!--
+    MAML help and the reference pages: built from the XML doc comments on every cmdlet class and property,
+    read as source text by Zabbix.PowerShell.HelpGen's ZabbixBuildHelpTask (tools/Zabbix.PowerShell.HelpGen; its
+    csproj records why not reflection over the assembly this build is writing, docs/design/decisions.md why not
+    PlatyPS). The cmdlet base
+    classes live in the Community.Zabbix module (ZabbixServerCmdlet: -Connection; the wire bases: the TLS parameters; the CRUD and
+    singleton bases: -Id, -Filter,
+    -Limit, -Force), so every module reads them from there to document what its cmdlets inherit.
+  -->
+  <Target Name="ZabbixBuildHelp" DependsOnTargets="ZabbixModulePaths;CoreCompile">
+    <ItemGroup>
+      <ZabbixHelpSource Include="Commands/**/*.cs" />
+      <ZabbixHelpSource Include="obj/generated/**/*.g.cs" Generated="true" Condition="'$(ZabbixModuleGeneratedCmdlets)' == 'true'" />
+      <ZabbixHelpBaseClassSource Include="$(MSBuildThisFileDirectory)Zabbix.PowerShell/ZabbixServerCmdlet.cs" />
+      <ZabbixHelpBaseClassSource Include="$(MSBuildThisFileDirectory)Zabbix.PowerShell/ZabbixServerWireCmdlet.cs" />
+      <ZabbixHelpBaseClassSource Include="$(MSBuildThisFileDirectory)Zabbix.PowerShell/ZabbixTlsCmdlet.cs" />
+      <ZabbixHelpBaseClassSource Include="$(MSBuildThisFileDirectory)Zabbix.PowerShell/ZabbixWireCmdlet.cs" />
+      <ZabbixHelpBaseClassSource Include="$(MSBuildThisFileDirectory)Zabbix.PowerShell/ZabbixConnectionTransformationAttribute.cs" />
+      <ZabbixHelpBaseClassSource Include="$(MSBuildThisFileDirectory)Zabbix.PowerShell/ZabbixConnectionCompleterAttribute.cs" />
+      <ZabbixHelpBaseClassSource Include="$(MSBuildThisFileDirectory)Zabbix.PowerShell/ZabbixSortOrder.cs" />
+      <ZabbixHelpBaseClassSource Include="$(MSBuildThisFileDirectory)Zabbix.PowerShell/ZabbixParameterSets.cs" />
+      <ZabbixHelpBaseClassSource Include="$(MSBuildThisFileDirectory)Zabbix.PowerShell/ZabbixGetCmdlet.cs" />
+      <ZabbixHelpBaseClassSource Include="$(MSBuildThisFileDirectory)Zabbix.PowerShell/ZabbixRemoveCmdlet.cs" />
+      <ZabbixHelpBaseClassSource Include="$(MSBuildThisFileDirectory)Zabbix.PowerShell/ZabbixNewCmdlet.cs" />
+      <ZabbixHelpBaseClassSource Include="$(MSBuildThisFileDirectory)Zabbix.PowerShell/ZabbixSetCmdlet.cs" />
+      <ZabbixHelpBaseClassSource Include="$(MSBuildThisFileDirectory)Zabbix.PowerShell/ZabbixSingletonGetCmdlet.cs" />
+      <ZabbixHelpBaseClassSource Include="$(MSBuildThisFileDirectory)Zabbix.PowerShell/ZabbixSingletonSetCmdlet.cs" />
+      <ZabbixHelpBaseClassSource Include="$(MSBuildThisFileDirectory)Zabbix.PowerShell/Sessions/ZabbixSessionCmdlet.cs" />
+      <ZabbixHelpBaseClassSource Include="$(MSBuildThisFileDirectory)Zabbix.PowerShell/Sessions/ZabbixGetSessionLogCmdlet.cs" />
+      <ZabbixHelpBaseClassSource Include="$(MSBuildThisFileDirectory)Zabbix.PowerShell/Sessions/ZabbixClearSessionLogCmdlet.cs" />
+      <ZabbixHelpBaseClassSource Include="$(MSBuildThisFileDirectory)Zabbix.PowerShell/Sessions/ZabbixStopSessionCmdlet.cs" />
+      <!-- The help scripts, one file per cmdlet (HelpGen's HelpScriptParser): a .SYNOPSIS/.DESCRIPTION block and the
+           examples; a generated cmdlet without one keeps the generator's. tools/Test-ZbxHelpExamples.ps1 runs them
+           against a live server. -->
+      <ZabbixHelpExampleSource Include="Examples/*.ps1" />
+      <!-- The XML documentation of every assembly the module folder will hold — this project's own and each copied
+           reference's — what the types the commands take and write are, for the help's INPUTS and OUTPUTS. -->
+      <ZabbixHelpDocumentation Include="@(DocFileItem->'%(FullPath)')" />
+      <ZabbixHelpDocumentation Include="@(ReferenceCopyLocalPaths->'%(FullPath)')" Condition="'%(Extension)' == '.xml'" />
+      <ZabbixHelpOutputPath Include="$(ZabbixModuleGeneratedDirectory)en-US/$(ZabbixModuleHelpFile)" />
+    </ItemGroup>
+    <!-- The concept topic each command's help links to: the module's own about_ topic when it ships one. -->
+    <PropertyGroup>
+      <ZabbixHelpConceptTopic>about_Community.Zabbix</ZabbixHelpConceptTopic>
+      <ZabbixHelpConceptTopic Condition="Exists('$(MSBuildProjectDirectory)/en-US/about_$(ZabbixModuleName).help.txt')">about_$(ZabbixModuleName)</ZabbixHelpConceptTopic>
+    </PropertyGroup>
+    <ZabbixBuildHelpTask Sources="@(ZabbixHelpSource)" BaseClassSources="@(ZabbixHelpBaseClassSource)" ExampleSources="@(ZabbixHelpExampleSource)" OutputPaths="@(ZabbixHelpOutputPath)" DocumentationFiles="@(ZabbixHelpDocumentation)"
+                         ReferenceDirectory="$(ZabbixReferenceDirectory)" OnlineBase="$(ZabbixHelpOnlineBase)" ModuleName="$(ZabbixModuleName)"
+                         ConceptTopic="$(ZabbixHelpConceptTopic)" GeneratedExamplesPath="$(ZabbixGeneratedExamplesPath)" />
+  </Target>
+
+  <!--
+    <name>.types.ps1xml and <name>.format.ps1xml (Community.Zabbix only): Zabbix.Generator's ZabbixTypesEmitter over the same
+    schema the records are generated from — ZabbixRecordConverter as every request/parameters/nested record's
+    <TypeConverter>, ZabbixAdditionalFieldsAdapter as every read record's <TypeAdapter>, and a table/list/wide view per
+    read record. ZabbixWriteTypesPs1XmlTask (tools/Zabbix.PowerShell.HelpGen) is the thin writer.
+  -->
+  <Target Name="ZabbixGenerateTypesPs1Xml" DependsOnTargets="ZabbixModulePaths" Condition="'$(ZabbixModuleTypesFromSchema)' == 'true'">
+    <ItemGroup>
+      <ZabbixTypesOutputPath Include="$(ZabbixModuleGeneratedDirectory)$(ZabbixModuleName).types.ps1xml" />
+      <ZabbixFormatOutputPath Include="$(ZabbixModuleGeneratedDirectory)$(ZabbixModuleName).format.ps1xml" />
+    </ItemGroup>
+    <ZabbixWriteTypesPs1XmlTask SchemaPath="$(MSBuildThisFileDirectory)../schema/zabbix-api.json" OutputPaths="@(ZabbixTypesOutputPath)" FormatOutputPaths="@(ZabbixFormatOutputPath)" />
+  </Target>
+</Project>

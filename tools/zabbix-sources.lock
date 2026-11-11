@@ -1,0 +1,22 @@
+# The Zabbix sources the API model (schema/zabbix-api.json) is extracted from, pinned to Zabbix's own repository.
+# tools/fetch-zabbix-sources.sh checks out each line's commit and refuses one whose hash differs; tools/regenerate-schema.sh
+# fetches, extracts, merges and verifies. Changing a line is a model change: regenerate and review the diff of
+# schema/zabbix-api.json in the same commit (the schema-drift workflow fails until that is done).
+#
+# repository: the official GitHub mirror of git.zabbix.com.
+# columns: <model version> <upstream ref> <commit the ref names>
+#   a tag is checked against the commit it points to; "master" is a branch, so only the commit is pinned.
+#
+# 8.0: no 8.0.0 tag exists on the mirror yet; the model is extracted from the tag 8.0.0rc1, the first 8.0 release
+# candidate (later candidates are not adopted yet; moving the pin is a reviewed change with the regenerated schema).
+# Relative to master at e54122474d1, rc1 adds four API objects (apmlog, apmmetric,
+# apmspan, apmtrace) and changes CCepRule (the window types: SIMPLE_MULTIPLE 1, SIMPLE_ONCE 3), CEvent (groupBy),
+# CHistory, CHostInterface and CHostPrototype (SNMP macros), CProxy (APM configuration), CScript (monitored_by),
+# CSettings (APM), CApiInputValidator, schema.inc.php and defines.inc.php. Move the line to the 8.0.0 tag once it is
+# published, and regenerate. The 8.0 lab server (tests/lab/zabbix-8.0.yaml) is a digest-pinned trunk build after the
+# 8.0.0rc1 tag that reports 8.0.0rc2 with rc1's API: Docker Hub has no 8.0.0rc1 image. The 7.x lab images are the
+# releases these lines name, pinned by digest; a lab pod's zabbix-release label names the line it serves.
+repository https://github.com/zabbix/zabbix.git
+7.0 7.0.31 e7da53eea214a08118288b78c3529a6d6bf45746
+7.4 7.4.15 bd350f540cdb6665dbeb144503b5426f9a0dc2ad
+8.0 8.0.0rc1 dd0d9c26a3ad7b394eebaaedb46446f7c9983547

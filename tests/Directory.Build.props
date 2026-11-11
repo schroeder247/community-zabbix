@@ -1,0 +1,43 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+-->
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..'))" />
+  <PropertyGroup>
+    <!-- Test classes are public-by-xunit and deliberately undocumented (CS1591); test names are
+         Scenario_expected sentences (CA1707). Everything else the analyzers say about a test is still an
+         error — a test is code. -->
+    <NoWarn>$(NoWarn);CS1591;CA1707</NoWarn>
+    <!-- The xunit analyzers that catch a test which CANNOT FAIL are errors here, not hidden suggestions
+         (xUnit2001: Assert.Equals; xUnit2020: asserting a constant). -->
+    <WarningsAsErrors>$(WarningsAsErrors);xUnit2001;xUnit2020;xUnit1012;xUnit1026</WarningsAsErrors>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <!-- The tests live in the namespace of the code they test, under Community.Zabbix (folder tests/Zabbix.Tests is
+         namespace Community.Zabbix.Tests). -->
+    <RootNamespace>Community.$(MSBuildProjectName)</RootNamespace>
+    <!-- A Microsoft.Testing.Platform test project IS an executable: run it directly to run the tests. -->
+    <OutputType>Exe</OutputType>
+    <RollForward>Major</RollForward>
+    <!-- An empty run is a failure rather than a green tick. Each project pins its own
+         `minimum-expected-tests` in its csproj, so a deleted test is a deliberate edit, never a silent shrink. -->
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --zero-tests-policy strict</TestingPlatformCommandLineArguments>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
+    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
+    <!-- The clock every cadence runs on, so a test drives time instead of waiting for it. -->
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+    <!-- FakeLogger/FakeLogCollector: every failure path asserts its event id. -->
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" />
+    <!-- FakeRedactor: classified data is asserted redacted before the sink. -->
+    <PackageReference Include="Microsoft.Extensions.Compliance.Testing" />
+    <!-- Tests wait on signals, not on time (tests/BannedSymbols.txt; RS0030 is an error). -->
+    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" PrivateAssets="all" />
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
+  </ItemGroup>
+</Project>

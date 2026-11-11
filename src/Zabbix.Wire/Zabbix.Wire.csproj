@@ -1,0 +1,52 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The framed-TCP wire (docs/adr/0006-protocol-split.md): the frame (ZabbixHeader), the exchange and its node walk
+    (ZabbixFrames), TLS with certificates and PSK (ZabbixTls), redirects, and the typed clients over it: the sender,
+    the getter and the server wire. A protocol of its own, so an application that only calls the JSON-RPC API does
+    not take a TLS stack, and one that only sends values does not take the API's HTTP pipeline. It depends on the
+    contracts, BouncyCastle, the telemetry abstractions, the container and the options' configuration binding only; never
+    on Zabbix.Sdk or Zabbix.Api (DesignConformanceTests holds that).
+  -->
+  <PropertyGroup>
+    <RootNamespace>Community.Zabbix</RootNamespace>
+    <AssemblyName>Community.Zabbix.Wire</AssemblyName>
+    <PackageId>Community.Zabbix.Wire</PackageId>
+    <Description>The Zabbix framed-TCP wire: the frame and the exchange with HA failover and redirects, TLS with certificates and PSK, and the sender, getter and server-wire clients.</Description>
+    <PackageTags>zabbix;monitoring;sender;zabbix_sender;zabbix_get;tls;psk</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Zabbix.Abstractions/Zabbix.Abstractions.csproj" />
+    <!-- The one third-party boundary tool: .NET 10.0.11 has no TLS-PSK API (SslStream takes no key; the only PSK
+         names in the shared framework are TlsCipherSuite members), and Zabbix agents and proxies speak PSK. SslStream
+         offers no hook that supplies a key or a PSK key exchange; the alternative would be a TLS stack of our own.
+         BouncyCastle's managed TLS offers upstream's TLS 1.3 pair and the six TLS 1.2 suites OpenSSL expands
+         upstream's string to that a handshake completes with (PSK-AES128-CCM8 is refused; the list and the evidence
+         for it are at ZabbixTls.s_pskCipherSuites, which the listener's acceptor offers too). Reached from ZabbixTls.WrapClientAsync (client) and from
+         Zabbix.Proxy's ZabbixTlsAcceptor (the listener's PSK server). -->
+    <PackageReference Include="BouncyCastle.Cryptography" />
+    <!-- The extended [LoggerMessage] generator: the getter's events classify the item key ([ZabbixItemKeyData]), and
+         only this package's generator keeps a classified parameter out of the message and the state. The shared
+         framework's generator compiles the same declaration and logs the key in clear text. An abstractions package:
+         its closure adds ObjectPool and the compliance abstractions, nothing of the API or the host. -->
+    <PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" />
+    <!-- The client's builder (docs/adr/0013-builders-verbs-and-typed-values.md): ZabbixWireClient.CreateBuilder() registers
+         the client in a container of its own, through the AddZabbixWireClient an application's host calls, and builds it,
+         so the two paths are one. -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <!-- The builder's Bind verb: a section binds to the client's named options, by the generated binder. -->
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- The family's own assemblies share the wire's plumbing (frames, telemetry, the JSON contracts) without making
+         it public surface (docs/adr/0002-package-ids.md). -->
+    <InternalsVisibleTo Include="Community.Zabbix.Agent" />
+    <InternalsVisibleTo Include="Community.Zabbix.Proxy" />
+    <!-- Not the PowerShell modules: they program against the public API, as an application does (ModulePublicApiTests). -->
+    <InternalsVisibleTo Include="Zabbix.Tests" />
+    <InternalsVisibleTo Include="Zabbix.PowerShell.Tests" />
+  </ItemGroup>
+</Project>

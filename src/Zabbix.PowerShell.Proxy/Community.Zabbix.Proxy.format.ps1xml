@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  This Source Code Form is subject to the terms of the Mozilla Public
+  License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+
+  The views of the Community.Zabbix.Proxy module's own output types, hand-written because the types are (the Community.Zabbix module's
+  Zabbix.PowerShell.format.ps1xml carries the shared ones: connections, the session log). A new output type here with
+  more than four public properties needs a view here (ZabbixFormatPs1XmlTests).
+-->
+<Configuration>
+  <ViewDefinitions>
+    <View>
+      <Name>ZabbixActiveProxySession.Table</Name>
+      <ViewSelectedBy><TypeName>Community.Zabbix.PowerShell.Commands.ZabbixActiveProxySession</TypeName></ViewSelectedBy>
+      <TableControl>
+        <TableHeaders><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /></TableHeaders>
+        <TableRowEntries><TableRowEntry><TableColumnItems>
+          <TableColumnItem><PropertyName>Name</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>ProxyName</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Started</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>LastPulledAt</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>ConfigRevision</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Fault</PropertyName></TableColumnItem>
+        </TableColumnItems></TableRowEntry></TableRowEntries>
+      </TableControl>
+    </View>
+    <View>
+      <Name>ZabbixPassiveProxySession.Table</Name>
+      <ViewSelectedBy><TypeName>Community.Zabbix.PowerShell.Commands.ZabbixPassiveProxySession</TypeName></ViewSelectedBy>
+      <TableControl>
+        <TableHeaders><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /></TableHeaders>
+        <TableRowEntries><TableRowEntry><TableColumnItems>
+          <TableColumnItem><PropertyName>Name</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Started</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Listener</PropertyName></TableColumnItem>
+        </TableColumnItems></TableRowEntry></TableRowEntries>
+      </TableControl>
+    </View>
+    <View>
+      <Name>ZabbixProxyHistoryItem.Table</Name>
+      <ViewSelectedBy><TypeName>Community.Zabbix.Proxy.ZabbixProxyHistoryItem</TypeName></ViewSelectedBy>
+      <TableControl>
+        <TableHeaders><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /></TableHeaders>
+        <TableRowEntries><TableRowEntry><TableColumnItems>
+          <TableColumnItem><PropertyName>Id</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>ItemId</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Clock</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Ns</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Value</PropertyName></TableColumnItem>
+        </TableColumnItems></TableRowEntry></TableRowEntries>
+      </TableControl>
+    </View>
+    <View>
+      <Name>ZabbixProxyResponse.Table</Name>
+      <ViewSelectedBy><TypeName>Community.Zabbix.Proxy.ZabbixProxyResponse</TypeName></ViewSelectedBy>
+      <TableControl>
+        <TableHeaders><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /></TableHeaders>
+        <TableRowEntries><TableRowEntry><TableColumnItems>
+          <TableColumnItem><PropertyName>Response</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>IsSuccess</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Info</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>TaskCount</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>UploadDisabled</PropertyName></TableColumnItem>
+        </TableColumnItems></TableRowEntry></TableRowEntries>
+      </TableControl>
+    </View>
+    <View>
+      <Name>ZabbixProxyDataRequest.List</Name>
+      <ViewSelectedBy><TypeName>Community.Zabbix.Proxy.ZabbixProxyDataRequest</TypeName></ViewSelectedBy>
+      <ListControl><ListEntries><ListEntry><ListItems>
+        <ListItem><PropertyName>Request</PropertyName></ListItem>
+        <ListItem><PropertyName>Host</PropertyName></ListItem>
+        <ListItem><PropertyName>Version</PropertyName></ListItem>
+        <ListItem><PropertyName>Clock</PropertyName></ListItem>
+        <ListItem><Label>History</Label><ScriptBlock>@($_.History).Count</ScriptBlock></ListItem>
+        <ListItem><Label>Discovery</Label><ScriptBlock>@($_.Discovery).Count</ScriptBlock></ListItem>
+        <ListItem><Label>Autoregistration</Label><ScriptBlock>@($_.Autoregistration).Count</ScriptBlock></ListItem>
+        <ListItem><Label>Availability</Label><ScriptBlock>@($_.Availability).Count</ScriptBlock></ListItem>
+        <ListItem><PropertyName>More</PropertyName></ListItem>
+      </ListItems></ListEntry></ListEntries></ListControl>
+    </View>
+    <View>
+      <Name>ZabbixProxyConfig.List</Name>
+      <ViewSelectedBy><TypeName>Community.Zabbix.Proxy.ZabbixProxyConfig</TypeName></ViewSelectedBy>
+      <ListControl><ListEntries><ListEntry><ListItems>
+        <ListItem><PropertyName>ConfigRevision</PropertyName></ListItem>
+        <ListItem><PropertyName>HostmapRevision</PropertyName></ListItem>
+        <ListItem><Label>Hosts</Label><ScriptBlock>@($_.Hosts).Count</ScriptBlock></ListItem>
+        <ListItem><Label>Items</Label><ScriptBlock>@($_.Items).Count</ScriptBlock></ListItem>
+        <ListItem><Label>Templates</Label><ScriptBlock>@($_.Templates).Count</ScriptBlock></ListItem>
+        <ListItem><Label>GlobalMacros</Label><ScriptBlock>@($_.GlobalMacros).Count</ScriptBlock></ListItem>
+        <ListItem><Label>HostMacros</Label><ScriptBlock>@($_.HostMacros).Count</ScriptBlock></ListItem>
+      </ListItems></ListEntry></ListEntries></ListControl>
+    </View>
+  </ViewDefinitions>
+</Configuration>

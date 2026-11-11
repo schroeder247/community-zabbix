@@ -1,0 +1,46 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The hosts: the agent (its sources merged into a store and drained by the send loop), the active agent (the
+    `active checks` conversation and its item delays), the poll source, the item handlers, the agent health check and
+    status, and the document's agent sections; and the store every host buffers in (ZabbixStore<T>, ZabbixPersistentStore<T>, ZabbixMemoryStore<T>, the storage builder, the
+    delivery seam). Split from Zabbix.Sdk and Zabbix.Wire so an application that only calls the API or the wire does
+    not take the hosting stack, and built on the wire alone, so a host does not take the API (docs/adr/0002-package-ids.md, docs/adr/0006-protocol-split.md).
+  -->
+  <PropertyGroup>
+    <RootNamespace>Community.Zabbix</RootNamespace>
+    <AssemblyName>Community.Zabbix.Agent</AssemblyName>
+    <PackageId>Community.Zabbix.Agent</PackageId>
+    <Description>Zabbix agents on the .NET generic host: the active agent, the poll source, the send loop with retry and backoff, item handlers, health checks, and the store with its acknowledged face.</Description>
+    <PackageTags>zabbix;monitoring;agent;active-agent;hosting;healthchecks</PackageTags>
+    <!-- The source-generated P/Invoke stubs the bundled keys' platform calls compile to (LibraryImport; ADR 0009 §6).
+         The agent's own code has no unsafe blocks. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- The wire and the contracts only: an agent sends over the framed TCP wire and never calls the JSON-RPC API, so
+         Zabbix.Sdk, the generated API and the HTTP pipeline are not in an agent's closure (DesignConformanceTests). -->
+    <ProjectReference Include="../Zabbix.Wire/Zabbix.Wire.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+    <!-- The send loop's retry is a resilience pipeline (Polly v8 through Microsoft's package), not a loop. -->
+    <PackageReference Include="Microsoft.Extensions.Resilience" />
+    <!-- The host's meters (AddMetrics) for the agents' and the wire's telemetry in a container, and its loggers
+         (AddLogging) for an agent composed outside a generic host. -->
+    <PackageReference Include="Microsoft.Extensions.Diagnostics" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <!-- A section of the document binds to named options. -->
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+    <!-- The extended [LoggerMessage] generator, which honours [ZabbixItemKeyData] on the agents' events. -->
+    <PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" />
+    <!-- An agent's health is the host's health-check concept: the check type and its registration. -->
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Community.Zabbix.Proxy" />
+    <!-- Not the PowerShell modules: they program against the public API, as an application does (ModulePublicApiTests). -->
+    <InternalsVisibleTo Include="Zabbix.Tests" />
+  </ItemGroup>
+</Project>

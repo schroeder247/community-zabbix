@@ -1,0 +1,29 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The API's vocabulary: every enum, object, parameter set and request of the Zabbix 7.0–8.0 API, extracted from the Zabbix source, generated at build time
+    from schema/zabbix-api.json. Its own assembly because a source generator's output is invisible to the other
+    generators in the same compilation: System.Text.Json's context (in Zabbix) can only serialize these records when
+    they arrive as a reference.
+  -->
+  <PropertyGroup>
+    <RootNamespace>Community.Zabbix</RootNamespace>
+    <AssemblyName>Community.Zabbix.Api</AssemblyName>
+    <PackageId>Community.Zabbix.Api</PackageId>
+    <Description>Zabbix API vocabulary: the objects, parameters and requests of the JSON-RPC API as records.</Description>
+    <PackageTags>zabbix;monitoring;json-rpc</PackageTags>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Zabbix.Abstractions/Zabbix.Abstractions.csproj" />
+    <ProjectReference Include="../Zabbix.Generator/Zabbix.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <AdditionalFiles Include="../../schema/zabbix-api.json" ZabbixEmit="Models" />
+    <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="ZabbixEmit" />
+    <!-- the JSON context (in Zabbix) reads and writes the read records' internal extension-data bag (IZabbixAdditionalFields) -->
+    <InternalsVisibleTo Include="Community.Zabbix.Sdk" />
+    <InternalsVisibleTo Include="Zabbix.Tests" />
+  </ItemGroup>
+</Project>

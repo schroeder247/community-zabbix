@@ -1,0 +1,102 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dotnet/docfx/main/schemas/docfx.schema.json",
+  "metadata": [
+    {
+      "src": [
+        {
+          "src": "src",
+          "files": [
+            "Zabbix.Abstractions/Zabbix.Abstractions.csproj",
+            "Zabbix.Api/Zabbix.Api.csproj",
+            "Zabbix.Sdk/Zabbix.Sdk.csproj",
+            "Zabbix.Wire/Zabbix.Wire.csproj",
+            "Zabbix.Agent/Zabbix.Agent.csproj",
+            "Zabbix.Proxy/Zabbix.Proxy.csproj",
+            "Zabbix.Agent.Storage.EntityFrameworkCore/Zabbix.Agent.Storage.EntityFrameworkCore.csproj",
+            "Zabbix.Agent.Plugins/Zabbix.Agent.Plugins.csproj"
+          ]
+        }
+      ],
+      "dest": "api",
+      "properties": {
+        "Configuration": "Release"
+      },
+      "memberLayout": "separatePages",
+      "enumSortOrder": "declaringOrder"
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": [
+          "index.md",
+          "toc.yml",
+          "README.md",
+          "CHANGELOG.md",
+          "CONTRIBUTING.md",
+          "SECURITY.md",
+          "CODE_OF_CONDUCT.md",
+          "THIRD-PARTY-NOTICES.md",
+          "api/**.yml",
+          "api/index.md",
+          "docs/**/*.md",
+          "samples/README.md",
+          "src/*/README.md",
+          "src/Zabbix.PowerShell/GETTING-STARTED.md",
+          "tools/ZabbixApiExtract/README.md"
+        ],
+        "exclude": [
+          "_site/**",
+          "docs/reference/**"
+        ]
+      },
+      {
+        "src": "docs/reference/Community.Zabbix",
+        "files": [
+          "**.md"
+        ],
+        "dest": "reference/Community.Zabbix"
+      },
+      {
+        "src": "docs/reference/Community.Zabbix.Agent",
+        "files": [
+          "**.md"
+        ],
+        "dest": "reference/Community.Zabbix.Agent"
+      },
+      {
+        "src": "docs/reference/Community.Zabbix.Proxy",
+        "files": [
+          "**.md"
+        ],
+        "dest": "reference/Community.Zabbix.Proxy"
+      }
+    ],
+    "resource": [
+      {
+        "files": [
+          "src/Zabbix.PowerShell/en-US/about_*.help.txt",
+          "src/Zabbix.PowerShell.Agent/en-US/about_*.help.txt",
+          "LICENSE",
+          "assets/icon.png",
+          "assets/third-party/zabbix-logo-2025.png"
+        ]
+      }
+    ],
+    "output": "_site",
+    "xref": [
+      "https://learn.microsoft.com/en-us/dotnet/.xrefmap.json"
+    ],
+    "template": [
+      "default",
+      "modern"
+    ],
+    "globalMetadata": {
+      "_appName": "Community Zabbix",
+      "_appTitle": "Community Zabbix",
+      "_appFooter": "Community Zabbix: an unofficial .NET SDK and PowerShell modules for Zabbix 7.0, 7.4 and 8.0. Provided \"as is\", without warranty of any kind: use at your own risk. This project is not affiliated with, endorsed by or sponsored by Zabbix LLC. Zabbix is a registered trademark of Zabbix LLC.",
+      "_enableSearch": true,
+      "pdf": false
+    }
+  }
+}

@@ -1,0 +1,157 @@
+{
+ "$comment": "verify's recorded exceptions: every line of `python3 -m zabbix_api_extract verify` that is not a defect of the description, with the source reason. A key is `<version> <CODE> <api> <path>`, globs allowed. verify fails on a new line and on a stale exception (tools/ZabbixApiExtract/zabbix_api_extract/verify.py).",
+ "exceptions": [
+  {
+   "key": "* COLUMN-MISSING hostinterface.replacehostinterfaces /interfaces/*",
+   "reason": "server-maintained interface columns (available, error, errors_from, disable_until): CHostInterface::checkInput's allow-list (array_flip, 7.0:255, 7.4:254, 8.0:247) refuses them; verify reads array_diff_key allow-lists, not this array_flip one (DOC-X-04)"
+  },
+  {
+   "key": "* FIELD-MISSING action.* /recovery_operations/op*",
+   "reason": "CAction's shared operation writers store opconditions/opinventory when an operation carries them, but recovery operations are validated by strict API_OBJECTS rules that name neither (CAction::getOperationValidationRules(ACTION_RECOVERY_OPERATION), 8.0:2469), so the server refuses them"
+  },
+  {
+   "key": "* FIELD-MISSING action.* /update_operations/op*",
+   "reason": "as recovery operations: update operations' strict rules (CAction::getOperationValidationRules(ACTION_UPDATE_OPERATION), 8.0:2482) name neither opconditions nor opinventory"
+  },
+  {
+   "key": "7.0 FIELD-MISSING map.create /links",
+   "reason": "7.0 stores links it checks by hand (CMap::create, 7.0:1800); its rule names them from 7.4 (CMap.php 7.4:622), which is the since the model records. The client gates only removed fields, so a 7.0 caller sends links"
+  },
+  {
+   "key": "* FIELD-UNFOUNDED host.massadd /interfaces/*",
+   "reason": "host.massadd hands interfaces to API::HostInterface()->massAdd (CHost.php 8.0:865), whose allow-list takes these (CHostInterface.php 8.0:247); verify never follows another API method (overlay extraFields list:hostinterface.create)"
+  },
+  {
+   "key": "7.* FIELD-UNFOUNDED host.update /*",
+   "reason": "CHost::updateForce hands each host to massUpdate as array_diff_key(host, …) plus a rebuilt 'hosts' key (CHost.php 7.0:840-872), which stores the hosts row these columns belong to; verify loses the request through the rebuilt array. 8.0 validates them itself"
+  },
+  {
+   "key": "* INT-ENUM *dashboard.* /display_period",
+   "reason": "a closed set of durations in seconds (10 to 3600), not named defines: an int is the value"
+  },
+  {
+   "key": "* INT-ENUM *dashboard.* /pages/display_period",
+   "reason": "a page's display period: 0 (the dashboard's) or a duration in seconds, not named defines"
+  },
+  {
+   "key": "* INT-ENUM * /authtype",
+   "reason": "one field, two enums by item type: HTTP_AUTH_* for HTTP agent items, ITEM_AUTHTYPE_* for SSH items (API_MULTIPLE by type, CItemGeneral.php 8.0:331); kept an int"
+  },
+  {
+   "key": "* INT-ENUM settings.update /server_check_interval",
+   "reason": "0 or SERVER_CHECK_INTERVAL: an interval in seconds (10), not an enum"
+  },
+  {
+   "key": "* INT-ENUM maintenance.* /timeperiods/every",
+   "reason": "1-5 is the week of the month only for monthly periods; daily and weekly periods take an interval in days or weeks (CMaintenance.php 8.0:362), so every is a number"
+  },
+  {
+   "key": "* LENGTH role.* /rules/*",
+   "reason": "role_rule.value_str grows from 255 (schema.inc.php 7.0:8749, 7.4:8333) to 2048 (8.0:8514); the record carries the newest length and a 7.x server refuses the excess itself"
+  },
+  {
+   "key": "* KIND host.get /selectInheritedTags",
+   "reason": "API_STRINGS_UTF8 of tag fields or 'extend' (CHost.php 7.0:2009): ZabbixOutput is exactly that shape"
+  },
+  {
+   "key": "7.4 KIND template.massupdate /templates/macros",
+   "reason": "as template.massadd (CTemplate.php 7.4:489)"
+  },
+  {
+   "key": "7.0 KIND mediatype.* /parameters",
+   "reason": "a first pass takes parameters as API_OBJECT with API_ALLOW_UNEXPECTED (CMediatype.php 7.0:302,404, a PHP array); the per-type rules validate the list (API_OBJECTS, 7.0:643,671)"
+  },
+  {
+   "key": "8.0 KIND ceprule.* /window/tags",
+   "reason": "a window of no type takes only an empty list (CCepRule.php 8.0:561), every other type a list of tag names when group_by_tags is on (8.0:597): a list of text; verify composes the two passes as one"
+  },
+  {
+   "key": "* KIND-UNTYPED module.* /config",
+   "reason": "a module's configuration is its manifest's free-form object (CModule.php 8.0:138); the API names no fields"
+  },
+  {
+   "key": "* REQUIRED-EXTRA map.create /shapes/type",
+   "reason": "type is API_REQUIRED for every shape map.create is given (CMap.php 8.0:2403); verify reads the shape validation, inside if (array_key_exists('shapes', …)), as conditional"
+  },
+  {
+   "key": "* REQUIRED-EXTRA template.mass* /templates/macros/config/type",
+   "reason": "a macro config's type is required whenever a config is given to a new macro (CTemplate::getMacroConfigValidationRules); verify reads the validation, inside if (array_key_exists('config', …)), as conditional"
+  },
+  {
+   "key": "* REQUIRED-MISSING drule.create /dchecks/type",
+   "reason": "recorded deviation: CDRule::validateDChecks requires type by hand (check_db_fields, 8.0:514); NetworkDiscoveryCheckRequest serves create and update and stays optional, the server refusing a check without type"
+  },
+  {
+   "key": "* REQUIRED-MISSING hostinterface.create /details",
+   "reason": "details are required for SNMP interfaces only (CHostInterface::checkSnmpInput, type == INTERFACE_TYPE_SNMP); optional is right for every other type"
+  },
+  {
+   "key": "* REQUIRED-MISSING hostinterface.create /details/version",
+   "reason": "version is required for SNMP details only, as details are"
+  },
+  {
+   "key": "* REQUIRED-MISSING hostinterface.replacehostinterfaces /interfaces/type",
+   "reason": "recorded deviation: replaceHostInterfaces checks type by hand (check_db_fields); the element record is shared with the other interface lists and stays optional, the server refusing an interface without type"
+  },
+  {
+   "key": "* REQUIRED-MISSING *.get /tags/tag",
+   "reason": "8.0 makes a tag filter's tag API_REQUIRED (CHost.php 8.0:560, CItem.php 8.0:461 …), 7.x does not; a field required on some versions only is not required in the merged model, the server refusing a filter without tag"
+  },
+  {
+   "key": "* REQUIRED-MISSING service.get /problem_tags/tag",
+   "reason": "every .get's tag filter is one ZabbixTagFilter (schema/overlay.json nested), whose tag is optional because host.get and the others take a filter without one on 7.x; service.get's problem_tags require it (CService.php 8.0:104), the server refusing a filter without tag"
+  },
+  {
+   "key": "* REQUIRED-MISSING sla.get /service_tags/tag",
+   "reason": "every .get's tag filter is one ZabbixTagFilter (schema/overlay.json nested), whose tag is optional because host.get and the others take a filter without one on 7.x; sla.get's service_tags require it (CSla.php 8.0:73), the server refusing a filter without tag"
+  },
+  {
+   "key": "8.0 SORT-EXTRA event.get /sortfield",
+   "reason": "event.get sorts by $sortColumns plus rowscount (array_merge, CEvent.php 8.0:103); verify reads $sortColumns alone"
+  },
+  {
+   "key": "* FIELD-MISSING hostinterface.create /interface_ref",
+   "reason": "CHostInterface::checkInput's allow-list (8.0:248) lets the configuration import's own keys through: interface_ref joins an imported interface to its items, and createInterfaces stores neither it nor items; the description leaves both out (overlay.json notFields)"
+  },
+  {
+   "key": "* FIELD-MISSING hostinterface.create /items",
+   "reason": "as /interface_ref: an import key on the same allow-list, stored by no API path"
+  },
+  {
+   "key": "* FIELD-MISSING hostinterface.replacehostinterfaces /interfaces/interface_ref",
+   "reason": "the interfaces go through hostinterface.create's checkInput (CHostInterface.php 7.4:289); as hostinterface.create"
+  },
+  {
+   "key": "* FIELD-MISSING hostinterface.replacehostinterfaces /interfaces/items",
+   "reason": "as hostinterface.replacehostinterfaces /interfaces/interface_ref"
+  },
+  {
+   "key": "* FIELD-MISSING hostinterface.update /interface_ref",
+   "reason": "as hostinterface.create (CHostInterface.php 8.0:248)"
+  },
+  {
+   "key": "* FIELD-MISSING hostinterface.update /items",
+   "reason": "as hostinterface.create (CHostInterface.php 8.0:248)"
+  },
+  {
+   "key": "* OPTION-MISSING hostinterface.get /groupids",
+   "reason": "a $defOptions default of the older get (CHostInterface.php 8.0:64) that no query reads; the description leaves it out (overlay.json notFields)"
+  },
+  {
+   "key": "* OPTION-MISSING itemprototype.get /groupids",
+   "reason": "a $defOptions default (CItemPrototype.php 8.0:78) that no query reads; the description leaves it out (overlay.json notFields)"
+  },
+  {
+   "key": "8.0 KIND hostinterface.* /details/max_repetitions",
+   "reason": "API_INT32 with API_ALLOW_USER_MACRO (CHostInterface.php 8.0:1076) over a text column (interface_snmp.max_repetitions, schema.inc.php 8.0): the value is a number or a user macro, and the record types it by its column, text, which carries both"
+  },
+  {
+   "key": "8.0 KIND hostinterface.* /details/retries",
+   "reason": "as /details/max_repetitions (CHostInterface.php 8.0:1095, interface_snmp.retries)"
+  },
+  {
+   "key": "8.0 FIELD-MISSING discoveryrule*.* /*",
+   "reason": "time_shift, lookback_limit and granularity are the telemetry query's (CItemTypeTelemetryQuery.php 8.0:27); a discovery rule's type is one of SUPPORTED_ITEM_TYPES (CDiscoveryRuleGeneral.php 8.0:35), which has no ITEM_TYPE_TELEMETRY_QUERY, so only their column defaults pass (CItemType.php 8.0:517); verify dispatches CItemGeneral::validateByType (CItemGeneral.php 8.0:331) over every item type class, and the description leaves them out (overlay.json notFields)"
+  }
+ ]
+}

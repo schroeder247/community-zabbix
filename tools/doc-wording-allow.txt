@@ -1,0 +1,4 @@
+# Overlay sentences or clauses of six words or more that tools/check-doc-wording.py lets through although they match
+# Zabbix's documentation: one per line, as the project wrote it (case and punctuation are ignored), then `#` and why
+# the wording cannot reasonably be put another way. Units of five words or fewer need no entry. Keep this list empty
+# unless a reviewer agrees that a unit is a bare fact.

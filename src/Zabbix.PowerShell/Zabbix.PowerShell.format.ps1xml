@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  This Source Code Form is subject to the terms of the Mozilla Public
+  License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+
+  The views of the module's own hand-written output types (connections, sessions, watches, the server protocol's
+  answers), beside the generated Community.Zabbix.format.ps1xml for the API's read records. Hand-written because the types are:
+  a new type here with more than four public properties needs a view here (ZabbixFormatPs1XmlTests,
+  Every_output_type_with_more_than_four_properties_has_a_view).
+-->
+<Configuration>
+  <ViewDefinitions>
+    <View>
+      <Name>ZabbixNetworkDiscoveryCheckRequest.List</Name>
+      <ViewSelectedBy><TypeName>Community.Zabbix.ZabbixNetworkDiscoveryCheckRequest</TypeName></ViewSelectedBy>
+      <ListControl><ListEntries><ListEntry><ListItems>
+        <ListItem><PropertyName>Type</PropertyName></ListItem>
+        <ListItem><PropertyName>Key</PropertyName></ListItem>
+        <ListItem><PropertyName>Ports</PropertyName></ListItem>
+        <ListItem><PropertyName>Unique</PropertyName></ListItem>
+        <ListItem><PropertyName>SnmpCommunity</PropertyName></ListItem>
+        <ListItem><PropertyName>Snmpv3SecurityName</PropertyName></ListItem>
+        <ListItem><PropertyName>Snmpv3SecurityLevel</PropertyName></ListItem>
+        <ListItem><Label>Snmpv3AuthPassphrase</Label><ScriptBlock>if ($null -ne $_.Snmpv3AuthPassphrase) { '********' }</ScriptBlock></ListItem>
+        <ListItem><PropertyName>Snmpv3AuthProtocol</PropertyName></ListItem>
+        <ListItem><Label>Snmpv3PrivPassphrase</Label><ScriptBlock>if ($null -ne $_.Snmpv3PrivPassphrase) { '********' }</ScriptBlock></ListItem>
+        <ListItem><PropertyName>Snmpv3PrivProtocol</PropertyName></ListItem>
+        <ListItem><PropertyName>Snmpv3ContextName</PropertyName></ListItem>
+      </ListItems></ListEntry></ListEntries></ListControl>
+    </View>
+    <View>
+      <Name>ZabbixConnection.Table</Name>
+      <ViewSelectedBy><TypeName>Community.Zabbix.PowerShell.ZabbixConnection</TypeName></ViewSelectedBy>
+      <TableControl>
+        <TableHeaders><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader><Label>Trapper</Label></TableColumnHeader><TableColumnHeader /></TableHeaders>
+        <TableRowEntries><TableRowEntry><TableColumnItems>
+          <TableColumnItem><PropertyName>Name</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>ApiVersion</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Endpoint</PropertyName></TableColumnItem>
+          <TableColumnItem><ScriptBlock>(@($_.Trapper) | ForEach-Object { if ($_) { '{0}:{1}' -f $_.Host, $_.Port } }) -join ', '</ScriptBlock></TableColumnItem>
+          <TableColumnItem><PropertyName>IsClosed</PropertyName></TableColumnItem>
+        </TableColumnItems></TableRowEntry></TableRowEntries>
+      </TableControl>
+    </View>
+    <View>
+      <Name>ServerInfo.Table</Name>
+      <ViewSelectedBy><TypeName>Community.Zabbix.PowerShell.ServerInfo</TypeName></ViewSelectedBy>
+      <TableControl>
+        <TableHeaders><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader><Label>Trapper</Label></TableColumnHeader></TableHeaders>
+        <TableRowEntries><TableRowEntry><TableColumnItems>
+          <TableColumnItem><PropertyName>Name</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>ApiVersion</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Endpoint</PropertyName></TableColumnItem>
+          <TableColumnItem><ScriptBlock>(@($_.Trapper) | ForEach-Object { if ($_) { '{0}:{1}' -f $_.Host, $_.Port } }) -join ', '</ScriptBlock></TableColumnItem>
+        </TableColumnItems></TableRowEntry></TableRowEntries>
+      </TableControl>
+    </View>
+    <View>
+      <Name>TrapperEndpoint.Table</Name>
+      <ViewSelectedBy><TypeName>Community.Zabbix.PowerShell.TrapperEndpoint</TypeName></ViewSelectedBy>
+      <TableControl>
+        <TableHeaders><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader><Label>Nodes</Label></TableColumnHeader></TableHeaders>
+        <TableRowEntries><TableRowEntry><TableColumnItems>
+          <TableColumnItem><PropertyName>HostName</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>HostId</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Address</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Port</PropertyName></TableColumnItem>
+          <TableColumnItem><ScriptBlock>$_.Nodes -join ', '</ScriptBlock></TableColumnItem>
+        </TableColumnItems></TableRowEntry></TableRowEntries>
+      </TableControl>
+    </View>
+    <View>
+      <Name>ScriptResult.Table</Name>
+      <ViewSelectedBy><TypeName>Community.Zabbix.PowerShell.ScriptResult</TypeName></ViewSelectedBy>
+      <TableControl>
+        <TableHeaders><TableColumnHeader /><TableColumnHeader /></TableHeaders>
+        <TableRowEntries><TableRowEntry><Wrap /><TableColumnItems>
+          <TableColumnItem><PropertyName>response</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>value</PropertyName></TableColumnItem>
+        </TableColumnItems></TableRowEntry></TableRowEntries>
+      </TableControl>
+    </View>
+    <View>
+      <Name>ZabbixContext.List</Name>
+      <ViewSelectedBy><TypeName>Community.Zabbix.PowerShell.ZabbixContext</TypeName></ViewSelectedBy>
+      <ListControl><ListEntries><ListEntry><ListItems>
+        <ListItem><Label>Current</Label><ScriptBlock>$_.Current.Name</ScriptBlock></ListItem>
+        <ListItem><Label>Servers</Label><ScriptBlock>$_.Servers.Keys -join ', '</ScriptBlock></ListItem>
+        <ListItem><Label>Sessions</Label><PropertyName>SessionCount</PropertyName></ListItem>
+        <ListItem><PropertyName>ExportsTelemetry</PropertyName></ListItem>
+      </ListItems></ListEntry></ListEntries></ListControl>
+    </View>
+    <View>
+      <Name>ZabbixWatch.Table</Name>
+      <ViewSelectedBy><TypeName>Community.Zabbix.PowerShell.Commands.ZabbixWatch</TypeName></ViewSelectedBy>
+      <TableControl>
+        <TableHeaders><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /></TableHeaders>
+        <TableRowEntries><TableRowEntry><TableColumnItems>
+          <TableColumnItem><PropertyName>Name</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Started</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>SucceededPolls</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>FailedPolls</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Dropped</PropertyName></TableColumnItem>
+        </TableColumnItems></TableRowEntry></TableRowEntries>
+      </TableControl>
+    </View>
+    <View>
+      <Name>ZabbixSessionLogEntry.Table</Name>
+      <ViewSelectedBy><TypeName>Community.Zabbix.PowerShell.Diagnostics.ZabbixSessionLogEntry</TypeName></ViewSelectedBy>
+      <TableControl>
+        <TableHeaders><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /></TableHeaders>
+        <TableRowEntries><TableRowEntry><TableColumnItems>
+          <TableColumnItem><PropertyName>Timestamp</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Level</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Category</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Message</PropertyName></TableColumnItem>
+        </TableColumnItems></TableRowEntry></TableRowEntries>
+      </TableControl>
+    </View>
+    <View>
+      <Name>ZabbixSenderResponse.Table</Name>
+      <ViewSelectedBy><TypeName>Community.Zabbix.ZabbixSenderResponse</TypeName></ViewSelectedBy>
+      <TableControl>
+        <TableHeaders><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /></TableHeaders>
+        <TableRowEntries><TableRowEntry><TableColumnItems>
+          <TableColumnItem><PropertyName>Processed</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Failed</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Total</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>TimeSpent</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>HasFailures</PropertyName></TableColumnItem>
+        </TableColumnItems></TableRowEntry></TableRowEntries>
+      </TableControl>
+    </View>
+    <View>
+      <Name>ZabbixQueueDelays.Table</Name>
+      <ViewSelectedBy><TypeName>Community.Zabbix.ZabbixQueueDelays</TypeName></ViewSelectedBy>
+      <TableControl>
+        <TableHeaders><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /></TableHeaders>
+        <TableRowEntries><TableRowEntry><TableColumnItems>
+          <TableColumnItem><PropertyName>ItemType</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>ProxyId</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Delay5</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Delay10</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Delay30</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Delay60</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Delay300</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Delay600</PropertyName></TableColumnItem>
+        </TableColumnItems></TableRowEntry></TableRowEntries>
+      </TableControl>
+    </View>
+    <View>
+      <Name>ZabbixConfigurationTestResult.Table</Name>
+      <ViewSelectedBy><TypeName>Community.Zabbix.PowerShell.Commands.ZabbixConfigurationTestResult</TypeName></ViewSelectedBy>
+      <TableControl>
+        <TableHeaders><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader><Label>Issues</Label></TableColumnHeader></TableHeaders>
+        <TableRowEntries><TableRowEntry><TableColumnItems>
+          <TableColumnItem><PropertyName>IsValid</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Source</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Format</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>PlaintextSecretCount</PropertyName></TableColumnItem>
+          <TableColumnItem><ScriptBlock>@($_.Issues).Count</ScriptBlock></TableColumnItem>
+        </TableColumnItems></TableRowEntry></TableRowEntries>
+      </TableControl>
+    </View>
+    <View>
+      <Name>ZabbixValue.Table</Name>
+      <ViewSelectedBy><TypeName>Community.Zabbix.ZabbixValue</TypeName></ViewSelectedBy>
+      <TableControl>
+        <TableHeaders><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader><Label>Time</Label></TableColumnHeader><TableColumnHeader /></TableHeaders>
+        <TableRowEntries><TableRowEntry><TableColumnItems>
+          <TableColumnItem><PropertyName>Host</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Key</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Value</PropertyName></TableColumnItem>
+          <TableColumnItem><ScriptBlock>if ($_.Time.ToUnixTimeSeconds() -gt 0) { $_.Time.LocalDateTime }</ScriptBlock></TableColumnItem>
+          <TableColumnItem><PropertyName>IsSupported</PropertyName></TableColumnItem>
+        </TableColumnItems></TableRowEntry></TableRowEntries>
+      </TableControl>
+    </View>
+  </ViewDefinitions>
+</Configuration>

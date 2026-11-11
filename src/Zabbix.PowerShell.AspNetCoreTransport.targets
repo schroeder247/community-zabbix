@@ -1,0 +1,55 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+
+The connection layer the listeners run on (Zabbix.Proxy: passive agent, proxy, trapper), carried in the module folder of
+every module that starts a listener (Community.Zabbix.Agent: Start-ZbxPassiveAgent; Community.Zabbix.Proxy:
+Start-ZbxPassiveProxy) because pwsh has no ASP.NET Core shared framework: Kestrel's socket transport and the three
+assemblies it binds to. They are the shared framework's own files, taken from its runtime packs (NuGet packages, what a
+self-contained publish copies) at the version of the SDK's framework reference. In pwsh 7.6.6, without them
+Zabbix.Proxy's listener types fail to load (Microsoft.AspNetCore.Connections.Abstractions 10.0.0.0 not found). The
+module Community.Zabbix references none of this.
+
+A runtime pack's assemblies are ReadyToRun images compiled for that pack's operating system and processor, and the
+runtime refuses one built for another (BadImageFormatException: linux-x64's files do not load on osx-arm64 or win-x64).
+The module folder therefore carries one copy per platform pwsh 7.6 ships for, at runtimes/<platform>/lib/net10.0/ (the
+NuGet layout for a platform's assets), and the module's import answers each reference from the folder of the platform it
+runs on (ZabbixModulePlatformAssemblies). Alpine's pwsh (linux-musl-x64) runs the linux-x64 copy: the image format
+names the operating system and processor only, not the C library.
+-->
+<Project>
+  <PropertyGroup>
+    <!-- The version Directory.Packages.props pins with the other 10.0.x packages, so the files the module carries are a
+         pinned version and do not change with the building SDK. -->
+    <AspNetCoreRuntimePackVersion>$(ZabbixAspNetCoreRuntimePackVersion)</AspNetCoreRuntimePackVersion>
+    <!-- NuGet writes NuGetPackageRoot as NUGET_PACKAGES spells it, with or without the closing slash. -->
+    <ZabbixPackageRoot>$([MSBuild]::EnsureTrailingSlash('$(NuGetPackageRoot)'))</ZabbixPackageRoot>
+    <!-- The compiler reads only metadata, the same in every platform's copy: one of them serves as the reference. -->
+    <AspNetCoreRuntimePack>$(ZabbixPackageRoot)microsoft.aspnetcore.app.runtime.linux-x64/$(AspNetCoreRuntimePackVersion)/runtimes/linux-x64/lib/net10.0/</AspNetCoreRuntimePack>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- The platforms pwsh 7.6 is released for (Windows, Linux and macOS; x64, x86 and Arm), named as their runtime packs
+         and as ZabbixModulePlatformAssemblies.Platform names the running one. -->
+    <ZabbixListenerPlatform Include="win-x64;win-x86;win-arm64;linux-x64;linux-arm64;linux-arm;osx-x64;osx-arm64" />
+    <ZabbixListenerAssembly Include="Microsoft.AspNetCore.Connections.Abstractions;Microsoft.Extensions.Features;Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets;Microsoft.AspNetCore.Hosting.Abstractions" />
+    <PackageDownload Include="@(ZabbixListenerPlatform->'Microsoft.AspNetCore.App.Runtime.%(Identity)')" Version="[$(AspNetCoreRuntimePackVersion)]" />
+    <!-- Zabbix.Proxy's public listener types (ZabbixListener, ZabbixPassiveAgent, ZabbixPassiveProxy) name the
+         connection abstractions (IConnectionListenerFactory) in their signatures, so the compiler needs these assemblies
+         for the session cmdlets (Start-ZbxPassiveAgent, Start-ZbxPassiveProxy), not only copied for run time: referenced
+         with Private="false", so the reference copies nothing beside the module assembly. -->
+    <Reference Include="Microsoft.AspNetCore.Connections.Abstractions" HintPath="$(AspNetCoreRuntimePack)Microsoft.AspNetCore.Connections.Abstractions.dll" Private="false" />
+    <Reference Include="Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets" HintPath="$(AspNetCoreRuntimePack)Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.dll" Private="false" />
+    <Reference Include="Microsoft.AspNetCore.Hosting.Abstractions" HintPath="$(AspNetCoreRuntimePack)Microsoft.AspNetCore.Hosting.Abstractions.dll" Private="false" />
+  </ItemGroup>
+
+  <!-- Every platform's copy of every assembly, as a file the output copy carries to runtimes/<platform>/lib/net10.0/: in a
+       target, because the list is the two item lists' product (batching over the platforms), joined to the None items
+       before the project's own copy reads them and before a referencing project asks for them. -->
+  <Target Name="ZabbixListenerTransportFiles" BeforeTargets="_GetCopyToOutputDirectoryItemsFromThisProject">
+    <ItemGroup>
+      <_ZabbixListenerFile Include="@(ZabbixListenerAssembly)" Platform="%(ZabbixListenerPlatform.Identity)" />
+      <_NoneWithTargetPath Include="$(ZabbixPackageRoot)microsoft.aspnetcore.app.runtime.%(_ZabbixListenerFile.Platform)/$(AspNetCoreRuntimePackVersion)/runtimes/%(_ZabbixListenerFile.Platform)/lib/net10.0/%(_ZabbixListenerFile.Identity).dll"
+                           TargetPath="runtimes/%(_ZabbixListenerFile.Platform)/lib/net10.0/%(_ZabbixListenerFile.Identity).dll" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+  </Target>
+</Project>

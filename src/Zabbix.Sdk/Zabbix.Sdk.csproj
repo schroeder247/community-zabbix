@@ -1,0 +1,81 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The SDK: the root (ZabbixClient), the JSON-RPC transport over the platform's own HTTP pipeline, the generated
+    clients, the pull tree and its watcher, redaction, and the in-memory store and the store builder. The framed-TCP
+    wire is Zabbix.Wire and the hosts are Zabbix.Agent (docs/adr/0006-protocol-split.md), so an application that only
+    calls the API takes neither a TLS stack nor the hosting stack.
+  -->
+  <PropertyGroup>
+    <RootNamespace>Community.Zabbix</RootNamespace>
+    <AssemblyName>Community.Zabbix.Sdk</AssemblyName>
+    <!-- Package id = `Community.` + assembly name in every library (docs/adr/0002-package-ids.md, amendment): the
+         packages are community software for Zabbix, and the assembly and namespace keep the `Zabbix` a developer
+         expects. -->
+    <PackageId>Community.Zabbix.Sdk</PackageId>
+    <Description>The Community Zabbix SDK: the JSON-RPC API over the platform's HTTP pipeline with generated clients for Zabbix 7.0, 7.4 and 8.0, and the host/item tree and its watcher.</Description>
+    <PackageTags>zabbix;monitoring;json-rpc;api;opentelemetry</PackageTags>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Zabbix.Abstractions/Zabbix.Abstractions.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <!-- The HTTP chain is the platform's: IHttpClientFactory, the DelegatingHandler pipeline, and the standard
+         resilience handler (rate limiter → total timeout → retry → circuit breaker → attempt timeout). Nothing of
+         ours mimics them. -->
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
+    <!-- Redaction of what the taxonomy marks Secret, registered by AddZabbix so a host that enables redaction has it. -->
+    <PackageReference Include="Microsoft.Extensions.Compliance.Redaction" />
+    <PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Telemetry" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- The API clients are generated at build time from the checked-in description;
+         the records they exchange come from Zabbix.Api, and the JSON context is written into obj/ before CoreCompile
+         by the ZabbixApiJsonContext target below. -->
+    <ProjectReference Include="../Zabbix.Api/Zabbix.Api.csproj" />
+    <ProjectReference Include="../Zabbix.Generator/Zabbix.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <AdditionalFiles Include="../../schema/zabbix-api.json" ZabbixEmit="Clients" />
+    <!-- Built first, never referenced: the build step below runs it. -->
+    <ProjectReference Include="../../tools/Zabbix.Generator.Context/Zabbix.Generator.Context.csproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" Private="false" />
+    <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="ZabbixEmit" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- The test projects only: no library builds on the API client, and the PowerShell modules program against its
+         public API, as an application does (ModulePublicApiTests). -->
+    <InternalsVisibleTo Include="Zabbix.Tests" />
+    <InternalsVisibleTo Include="Zabbix.PowerShell.Tests" />
+  </ItemGroup>
+  <!--
+    The JSON context: System.Text.Json's generator must see ZabbixApiJson as real source,
+    and one generator cannot see another's output, so the context is written from the description before the compiler runs,
+    by the same emitter the source generator uses, into $(IntermediateOutputPath) — never into the source tree
+    (docs/adr/0004-conventions.md; CI's clean-tree gate). The path is set inside the target: the SDK defines
+    IntermediateOutputPath after this body is evaluated. The design-time build (dotnet format, docfx, the IDE) runs the target
+    too, since it runs before CoreCompile.
+  -->
+  <PropertyGroup>
+    <ZabbixApiDescription>$(MSBuildThisFileDirectory)../../schema/zabbix-api.json</ZabbixApiDescription>
+  </PropertyGroup>
+  <Target Name="ZabbixApiJsonContext" BeforeTargets="CoreCompile" DependsOnTargets="ResolveProjectReferences">
+    <PropertyGroup>
+      <ZabbixApiJsonContext>$(MSBuildProjectDirectory)/$(IntermediateOutputPath)ZabbixApiJson.g.cs</ZabbixApiJsonContext>
+    </PropertyGroup>
+    <MSBuild Projects="../../tools/Zabbix.Generator.Context/Zabbix.Generator.Context.csproj" Targets="GetTargetPath" Properties="Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" ItemName="_ZabbixContextTool" />
+    </MSBuild>
+    <Exec Command="&quot;$(DOTNET_HOST_PATH)&quot; &quot;@(_ZabbixContextTool)&quot; &quot;$(ZabbixApiDescription)&quot; &quot;$(ZabbixApiJsonContext)&quot;" />
+    <ItemGroup>
+      <Compile Remove="$(ZabbixApiJsonContext)" />
+      <Compile Include="$(ZabbixApiJsonContext)" />
+      <FileWrites Include="$(ZabbixApiJsonContext)" />
+    </ItemGroup>
+  </Target>
+</Project>

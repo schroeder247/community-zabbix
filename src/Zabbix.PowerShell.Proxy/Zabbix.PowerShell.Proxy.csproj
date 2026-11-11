@@ -1,0 +1,26 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The module Community.Zabbix.Proxy (docs/adr/0003-powershell-module-split.md): the active and passive proxy sessions, the
+    proxy protocol's builders, and the connector stream reader, over the SDK's Zabbix.Proxy. It requires the module Community.Zabbix
+    (RequiredModules in Community.Zabbix.Proxy.psd1) and builds on its infrastructure through InternalsVisibleTo.
+  -->
+  <PropertyGroup>
+    <RootNamespace>Community.Zabbix.PowerShell</RootNamespace>
+    <AssemblyName>Community.Zabbix.PowerShell.Proxy</AssemblyName>
+    <Description>Zabbix PowerShell module Community.Zabbix.Proxy: proxy sessions, proxy protocol builders and the connector stream.</Description>
+    <ZabbixModuleName>Community.Zabbix.Proxy</ZabbixModuleName>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Zabbix.PowerShell.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Zabbix.PowerShell/Zabbix.PowerShell.csproj" />
+    <ProjectReference Include="../Zabbix.Proxy/Zabbix.Proxy.csproj" />
+  </ItemGroup>
+  <Import Project="../Zabbix.PowerShell.AspNetCoreTransport.targets" />
+  <Import Project="../Zabbix.PowerShell.Module.targets" />
+</Project>

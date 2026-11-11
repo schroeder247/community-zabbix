@@ -1,0 +1,149 @@
+TOPIC
+    about_Community.Zabbix
+
+SHORT DESCRIPTION
+    The Community.Zabbix module: manage a Zabbix server (7.0, 7.4 or 8.0)
+    from PowerShell through its JSON-RPC API and send values
+    to it; its sibling modules Community.Zabbix.Agent and Community.Zabbix.Proxy
+    run agents and proxies.
+
+LONG DESCRIPTION
+    The module is a PowerShell surface over the Community Zabbix SDK, the .NET
+    part of the project. Every API object (host, host group, item, trigger,
+    template, action, ...) has Get-, New-, Set- and Remove- cmdlets named
+    Get-Zbx<Object>; the rest of the module covers what is not plain CRUD:
+    connecting, sending values (the sender protocol), reading history,
+    watching items, and configuration export and import.
+
+    Three modules
+        Community.Zabbix        the API, the sender and getter, watches,
+                                configuration documents (this module)
+        Community.Zabbix.Agent  active and passive agent sessions, their
+                                item handlers, agent-host provisioning
+        Community.Zabbix.Proxy  active and passive proxy sessions, the
+                                proxy protocol's builders, the connector
+                                stream
+
+    Community.Zabbix.Agent and Community.Zabbix.Proxy require Community.Zabbix: importing either imports
+    it first, and they share its connections and sessions. Install only
+    what you use; the agent and proxy modules carry the hosting and
+    listener libraries the module Community.Zabbix does not.
+
+            Install-PSResource Community.Zabbix, Community.Zabbix.Agent
+            Import-Module Community.Zabbix.Agent
+
+    Connecting
+        Connect-ZbxServer adds a server to the session and makes it the
+        current one. Every other cmdlet talks to the current server, or to
+        the one named by its -Connection parameter. See
+        about_Community.Zabbix_Sessions.
+
+            $token = Read-Host -AsSecureString 'API token'
+            Connect-ZbxServer -Uri https://zabbix.example/ -ApiToken $token
+
+        Secrets are accepted only as a SecureString (-ApiToken) or a
+        PSCredential (-Credential), never as a plain string.
+
+    Reading objects
+        A Get- cmdlet selects by -Id, by -Name (a * makes it a search), by
+        -Filter (the typed .get parameters of that object), or returns all
+        of them (up to -Limit). The -Select* switches add related objects;
+        -CountOutput returns the number of matches instead of the objects.
+
+            Get-ZbxHost -Name 'web-*' -SelectInterfaces
+            Get-ZbxItem -Host 'web-01' -Search @{ key_ = 'system.cpu' }
+
+        Results are typed records (Community.Zabbix.ZabbixHost,
+        Community.Zabbix.ZabbixItem, ...). Their property names are the
+        SDK's: a host's technical name is TechnicalName (the API's "host"
+        field) and its visible name is VisibleName (the API's "name").
+        Get-Member lists them. A field the server sends that the record does
+        not model still reads as a property (see
+        about_Community.Zabbix_Properties).
+
+    Changing objects
+        New- creates and writes the created object. Set- and Remove- take
+        the objects to change from the pipeline or -InputObject, as ids,
+        names or objects; Set- writes nothing unless -PassThru is given:
+
+            New-ZbxHostGroup -Name 'Databases'
+            Get-ZbxHost -Name 'web-*' | Set-ZbxHost -Description 'web tier'
+            Get-ZbxHost -Name 'web-02' | Remove-ZbxHost
+
+        New- and Set- have ConfirmImpact Medium (no prompt by default;
+        -WhatIf previews, -Confirm asks). Remove- has ConfirmImpact High:
+        PowerShell asks before deleting unless -Force or -Confirm:$false is
+        given (-Force never overrides -WhatIf or an explicit -Confirm). A
+        name that matches no object, or more than one, is reported as an
+        error and left out; a name never picks one of several objects. A
+        name given for a field (-Group, -Template) that matches nothing
+        stops that object's change: the field replaces the object's list,
+        so it is sent whole or not at all.
+
+        Parameters that take an object type accept a hashtable with the
+        API's field names; -AdditionalProperty on every generated New- and
+        Set- (not the builders) adds any field the cmdlet has no parameter
+        for. See about_Community.Zabbix_Properties.
+
+    Errors
+        A failed API call is a non-terminating error whose
+        FullyQualifiedErrorId starts with ZabbixApi.<Kind> (for example
+        ZabbixApi.Validation, ZabbixApi.PermissionOrNotFound,
+        ZabbixApi.SessionTerminated, ZabbixApi.Transient),
+        so a script can branch on the kind without parsing the message:
+
+            try { New-ZbxHostGroup -Name 'Linux servers' -ErrorAction Stop }
+            catch { if ($_.FullyQualifiedErrorId -like 'ZabbixApi.Validation*') { 'exists' } }
+
+        A call without a connection fails with ZabbixNotConnected. A name
+        that resolves to nothing fails with ZabbixReferenceNotFound.
+
+    Versions
+        The module knows which fields and methods each server version has.
+        A parameter the connected server's version does not support fails
+        before the call is sent, naming the version it needs; on 8.0 the
+        removed *.massupdate calls are emulated with get and update calls
+        (not atomic).
+
+    Logging and telemetry
+        The SDK's log reaches the usual streams: -Verbose shows trace
+        records, -Debug debug records, warnings go to the warning stream.
+        When OTEL_EXPORTER_OTLP_ENDPOINT is set before Import-Module, the
+        module also exports its logs, traces and metrics over OTLP.
+
+EXAMPLES
+    Connect, list the current problems, and disable the Linux servers:
+
+        Connect-ZbxServer -Uri https://zabbix.example/ -ApiToken $token
+        Get-ZbxProblem | Select-Object -ExpandProperty Name
+        Get-ZbxHost -Group 'Linux servers' | Disable-ZbxHost -Confirm:$false
+
+    Send a value to a trapper item and read it back:
+
+        Send-ZbxData -HostName 'web-01' -Key 'app.requests' -Value 42
+        $item = Get-ZbxItem -Host 'web-01' -Filter @{ filter = @{ key_ = 'app.requests' } }
+        Get-ZbxHistory -Filter @{ itemids = $item.ItemId; history = 3; limit = 1;
+                                  sortfield = 'clock'; sortorder = 'DESC' }
+
+NOTE
+    Get-Help <cmdlet> -Examples shows worked examples for each cmdlet;
+    Get-Help <cmdlet> -Full shows every parameter set, the parameter types
+    and which parameters take pipeline input.
+
+DISCLAIMER
+    Provided "as is", without warranty of any kind: use at your own risk.
+    The cmdlets create, change and delete objects on the server they are
+    connected to: try a script against a lab server first. See the LICENSE
+    (Mozilla Public License 2.0).
+
+TRADEMARK
+    This project is not affiliated with, endorsed by or sponsored by Zabbix
+    LLC. Zabbix is a registered trademark of Zabbix LLC.
+
+SEE ALSO
+    about_Community.Zabbix_Sessions
+    about_Community.Zabbix_Properties
+    about_Community.Zabbix_Pipeline
+    Connect-ZbxServer
+    Get-ZbxHost
+    Invoke-ZbxApi

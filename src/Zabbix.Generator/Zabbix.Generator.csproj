@@ -1,0 +1,58 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The source generator: the API description (schema/zabbix-api.json, the 7.0, 7.4 and 8.0 descriptions merged) becomes
+    the enums, the records, the parameters, the requests, one client per entity, the ZabbixApi aggregate and the JSON
+    context — at build time, in the consuming assembly. Nothing about an entity is written by hand twice, and
+    nothing is reflected over at run time. It targets netstandard2.0, the Roslyn convention for an analyzer (it loads in any
+    compiler host), with the compiler's marker types defined internally (Polyfills/) and System.Text.Json as a package.
+    Consumed by ProjectReference, never packed (the guard below keeps a pack honest if that changes).
+  -->
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Community.Zabbix.Generator</RootNamespace>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IsAotCompatible>false</IsAotCompatible>
+    <EnablePackageValidation>false</EnablePackageValidation>
+  </PropertyGroup>
+  <!-- AnalyzerReleases.Shipped.md/Unshipped.md are AdditionalFiles already: Microsoft.CodeAnalysis.Analyzers'
+       buildTransitive targets add both when they exist (its workaround for dotnet/roslyn#4655). Listing them here too
+       would duplicate the items, and MSBuildWorkspace (docfx metadata, dotnet format) reports "Duplicate source file",
+       which fails `docfx docfx.json` in strict mode. For the same reason
+       Directory.Build.targets declares PublicAPI.*.txt only by their presence on disk. -->
+  <ItemGroup>
+    <!-- The lowest compiler the generator runs in (Roslyn's convention: reference the oldest Microsoft.CodeAnalysis that has
+         what the generator uses). Its API surface is 4.0's (IIncrementalGenerator, AdditionalTextsProvider,
+         AnalyzerConfigOptionsProvider, RegisterSourceOutput); 4.9 is the floor because collection expressions over
+         ImmutableArray<T> need the System.Collections.Immutable 8 it brings (4.0.1, 4.4.0 and 4.8.0 fail with
+         CS9210). The tests keep the central, newer version: they parse this repository's sources. -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" VersionOverride="4.9.2" PrivateAssets="all" />
+    <!-- The description is read with System.Text.Json: in the box on the compiler's own runtime (the .NET SDK's csc,
+         the only host this ProjectReference-only generator runs in), a package on netstandard2.0. Pinned to the 8.0 line,
+         not the central 10.0: the generator binds to the System.Text.Json the host loads, and an IDE's compiler host may
+         run on .NET 8 or 9, whose in-box 8.0/9.0 cannot satisfy a reference to 10.0.0.0 (the generator would fail to load
+         there). GeneratedApiTests pins the referenced version. Not flowed to the generator's net10.0 consumers (HelpGen,
+         the context tool, the tests), which have it in the box. -->
+    <PackageReference Include="System.Text.Json" VersionOverride="8.0.6" PrivateAssets="all" />
+    <!-- The words a field's C# name is made of (ZabbixNames): reviewed input beside the description, read from the
+         generator's own assembly so every reader of the description (both generators, HelpGen, the tests) names alike. -->
+    <EmbeddedResource Include="../../schema/words.json" LogicalName="Zabbix.Generator.words.json" />
+  </ItemGroup>
+  <!-- The emitters and the description model are internal: the generators are the assembly's only public types. The
+       tests, the JSON-context tool and HelpGen read the description and call the emitters as the generators do. -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="Zabbix.Tests" />
+    <InternalsVisibleTo Include="Zabbix.PowerShell.Tests" />
+    <InternalsVisibleTo Include="Zabbix.Generator.Context" />
+    <InternalsVisibleTo Include="Zabbix.PowerShell.HelpGen" />
+  </ItemGroup>
+  <Target Name="RefusesToShipANonPortableAnalyzer" BeforeTargets="GenerateNuspec" Condition="'$(IsPackable)' == 'true' AND '$(TargetFramework)' != 'netstandard2.0'">
+    <Error Text="Zabbix.Generator is packable but targets $(TargetFramework); a shipped analyzer must target netstandard2.0." />
+  </Target>
+</Project>

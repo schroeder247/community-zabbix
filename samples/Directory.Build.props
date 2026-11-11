@@ -1,0 +1,16 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+-->
+<!--
+The samples are applications a reader copies from: they take the solution's props directly, skip what only a package needs,
+and leave undocumented what only they use. .editorconfig's samples section turns off the rules that are for libraries.
+-->
+<Project>
+  <Import Project="../Directory.Build.props" />
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsPublicApiTracked>false</IsPublicApiTracked>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+</Project>

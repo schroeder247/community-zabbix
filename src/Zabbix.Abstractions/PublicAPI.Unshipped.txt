@@ -1,0 +1,685 @@
+#nullable enable
+Community.Zabbix.Diagnostics.ZabbixTelemetryNames
+Community.Zabbix.IZabbixAdditionalFields
+Community.Zabbix.IZabbixAdditionalFields.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
+Community.Zabbix.IZabbixGetParameters
+Community.Zabbix.IZabbixGetParameters.CountOutput.get -> bool?
+Community.Zabbix.IZabbixGetParameters.CountOutput.set -> void
+Community.Zabbix.IZabbixGetParameters.ExcludeSearch.get -> bool?
+Community.Zabbix.IZabbixGetParameters.ExcludeSearch.set -> void
+Community.Zabbix.IZabbixGetParameters.Filter.get -> Community.Zabbix.ZabbixGetConditions!
+Community.Zabbix.IZabbixGetParameters.Limit.get -> int?
+Community.Zabbix.IZabbixGetParameters.Limit.set -> void
+Community.Zabbix.IZabbixGetParameters.Output.get -> Community.Zabbix.ZabbixOutput?
+Community.Zabbix.IZabbixGetParameters.Output.set -> void
+Community.Zabbix.IZabbixGetParameters.Search.get -> Community.Zabbix.ZabbixGetConditions!
+Community.Zabbix.IZabbixGetParameters.SearchByAny.get -> bool?
+Community.Zabbix.IZabbixGetParameters.SearchByAny.set -> void
+Community.Zabbix.IZabbixGetParameters.SearchWildcardsEnabled.get -> bool?
+Community.Zabbix.IZabbixGetParameters.SearchWildcardsEnabled.set -> void
+Community.Zabbix.IZabbixGetParameters.SortField.get -> System.Collections.Generic.IReadOnlyList<string!>?
+Community.Zabbix.IZabbixGetParameters.SortField.set -> void
+Community.Zabbix.IZabbixGetParameters.SortOrder.get -> System.Collections.Generic.IReadOnlyList<System.ComponentModel.ListSortDirection>?
+Community.Zabbix.IZabbixGetParameters.SortOrder.set -> void
+Community.Zabbix.IZabbixGetParameters.StartSearch.get -> bool?
+Community.Zabbix.IZabbixGetParameters.StartSearch.set -> void
+Community.Zabbix.IZabbixItemRegistry
+Community.Zabbix.IZabbixItemRegistry.Register(System.Action<Community.Zabbix.IZabbixItemsBuilder!>! configure) -> Community.Zabbix.IZabbixItemRegistry!
+Community.Zabbix.IZabbixItemsBuilder
+Community.Zabbix.IZabbixItemsBuilder.Name.get -> string!
+Community.Zabbix.IZabbixItemsBuilder.Services.get -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+Community.Zabbix.IZabbixTransport
+Community.Zabbix.IZabbixTransport.SendAsync<TParameters, TResult>(string! method, TParameters parameters, System.Text.Json.Serialization.Metadata.JsonTypeInfo<TParameters>! parametersInfo, System.Text.Json.Serialization.Metadata.JsonTypeInfo<TResult>! resultInfo, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<TResult>!
+Community.Zabbix.IZabbixTransport.SendAsync<TParameters>(string! method, TParameters parameters, System.Text.Json.Serialization.Metadata.JsonTypeInfo<TParameters>! parametersInfo, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
+Community.Zabbix.ZabbixAgentAnswer
+Community.Zabbix.ZabbixAgentAnswer.<Clone>$() -> Community.Zabbix.ZabbixAgentAnswer!
+Community.Zabbix.ZabbixAgentAnswer.Deconstruct(out Community.Zabbix.ZabbixItemKey Key, out string? Value, out string? Error) -> void
+Community.Zabbix.ZabbixAgentAnswer.Equals(Community.Zabbix.ZabbixAgentAnswer? other) -> bool
+Community.Zabbix.ZabbixAgentAnswer.Error.get -> string?
+Community.Zabbix.ZabbixAgentAnswer.Error.init -> void
+Community.Zabbix.ZabbixAgentAnswer.IsSupported.get -> bool
+Community.Zabbix.ZabbixAgentAnswer.Key.get -> Community.Zabbix.ZabbixItemKey
+Community.Zabbix.ZabbixAgentAnswer.Key.init -> void
+Community.Zabbix.ZabbixAgentAnswer.Value.get -> string?
+Community.Zabbix.ZabbixAgentAnswer.Value.init -> void
+Community.Zabbix.ZabbixAgentAnswer.ZabbixAgentAnswer(Community.Zabbix.ZabbixItemKey Key, string? Value, string? Error) -> void
+Community.Zabbix.ZabbixApiErrorKind
+Community.Zabbix.ZabbixApiErrorKind.AuthorizationHeaderRefused = 9 -> Community.Zabbix.ZabbixApiErrorKind
+Community.Zabbix.ZabbixApiErrorKind.Database = 11 -> Community.Zabbix.ZabbixApiErrorKind
+Community.Zabbix.ZabbixApiErrorKind.LoginFailed = 5 -> Community.Zabbix.ZabbixApiErrorKind
+Community.Zabbix.ZabbixApiErrorKind.MethodNotFound = 8 -> Community.Zabbix.ZabbixApiErrorKind
+Community.Zabbix.ZabbixApiErrorKind.NotAuthorized = 2 -> Community.Zabbix.ZabbixApiErrorKind
+Community.Zabbix.ZabbixApiErrorKind.Permission = 6 -> Community.Zabbix.ZabbixApiErrorKind
+Community.Zabbix.ZabbixApiErrorKind.PermissionOrNotFound = 7 -> Community.Zabbix.ZabbixApiErrorKind
+Community.Zabbix.ZabbixApiErrorKind.SessionTerminated = 3 -> Community.Zabbix.ZabbixApiErrorKind
+Community.Zabbix.ZabbixApiErrorKind.TokenExpired = 4 -> Community.Zabbix.ZabbixApiErrorKind
+Community.Zabbix.ZabbixApiErrorKind.Transient = 10 -> Community.Zabbix.ZabbixApiErrorKind
+Community.Zabbix.ZabbixApiErrorKind.Unknown = 0 -> Community.Zabbix.ZabbixApiErrorKind
+Community.Zabbix.ZabbixApiErrorKind.Validation = 1 -> Community.Zabbix.ZabbixApiErrorKind
+Community.Zabbix.ZabbixApiException
+Community.Zabbix.ZabbixApiException.Code.get -> int
+Community.Zabbix.ZabbixApiException.Detail.get -> string?
+Community.Zabbix.ZabbixApiException.IsTransient.get -> bool
+Community.Zabbix.ZabbixApiException.Kind.get -> Community.Zabbix.ZabbixApiErrorKind
+Community.Zabbix.ZabbixApiException.Method.get -> string?
+Community.Zabbix.ZabbixApiException.ServerMessage.get -> string?
+Community.Zabbix.ZabbixApiException.ZabbixApiException() -> void
+Community.Zabbix.ZabbixApiException.ZabbixApiException(int code, string! message, string? detail, string? method) -> void
+Community.Zabbix.ZabbixApiException.ZabbixApiException(int code, string! message, string? detail, string? method, System.Exception? innerException) -> void
+Community.Zabbix.ZabbixApiException.ZabbixApiException(string! message) -> void
+Community.Zabbix.ZabbixApiException.ZabbixApiException(string! message, System.Exception! innerException) -> void
+Community.Zabbix.ZabbixApiTokenCredential
+Community.Zabbix.ZabbixApiTokenCredential.ZabbixApiTokenCredential(string! token) -> void
+Community.Zabbix.ZabbixComponentVersion
+Community.Zabbix.ZabbixComponentVersion.CompareTo(Community.Zabbix.ZabbixComponentVersion other) -> int
+Community.Zabbix.ZabbixComponentVersion.CompareTo(object? obj) -> int
+Community.Zabbix.ZabbixComponentVersion.Deconstruct(out int Major, out int Minor, out int Patch) -> void
+Community.Zabbix.ZabbixComponentVersion.Equals(Community.Zabbix.ZabbixComponentVersion other) -> bool
+Community.Zabbix.ZabbixComponentVersion.Major.get -> int
+Community.Zabbix.ZabbixComponentVersion.Major.init -> void
+Community.Zabbix.ZabbixComponentVersion.Minor.get -> int
+Community.Zabbix.ZabbixComponentVersion.Minor.init -> void
+Community.Zabbix.ZabbixComponentVersion.Patch.get -> int
+Community.Zabbix.ZabbixComponentVersion.Patch.init -> void
+Community.Zabbix.ZabbixComponentVersion.ToString(string? format, System.IFormatProvider? formatProvider) -> string!
+Community.Zabbix.ZabbixComponentVersion.ToVersion() -> System.Version!
+Community.Zabbix.ZabbixComponentVersion.TryFormat(System.Span<byte> utf8Destination, out int bytesWritten, System.ReadOnlySpan<char> format, System.IFormatProvider? provider) -> bool
+Community.Zabbix.ZabbixComponentVersion.TryFormat(System.Span<char> destination, out int charsWritten, System.ReadOnlySpan<char> format, System.IFormatProvider? provider) -> bool
+Community.Zabbix.ZabbixComponentVersion.WithoutPatch.get -> Community.Zabbix.ZabbixComponentVersion
+Community.Zabbix.ZabbixComponentVersion.ZabbixComponentVersion() -> void
+Community.Zabbix.ZabbixComponentVersion.ZabbixComponentVersion(int Major, int Minor, int Patch) -> void
+Community.Zabbix.ZabbixComponentVersion.ZabbixComponentVersion(int major, int minor) -> void
+Community.Zabbix.ZabbixConfigurationSections
+Community.Zabbix.ZabbixCredential
+Community.Zabbix.ZabbixCredential.ZabbixCredential() -> void
+Community.Zabbix.ZabbixDataClassifications
+Community.Zabbix.ZabbixFieldValue
+Community.Zabbix.ZabbixFieldValue.Element.get -> System.Text.Json.JsonElement
+Community.Zabbix.ZabbixFieldValue.Equals(Community.Zabbix.ZabbixFieldValue other) -> bool
+Community.Zabbix.ZabbixFieldValue.ZabbixFieldValue() -> void
+Community.Zabbix.ZabbixFieldValue.ZabbixFieldValue(System.Text.Json.JsonElement element) -> void
+Community.Zabbix.ZabbixGetConditions
+Community.Zabbix.ZabbixGetConditions.ContainsKey(string! key) -> bool
+Community.Zabbix.ZabbixGetConditions.Count.get -> int
+Community.Zabbix.ZabbixGetConditions.GetEnumerator() -> System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string!, Community.Zabbix.ZabbixFieldValue>>!
+Community.Zabbix.ZabbixGetConditions.Keys.get -> System.Collections.Generic.IEnumerable<string!>!
+Community.Zabbix.ZabbixGetConditions.TryGetValue(string! key, out Community.Zabbix.ZabbixFieldValue value) -> bool
+Community.Zabbix.ZabbixGetConditions.Values.get -> System.Collections.Generic.IEnumerable<Community.Zabbix.ZabbixFieldValue>!
+Community.Zabbix.ZabbixGetConditions.ZabbixGetConditions() -> void
+Community.Zabbix.ZabbixGetConditions.ZabbixGetConditions(Community.Zabbix.ZabbixGetConditions! original) -> void
+Community.Zabbix.ZabbixGetConditions.ZabbixGetConditions(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string!, Community.Zabbix.ZabbixFieldValue>>? fields) -> void
+Community.Zabbix.ZabbixGetConditions.this[string! key].get -> Community.Zabbix.ZabbixFieldValue
+Community.Zabbix.ZabbixGetConditions.this[string! key].set -> void
+Community.Zabbix.ZabbixGetFields
+Community.Zabbix.ZabbixGetFields.Equals(Community.Zabbix.ZabbixGetFields? other) -> bool
+Community.Zabbix.ZabbixGetFields.ZabbixGetFields() -> void
+Community.Zabbix.ZabbixGetFields.ZabbixGetFields(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string!, Community.Zabbix.ZabbixFieldValue>>? fields) -> void
+Community.Zabbix.ZabbixItemDefinition
+Community.Zabbix.ZabbixItemDefinition.<Clone>$() -> Community.Zabbix.ZabbixItemDefinition!
+Community.Zabbix.ZabbixItemDefinition.Description.get -> string!
+Community.Zabbix.ZabbixItemDefinition.Equals(Community.Zabbix.ZabbixItemDefinition? other) -> bool
+Community.Zabbix.ZabbixItemDefinition.KeyName.get -> string!
+Community.Zabbix.ZabbixItemDefinition.TestKey.get -> string?
+Community.Zabbix.ZabbixItemDefinition.TestKey.init -> void
+Community.Zabbix.ZabbixItemDefinition.ZabbixItemDefinition(string! keyName, string! description) -> void
+Community.Zabbix.ZabbixItemKey
+Community.Zabbix.ZabbixItemKey.Equals(Community.Zabbix.ZabbixItemKey other) -> bool
+Community.Zabbix.ZabbixItemKey.GetParameterType(int index) -> Community.Zabbix.ZabbixItemKeyParameterType
+Community.Zabbix.ZabbixItemKey.Name.get -> string!
+Community.Zabbix.ZabbixItemKey.Parameters.get -> System.Collections.Generic.IReadOnlyList<string!>!
+Community.Zabbix.ZabbixItemKey.ToString(string? format, System.IFormatProvider? formatProvider) -> string!
+Community.Zabbix.ZabbixItemKey.TryFormat(System.Span<char> destination, out int charsWritten, System.ReadOnlySpan<char> format, System.IFormatProvider? provider) -> bool
+Community.Zabbix.ZabbixItemKey.ZabbixItemKey() -> void
+Community.Zabbix.ZabbixItemKey.this[int index].get -> string!
+Community.Zabbix.ZabbixItemKey<T>
+Community.Zabbix.ZabbixItemKey<T>.Equals(Community.Zabbix.ZabbixItemKey<T> other) -> bool
+Community.Zabbix.ZabbixItemKey<T>.Format(T value) -> string!
+Community.Zabbix.ZabbixItemKey<T>.Key.get -> Community.Zabbix.ZabbixItemKey
+Community.Zabbix.ZabbixItemKey<T>.Parse(string! value) -> T
+Community.Zabbix.ZabbixItemKey<T>.With(params System.ReadOnlySpan<string!> parameters) -> Community.Zabbix.ZabbixItemKey<T>
+Community.Zabbix.ZabbixItemKey<T>.ZabbixItemKey() -> void
+Community.Zabbix.ZabbixItemKey<T>.ZabbixItemKey(Community.Zabbix.ZabbixItemKey key) -> void
+Community.Zabbix.ZabbixItemKey<T>.ZabbixItemKey(string! key) -> void
+Community.Zabbix.ZabbixItemKeyDataAttribute
+Community.Zabbix.ZabbixItemKeyDataAttribute.ZabbixItemKeyDataAttribute() -> void
+Community.Zabbix.ZabbixItemKeyParameterType
+Community.Zabbix.ZabbixItemKeyParameterType.Array = 2 -> Community.Zabbix.ZabbixItemKeyParameterType
+Community.Zabbix.ZabbixItemKeyParameterType.String = 1 -> Community.Zabbix.ZabbixItemKeyParameterType
+Community.Zabbix.ZabbixItemKeyParameterType.Undefined = 0 -> Community.Zabbix.ZabbixItemKeyParameterType
+Community.Zabbix.ZabbixItemKeyRedactor
+Community.Zabbix.ZabbixItemKeyRedactor.ZabbixItemKeyRedactor() -> void
+Community.Zabbix.ZabbixItemKeys
+Community.Zabbix.ZabbixItemKeys.Agent
+Community.Zabbix.ZabbixItemKeys.Cpu
+Community.Zabbix.ZabbixItemKeys.Cpu.CpuLoadScope
+Community.Zabbix.ZabbixItemKeys.Cpu.CpuLoadScope.All = 0 -> Community.Zabbix.ZabbixItemKeys.Cpu.CpuLoadScope
+Community.Zabbix.ZabbixItemKeys.Cpu.CpuLoadScope.PerProcessor = 1 -> Community.Zabbix.ZabbixItemKeys.Cpu.CpuLoadScope
+Community.Zabbix.ZabbixItemKeys.Cpu.CpuLoadWindow
+Community.Zabbix.ZabbixItemKeys.Cpu.CpuLoadWindow.FifteenMinutes = 2 -> Community.Zabbix.ZabbixItemKeys.Cpu.CpuLoadWindow
+Community.Zabbix.ZabbixItemKeys.Cpu.CpuLoadWindow.FiveMinutes = 1 -> Community.Zabbix.ZabbixItemKeys.Cpu.CpuLoadWindow
+Community.Zabbix.ZabbixItemKeys.Cpu.CpuLoadWindow.OneMinute = 0 -> Community.Zabbix.ZabbixItemKeys.Cpu.CpuLoadWindow
+Community.Zabbix.ZabbixItemKeys.Disk
+Community.Zabbix.ZabbixItemKeys.File
+Community.Zabbix.ZabbixItemKeys.File.FileTypes
+Community.Zabbix.ZabbixItemKeys.File.FileTypes.All = Community.Zabbix.ZabbixItemKeys.File.FileTypes.File | Community.Zabbix.ZabbixItemKeys.File.FileTypes.Directory | Community.Zabbix.ZabbixItemKeys.File.FileTypes.SymbolicLink | Community.Zabbix.ZabbixItemKeys.File.FileTypes.Socket | Community.Zabbix.ZabbixItemKeys.File.FileTypes.Device | Community.Zabbix.ZabbixItemKeys.File.FileTypes.Fifo -> Community.Zabbix.ZabbixItemKeys.File.FileTypes
+Community.Zabbix.ZabbixItemKeys.File.FileTypes.BlockDevice = 16 -> Community.Zabbix.ZabbixItemKeys.File.FileTypes
+Community.Zabbix.ZabbixItemKeys.File.FileTypes.CharacterDevice = 32 -> Community.Zabbix.ZabbixItemKeys.File.FileTypes
+Community.Zabbix.ZabbixItemKeys.File.FileTypes.Device = Community.Zabbix.ZabbixItemKeys.File.FileTypes.BlockDevice | Community.Zabbix.ZabbixItemKeys.File.FileTypes.CharacterDevice -> Community.Zabbix.ZabbixItemKeys.File.FileTypes
+Community.Zabbix.ZabbixItemKeys.File.FileTypes.Directory = 2 -> Community.Zabbix.ZabbixItemKeys.File.FileTypes
+Community.Zabbix.ZabbixItemKeys.File.FileTypes.Fifo = 64 -> Community.Zabbix.ZabbixItemKeys.File.FileTypes
+Community.Zabbix.ZabbixItemKeys.File.FileTypes.File = 1 -> Community.Zabbix.ZabbixItemKeys.File.FileTypes
+Community.Zabbix.ZabbixItemKeys.File.FileTypes.None = 0 -> Community.Zabbix.ZabbixItemKeys.File.FileTypes
+Community.Zabbix.ZabbixItemKeys.File.FileTypes.Socket = 8 -> Community.Zabbix.ZabbixItemKeys.File.FileTypes
+Community.Zabbix.ZabbixItemKeys.File.FileTypes.SymbolicLink = 4 -> Community.Zabbix.ZabbixItemKeys.File.FileTypes
+Community.Zabbix.ZabbixItemKeys.Host
+Community.Zabbix.ZabbixItemKeys.Host.HostnameKind
+Community.Zabbix.ZabbixItemKeys.Host.HostnameKind.Default = 0 -> Community.Zabbix.ZabbixItemKeys.Host.HostnameKind
+Community.Zabbix.ZabbixItemKeys.Host.HostnameKind.FullyQualifiedName = 3 -> Community.Zabbix.ZabbixItemKeys.Host.HostnameKind
+Community.Zabbix.ZabbixItemKeys.Host.HostnameKind.HostName = 1 -> Community.Zabbix.ZabbixItemKeys.Host.HostnameKind
+Community.Zabbix.ZabbixItemKeys.Host.HostnameKind.NetBiosName = 4 -> Community.Zabbix.ZabbixItemKeys.Host.HostnameKind
+Community.Zabbix.ZabbixItemKeys.Host.HostnameKind.ShortHostName = 2 -> Community.Zabbix.ZabbixItemKeys.Host.HostnameKind
+Community.Zabbix.ZabbixItemKeys.Kernel
+Community.Zabbix.ZabbixItemKeys.Memory
+Community.Zabbix.ZabbixItemKeys.Network
+Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType
+Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType.Address = 2 -> Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType
+Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType.Any = 1 -> Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType
+Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType.CanonicalName = 5 -> Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType
+Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType.HostInformation = 14 -> Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType
+Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType.Ipv6Address = 3 -> Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType
+Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType.MailDestination = 9 -> Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType
+Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType.MailExchange = 16 -> Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType
+Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType.MailForwarder = 10 -> Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType
+Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType.MailGroup = 7 -> Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType
+Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType.MailInformation = 15 -> Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType
+Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType.MailRename = 8 -> Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType
+Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType.Mailbox = 6 -> Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType
+Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType.NameServer = 4 -> Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType
+Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType.Null = 11 -> Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType
+Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType.ReversePointer = 13 -> Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType
+Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType.Service = 18 -> Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType
+Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType.StartOfAuthority = 0 -> Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType
+Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType.Text = 17 -> Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType
+Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType.WellKnownService = 12 -> Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType
+Community.Zabbix.ZabbixItemKeys.Network.TcpService
+Community.Zabbix.ZabbixItemKeys.Network.TcpService.Ftp = 3 -> Community.Zabbix.ZabbixItemKeys.Network.TcpService
+Community.Zabbix.ZabbixItemKeys.Network.TcpService.Http = 4 -> Community.Zabbix.ZabbixItemKeys.Network.TcpService
+Community.Zabbix.ZabbixItemKeys.Network.TcpService.Https = 5 -> Community.Zabbix.ZabbixItemKeys.Network.TcpService
+Community.Zabbix.ZabbixItemKeys.Network.TcpService.Imap = 8 -> Community.Zabbix.ZabbixItemKeys.Network.TcpService
+Community.Zabbix.ZabbixItemKeys.Network.TcpService.Ldap = 1 -> Community.Zabbix.ZabbixItemKeys.Network.TcpService
+Community.Zabbix.ZabbixItemKeys.Network.TcpService.Nntp = 7 -> Community.Zabbix.ZabbixItemKeys.Network.TcpService
+Community.Zabbix.ZabbixItemKeys.Network.TcpService.Pop = 6 -> Community.Zabbix.ZabbixItemKeys.Network.TcpService
+Community.Zabbix.ZabbixItemKeys.Network.TcpService.Smtp = 2 -> Community.Zabbix.ZabbixItemKeys.Network.TcpService
+Community.Zabbix.ZabbixItemKeys.Network.TcpService.Ssh = 0 -> Community.Zabbix.ZabbixItemKeys.Network.TcpService
+Community.Zabbix.ZabbixItemKeys.Network.TcpService.Tcp = 10 -> Community.Zabbix.ZabbixItemKeys.Network.TcpService
+Community.Zabbix.ZabbixItemKeys.Network.TcpService.Telnet = 9 -> Community.Zabbix.ZabbixItemKeys.Network.TcpService
+Community.Zabbix.ZabbixItemKeys.Network.UdpSocketState
+Community.Zabbix.ZabbixItemKeys.Network.UdpSocketState.Any = 0 -> Community.Zabbix.ZabbixItemKeys.Network.UdpSocketState
+Community.Zabbix.ZabbixItemKeys.Network.UdpSocketState.Established = 1 -> Community.Zabbix.ZabbixItemKeys.Network.UdpSocketState
+Community.Zabbix.ZabbixItemKeys.Network.UdpSocketState.Unconnected = 2 -> Community.Zabbix.ZabbixItemKeys.Network.UdpSocketState
+Community.Zabbix.ZabbixItemKeys.Process
+Community.Zabbix.ZabbixItemKeys.Process.ProcessCpuTime
+Community.Zabbix.ZabbixItemKeys.Process.ProcessCpuTime.Privileged = 2 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessCpuTime
+Community.Zabbix.ZabbixItemKeys.Process.ProcessCpuTime.Total = 0 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessCpuTime
+Community.Zabbix.ZabbixItemKeys.Process.ProcessCpuTime.User = 1 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessCpuTime
+Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter
+Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter.GdiObjects = 5 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter
+Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter.IoOtherBytes = 11 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter
+Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter.IoOtherOperations = 12 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter
+Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter.IoReadBytes = 7 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter
+Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter.IoReadOperations = 8 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter
+Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter.IoWriteBytes = 9 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter
+Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter.IoWriteOperations = 10 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter
+Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter.KernelTimeMilliseconds = 3 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter
+Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter.PageFaults = 2 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter
+Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter.UserObjects = 6 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter
+Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter.UserTimeMilliseconds = 4 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter
+Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter.VirtualSizeKilobytes = 0 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter
+Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter.WorkingSetKilobytes = 1 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter
+Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoStatistic
+Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoStatistic.Average = 0 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoStatistic
+Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoStatistic.Maximum = 2 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoStatistic
+Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoStatistic.Minimum = 1 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoStatistic
+Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoStatistic.Sum = 3 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoStatistic
+Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryStatistic
+Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryStatistic.Maximum = 1 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryStatistic
+Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryStatistic.Minimum = 2 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryStatistic
+Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryStatistic.Sum = 0 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryStatistic
+Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType
+Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType.Code = 11 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType
+Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType.Data = 9 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType
+Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType.DataStackAndCode = 2 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType
+Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType.Locked = 6 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType
+Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType.PageTables = 12 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType
+Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType.PeakResidentSet = 8 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType
+Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType.PeakVirtualSize = 3 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType
+Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType.Pinned = 7 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType
+Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType.ResidentSet = 1 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType
+Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType.SharedLibraries = 5 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType
+Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType.Stack = 10 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType
+Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType.Swapped = 4 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType
+Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType.VirtualSize = 0 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType
+Community.Zabbix.ZabbixItemKeys.Process.ProcessState
+Community.Zabbix.ZabbixItemKeys.Process.ProcessState.All = 0 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessState
+Community.Zabbix.ZabbixItemKeys.Process.ProcessState.DiskSleep = 4 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessState
+Community.Zabbix.ZabbixItemKeys.Process.ProcessState.Running = 1 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessState
+Community.Zabbix.ZabbixItemKeys.Process.ProcessState.Sleeping = 2 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessState
+Community.Zabbix.ZabbixItemKeys.Process.ProcessState.Traced = 5 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessState
+Community.Zabbix.ZabbixItemKeys.Process.ProcessState.Zombie = 3 -> Community.Zabbix.ZabbixItemKeys.Process.ProcessState
+Community.Zabbix.ZabbixItemKeys.SampleWindow
+Community.Zabbix.ZabbixItemKeys.SampleWindow.FifteenMinutes = 2 -> Community.Zabbix.ZabbixItemKeys.SampleWindow
+Community.Zabbix.ZabbixItemKeys.SampleWindow.FiveMinutes = 1 -> Community.Zabbix.ZabbixItemKeys.SampleWindow
+Community.Zabbix.ZabbixItemKeys.SampleWindow.OneMinute = 0 -> Community.Zabbix.ZabbixItemKeys.SampleWindow
+Community.Zabbix.ZabbixItemKeys.Swap
+Community.Zabbix.ZabbixItemKeys.Web
+Community.Zabbix.ZabbixItemProvider
+Community.Zabbix.ZabbixItemProvider.ZabbixItemProvider() -> void
+Community.Zabbix.ZabbixItemsBuilderExtensions
+Community.Zabbix.ZabbixItemsBuilderExtensions.extension(Community.Zabbix.IZabbixItemsBuilder!)
+Community.Zabbix.ZabbixItemsBuilderExtensions.extension(Community.Zabbix.IZabbixItemsBuilder!).AddItems<TProvider>() -> Community.Zabbix.IZabbixItemsBuilder!
+Community.Zabbix.ZabbixItemsBuilderExtensions.extension<TBuilder>(TBuilder)
+Community.Zabbix.ZabbixItemsBuilderExtensions.extension<TBuilder>(TBuilder).AddItems(Community.Zabbix.ZabbixItemProvider! provider) -> TBuilder
+Community.Zabbix.ZabbixItemsBuilderExtensions.extension<TBuilder>(TBuilder).AddItems(System.Func<System.IServiceProvider!, Community.Zabbix.ZabbixItemProvider!>! factory) -> TBuilder
+Community.Zabbix.ZabbixOptions
+Community.Zabbix.ZabbixOptions.AllowUnencryptedCredentials.get -> bool
+Community.Zabbix.ZabbixOptions.AllowUnencryptedCredentials.set -> void
+Community.Zabbix.ZabbixOptions.ApiToken.get -> string?
+Community.Zabbix.ZabbixOptions.ApiToken.set -> void
+Community.Zabbix.ZabbixOptions.Endpoint.get -> System.Uri?
+Community.Zabbix.ZabbixOptions.Endpoint.set -> void
+Community.Zabbix.ZabbixOptions.FrontendUri.get -> System.Uri?
+Community.Zabbix.ZabbixOptions.FrontendUri.set -> void
+Community.Zabbix.ZabbixOptions.MaxConnectionsPerServer.get -> int
+Community.Zabbix.ZabbixOptions.MaxConnectionsPerServer.set -> void
+Community.Zabbix.ZabbixOptions.MaxResponseContentBytes.get -> long
+Community.Zabbix.ZabbixOptions.MaxResponseContentBytes.set -> void
+Community.Zabbix.ZabbixOptions.Timeouts.get -> System.Collections.Generic.IDictionary<string!, System.TimeSpan>!
+Community.Zabbix.ZabbixOptions.Validate(System.ComponentModel.DataAnnotations.ValidationContext! validationContext) -> System.Collections.Generic.IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult!>!
+Community.Zabbix.ZabbixOptions.ZabbixOptions() -> void
+Community.Zabbix.ZabbixOutput
+Community.Zabbix.ZabbixOutput.<Clone>$() -> Community.Zabbix.ZabbixOutput!
+Community.Zabbix.ZabbixOutput.Equals(Community.Zabbix.ZabbixOutput? other) -> bool
+Community.Zabbix.ZabbixOutput.Fields.get -> System.Collections.Generic.IReadOnlyList<string!>?
+Community.Zabbix.ZabbixOutput.GetEnumerator() -> System.Collections.Generic.IEnumerator<string!>!
+Community.Zabbix.ZabbixOutput.Keyword.get -> string?
+Community.Zabbix.ZabbixPeerTextAttribute
+Community.Zabbix.ZabbixPeerTextAttribute.ZabbixPeerTextAttribute() -> void
+Community.Zabbix.ZabbixPeerTextRedactor
+Community.Zabbix.ZabbixPeerTextRedactor.ZabbixPeerTextRedactor() -> void
+Community.Zabbix.ZabbixPersonalAttribute
+Community.Zabbix.ZabbixPersonalAttribute.ZabbixPersonalAttribute() -> void
+Community.Zabbix.ZabbixPluginAttribute
+Community.Zabbix.ZabbixPluginAttribute.Entry.get -> System.Type!
+Community.Zabbix.ZabbixPluginAttribute.ZabbixPluginAttribute(System.Type! entry) -> void
+Community.Zabbix.ZabbixPluginEntry
+Community.Zabbix.ZabbixPluginEntry.ZabbixPluginEntry() -> void
+Community.Zabbix.ZabbixRefusedException
+Community.Zabbix.ZabbixRefusedException.ZabbixRefusedException() -> void
+Community.Zabbix.ZabbixRefusedException.ZabbixRefusedException(string! message) -> void
+Community.Zabbix.ZabbixRefusedException.ZabbixRefusedException(string! message, System.Exception? innerException) -> void
+Community.Zabbix.ZabbixSample<T>
+Community.Zabbix.ZabbixSample<T>.Deconstruct(out System.DateTimeOffset Time, out T Value) -> void
+Community.Zabbix.ZabbixSample<T>.Equals(Community.Zabbix.ZabbixSample<T> other) -> bool
+Community.Zabbix.ZabbixSample<T>.Time.get -> System.DateTimeOffset
+Community.Zabbix.ZabbixSample<T>.Time.init -> void
+Community.Zabbix.ZabbixSample<T>.Value.get -> T
+Community.Zabbix.ZabbixSample<T>.Value.init -> void
+Community.Zabbix.ZabbixSample<T>.ZabbixSample() -> void
+Community.Zabbix.ZabbixSample<T>.ZabbixSample(System.DateTimeOffset Time, T Value) -> void
+Community.Zabbix.ZabbixSecretAttribute
+Community.Zabbix.ZabbixSecretAttribute.ZabbixSecretAttribute() -> void
+Community.Zabbix.ZabbixSessionCredential
+Community.Zabbix.ZabbixSessionCredential.LoginBackoff.get -> System.TimeSpan
+Community.Zabbix.ZabbixSessionCredential.LoginBackoff.init -> void
+Community.Zabbix.ZabbixSessionCredential.Username.get -> string!
+Community.Zabbix.ZabbixSessionCredential.ZabbixSessionCredential(string! username, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<string!>>! password) -> void
+Community.Zabbix.ZabbixSessionCredential.ZabbixSessionCredential(string! username, string! password) -> void
+Community.Zabbix.ZabbixTokenRequestContext
+Community.Zabbix.ZabbixTokenRequestContext.Deconstruct(out Community.Zabbix.IZabbixTransport! Transport, out string! Method, out System.TimeProvider! Time) -> void
+Community.Zabbix.ZabbixTokenRequestContext.Equals(Community.Zabbix.ZabbixTokenRequestContext other) -> bool
+Community.Zabbix.ZabbixTokenRequestContext.Method.get -> string!
+Community.Zabbix.ZabbixTokenRequestContext.Method.init -> void
+Community.Zabbix.ZabbixTokenRequestContext.Time.get -> System.TimeProvider!
+Community.Zabbix.ZabbixTokenRequestContext.Time.init -> void
+Community.Zabbix.ZabbixTokenRequestContext.Transport.get -> Community.Zabbix.IZabbixTransport!
+Community.Zabbix.ZabbixTokenRequestContext.Transport.init -> void
+Community.Zabbix.ZabbixTokenRequestContext.ZabbixTokenRequestContext() -> void
+Community.Zabbix.ZabbixTokenRequestContext.ZabbixTokenRequestContext(Community.Zabbix.IZabbixTransport! Transport, string! Method, System.TimeProvider! Time) -> void
+Community.Zabbix.ZabbixValue
+Community.Zabbix.ZabbixValue.<Clone>$() -> Community.Zabbix.ZabbixValue!
+Community.Zabbix.ZabbixValue.As<T>() -> T
+Community.Zabbix.ZabbixValue.Deconstruct(out string! Host, out Community.Zabbix.ZabbixItemKey Key, out string! Value, out System.DateTimeOffset Time) -> void
+Community.Zabbix.ZabbixValue.Equals(Community.Zabbix.ZabbixValue? other) -> bool
+Community.Zabbix.ZabbixValue.Host.get -> string!
+Community.Zabbix.ZabbixValue.Host.init -> void
+Community.Zabbix.ZabbixValue.IsSupported.get -> bool
+Community.Zabbix.ZabbixValue.IsSupported.init -> void
+Community.Zabbix.ZabbixValue.Key.get -> Community.Zabbix.ZabbixItemKey
+Community.Zabbix.ZabbixValue.Key.init -> void
+Community.Zabbix.ZabbixValue.Time.get -> System.DateTimeOffset
+Community.Zabbix.ZabbixValue.Time.init -> void
+Community.Zabbix.ZabbixValue.Value.get -> string!
+Community.Zabbix.ZabbixValue.Value.init -> void
+Community.Zabbix.ZabbixValue.ZabbixValue(string! Host, Community.Zabbix.ZabbixItemKey Key, string! Value, System.DateTimeOffset Time) -> void
+Community.Zabbix.ZabbixValue.ZabbixValue(string! host, string! key, double value, System.DateTimeOffset time) -> void
+Community.Zabbix.ZabbixValue.ZabbixValue(string! host, string! key, long value, System.DateTimeOffset time) -> void
+Community.Zabbix.ZabbixValue.ZabbixValue(string! host, string! key, string! value, System.DateTimeOffset time) -> void
+abstract Community.Zabbix.ZabbixCredential.GetTokenAsync(Community.Zabbix.ZabbixTokenRequestContext context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<string?>
+abstract Community.Zabbix.ZabbixGetConditions.<Clone>$() -> Community.Zabbix.ZabbixGetConditions!
+abstract Community.Zabbix.ZabbixGetConditions.MemberConditions() -> System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string!, Community.Zabbix.ZabbixFieldValue>>!
+abstract Community.Zabbix.ZabbixItemProvider.GetValueAsync(Community.Zabbix.ZabbixItemKey key, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask<Community.Zabbix.ZabbixAgentAnswer!>
+abstract Community.Zabbix.ZabbixItemProvider.Items.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixItemDefinition!>!
+abstract Community.Zabbix.ZabbixPluginEntry.Register(Community.Zabbix.IZabbixItemsBuilder! items, Microsoft.Extensions.Configuration.IConfiguration! settings) -> void
+const Community.Zabbix.Diagnostics.ZabbixTelemetryNames.Agent = "Community.Zabbix.Agent" -> string!
+const Community.Zabbix.Diagnostics.ZabbixTelemetryNames.Api = "Community.Zabbix.Api" -> string!
+const Community.Zabbix.Diagnostics.ZabbixTelemetryNames.Listener = "Community.Zabbix.Listener" -> string!
+const Community.Zabbix.Diagnostics.ZabbixTelemetryNames.PowerShell = "Community.Zabbix.PowerShell" -> string!
+const Community.Zabbix.Diagnostics.ZabbixTelemetryNames.Prefix = "Community.Zabbix." -> string!
+const Community.Zabbix.Diagnostics.ZabbixTelemetryNames.Proxy = "Community.Zabbix.Proxy" -> string!
+const Community.Zabbix.Diagnostics.ZabbixTelemetryNames.Store = "Community.Zabbix.Store" -> string!
+const Community.Zabbix.Diagnostics.ZabbixTelemetryNames.Subscription = "Community.Zabbix.*" -> string!
+const Community.Zabbix.Diagnostics.ZabbixTelemetryNames.Tree = "Community.Zabbix.Tree" -> string!
+const Community.Zabbix.Diagnostics.ZabbixTelemetryNames.Wire = "Community.Zabbix.Wire" -> string!
+const Community.Zabbix.ZabbixConfigurationSections.ActiveAgents = "ActiveAgents" -> string!
+const Community.Zabbix.ZabbixConfigurationSections.PassiveAgents = "PassiveAgents" -> string!
+const Community.Zabbix.ZabbixConfigurationSections.Proxies = "Proxies" -> string!
+const Community.Zabbix.ZabbixConfigurationSections.PushAgents = "PushAgents" -> string!
+const Community.Zabbix.ZabbixConfigurationSections.Section = "Zabbix" -> string!
+const Community.Zabbix.ZabbixConfigurationSections.Servers = "Servers" -> string!
+const Community.Zabbix.ZabbixConfigurationSections.Trapper = "Trapper" -> string!
+const Community.Zabbix.ZabbixDataClassifications.TaxonomyName = "Zabbix" -> string!
+const Community.Zabbix.ZabbixOptions.ApiScript = "api_jsonrpc.php" -> string!
+override Community.Zabbix.ZabbixAgentAnswer.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixAgentAnswer.GetHashCode() -> int
+override Community.Zabbix.ZabbixAgentAnswer.ToString() -> string!
+override Community.Zabbix.ZabbixApiTokenCredential.GetTokenAsync(Community.Zabbix.ZabbixTokenRequestContext context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<string?>
+override Community.Zabbix.ZabbixApiTokenCredential.ToString() -> string!
+override Community.Zabbix.ZabbixComponentVersion.GetHashCode() -> int
+override Community.Zabbix.ZabbixComponentVersion.ToString() -> string!
+override Community.Zabbix.ZabbixFieldValue.GetHashCode() -> int
+override Community.Zabbix.ZabbixFieldValue.ToString() -> string!
+override Community.Zabbix.ZabbixGetConditions.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixGetConditions.GetHashCode() -> int
+override Community.Zabbix.ZabbixGetConditions.ToString() -> string!
+override Community.Zabbix.ZabbixGetFields.<Clone>$() -> Community.Zabbix.ZabbixGetFields!
+override Community.Zabbix.ZabbixGetFields.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixGetFields.GetHashCode() -> int
+override Community.Zabbix.ZabbixGetFields.ToString() -> string!
+override Community.Zabbix.ZabbixItemDefinition.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixItemDefinition.GetHashCode() -> int
+override Community.Zabbix.ZabbixItemDefinition.ToString() -> string!
+override Community.Zabbix.ZabbixItemKey.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixItemKey.GetHashCode() -> int
+override Community.Zabbix.ZabbixItemKey.ToString() -> string!
+override Community.Zabbix.ZabbixItemKey<T>.GetHashCode() -> int
+override Community.Zabbix.ZabbixItemKey<T>.ToString() -> string!
+override Community.Zabbix.ZabbixItemKeyRedactor.GetRedactedLength(System.ReadOnlySpan<char> input) -> int
+override Community.Zabbix.ZabbixItemKeyRedactor.Redact(System.ReadOnlySpan<char> source, System.Span<char> destination) -> int
+override Community.Zabbix.ZabbixOutput.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixOutput.GetHashCode() -> int
+override Community.Zabbix.ZabbixOutput.ToString() -> string!
+override Community.Zabbix.ZabbixPeerTextRedactor.GetRedactedLength(System.ReadOnlySpan<char> input) -> int
+override Community.Zabbix.ZabbixPeerTextRedactor.Redact(System.ReadOnlySpan<char> source, System.Span<char> destination) -> int
+override Community.Zabbix.ZabbixSample<T>.GetHashCode() -> int
+override Community.Zabbix.ZabbixSessionCredential.GetTokenAsync(Community.Zabbix.ZabbixTokenRequestContext context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<string?>
+override Community.Zabbix.ZabbixSessionCredential.Invalidate(string! token, Community.Zabbix.ZabbixApiException! refusal) -> bool
+override Community.Zabbix.ZabbixSessionCredential.ToString() -> string!
+override Community.Zabbix.ZabbixTokenRequestContext.GetHashCode() -> int
+override Community.Zabbix.ZabbixValue.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixValue.GetHashCode() -> int
+override Community.Zabbix.ZabbixValue.ToString() -> string!
+override sealed Community.Zabbix.ZabbixGetFields.Equals(Community.Zabbix.ZabbixGetConditions? other) -> bool
+static Community.Zabbix.ZabbixAgentAnswer.NotSupported(Community.Zabbix.ZabbixItemKey key, string! error) -> Community.Zabbix.ZabbixAgentAnswer!
+static Community.Zabbix.ZabbixAgentAnswer.Supported(Community.Zabbix.ZabbixItemKey key, string? value) -> Community.Zabbix.ZabbixAgentAnswer!
+static Community.Zabbix.ZabbixAgentAnswer.operator !=(Community.Zabbix.ZabbixAgentAnswer? left, Community.Zabbix.ZabbixAgentAnswer? right) -> bool
+static Community.Zabbix.ZabbixAgentAnswer.operator ==(Community.Zabbix.ZabbixAgentAnswer? left, Community.Zabbix.ZabbixAgentAnswer? right) -> bool
+static Community.Zabbix.ZabbixComponentVersion.FromVersion(System.Version! version) -> Community.Zabbix.ZabbixComponentVersion
+static Community.Zabbix.ZabbixComponentVersion.Parse(System.ReadOnlySpan<char> s, System.IFormatProvider? provider) -> Community.Zabbix.ZabbixComponentVersion
+static Community.Zabbix.ZabbixComponentVersion.Parse(string! s, System.IFormatProvider? provider) -> Community.Zabbix.ZabbixComponentVersion
+static Community.Zabbix.ZabbixComponentVersion.TryParse(System.ReadOnlySpan<char> s, System.IFormatProvider? provider, out Community.Zabbix.ZabbixComponentVersion result) -> bool
+static Community.Zabbix.ZabbixComponentVersion.TryParse(string? s, System.IFormatProvider? provider, out Community.Zabbix.ZabbixComponentVersion result) -> bool
+static Community.Zabbix.ZabbixComponentVersion.operator !=(Community.Zabbix.ZabbixComponentVersion left, Community.Zabbix.ZabbixComponentVersion right) -> bool
+static Community.Zabbix.ZabbixComponentVersion.operator <(Community.Zabbix.ZabbixComponentVersion left, Community.Zabbix.ZabbixComponentVersion right) -> bool
+static Community.Zabbix.ZabbixComponentVersion.operator <=(Community.Zabbix.ZabbixComponentVersion left, Community.Zabbix.ZabbixComponentVersion right) -> bool
+static Community.Zabbix.ZabbixComponentVersion.operator ==(Community.Zabbix.ZabbixComponentVersion left, Community.Zabbix.ZabbixComponentVersion right) -> bool
+static Community.Zabbix.ZabbixComponentVersion.operator >(Community.Zabbix.ZabbixComponentVersion left, Community.Zabbix.ZabbixComponentVersion right) -> bool
+static Community.Zabbix.ZabbixComponentVersion.operator >=(Community.Zabbix.ZabbixComponentVersion left, Community.Zabbix.ZabbixComponentVersion right) -> bool
+static Community.Zabbix.ZabbixCredential.Anonymous.get -> Community.Zabbix.ZabbixCredential!
+static Community.Zabbix.ZabbixCredential.FromApiToken(string! token) -> Community.Zabbix.ZabbixApiTokenCredential!
+static Community.Zabbix.ZabbixCredential.FromLogin(string! username, string! password) -> Community.Zabbix.ZabbixSessionCredential!
+static Community.Zabbix.ZabbixDataClassifications.ItemKey.get -> Microsoft.Extensions.Compliance.Classification.DataClassification
+static Community.Zabbix.ZabbixDataClassifications.PeerText.get -> Microsoft.Extensions.Compliance.Classification.DataClassification
+static Community.Zabbix.ZabbixDataClassifications.Personal.get -> Microsoft.Extensions.Compliance.Classification.DataClassification
+static Community.Zabbix.ZabbixDataClassifications.Secret.get -> Microsoft.Extensions.Compliance.Classification.DataClassification
+static Community.Zabbix.ZabbixFieldValue.FromInt64(long value) -> Community.Zabbix.ZabbixFieldValue
+static Community.Zabbix.ZabbixFieldValue.FromInt64Array(long[]! values) -> Community.Zabbix.ZabbixFieldValue
+static Community.Zabbix.ZabbixFieldValue.FromString(string! value) -> Community.Zabbix.ZabbixFieldValue
+static Community.Zabbix.ZabbixFieldValue.FromStringArray(string![]! values) -> Community.Zabbix.ZabbixFieldValue
+static Community.Zabbix.ZabbixFieldValue.FromUInt64(ulong value) -> Community.Zabbix.ZabbixFieldValue
+static Community.Zabbix.ZabbixFieldValue.FromUInt64Array(ulong[]! values) -> Community.Zabbix.ZabbixFieldValue
+static Community.Zabbix.ZabbixFieldValue.implicit operator Community.Zabbix.ZabbixFieldValue(long value) -> Community.Zabbix.ZabbixFieldValue
+static Community.Zabbix.ZabbixFieldValue.implicit operator Community.Zabbix.ZabbixFieldValue(long[]! values) -> Community.Zabbix.ZabbixFieldValue
+static Community.Zabbix.ZabbixFieldValue.implicit operator Community.Zabbix.ZabbixFieldValue(string! value) -> Community.Zabbix.ZabbixFieldValue
+static Community.Zabbix.ZabbixFieldValue.implicit operator Community.Zabbix.ZabbixFieldValue(string![]! values) -> Community.Zabbix.ZabbixFieldValue
+static Community.Zabbix.ZabbixFieldValue.implicit operator Community.Zabbix.ZabbixFieldValue(ulong value) -> Community.Zabbix.ZabbixFieldValue
+static Community.Zabbix.ZabbixFieldValue.implicit operator Community.Zabbix.ZabbixFieldValue(ulong[]! values) -> Community.Zabbix.ZabbixFieldValue
+static Community.Zabbix.ZabbixFieldValue.operator !=(Community.Zabbix.ZabbixFieldValue left, Community.Zabbix.ZabbixFieldValue right) -> bool
+static Community.Zabbix.ZabbixFieldValue.operator ==(Community.Zabbix.ZabbixFieldValue left, Community.Zabbix.ZabbixFieldValue right) -> bool
+static Community.Zabbix.ZabbixGetConditions.operator !=(Community.Zabbix.ZabbixGetConditions? left, Community.Zabbix.ZabbixGetConditions? right) -> bool
+static Community.Zabbix.ZabbixGetConditions.operator ==(Community.Zabbix.ZabbixGetConditions? left, Community.Zabbix.ZabbixGetConditions? right) -> bool
+static Community.Zabbix.ZabbixGetFields.operator !=(Community.Zabbix.ZabbixGetFields? left, Community.Zabbix.ZabbixGetFields? right) -> bool
+static Community.Zabbix.ZabbixGetFields.operator ==(Community.Zabbix.ZabbixGetFields? left, Community.Zabbix.ZabbixGetFields? right) -> bool
+static Community.Zabbix.ZabbixItemDefinition.operator !=(Community.Zabbix.ZabbixItemDefinition? left, Community.Zabbix.ZabbixItemDefinition? right) -> bool
+static Community.Zabbix.ZabbixItemDefinition.operator ==(Community.Zabbix.ZabbixItemDefinition? left, Community.Zabbix.ZabbixItemDefinition? right) -> bool
+static Community.Zabbix.ZabbixItemKey.Create(string! name, params System.ReadOnlySpan<string!> parameters) -> Community.Zabbix.ZabbixItemKey
+static Community.Zabbix.ZabbixItemKey.Parse(System.ReadOnlySpan<char> s, System.IFormatProvider? provider) -> Community.Zabbix.ZabbixItemKey
+static Community.Zabbix.ZabbixItemKey.Parse(string! s, System.IFormatProvider? provider) -> Community.Zabbix.ZabbixItemKey
+static Community.Zabbix.ZabbixItemKey.TryCreate(string? name, System.ReadOnlySpan<string!> parameters, out Community.Zabbix.ZabbixItemKey result) -> bool
+static Community.Zabbix.ZabbixItemKey.TryParse(System.ReadOnlySpan<char> s, System.IFormatProvider? provider, out Community.Zabbix.ZabbixItemKey result) -> bool
+static Community.Zabbix.ZabbixItemKey.TryParse(string? s, System.IFormatProvider? provider, out Community.Zabbix.ZabbixItemKey result) -> bool
+static Community.Zabbix.ZabbixItemKey.TryParse(string? s, out Community.Zabbix.ZabbixItemKey result) -> bool
+static Community.Zabbix.ZabbixItemKey.operator !=(Community.Zabbix.ZabbixItemKey left, Community.Zabbix.ZabbixItemKey right) -> bool
+static Community.Zabbix.ZabbixItemKey.operator ==(Community.Zabbix.ZabbixItemKey left, Community.Zabbix.ZabbixItemKey right) -> bool
+static Community.Zabbix.ZabbixItemKey<T>.operator !=(Community.Zabbix.ZabbixItemKey<T> left, Community.Zabbix.ZabbixItemKey<T> right) -> bool
+static Community.Zabbix.ZabbixItemKey<T>.operator ==(Community.Zabbix.ZabbixItemKey<T> left, Community.Zabbix.ZabbixItemKey<T> right) -> bool
+static Community.Zabbix.ZabbixItemKeys.Agent.HostMetadata.get -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Agent.Hostname.get -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Agent.Ping.get -> Community.Zabbix.ZabbixItemKey<bool>
+static Community.Zabbix.ZabbixItemKeys.Agent.Variant.get -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Agent.Version.get -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Cpu.ConfiguredCount.get -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Cpu.ContextSwitches.get -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Cpu.Count.get -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Cpu.CurrentFrequencies.get -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Cpu.CurrentFrequencyHertz(int processor) -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Cpu.Description(int? processor = null) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Cpu.Discovery.get -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Cpu.GuestNicePercent(int? processor = null, Community.Zabbix.ZabbixItemKeys.SampleWindow window = Community.Zabbix.ZabbixItemKeys.SampleWindow.OneMinute) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Cpu.GuestPercent(int? processor = null, Community.Zabbix.ZabbixItemKeys.SampleWindow window = Community.Zabbix.ZabbixItemKeys.SampleWindow.OneMinute) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Cpu.IdlePercent(int? processor = null, Community.Zabbix.ZabbixItemKeys.SampleWindow window = Community.Zabbix.ZabbixItemKeys.SampleWindow.OneMinute) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Cpu.InterruptPercent(int? processor = null, Community.Zabbix.ZabbixItemKeys.SampleWindow window = Community.Zabbix.ZabbixItemKeys.SampleWindow.OneMinute) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Cpu.Interrupts.get -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Cpu.IoWaitPercent(int? processor = null, Community.Zabbix.ZabbixItemKeys.SampleWindow window = Community.Zabbix.ZabbixItemKeys.SampleWindow.OneMinute) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Cpu.Load(Community.Zabbix.ZabbixItemKeys.Cpu.CpuLoadScope scope = Community.Zabbix.ZabbixItemKeys.Cpu.CpuLoadScope.All, Community.Zabbix.ZabbixItemKeys.Cpu.CpuLoadWindow window = Community.Zabbix.ZabbixItemKeys.Cpu.CpuLoadWindow.OneMinute) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Cpu.MaxFrequencies.get -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Cpu.MaxFrequencyHertz(int processor) -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Cpu.Model(int? processor = null) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Cpu.NicePercent(int? processor = null, Community.Zabbix.ZabbixItemKeys.SampleWindow window = Community.Zabbix.ZabbixItemKeys.SampleWindow.OneMinute) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Cpu.SoftIrqPercent(int? processor = null, Community.Zabbix.ZabbixItemKeys.SampleWindow window = Community.Zabbix.ZabbixItemKeys.SampleWindow.OneMinute) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Cpu.StealPercent(int? processor = null, Community.Zabbix.ZabbixItemKeys.SampleWindow window = Community.Zabbix.ZabbixItemKeys.SampleWindow.OneMinute) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Cpu.SystemPercent(int? processor = null, Community.Zabbix.ZabbixItemKeys.SampleWindow window = Community.Zabbix.ZabbixItemKeys.SampleWindow.OneMinute) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Cpu.UserPercent(int? processor = null, Community.Zabbix.ZabbixItemKeys.SampleWindow window = Community.Zabbix.ZabbixItemKeys.SampleWindow.OneMinute) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Cpu.Vendor(int? processor = null) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Disk.DeviceDiscovery.get -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Disk.Discovery.get -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Disk.FileSystems.get -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Disk.FreeBytes(string! path) -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Disk.FreePercent(string! path) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Disk.InodesFree(string! path) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Disk.InodesFreePercent(string! path) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Disk.InodesTotal(string! path) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Disk.InodesUsed(string! path) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Disk.InodesUsedPercent(string! path) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Disk.ReadOperations(string? device = null) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Disk.ReadOperationsPerSecond(string? device = null, Community.Zabbix.ZabbixItemKeys.SampleWindow window = Community.Zabbix.ZabbixItemKeys.SampleWindow.OneMinute) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Disk.ReadSectors(string? device = null) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Disk.ReadSectorsPerSecond(string? device = null, Community.Zabbix.ZabbixItemKeys.SampleWindow window = Community.Zabbix.ZabbixItemKeys.SampleWindow.OneMinute) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Disk.TotalBytes(string! path) -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Disk.UsedBytes(string! path) -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Disk.UsedPercent(string! path) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Disk.WriteOperations(string? device = null) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Disk.WriteOperationsPerSecond(string? device = null, Community.Zabbix.ZabbixItemKeys.SampleWindow window = Community.Zabbix.ZabbixItemKeys.SampleWindow.OneMinute) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Disk.WriteSectors(string? device = null) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Disk.WriteSectorsPerSecond(string? device = null, Community.Zabbix.ZabbixItemKeys.SampleWindow window = Community.Zabbix.ZabbixItemKeys.SampleWindow.OneMinute) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.File.AccessedTime(string! path) -> Community.Zabbix.ZabbixItemKey<System.DateTimeOffset>
+static Community.Zabbix.ZabbixItemKeys.File.ChangedTime(string! path) -> Community.Zabbix.ZabbixItemKey<System.DateTimeOffset>
+static Community.Zabbix.ZabbixItemKeys.File.Contents(string! path, string? encoding = null) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.File.Crc32Checksum(string! path) -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.File.Details(string! path) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.File.DirectoryDiskBytes(string! path, string? includePattern = null, string? excludePattern = null, int? maxDepth = null, string? excludeDirectoryPattern = null) -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.File.DirectoryEntries(string! path, string? includePattern = null, string? excludePattern = null, Community.Zabbix.ZabbixItemKeys.File.FileTypes includeTypes = Community.Zabbix.ZabbixItemKeys.File.FileTypes.None, Community.Zabbix.ZabbixItemKeys.File.FileTypes excludeTypes = Community.Zabbix.ZabbixItemKeys.File.FileTypes.None, int? maxDepth = null, long? minSize = null, long? maxSize = null, System.TimeSpan? minAge = null, System.TimeSpan? maxAge = null, string? excludeDirectoryPattern = null) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.File.DirectoryEntryCount(string! path, string? includePattern = null, string? excludePattern = null, Community.Zabbix.ZabbixItemKeys.File.FileTypes includeTypes = Community.Zabbix.ZabbixItemKeys.File.FileTypes.None, Community.Zabbix.ZabbixItemKeys.File.FileTypes excludeTypes = Community.Zabbix.ZabbixItemKeys.File.FileTypes.None, int? maxDepth = null, long? minSize = null, long? maxSize = null, System.TimeSpan? minAge = null, System.TimeSpan? maxAge = null, string? excludeDirectoryPattern = null) -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.File.DirectorySizeBytes(string! path, string? includePattern = null, string? excludePattern = null, int? maxDepth = null, string? excludeDirectoryPattern = null) -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.File.Exists(string! path, Community.Zabbix.ZabbixItemKeys.File.FileTypes include = Community.Zabbix.ZabbixItemKeys.File.FileTypes.None, Community.Zabbix.ZabbixItemKeys.File.FileTypes exclude = Community.Zabbix.ZabbixItemKeys.File.FileTypes.None) -> Community.Zabbix.ZabbixItemKey<bool>
+static Community.Zabbix.ZabbixItemKeys.File.FirstMatchingLine(string! path, string! pattern, string? encoding = null, int? startLine = null, int? endLine = null, string? output = null) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.File.GroupId(string! path) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.File.GroupName(string! path) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.File.HasMatchingLine(string! path, string! pattern, string? encoding = null, int? startLine = null, int? endLine = null) -> Community.Zabbix.ZabbixItemKey<bool>
+static Community.Zabbix.ZabbixItemKeys.File.LineCount(string! path) -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.File.Md5Checksum(string! path) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.File.Md5Sum(string! path) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.File.ModifiedTime(string! path) -> Community.Zabbix.ZabbixItemKey<System.DateTimeOffset>
+static Community.Zabbix.ZabbixItemKeys.File.OwnerId(string! path) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.File.OwnerName(string! path) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.File.Permissions(string! path) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.File.Sha256Checksum(string! path) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.File.SizeBytes(string! path) -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Host.Architecture.get -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Host.BootTime.get -> Community.Zabbix.ZabbixItemKey<System.DateTimeOffset>
+static Community.Zabbix.ZabbixItemKeys.Host.Hostname(Community.Zabbix.ZabbixItemKeys.Host.HostnameKind kind = Community.Zabbix.ZabbixItemKeys.Host.HostnameKind.Default, bool lowercase = false) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Host.LocalTime.get -> Community.Zabbix.ZabbixItemKey<System.DateTimeOffset>
+static Community.Zabbix.ZabbixItemKeys.Host.LocalTimeText.get -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Host.OsDetails.get -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Host.OsName.get -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Host.OsShortVersion.get -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Host.OsVersion.get -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Host.Uname.get -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Host.Uptime.get -> Community.Zabbix.ZabbixItemKey<System.TimeSpan>
+static Community.Zabbix.ZabbixItemKeys.Kernel.MaxFiles.get -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Kernel.MaxProcesses.get -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Kernel.OpenFiles.get -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Memory.ActiveBytes.get -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Memory.AnonymousBytes.get -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Memory.AvailableBytes.get -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Memory.AvailablePercent.get -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Memory.BuffersBytes.get -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Memory.CachedBytes.get -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Memory.FreeBytes.get -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Memory.InactiveBytes.get -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Memory.SharedBytes.get -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Memory.SlabBytes.get -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Memory.TotalBytes.get -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Memory.UsedBytes.get -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Memory.UsedPercent.get -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Memory.VirtualAvailableBytes.get -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Memory.VirtualAvailablePercent.get -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Memory.VirtualTotalBytes.get -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Memory.VirtualUsedBytes.get -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Memory.VirtualUsedPercent.get -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Memory.WiredBytes.get -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Network.BytesReceived(string! interfaceName) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Network.BytesSent(string! interfaceName) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Network.Collisions(string! interfaceName) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Network.CompressedReceived(string! interfaceName) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Network.CompressedSent(string! interfaceName) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Network.DnsRecords(string! name, string? server = null, Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType recordType = Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType.StartOfAuthority, System.TimeSpan? timeout = null, int? attempts = null, bool useTcp = false) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Network.DnsResolves(string! name, string? server = null, Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType recordType = Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType.StartOfAuthority, System.TimeSpan? timeout = null, int? attempts = null, bool useTcp = false) -> Community.Zabbix.ZabbixItemKey<bool>
+static Community.Zabbix.ZabbixItemKeys.Network.DnsResponseTime(string! name, string? server = null, Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType recordType = Community.Zabbix.ZabbixItemKeys.Network.DnsRecordType.StartOfAuthority, System.TimeSpan? timeout = null, int? attempts = null, bool useTcp = false) -> Community.Zabbix.ZabbixItemKey<System.TimeSpan>
+static Community.Zabbix.ZabbixItemKeys.Network.InterfaceDiscovery.get -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Network.InterfaceList.get -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Network.IsNtpUp(string? address = null, int? port = null) -> Community.Zabbix.ZabbixItemKey<bool>
+static Community.Zabbix.ZabbixItemKeys.Network.IsTcpListening(int port) -> Community.Zabbix.ZabbixItemKey<bool>
+static Community.Zabbix.ZabbixItemKeys.Network.IsTcpPortOpen(int port, string? address = null) -> Community.Zabbix.ZabbixItemKey<bool>
+static Community.Zabbix.ZabbixItemKeys.Network.IsTcpServiceUp(Community.Zabbix.ZabbixItemKeys.Network.TcpService service, string? address = null, int? port = null) -> Community.Zabbix.ZabbixItemKey<bool>
+static Community.Zabbix.ZabbixItemKeys.Network.IsUdpListening(int port) -> Community.Zabbix.ZabbixItemKey<bool>
+static Community.Zabbix.ZabbixItemKeys.Network.MacAddresses(string? interfacePattern = null, bool addressesOnly = false) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Network.MulticastReceived(string! interfaceName) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Network.NtpResponseTime(string? address = null, int? port = null) -> Community.Zabbix.ZabbixItemKey<System.TimeSpan>
+static Community.Zabbix.ZabbixItemKeys.Network.PacketsReceived(string! interfaceName) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Network.PacketsSent(string! interfaceName) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Network.ReceiveDrops(string! interfaceName) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Network.ReceiveErrors(string! interfaceName) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Network.ReceiveFrameErrors(string! interfaceName) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Network.ReceiveOverruns(string! interfaceName) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Network.SendCarrierErrors(string! interfaceName) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Network.SendCollisions(string! interfaceName) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Network.SendDrops(string! interfaceName) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Network.SendErrors(string! interfaceName) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Network.SendOverruns(string! interfaceName) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Network.ServerQueue(string? address = null, int? port = null, System.TimeSpan? minDelay = null, System.TimeSpan? maxDelay = null) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Network.ServerStatistics(string? address = null, int? port = null) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Network.TcpServiceResponseTime(Community.Zabbix.ZabbixItemKeys.Network.TcpService service, string? address = null, int? port = null) -> Community.Zabbix.ZabbixItemKey<System.TimeSpan>
+static Community.Zabbix.ZabbixItemKeys.Network.TcpSocketCount(string? localAddress = null, int? localPort = null, string? remoteAddress = null, int? remotePort = null, System.Net.NetworkInformation.TcpState? state = null) -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Network.TotalBytes(string! interfaceName) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Network.TotalCompressed(string! interfaceName) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Network.TotalDrops(string! interfaceName) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Network.TotalErrors(string! interfaceName) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Network.TotalOverruns(string! interfaceName) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Network.TotalPackets(string! interfaceName) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Network.UdpSocketCount(string? localAddress = null, int? localPort = null, string? remoteAddress = null, int? remotePort = null, Community.Zabbix.ZabbixItemKeys.Network.UdpSocketState state = Community.Zabbix.ZabbixItemKeys.Network.UdpSocketState.Any) -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Process.AverageMemoryBytes(string? name = null, string? user = null, string? commandLine = null, Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType memoryType = Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType.VirtualSize) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Process.AverageMemoryPercent(string? name = null, string? user = null, string? commandLine = null) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Process.Count(string? name = null, string? user = null, Community.Zabbix.ZabbixItemKeys.Process.ProcessState state = Community.Zabbix.ZabbixItemKeys.Process.ProcessState.All, string? commandLine = null) -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Process.CpuPercent(string? name = null, string? user = null, Community.Zabbix.ZabbixItemKeys.Process.ProcessCpuTime time = Community.Zabbix.ZabbixItemKeys.Process.ProcessCpuTime.Total, string? commandLine = null, Community.Zabbix.ZabbixItemKeys.SampleWindow window = Community.Zabbix.ZabbixItemKeys.SampleWindow.OneMinute) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Process.Details(string? name = null, string? user = null, string? commandLine = null) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Process.Info(string! name, Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter counter = Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoCounter.VirtualSizeKilobytes, Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoStatistic statistic = Community.Zabbix.ZabbixItemKeys.Process.ProcessInfoStatistic.Average) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Process.MemoryBytes(string? name = null, string? user = null, Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryStatistic statistic = Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryStatistic.Sum, string? commandLine = null, Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType memoryType = Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryType.VirtualSize) -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Process.MemoryPercent(string? name = null, string? user = null, Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryStatistic statistic = Community.Zabbix.ZabbixItemKeys.Process.ProcessMemoryStatistic.Sum, string? commandLine = null) -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Process.Summary(string? name = null, string? user = null) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Process.ThreadDetails(string? name = null, string? user = null, string? commandLine = null) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Swap.FreeBytes.get -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Swap.FreePercent.get -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Swap.InOperations(string? device = null) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Swap.InSectors(string? device = null) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Swap.OutOperations(string? device = null) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Swap.OutSectors(string? device = null) -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Swap.PagesIn.get -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Swap.PagesOut.get -> Community.Zabbix.ZabbixItemKey<ulong>
+static Community.Zabbix.ZabbixItemKeys.Swap.TotalBytes.get -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Swap.UsedBytes.get -> Community.Zabbix.ZabbixItemKey<long>
+static Community.Zabbix.ZabbixItemKeys.Swap.UsedPercent.get -> Community.Zabbix.ZabbixItemKey<double>
+static Community.Zabbix.ZabbixItemKeys.Web.Certificate(string! hostname, int? port = null, string? address = null) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Web.Page(string! host, string? path = null, int? port = null) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemKeys.Web.PageLoadTime(string! host, string? path = null, int? port = null) -> Community.Zabbix.ZabbixItemKey<System.TimeSpan>
+static Community.Zabbix.ZabbixItemKeys.Web.PageMatch(string! host, string! pattern, string? path = null, int? port = null, int? length = null, string? output = null) -> Community.Zabbix.ZabbixItemKey<string!>
+static Community.Zabbix.ZabbixItemsBuilderExtensions.AddItems<TBuilder>(this TBuilder builder, Community.Zabbix.ZabbixItemProvider! provider) -> TBuilder
+static Community.Zabbix.ZabbixItemsBuilderExtensions.AddItems<TBuilder>(this TBuilder builder, System.Func<System.IServiceProvider!, Community.Zabbix.ZabbixItemProvider!>! factory) -> TBuilder
+static Community.Zabbix.ZabbixItemsBuilderExtensions.AddItems<TProvider>(this Community.Zabbix.IZabbixItemsBuilder! builder) -> Community.Zabbix.IZabbixItemsBuilder!
+static Community.Zabbix.ZabbixOptions.GetApiEndpoint(System.Uri! address) -> System.Uri!
+static Community.Zabbix.ZabbixOutput.Count.get -> Community.Zabbix.ZabbixOutput!
+static Community.Zabbix.ZabbixOutput.Extend.get -> Community.Zabbix.ZabbixOutput!
+static Community.Zabbix.ZabbixOutput.FromString(string! keywordOrField) -> Community.Zabbix.ZabbixOutput!
+static Community.Zabbix.ZabbixOutput.FromStringArray(string![]! fields) -> Community.Zabbix.ZabbixOutput!
+static Community.Zabbix.ZabbixOutput.Of(params System.ReadOnlySpan<string!> fields) -> Community.Zabbix.ZabbixOutput!
+static Community.Zabbix.ZabbixOutput.implicit operator Community.Zabbix.ZabbixOutput!(string! keywordOrField) -> Community.Zabbix.ZabbixOutput!
+static Community.Zabbix.ZabbixOutput.implicit operator Community.Zabbix.ZabbixOutput!(string![]! fields) -> Community.Zabbix.ZabbixOutput!
+static Community.Zabbix.ZabbixOutput.operator !=(Community.Zabbix.ZabbixOutput? left, Community.Zabbix.ZabbixOutput? right) -> bool
+static Community.Zabbix.ZabbixOutput.operator ==(Community.Zabbix.ZabbixOutput? left, Community.Zabbix.ZabbixOutput? right) -> bool
+static Community.Zabbix.ZabbixSample<T>.operator !=(Community.Zabbix.ZabbixSample<T> left, Community.Zabbix.ZabbixSample<T> right) -> bool
+static Community.Zabbix.ZabbixSample<T>.operator ==(Community.Zabbix.ZabbixSample<T> left, Community.Zabbix.ZabbixSample<T> right) -> bool
+static Community.Zabbix.ZabbixTokenRequestContext.operator !=(Community.Zabbix.ZabbixTokenRequestContext left, Community.Zabbix.ZabbixTokenRequestContext right) -> bool
+static Community.Zabbix.ZabbixTokenRequestContext.operator ==(Community.Zabbix.ZabbixTokenRequestContext left, Community.Zabbix.ZabbixTokenRequestContext right) -> bool
+static Community.Zabbix.ZabbixValue.From<T>(string! host, Community.Zabbix.ZabbixItemKey<T> item, T value, System.DateTimeOffset time) -> Community.Zabbix.ZabbixValue!
+static Community.Zabbix.ZabbixValue.operator !=(Community.Zabbix.ZabbixValue? left, Community.Zabbix.ZabbixValue? right) -> bool
+static Community.Zabbix.ZabbixValue.operator ==(Community.Zabbix.ZabbixValue? left, Community.Zabbix.ZabbixValue? right) -> bool
+virtual Community.Zabbix.ZabbixCredential.Invalidate(string! token, Community.Zabbix.ZabbixApiException! refusal) -> bool
+virtual Community.Zabbix.ZabbixGetConditions.EqualityContract.get -> System.Type!
+virtual Community.Zabbix.ZabbixGetConditions.Equals(Community.Zabbix.ZabbixGetConditions? other) -> bool
+virtual Community.Zabbix.ZabbixGetConditions.PrintMembers(System.Text.StringBuilder! builder) -> bool
+~override Community.Zabbix.ZabbixComponentVersion.Equals(object obj) -> bool
+~override Community.Zabbix.ZabbixFieldValue.Equals(object obj) -> bool
+~override Community.Zabbix.ZabbixItemKey<T>.Equals(object obj) -> bool
+~override Community.Zabbix.ZabbixSample<T>.Equals(object obj) -> bool
+~override Community.Zabbix.ZabbixSample<T>.ToString() -> string
+~override Community.Zabbix.ZabbixTokenRequestContext.Equals(object obj) -> bool
+~override Community.Zabbix.ZabbixTokenRequestContext.ToString() -> string

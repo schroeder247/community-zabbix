@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  This Source Code Form is subject to the terms of the Mozilla Public
+  License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+
+  The views of the Community.Zabbix.Agent module's own output types, hand-written because the types are (the Community.Zabbix module's
+  Zabbix.PowerShell.format.ps1xml carries the shared ones: connections, the session log). A new output type here with
+  more than four public properties needs a view here (ZabbixFormatPs1XmlTests).
+-->
+<Configuration>
+  <ViewDefinitions>
+    <View>
+      <Name>ZabbixAgentSession.Table</Name>
+      <ViewSelectedBy><TypeName>Community.Zabbix.PowerShell.Commands.ZabbixAgentSession</TypeName></ViewSelectedBy>
+      <TableControl>
+        <TableHeaders><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /><TableColumnHeader /></TableHeaders>
+        <TableRowEntries><TableRowEntry><TableColumnItems>
+          <TableColumnItem><PropertyName>Name</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Kind</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Started</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>AgentStatus</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>Listener</PropertyName></TableColumnItem>
+        </TableColumnItems></TableRowEntry></TableRowEntries>
+      </TableControl>
+    </View>
+  </ViewDefinitions>
+</Configuration>

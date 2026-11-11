@@ -1,0 +1,57 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+# Dependabot opens pull requests as a signal, not as the way a bump lands. House rule: package bumps are applied locally
+# in one gated commit (the full build with -warnaserror, both suites at their floors, pack, docfx and the live matrix),
+# because packages that move together (the Microsoft.Extensions and EF Core 10.0.x line, the Roslyn and MSBuild pairs,
+# OpenTelemetry) break when one moves without the others. The groups below keep each such set in one pull request.
+#
+# The source generator pins Microsoft.CodeAnalysis.CSharp (4.9.2) and System.Text.Json (8.0.6) with VersionOverride in
+# src/Zabbix.Generator/Zabbix.Generator.csproj, so the generator loads in the oldest IDE and SDK host it supports. The
+# NuGet updater proposes updates for a VersionOverride too, and an ignore entry cannot be scoped to one project file, so
+# the two names are ignored here as a whole: their central versions (the tests' Roslyn, the runtime's System.Text.Json)
+# are bumped locally with the groups they belong to, and the generator's pins move only when its supported hosts do.
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      microsoft-extensions-and-ef-core:
+        patterns:
+          - "Microsoft.Extensions.*"
+          - "Microsoft.EntityFrameworkCore*"
+          - "Npgsql.EntityFrameworkCore.*"
+          - "System.Threading.RateLimiting"
+      opentelemetry:
+        patterns:
+          - "OpenTelemetry*"
+      roslyn:
+        patterns:
+          - "Microsoft.CodeAnalysis.*"
+      msbuild:
+        patterns:
+          - "Microsoft.Build.*"
+      powershell:
+        patterns:
+          - "Microsoft.PowerShell.*"
+          - "PowerShellStandard.*"
+          - "System.Management.Automation"
+    ignore:
+      - dependency-name: "Microsoft.CodeAnalysis.CSharp"
+      - dependency-name: "System.Text.Json"
+    commit-message:
+      prefix: "deps"
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    # CodeQL refuses to run when its init and analyze steps are on different versions, so both move in one pull request.
+    groups:
+      codeql-action:
+        patterns:
+          - "github/codeql-action*"
+    commit-message:
+      prefix: "ci"

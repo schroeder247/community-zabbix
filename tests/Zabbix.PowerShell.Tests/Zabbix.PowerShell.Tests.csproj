@@ -1,0 +1,75 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The module's tests: the cmdlets run in real runspaces (the PowerShell SDK hosts the engine in-process — Learn,
+    "Choosing the right PowerShell NuGet package": Microsoft.PowerShell.SDK is "best suited for … xUnit testing of
+    libraries targeting PowerShell reference assemblies"), against a real HTTP server (Kestrel) that plays the Zabbix API,
+    so a cancelled call is observed where it matters: the server sees the request aborted. The import, OTLP and
+    assembly-load tests start a fresh pwsh process.
+  -->
+  <PropertyGroup>
+    <!-- The case count this project runs today; a run that discovers fewer fails, so a test silently dropped from discovery cannot pass unnoticed. -->
+    <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --minimum-expected-tests 1854</TestingPlatformCommandLineArguments>
+    <!-- The run's own deadline: every wait in these tests is bounded, and a wait nobody has
+         found yet still ends the run: after 10 minutes without a test finishing (a normal run is 80–300 s, no test
+         over 60 s) the platform writes a dump, names the tests still running, and fails, instead of printing nothing
+         for two hours. Run the dll directly with the same flags to get the same bound. -->
+    <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --hangdump --hangdump-timeout 10m --hangdump-type Mini</TestingPlatformCommandLineArguments>
+    <OlderLoggingAbstractionsVersion>8.0.2</OlderLoggingAbstractionsVersion>
+    <OlderBouncyCastleVersion>2.4.0</OlderBouncyCastleVersion>
+    <!-- NuGet writes NuGetPackageRoot as NUGET_PACKAGES spells it, with or without the closing slash. -->
+    <ZabbixPackageRoot>$([MSBuild]::EnsureTrailingSlash('$(NuGetPackageRoot)'))</ZabbixPackageRoot>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.PowerShell.SDK" />
+    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
+    <PackageDownload Include="Microsoft.Extensions.Logging.Abstractions" Version="[$(OlderLoggingAbstractionsVersion)]" />
+    <PackageDownload Include="BouncyCastle.Cryptography" Version="[$(OlderBouncyCastleVersion)]" />
+    <ProjectReference Include="../../src/Zabbix.PowerShell/Zabbix.PowerShell.csproj" />
+    <ProjectReference Include="../../src/Zabbix.PowerShell.Agent/Zabbix.PowerShell.Agent.csproj" />
+    <ProjectReference Include="../../src/Zabbix.PowerShell.Proxy/Zabbix.PowerShell.Proxy.csproj" />
+    <!-- ZabbixTypesPs1XmlTests's own coverage check: Zabbix.Generator's ApiDescription/ZabbixTypesEmitter, called
+         directly (a normal reference, not the OutputItemType="Analyzer" ReferenceOutputAssembly="false" shape
+         Zabbix.PowerShell.csproj uses to load it as a source generator), the same way Zabbix.Tests's own
+         GeneratedApiTests drives the generator in-process. -->
+    <ProjectReference Include="../../src/Zabbix.Generator/Zabbix.Generator.csproj" Aliases="ZabbixGenerator" />
+    <!-- HelpGenTests: the help generator's source reader and MAML writer, called in-process on a checked-in sample. -->
+    <ProjectReference Include="../../tools/Zabbix.PowerShell.HelpGen/Zabbix.PowerShell.HelpGen.csproj" />
+    <Using Include="Xunit" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- ZabbixTypesPs1XmlTests's own input: the same description ZabbixTypesEmitter/ZabbixApiEmitter/
+         ZabbixCmdletEmitter all read, copied into this project's own output the same way Zabbix.Tests.csproj does. -->
+    <Content Include="../../schema/zabbix-api.json" Link="schema/zabbix-api.json" CopyToOutputDirectory="PreserveNewest" />
+    <!-- HelpGenTests' sample cmdlet source (.cs.txt: read as text, never compiled here) and the MAML it must produce. -->
+    <None Include="HelpGenSample/**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- The repository, for the tests that start a fresh pwsh: they import the modules as they ship, staged by
+         tools/Stage-ZbxModules.ps1 from the module projects' own output (this test project's output is all three
+         modules in one folder, and leans on the ASP.NET shared framework, which pwsh does not have). -->
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>RepositoryRoot</_Parameter1>
+      <_Parameter2>$([MSBuild]::NormalizeDirectory($(MSBuildThisFileDirectory)../..))</_Parameter2>
+    </AssemblyAttribute>
+    <!-- The dependency-conflict tests: an older copy of a shared assembly another module may have loaded first, at
+         the version Microsoft.Extensions.* shipped for .NET 8 (downloaded, never referenced). -->
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>OlderLoggingAbstractions</_Parameter1>
+      <_Parameter2>$(ZabbixPackageRoot)microsoft.extensions.logging.abstractions/$(OlderLoggingAbstractionsVersion)/lib/net8.0/Microsoft.Extensions.Logging.Abstractions.dll</_Parameter2>
+    </AssemblyAttribute>
+    <!-- An older BouncyCastle 2.x: the same assembly version (2.0.0.0) as the module's copy, an older release. -->
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>OlderBouncyCastle</_Parameter1>
+      <_Parameter2>$(ZabbixPackageRoot)bouncycastle.cryptography/$(OlderBouncyCastleVersion)/lib/net6.0/BouncyCastle.Cryptography.dll</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>Configuration</_Parameter1>
+      <_Parameter2>$(Configuration)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>

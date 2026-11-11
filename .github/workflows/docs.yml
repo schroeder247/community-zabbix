@@ -1,0 +1,83 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+name: Docs
+
+# The strict site build gates every pull request that touches what the site is built from; only a push to main
+# publishes it (job `deploy`).
+on:
+  push:
+    branches: [main]
+    # A YAML anchor: the pull request trigger below reads the same list.
+    paths: &site-sources
+      - 'src/**'
+      # The API model is generated at build time from the schema; the build props decide what is documented.
+      - 'schema/**'
+      - 'Directory.Build.*'
+      - 'Directory.Packages.props'
+      - 'global.json'
+      - 'docs/**'
+      - '*.md'
+      - 'api/index.md'
+      - 'docfx.json'
+      - 'toc.yml'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    branches: [main]
+    paths: *site-sources
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false   # no step pushes, so the token is not kept in .git/config
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          global-json-file: global.json
+      # docfx loads the source generators from bin/Release (the API model and the clients are generated at build time),
+      # so the libraries are built first. Zabbix.Proxy and the EF store reference every other library but Zabbix.Sdk,
+      # which the modules reference.
+      # The PowerShell modules are not part of the API site, but their builds rewrite the committed cmdlet reference
+      # under docs/reference, so the site publishes what the build writes (docs/adr/0004-conventions.md, amendment).
+      - name: Build the libraries (generators for docfx) and the modules (reference pages)
+        run: |
+          dotnet build src/Zabbix.Proxy/Zabbix.Proxy.csproj -c Release
+          dotnet build src/Zabbix.Agent.Storage.EntityFrameworkCore/Zabbix.Agent.Storage.EntityFrameworkCore.csproj -c Release
+          dotnet build src/Zabbix.Agent.Plugins/Zabbix.Agent.Plugins.csproj -c Release
+          dotnet build src/Zabbix.PowerShell.Agent/Zabbix.PowerShell.Agent.csproj -c Release
+          dotnet build src/Zabbix.PowerShell.Proxy/Zabbix.PowerShell.Proxy.csproj -c Release
+      - name: Install docfx
+        run: dotnet tool install -g docfx
+      - name: Build site (strict)
+        run: docfx docfx.json --warningsAsErrors
+      - if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    # deploy-pages fails with 404 until GitHub Pages is enabled with GitHub Actions as its source (CONTRIBUTING.md,
+    # "Releasing"). The job runs when the repository variable DEPLOY_PAGES is true; the build job above keeps validating
+    # the site strictly either way.
+    if: vars.DEPLOY_PAGES == 'true' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5

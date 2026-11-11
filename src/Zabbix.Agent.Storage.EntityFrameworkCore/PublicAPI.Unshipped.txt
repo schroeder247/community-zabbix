@@ -1,0 +1,8 @@
+#nullable enable
+Community.Zabbix.Storage.EntityFrameworkCore.ZabbixEntityFrameworkStore<T>
+Community.Zabbix.Storage.EntityFrameworkCore.ZabbixEntityFrameworkStore<T>.Table.get -> string!
+Community.Zabbix.Storage.EntityFrameworkCore.ZabbixEntityFrameworkStore<T>.ZabbixEntityFrameworkStore(System.Action<Microsoft.EntityFrameworkCore.DbContextOptionsBuilder!>! configureDatabase, Community.Zabbix.Storage.ZabbixStorePolicy<T!>? policy = null, Community.Zabbix.Storage.ZabbixStoreServices? services = null) -> void
+Community.Zabbix.Storage.EntityFrameworkCore.ZabbixEntityFrameworkStoreBuilderExtensions
+Community.Zabbix.Storage.EntityFrameworkCore.ZabbixEntityFrameworkStoreBuilderExtensions.extension<TBuilder>(TBuilder)
+Community.Zabbix.Storage.EntityFrameworkCore.ZabbixEntityFrameworkStoreBuilderExtensions.extension<TBuilder>(TBuilder).UseEntityFrameworkStore(System.Action<Microsoft.EntityFrameworkCore.DbContextOptionsBuilder!>! configureDatabase) -> TBuilder
+static Community.Zabbix.Storage.EntityFrameworkCore.ZabbixEntityFrameworkStoreBuilderExtensions.UseEntityFrameworkStore<TBuilder>(this TBuilder builder, System.Action<Microsoft.EntityFrameworkCore.DbContextOptionsBuilder!>! configureDatabase) -> TBuilder

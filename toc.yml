@@ -1,0 +1,92 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+- name: Home
+  href: index.md
+- name: Overview
+  href: README.md
+- name: Install
+  href: docs/INSTALL.md
+- name: Getting started
+  items:
+  - name: .NET
+    href: docs/GETTING-STARTED.md
+  - name: PowerShell
+    href: src/Zabbix.PowerShell/GETTING-STARTED.md
+- name: Samples
+  href: samples/README.md
+- name: Guides
+  items:
+  - name: The API client
+    href: docs/guides/api-client.md
+  - name: The tree and the watcher
+    href: docs/guides/tree-and-watcher.md
+  - name: The wire client
+    href: docs/guides/wire-client.md
+  - name: Agents
+    href: docs/guides/zabbix-agents.md
+  - name: Items
+    href: docs/guides/items.md
+  - name: Plugins
+    href: docs/guides/plugins.md
+  - name: Bundled items
+    href: docs/guides/bundled-items.md
+  - name: Stores
+    href: docs/guides/stores.md
+  - name: Proxies
+    href: docs/guides/proxies.md
+  - name: Listeners
+    href: docs/guides/listeners.md
+  - name: TLS and PSK
+    href: docs/guides/tls-and-psk.md
+  - name: Telemetry
+    href: docs/guides/telemetry.md
+  - name: Configuration
+    href: docs/guides/configuration.md
+  - name: PowerShell
+    href: docs/guides/powershell.md
+- name: Troubleshooting
+  href: docs/TROUBLESHOOTING.md
+- name: Cmdlet reference
+  items:
+  - name: Community.Zabbix
+    href: docs/reference/Community.Zabbix/README.md
+  - name: Community.Zabbix.Agent
+    href: docs/reference/Community.Zabbix.Agent/README.md
+  - name: Community.Zabbix.Proxy
+    href: docs/reference/Community.Zabbix.Proxy/README.md
+- name: API reference
+  href: api/
+- name: Features
+  href: docs/FEATURES.md
+- name: Known limitations
+  href: docs/KNOWN-LIMITATIONS.md
+- name: Changelog
+  href: CHANGELOG.md
+- name: Security
+  href: SECURITY.md
+- name: License, trademark, and warranty
+  href: docs/LEGAL.md
+- name: Contributing
+  items:
+  - name: Contributing
+    href: CONTRIBUTING.md
+  - name: Testing
+    href: docs/TESTING.md
+  - name: Architecture
+    href: docs/design/architecture.md
+  - name: Design decisions
+    href: docs/design/decisions.md
+  - name: The PowerShell module contract
+    href: docs/design/powershell-module.md
+  - name: PowerShell binding
+    href: docs/design/powershell-binding.md
+  - name: Platform survey
+    href: docs/design/platform-survey.md
+  - name: Generator diagnostics
+    href: docs/generator-diagnostics.md
+  - name: The API model extractor
+    href: tools/ZabbixApiExtract/README.md
+  - name: Decision records
+    href: docs/adr/README.md
+- name: Documentation map
+  href: docs/INDEX.md

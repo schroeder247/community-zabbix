@@ -1,0 +1,27 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+# Normalize line endings to LF, in the repository and in the working tree.
+* text=auto eol=lf
+
+# PowerShell + scripts stay LF (pwsh 7 is cross-platform).
+*.ps1   text eol=lf
+*.psm1  text eol=lf
+*.psd1  text eol=lf
+*.sh    text eol=lf
+
+# Windows-only artifacts keep CRLF where a tool requires it.
+*.sln   text eol=crlf
+
+# Treat these as binary (no diff, no eol munging).
+*.png   binary
+*.jpg   binary
+*.gif   binary
+*.ico   binary
+*.pdf   binary
+*.snk   binary
+
+# Generated / vendored files: exclude from language stats and collapse in diffs.
+*.g.cs            linguist-generated=true
+Enums.g.cs        linguist-generated=true
+src/Zabbix.PowerShell/en-US/*.xml linguist-generated=true
+src/Zabbix.PowerShell/reference/*.md linguist-generated=true

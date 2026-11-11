@@ -1,0 +1,27 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Plugins an agent loads from a folder its configuration names (docs/adr/0008-item-providers-and-plugins.md): each
+       listed plugin in a load context of its own, its entry registering its item providers as a library's compile-time
+       registration does. It takes the item contract (Zabbix.Abstractions) and nothing else: AssemblyLoadContext and
+       AssemblyDependencyResolver are the base class library's, and the registration is generic over the agent's
+       builder, so the active and the passive agent take plugins alike. -->
+  <PropertyGroup>
+    <RootNamespace>Community.Zabbix</RootNamespace>
+    <AssemblyName>Community.Zabbix.Agent.Plugins</AssemblyName>
+    <PackageId>Community.Zabbix.Agent.Plugins</PackageId>
+    <Description>Plugins for Zabbix agents built with the Community Zabbix SDK: item providers loaded at start from a folder the configuration names, each plugin listed by name and isolated in a load context of its own.</Description>
+    <PackageTags>zabbix;monitoring;agent;plugins</PackageTags>
+    <!-- Loading an assembly at run time is what trimming and native AOT rule out; the opt-out is this package's alone,
+         so an application that does not load plugins stays AOT-compatible. -->
+    <IsAotCompatible>false</IsAotCompatible>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Zabbix.Abstractions/Zabbix.Abstractions.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Zabbix.Tests" />
+  </ItemGroup>
+</Project>

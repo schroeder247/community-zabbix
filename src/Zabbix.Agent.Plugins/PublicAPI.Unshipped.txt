@@ -1,0 +1,20 @@
+#nullable enable
+Community.Zabbix.ZabbixPluginBuilderExtensions
+Community.Zabbix.ZabbixPluginBuilderExtensions.extension<TBuilder>(TBuilder)
+Community.Zabbix.ZabbixPluginBuilderExtensions.extension<TBuilder>(TBuilder).AddPlugins(Community.Zabbix.ZabbixPluginOptions! options) -> TBuilder
+Community.Zabbix.ZabbixPluginBuilderExtensions.extension<TBuilder>(TBuilder).AddPlugins(Microsoft.Extensions.Configuration.IConfiguration! configuration) -> TBuilder
+Community.Zabbix.ZabbixPluginItemExtensions
+Community.Zabbix.ZabbixPluginItemExtensions.extension<TRegistry>(TRegistry)
+Community.Zabbix.ZabbixPluginItemExtensions.extension<TRegistry>(TRegistry).AddPlugins(Community.Zabbix.ZabbixPluginOptions! options) -> TRegistry
+Community.Zabbix.ZabbixPluginItemExtensions.extension<TRegistry>(TRegistry).AddPlugins(Microsoft.Extensions.Configuration.IConfiguration! configuration) -> TRegistry
+Community.Zabbix.ZabbixPluginOptions
+Community.Zabbix.ZabbixPluginOptions.Load.get -> System.Collections.Generic.IList<string!>!
+Community.Zabbix.ZabbixPluginOptions.Path.get -> string?
+Community.Zabbix.ZabbixPluginOptions.Path.set -> void
+Community.Zabbix.ZabbixPluginOptions.Settings.get -> Microsoft.Extensions.Configuration.IConfiguration?
+Community.Zabbix.ZabbixPluginOptions.Settings.set -> void
+Community.Zabbix.ZabbixPluginOptions.ZabbixPluginOptions() -> void
+static Community.Zabbix.ZabbixPluginBuilderExtensions.AddPlugins<TBuilder>(this TBuilder builder, Community.Zabbix.ZabbixPluginOptions! options) -> TBuilder
+static Community.Zabbix.ZabbixPluginBuilderExtensions.AddPlugins<TBuilder>(this TBuilder builder, Microsoft.Extensions.Configuration.IConfiguration! configuration) -> TBuilder
+static Community.Zabbix.ZabbixPluginItemExtensions.AddPlugins<TRegistry>(this TRegistry items, Community.Zabbix.ZabbixPluginOptions! options) -> TRegistry
+static Community.Zabbix.ZabbixPluginItemExtensions.AddPlugins<TRegistry>(this TRegistry items, Microsoft.Extensions.Configuration.IConfiguration! configuration) -> TRegistry

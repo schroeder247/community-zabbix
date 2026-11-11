@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+  This Source Code Form is subject to the terms of the Mozilla Public
+  License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+
+  A violation compile: a library-shaped project whose every marked line breaks a rule the build claims
+  to enforce. It is NOT in Zabbix.slnx and is expected to fail; DesignConformanceTests builds it and holds each
+  `// expect: ID` mark to the error the build reports at that line. It is analysed as a library: the solution's
+  Directory.Build.* (through the props below), .editorconfig and BannedSymbols.txt, none of the test relaxations.
+  -->
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>Community.Zabbix.Analyzers</RootNamespace>
+    <!-- Not a real library surface, so it opts out of Directory.Build.targets' PublicApiAnalyzers
+         wiring the same way tools/Zabbix.PowerShell.HelpGen does — this project has no PublicAPI.Shipped/Unshipped.txt
+         and is not meant to grow one; every marked line already fails on purpose, and RS0016/RS0037 firing on every
+         OTHER symbol here (there is no baseline file at all) drowned out The_probe_build_fails_only_where_a_probe_is_marked
+         with 20 unmarked "errors" that are an artifact of this project having no baseline, not a rule this file means
+         to prove. -->
+    <IsPublicApiTracked>false</IsPublicApiTracked>
+  </PropertyGroup>
+</Project>

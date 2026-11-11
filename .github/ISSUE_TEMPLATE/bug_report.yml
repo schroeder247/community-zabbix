@@ -1,0 +1,44 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+name: Bug report
+description: Report a defect in the SDK or a PowerShell module.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do **not** report security vulnerabilities here — use the private
+        advisory link on the "New issue" chooser. Never paste real tokens,
+        passwords, or PSK keys; redact them.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you expected versus what occurred.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: Minimal steps, cmdlet/SDK call, or code. Redact secrets.
+      render: powershell
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: SDK or module version
+      placeholder: "1.0.0"
+    validations:
+      required: true
+  - type: input
+    id: zabbix-version
+    attributes:
+      label: Zabbix server version
+      placeholder: "7.4.13"
+  - type: input
+    id: platform
+    attributes:
+      label: OS / .NET / PowerShell
+      placeholder: "Ubuntu 24.04, .NET 10, PowerShell 7.6"

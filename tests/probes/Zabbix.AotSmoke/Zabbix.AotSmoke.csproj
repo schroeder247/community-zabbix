@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+  This Source Code Form is subject to the terms of the Mozilla Public
+  License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+
+  The Native AOT composition check. The trim and AOT analyzers see each library alone; a publish proves the libraries
+  compose (Learn, "Native AOT deployment": the analyzers and the publish are separate checks). CI publishes this
+  console with `dotnet publish -warnaserror`, so any ILLink or ILC warning (IL2xxx, IL3xxx) fails the job, then runs
+  the binary. It is not in Zabbix.slnx: it is published on its own, never packed or tested.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <PublishAot>true</PublishAot>
+    <!-- Named, so a publish on any of these restores what the lock file holds: an AOT publish adds its host's runtime
+         identifier, and a lock file written on one fails CI's locked restore on another (NU1004). -->
+    <RuntimeIdentifiers>linux-x64;osx-arm64</RuntimeIdentifiers>
+    <IsPackable>false</IsPackable>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../../src/Zabbix.Sdk/Zabbix.Sdk.csproj" />
+    <ProjectReference Include="../../../src/Zabbix.Wire/Zabbix.Wire.csproj" />
+    <ProjectReference Include="../../../src/Zabbix.Agent/Zabbix.Agent.csproj" />
+    <ProjectReference Include="../../../src/Zabbix.Proxy/Zabbix.Proxy.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+  </ItemGroup>
+</Project>

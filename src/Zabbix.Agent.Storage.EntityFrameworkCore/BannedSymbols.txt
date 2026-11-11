@@ -1,0 +1,14 @@
+# The EF store's own bans, on top of the repository's: every database call is the asynchronous form, made by the store's
+# loop, never a synchronous round trip on a caller's thread (ZabbixPersistentStore<T>).
+M:Microsoft.EntityFrameworkCore.DbContext.SaveChanges;Use SaveChangesAsync: the store's loop awaits the database
+M:Microsoft.EntityFrameworkCore.DbContext.SaveChanges(System.Boolean);Use SaveChangesAsync: the store's loop awaits the database
+M:Microsoft.EntityFrameworkCore.RelationalQueryableExtensions.ExecuteDelete``1(System.Linq.IQueryable{``0});Use ExecuteDeleteAsync
+M:Microsoft.EntityFrameworkCore.RelationalQueryableExtensions.ExecuteUpdate``1(System.Linq.IQueryable{``0},System.Action{Microsoft.EntityFrameworkCore.Query.UpdateSettersBuilder{``0}});Use ExecuteUpdateAsync
+M:Microsoft.EntityFrameworkCore.Storage.IRelationalDatabaseCreator.Exists;Use ExistsAsync
+M:Microsoft.EntityFrameworkCore.Storage.IRelationalDatabaseCreator.Create;Use CreateAsync
+M:Microsoft.EntityFrameworkCore.Storage.IRelationalDatabaseCreator.CreateTables;Use CreateTablesAsync
+M:Microsoft.EntityFrameworkCore.Storage.IRelationalDatabaseCreator.HasTables;Use HasTablesAsync
+M:Microsoft.EntityFrameworkCore.Storage.IDatabaseCreator.EnsureCreated;Use EnsureCreatedAsync
+M:Microsoft.EntityFrameworkCore.Storage.IDatabaseCreator.EnsureDeleted;Use EnsureDeletedAsync
+M:System.Linq.Queryable.Count``1(System.Linq.IQueryable{``0});Use CountAsync
+M:System.Linq.Queryable.Any``1(System.Linq.IQueryable{``0});Use AnyAsync

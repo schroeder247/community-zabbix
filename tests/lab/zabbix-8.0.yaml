@@ -1,0 +1,75 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+#
+# Zabbix 8.0 at 8.0.0rc1's API: a throwaway server for the live matrix, one pod (its own PostgreSQL, the server, the
+# frontend) sharing one network namespace, so every component reaches the others on 127.0.0.1 as the official compose
+# files do. Docker Hub has no 8.0.0rc1 image; these are alpine-trunk builds pinned by their index digests (trunk moves
+# daily), a master build from after the 8.0.0rc1 tag: the server reports "zabbix_server (Zabbix) 8.0.0rc2, Revision
+# 0f4cbcd 1 October 2026", the frontend ZABBIX_VERSION 8.0.0rc2 and API version 8.0.0, with rc1's API (the APM objects,
+# CCepRuleHelper::WINDOW_SIMPLE_ONCE). Trunk builds from before the tag also call themselves 8.0.0rc1 but predate its API.
+# API http://localhost:18080/api_jsonrpc.php, trapper 127.0.0.1:18052.
+#
+# Not played directly: lab.sh renders @PKI@ (the directory holding the lab's CA, server certificate and key, made by
+# `lab.sh pki`) and plays the result, then creates the Admin API token. `podman kube play` names the containers
+# <pod>-<container> (zbxlab-80-db, -server, -web), the names lab.sh addresses.
+#
+# Server settings beyond the image defaults, each for one live test:
+#   ZBX_CACHEUPDATEFREQUENCY=1     a created item is in the configuration cache within a second, so a sender test's
+#                                  wait for "processed: 1" is short (the default is 10 s)
+#   ZBX_PROXYCONFIGFREQUENCY=5     the passive-proxy test sees the server push configuration within seconds
+#   ZBX_STARTCONNECTORS=1          streaming connectors run at all (the default, 0, starts no connector worker)
+#   ZBX_STATSALLOWEDIP             zabbix.stats answers the host (rootless podman presents the host as a pod-side peer)
+#   ZBX_TLSCAFILE/CERTFILE/KEYFILE the certificate path of the agent, sender and proxy tests (TLS PSK needs no server
+#                                  setting: the key is set per host or proxy through the API)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: zbxlab-80
+  labels:
+    app: zbxlab
+    zabbix-version: "8.0"
+    zabbix-release: "8.0.0rc1"
+spec:
+  restartPolicy: Always
+  containers:
+    - name: db
+      # postgres:16-alpine
+      image: docker.io/library/postgres@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea
+      env:
+        - { name: POSTGRES_USER, value: zabbix }
+        - { name: POSTGRES_PASSWORD, value: zabbix }
+        - { name: POSTGRES_DB, value: zabbix }
+    - name: server
+      image: docker.io/zabbix/zabbix-server-pgsql@sha256:79f853e7b254afe841a8b2b6720321076675f8ea44a1a41093367308a456b9b6
+      env:
+        - { name: DB_SERVER_HOST, value: 127.0.0.1 }
+        - { name: POSTGRES_USER, value: zabbix }
+        - { name: POSTGRES_PASSWORD, value: zabbix }
+        - { name: POSTGRES_DB, value: zabbix }
+        - { name: ZBX_CACHEUPDATEFREQUENCY, value: "1" }
+        - { name: ZBX_PROXYCONFIGFREQUENCY, value: "5" }
+        - { name: ZBX_STARTCONNECTORS, value: "1" }
+        - { name: ZBX_STATSALLOWEDIP, value: "0.0.0.0/0,::/0" }
+        - { name: ZBX_TLSCAFILE, value: /var/lib/zabbix/enc/ca.crt }
+        - { name: ZBX_TLSCERTFILE, value: /var/lib/zabbix/enc/server.crt }
+        - { name: ZBX_TLSKEYFILE, value: /var/lib/zabbix/enc/server.key }
+      ports:
+        - { containerPort: 10051, hostPort: 18052 }
+      volumeMounts:
+        - { name: pki, mountPath: /var/lib/zabbix/enc, readOnly: true }
+    - name: web
+      image: docker.io/zabbix/zabbix-web-nginx-pgsql@sha256:2d5f30b6ac45b9834ee035f8d39c76de0b527e7eccb8d3bd7bf038b5402ccd39
+      env:
+        - { name: DB_SERVER_HOST, value: 127.0.0.1 }
+        - { name: POSTGRES_USER, value: zabbix }
+        - { name: POSTGRES_PASSWORD, value: zabbix }
+        - { name: POSTGRES_DB, value: zabbix }
+        - { name: ZBX_SERVER_HOST, value: 127.0.0.1 }
+        - { name: PHP_TZ, value: UTC }
+      ports:
+        - { containerPort: 8080, hostPort: 18080 }
+  volumes:
+    - name: pki
+      hostPath:
+        path: "@PKI@"
+        type: Directory

@@ -1,0 +1,43 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- The cases this project executes today on each system, skipped ones not counted: Linux counts the PostgreSQL tests
+         CI runs there, and each system skips the platform calls of the others. A run that executes fewer fails: a deleted
+         or silently undiscovered test is a deliberate edit here, never a quiet shrink. -->
+    <TestingPlatformCommandLineArguments Condition="$([MSBuild]::IsOSPlatform('Linux'))">$(TestingPlatformCommandLineArguments) --minimum-expected-tests 3007</TestingPlatformCommandLineArguments>
+    <TestingPlatformCommandLineArguments Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(TestingPlatformCommandLineArguments) --minimum-expected-tests 2996</TestingPlatformCommandLineArguments>
+    <TestingPlatformCommandLineArguments Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TestingPlatformCommandLineArguments) --minimum-expected-tests 2994</TestingPlatformCommandLineArguments>
+    <!-- The run's own deadline, as the PowerShell suite has: after 10 minutes without a test finishing (a normal run is
+         under a minute) the platform writes a dump, names the tests still running, and fails. -->
+    <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --hangdump --hangdump-timeout 10m --hangdump-type Mini</TestingPlatformCommandLineArguments>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Zabbix.Sdk/Zabbix.Sdk.csproj" />
+    <ProjectReference Include="../../src/Zabbix.Agent/Zabbix.Agent.csproj" />
+    <ProjectReference Include="../../src/Zabbix.Proxy/Zabbix.Proxy.csproj" />
+    <ProjectReference Include="../../src/Zabbix.Agent.Storage.EntityFrameworkCore/Zabbix.Agent.Storage.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="../../src/Zabbix.Agent.Plugins/Zabbix.Agent.Plugins.csproj" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <!-- The durable store runs on SQLite in every run (a throwaway file) and on PostgreSQL when ZABBIX_TEST_POSTGRES is set. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+    <!-- The extended [LoggerMessage] generator, so a test can log a classified parameter the way the SDK does. -->
+    <PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" />
+    <!-- The parsers and the frame reader as properties over generated inputs (PropertyTests). -->
+    <PackageReference Include="CsCheck" />
+    <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
+    <Using Include="Xunit" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- The generator is driven in-process (its diagnostics and its two parts), and the checked-in JSON context is
+         held to the description by the build step that writes it. -->
+    <ProjectReference Include="../../src/Zabbix.Generator/Zabbix.Generator.csproj" Aliases="ZabbixGenerator" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <Content Include="../../schema/zabbix-api.json" Link="schema/zabbix-api.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

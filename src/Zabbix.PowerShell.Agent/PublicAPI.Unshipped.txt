@@ -1,0 +1,206 @@
+#nullable enable
+Community.Zabbix.PowerShell.Commands.ClearZbxActiveAgentLogCommand
+Community.Zabbix.PowerShell.Commands.ClearZbxActiveAgentLogCommand.ClearZbxActiveAgentLogCommand() -> void
+Community.Zabbix.PowerShell.Commands.ClearZbxAgentHostCommand
+Community.Zabbix.PowerShell.Commands.ClearZbxAgentHostCommand.ClearZbxAgentHostCommand() -> void
+Community.Zabbix.PowerShell.Commands.ClearZbxAgentHostCommand.Force.get -> System.Management.Automation.SwitchParameter
+Community.Zabbix.PowerShell.Commands.ClearZbxAgentHostCommand.Force.set -> void
+Community.Zabbix.PowerShell.Commands.ClearZbxPassiveAgentLogCommand
+Community.Zabbix.PowerShell.Commands.ClearZbxPassiveAgentLogCommand.ClearZbxPassiveAgentLogCommand() -> void
+Community.Zabbix.PowerShell.Commands.ExportZbxAgentTemplateCommand
+Community.Zabbix.PowerShell.Commands.ExportZbxAgentTemplateCommand.ExportZbxAgentTemplateCommand() -> void
+Community.Zabbix.PowerShell.Commands.ExportZbxAgentTemplateCommand.Format.get -> Community.Zabbix.PowerShell.Commands.ZabbixConfigurationFormat
+Community.Zabbix.PowerShell.Commands.ExportZbxAgentTemplateCommand.Format.set -> void
+Community.Zabbix.PowerShell.Commands.ExportZbxAgentTemplateCommand.LiteralPath.get -> string?
+Community.Zabbix.PowerShell.Commands.ExportZbxAgentTemplateCommand.LiteralPath.set -> void
+Community.Zabbix.PowerShell.Commands.ExportZbxAgentTemplateCommand.NoClobber.get -> System.Management.Automation.SwitchParameter
+Community.Zabbix.PowerShell.Commands.ExportZbxAgentTemplateCommand.NoClobber.set -> void
+Community.Zabbix.PowerShell.Commands.ExportZbxAgentTemplateCommand.Path.get -> string?
+Community.Zabbix.PowerShell.Commands.ExportZbxAgentTemplateCommand.Path.set -> void
+Community.Zabbix.PowerShell.Commands.ExportZbxAgentTemplateCommand.Unredacted.get -> System.Management.Automation.SwitchParameter
+Community.Zabbix.PowerShell.Commands.ExportZbxAgentTemplateCommand.Unredacted.set -> void
+Community.Zabbix.PowerShell.Commands.GetZbxActiveAgentLogCommand
+Community.Zabbix.PowerShell.Commands.GetZbxActiveAgentLogCommand.GetZbxActiveAgentLogCommand() -> void
+Community.Zabbix.PowerShell.Commands.GetZbxActiveAgentStatusCommand
+Community.Zabbix.PowerShell.Commands.GetZbxActiveAgentStatusCommand.GetZbxActiveAgentStatusCommand() -> void
+Community.Zabbix.PowerShell.Commands.GetZbxActiveAgentStatusCommand.Name.get -> string?
+Community.Zabbix.PowerShell.Commands.GetZbxActiveAgentStatusCommand.Name.set -> void
+Community.Zabbix.PowerShell.Commands.GetZbxAgentHostCommand
+Community.Zabbix.PowerShell.Commands.GetZbxAgentHostCommand.GetZbxAgentHostCommand() -> void
+Community.Zabbix.PowerShell.Commands.GetZbxPassiveAgentLogCommand
+Community.Zabbix.PowerShell.Commands.GetZbxPassiveAgentLogCommand.GetZbxPassiveAgentLogCommand() -> void
+Community.Zabbix.PowerShell.Commands.GetZbxPassiveAgentStatusCommand
+Community.Zabbix.PowerShell.Commands.GetZbxPassiveAgentStatusCommand.GetZbxPassiveAgentStatusCommand() -> void
+Community.Zabbix.PowerShell.Commands.GetZbxPassiveAgentStatusCommand.Name.get -> string?
+Community.Zabbix.PowerShell.Commands.GetZbxPassiveAgentStatusCommand.Name.set -> void
+Community.Zabbix.PowerShell.Commands.InitializeZbxAgentHostCommand
+Community.Zabbix.PowerShell.Commands.InitializeZbxAgentHostCommand.HostGroup.get -> string!
+Community.Zabbix.PowerShell.Commands.InitializeZbxAgentHostCommand.HostGroup.set -> void
+Community.Zabbix.PowerShell.Commands.InitializeZbxAgentHostCommand.HostName.get -> string?
+Community.Zabbix.PowerShell.Commands.InitializeZbxAgentHostCommand.HostName.set -> void
+Community.Zabbix.PowerShell.Commands.InitializeZbxAgentHostCommand.InitializeZbxAgentHostCommand() -> void
+Community.Zabbix.PowerShell.Commands.InitializeZbxAgentHostCommand.InterfaceAddress.get -> string?
+Community.Zabbix.PowerShell.Commands.InitializeZbxAgentHostCommand.InterfaceAddress.set -> void
+Community.Zabbix.PowerShell.Commands.InitializeZbxAgentHostCommand.InterfacePort.get -> int?
+Community.Zabbix.PowerShell.Commands.InitializeZbxAgentHostCommand.InterfacePort.set -> void
+Community.Zabbix.PowerShell.Commands.InitializeZbxAgentHostCommand.Key.get -> string![]?
+Community.Zabbix.PowerShell.Commands.InitializeZbxAgentHostCommand.Key.set -> void
+Community.Zabbix.PowerShell.Commands.InitializeZbxAgentHostCommand.PassThru.get -> System.Management.Automation.SwitchParameter
+Community.Zabbix.PowerShell.Commands.InitializeZbxAgentHostCommand.PassThru.set -> void
+Community.Zabbix.PowerShell.Commands.InitializeZbxAgentHostCommand.Session.get -> string?
+Community.Zabbix.PowerShell.Commands.InitializeZbxAgentHostCommand.Session.set -> void
+Community.Zabbix.PowerShell.Commands.InitializeZbxAgentHostCommand.ValueType.get -> Community.Zabbix.ZabbixItemValueType
+Community.Zabbix.PowerShell.Commands.InitializeZbxAgentHostCommand.ValueType.set -> void
+Community.Zabbix.PowerShell.Commands.NewZbxAgentHandlerCommand
+Community.Zabbix.PowerShell.Commands.NewZbxAgentHandlerCommand.Key.get -> string!
+Community.Zabbix.PowerShell.Commands.NewZbxAgentHandlerCommand.Key.set -> void
+Community.Zabbix.PowerShell.Commands.NewZbxAgentHandlerCommand.NewZbxAgentHandlerCommand() -> void
+Community.Zabbix.PowerShell.Commands.NewZbxAgentHandlerCommand.ScriptBlock.get -> System.Management.Automation.ScriptBlock!
+Community.Zabbix.PowerShell.Commands.NewZbxAgentHandlerCommand.ScriptBlock.set -> void
+Community.Zabbix.PowerShell.Commands.PublishZbxAgentHostCommand
+Community.Zabbix.PowerShell.Commands.PublishZbxAgentHostCommand.PassThru.get -> System.Management.Automation.SwitchParameter
+Community.Zabbix.PowerShell.Commands.PublishZbxAgentHostCommand.PassThru.set -> void
+Community.Zabbix.PowerShell.Commands.PublishZbxAgentHostCommand.PublishZbxAgentHostCommand() -> void
+Community.Zabbix.PowerShell.Commands.PublishZbxAgentHostCommand.RemoveStale.get -> System.Management.Automation.SwitchParameter
+Community.Zabbix.PowerShell.Commands.PublishZbxAgentHostCommand.RemoveStale.set -> void
+Community.Zabbix.PowerShell.Commands.PublishZbxAgentHostCommand.ValueType.get -> Community.Zabbix.ZabbixItemValueType
+Community.Zabbix.PowerShell.Commands.PublishZbxAgentHostCommand.ValueType.set -> void
+Community.Zabbix.PowerShell.Commands.RegisterZbxActiveAgentHandlerCommand
+Community.Zabbix.PowerShell.Commands.RegisterZbxActiveAgentHandlerCommand.RegisterZbxActiveAgentHandlerCommand() -> void
+Community.Zabbix.PowerShell.Commands.RegisterZbxAgentHandlerCommand
+Community.Zabbix.PowerShell.Commands.RegisterZbxAgentHandlerCommand.RegisterZbxAgentHandlerCommand() -> void
+Community.Zabbix.PowerShell.Commands.RegisterZbxPassiveAgentHandlerCommand
+Community.Zabbix.PowerShell.Commands.RegisterZbxPassiveAgentHandlerCommand.RegisterZbxPassiveAgentHandlerCommand() -> void
+Community.Zabbix.PowerShell.Commands.StartZbxActiveAgentCommand
+Community.Zabbix.PowerShell.Commands.StartZbxActiveAgentCommand.HeartbeatInterval.get -> System.TimeSpan
+Community.Zabbix.PowerShell.Commands.StartZbxActiveAgentCommand.HeartbeatInterval.set -> void
+Community.Zabbix.PowerShell.Commands.StartZbxActiveAgentCommand.HostMetadata.get -> string?
+Community.Zabbix.PowerShell.Commands.StartZbxActiveAgentCommand.HostMetadata.set -> void
+Community.Zabbix.PowerShell.Commands.StartZbxActiveAgentCommand.RefreshInterval.get -> System.TimeSpan
+Community.Zabbix.PowerShell.Commands.StartZbxActiveAgentCommand.RefreshInterval.set -> void
+Community.Zabbix.PowerShell.Commands.StartZbxActiveAgentCommand.Server.get -> string!
+Community.Zabbix.PowerShell.Commands.StartZbxActiveAgentCommand.Server.set -> void
+Community.Zabbix.PowerShell.Commands.StartZbxActiveAgentCommand.StartZbxActiveAgentCommand() -> void
+Community.Zabbix.PowerShell.Commands.StartZbxActiveAgentCommand.Tls.get -> Community.Zabbix.ZabbixTlsMode?
+Community.Zabbix.PowerShell.Commands.StartZbxActiveAgentCommand.Tls.set -> void
+Community.Zabbix.PowerShell.Commands.StartZbxPassiveAgentCommand
+Community.Zabbix.PowerShell.Commands.StartZbxPassiveAgentCommand.Address.get -> string!
+Community.Zabbix.PowerShell.Commands.StartZbxPassiveAgentCommand.Address.set -> void
+Community.Zabbix.PowerShell.Commands.StartZbxPassiveAgentCommand.AllowedPeer.get -> string![]!
+Community.Zabbix.PowerShell.Commands.StartZbxPassiveAgentCommand.AllowedPeer.set -> void
+Community.Zabbix.PowerShell.Commands.StartZbxPassiveAgentCommand.CheckTimeout.get -> System.TimeSpan
+Community.Zabbix.PowerShell.Commands.StartZbxPassiveAgentCommand.CheckTimeout.set -> void
+Community.Zabbix.PowerShell.Commands.StartZbxPassiveAgentCommand.Port.get -> int
+Community.Zabbix.PowerShell.Commands.StartZbxPassiveAgentCommand.Port.set -> void
+Community.Zabbix.PowerShell.Commands.StartZbxPassiveAgentCommand.StartZbxPassiveAgentCommand() -> void
+Community.Zabbix.PowerShell.Commands.StartZbxPassiveAgentCommand.TlsAccept.get -> Community.Zabbix.ZabbixTlsAcceptModes[]?
+Community.Zabbix.PowerShell.Commands.StartZbxPassiveAgentCommand.TlsAccept.set -> void
+Community.Zabbix.PowerShell.Commands.StopZbxActiveAgentCommand
+Community.Zabbix.PowerShell.Commands.StopZbxActiveAgentCommand.StopZbxActiveAgentCommand() -> void
+Community.Zabbix.PowerShell.Commands.StopZbxPassiveAgentCommand
+Community.Zabbix.PowerShell.Commands.StopZbxPassiveAgentCommand.StopZbxPassiveAgentCommand() -> void
+Community.Zabbix.PowerShell.Commands.TestZbxAgentItemCommand
+Community.Zabbix.PowerShell.Commands.TestZbxAgentItemCommand.HostName.get -> string!
+Community.Zabbix.PowerShell.Commands.TestZbxAgentItemCommand.HostName.set -> void
+Community.Zabbix.PowerShell.Commands.TestZbxAgentItemCommand.Key.get -> Community.Zabbix.ZabbixItemKey
+Community.Zabbix.PowerShell.Commands.TestZbxAgentItemCommand.Key.set -> void
+Community.Zabbix.PowerShell.Commands.TestZbxAgentItemCommand.Raw.get -> System.Management.Automation.SwitchParameter
+Community.Zabbix.PowerShell.Commands.TestZbxAgentItemCommand.Raw.set -> void
+Community.Zabbix.PowerShell.Commands.TestZbxAgentItemCommand.Session.get -> string?
+Community.Zabbix.PowerShell.Commands.TestZbxAgentItemCommand.Session.set -> void
+Community.Zabbix.PowerShell.Commands.TestZbxAgentItemCommand.TestZbxAgentItemCommand() -> void
+Community.Zabbix.PowerShell.Commands.TestZbxAgentItemCommand.Timeout.get -> System.TimeSpan
+Community.Zabbix.PowerShell.Commands.TestZbxAgentItemCommand.Timeout.set -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHandlerBinding
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHandlerBinding.<Clone>$() -> Community.Zabbix.PowerShell.Commands.ZabbixAgentHandlerBinding!
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHandlerBinding.Deconstruct(out string! Key, out System.Management.Automation.ScriptBlock! ScriptBlock) -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHandlerBinding.Equals(Community.Zabbix.PowerShell.Commands.ZabbixAgentHandlerBinding? other) -> bool
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHandlerBinding.Key.get -> string!
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHandlerBinding.Key.init -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHandlerBinding.ScriptBlock.get -> System.Management.Automation.ScriptBlock!
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHandlerBinding.ScriptBlock.init -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHandlerBinding.ZabbixAgentHandlerBinding(string! Key, System.Management.Automation.ScriptBlock! ScriptBlock) -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostCommand
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostCommand.Session.get -> string!
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostCommand.Session.set -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostCommand.ZabbixAgentHostCommand() -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus.<Clone>$() -> Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus!
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus.Deconstruct(out string! Key, out ulong ItemId, out bool HasLocalHandler) -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus.Equals(Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus? other) -> bool
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus.HasLocalHandler.get -> bool
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus.HasLocalHandler.init -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus.ItemId.get -> ulong
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus.ItemId.init -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus.Key.get -> string!
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus.Key.init -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus.ZabbixAgentHostItemStatus(string! Key, ulong ItemId, bool HasLocalHandler) -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus.<Clone>$() -> Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus!
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus.Deconstruct(out Community.Zabbix.ZabbixHost! Host, out System.Collections.Generic.IReadOnlyList<Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus!>! Items) -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus.Equals(Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus? other) -> bool
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus.Host.get -> Community.Zabbix.ZabbixHost!
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus.Host.init -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus.Items.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus!>!
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus.Items.init -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus.ZabbixAgentHostStatus(Community.Zabbix.ZabbixHost! Host, System.Collections.Generic.IReadOnlyList<Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus!>! Items) -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentKindCommand
+Community.Zabbix.PowerShell.Commands.ZabbixAgentKindCommand.ZabbixAgentKindCommand() -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSession
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSession.AgentStatus.get -> Community.Zabbix.ZabbixAgentStatus?
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSession.DestinationStatus.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixAgentStatus!>!
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSession.DisposeAsync() -> System.Threading.Tasks.ValueTask
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSession.Kind.get -> string!
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSession.Listener.get -> Community.Zabbix.Listening.ZabbixListener?
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSession.Name.get -> string!
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSession.Started.get -> System.DateTimeOffset
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSessionCommand
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSessionCommand.HostName.get -> string!
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSessionCommand.HostName.set -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSessionCommand.KeyRule.get -> string![]?
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSessionCommand.KeyRule.set -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSessionCommand.Name.get -> string!
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSessionCommand.Name.set -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSessionCommand.NoBundledItems.get -> System.Management.Automation.SwitchParameter
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSessionCommand.NoBundledItems.set -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSessionCommand.PassThru.get -> System.Management.Automation.SwitchParameter
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSessionCommand.PassThru.set -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSessionCommand.Plugin.get -> string![]?
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSessionCommand.Plugin.set -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSessionCommand.PluginPath.get -> string?
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSessionCommand.PluginPath.set -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSessionCommand.PluginSetting.get -> System.Collections.Hashtable?
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSessionCommand.PluginSetting.set -> void
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSessionCommand.ZabbixAgentSessionCommand() -> void
+Community.Zabbix.PowerShell.Commands.ZabbixRegisterAgentHandlerCommand
+Community.Zabbix.PowerShell.Commands.ZabbixRegisterAgentHandlerCommand.Binding.get -> Community.Zabbix.PowerShell.Commands.ZabbixAgentHandlerBinding?
+Community.Zabbix.PowerShell.Commands.ZabbixRegisterAgentHandlerCommand.Binding.set -> void
+Community.Zabbix.PowerShell.Commands.ZabbixRegisterAgentHandlerCommand.Key.get -> string?
+Community.Zabbix.PowerShell.Commands.ZabbixRegisterAgentHandlerCommand.Key.set -> void
+Community.Zabbix.PowerShell.Commands.ZabbixRegisterAgentHandlerCommand.Name.get -> string!
+Community.Zabbix.PowerShell.Commands.ZabbixRegisterAgentHandlerCommand.Name.set -> void
+Community.Zabbix.PowerShell.Commands.ZabbixRegisterAgentHandlerCommand.PassThru.get -> System.Management.Automation.SwitchParameter
+Community.Zabbix.PowerShell.Commands.ZabbixRegisterAgentHandlerCommand.PassThru.set -> void
+Community.Zabbix.PowerShell.Commands.ZabbixRegisterAgentHandlerCommand.ScriptBlock.get -> System.Management.Automation.ScriptBlock?
+Community.Zabbix.PowerShell.Commands.ZabbixRegisterAgentHandlerCommand.ScriptBlock.set -> void
+Community.Zabbix.PowerShell.Commands.ZabbixRegisterAgentHandlerCommand.ZabbixRegisterAgentHandlerCommand() -> void
+Community.Zabbix.PowerShell.ZabbixAgentModule
+Community.Zabbix.PowerShell.ZabbixAgentModule.OnImport() -> void
+Community.Zabbix.PowerShell.ZabbixAgentModule.OnRemove(System.Management.Automation.PSModuleInfo! psModuleInfo) -> void
+Community.Zabbix.PowerShell.ZabbixAgentModule.ZabbixAgentModule() -> void
+override Community.Zabbix.PowerShell.Commands.ZabbixAgentHandlerBinding.Equals(object? obj) -> bool
+override Community.Zabbix.PowerShell.Commands.ZabbixAgentHandlerBinding.GetHashCode() -> int
+override Community.Zabbix.PowerShell.Commands.ZabbixAgentHandlerBinding.ToString() -> string!
+override Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus.Equals(object? obj) -> bool
+override Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus.GetHashCode() -> int
+override Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus.ToString() -> string!
+override Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus.Equals(object? obj) -> bool
+override Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus.GetHashCode() -> int
+override Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus.ToString() -> string!
+override Community.Zabbix.PowerShell.Commands.ZabbixRegisterAgentHandlerCommand.ProcessRecord() -> void
+static Community.Zabbix.PowerShell.Commands.ZabbixAgentHandlerBinding.operator !=(Community.Zabbix.PowerShell.Commands.ZabbixAgentHandlerBinding? left, Community.Zabbix.PowerShell.Commands.ZabbixAgentHandlerBinding? right) -> bool
+static Community.Zabbix.PowerShell.Commands.ZabbixAgentHandlerBinding.operator ==(Community.Zabbix.PowerShell.Commands.ZabbixAgentHandlerBinding? left, Community.Zabbix.PowerShell.Commands.ZabbixAgentHandlerBinding? right) -> bool
+static Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus.operator !=(Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus? left, Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus? right) -> bool
+static Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus.operator ==(Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus? left, Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus? right) -> bool
+static Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus.operator !=(Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus? left, Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus? right) -> bool
+static Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus.operator ==(Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus? left, Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus? right) -> bool

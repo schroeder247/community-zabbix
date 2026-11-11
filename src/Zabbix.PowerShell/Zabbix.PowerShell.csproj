@@ -1,0 +1,71 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The module Community.Zabbix (docs/adr/0003-powershell-module-split.md): the API, the tree and the wire protocols over
+    Zabbix.Sdk, and the shared module infrastructure the two sibling modules (Community.Zabbix.Agent: src/Zabbix.PowerShell.Agent,
+    Community.Zabbix.Proxy: src/Zabbix.PowerShell.Proxy) build on — a per-runspace context, one bridge from the synchronous cmdlet
+    contract to the SDK's async API with the stop token, one ILoggerProvider to the host's streams, one reference
+    currency (ZabbixReference<T>), the error contract, the sessions, and the base classes the generator fills.
+    README.md states the base-class contract. The build of the
+    module folder (manifest exports, MAML help, reference pages, types/format files) is the shared
+    ../Zabbix.PowerShell.Module.targets.
+  -->
+  <PropertyGroup>
+    <RootNamespace>Community.Zabbix.PowerShell</RootNamespace>
+    <AssemblyName>Community.Zabbix.PowerShell</AssemblyName>
+    <Description>Zabbix PowerShell module: the shell over the Community Zabbix SDK.</Description>
+    <ZabbixModuleName>Community.Zabbix</ZabbixModuleName>
+    <ZabbixModuleGeneratedCmdlets>true</ZabbixModuleGeneratedCmdlets>
+    <ZabbixModuleTypesFromSchema>true</ZabbixModuleTypesFromSchema>
+    <!-- The generated CRUD cmdlets are written to obj/ so the manifest target can read their
+         [Cmdlet]/[Alias] attributes as text, the same way Zabbix.Sdk.csproj's ZabbixApiJsonContext target treats a
+         generator's output as a build artifact rather than something reflected over at run time. -->
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <!-- Under obj/, never the project directory: a relative CompilerGeneratedFilesOutputPath is project-directory-relative
+         (Learn), and the SDK's implicit globs would then pick the emitted .cs files back up as ordinary Compile items
+         on the next build (duplicate-type errors that survive a source fix until the stray files are deleted). -->
+    <CompilerGeneratedFilesOutputPath>obj/generated</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- The sibling modules build on the shared infrastructure (ZabbixCmdlet, the context, the sessions, the telemetry)
+         without it becoming public surface: a module's public types are its cmdlets and what they write. -->
+    <InternalsVisibleTo Include="Community.Zabbix.PowerShell.Agent" />
+    <InternalsVisibleTo Include="Community.Zabbix.PowerShell.Proxy" />
+    <InternalsVisibleTo Include="Zabbix.PowerShell.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- The CRUD cmdlets, the nested-record builders and the ZabbixEntities table, generated from the same
+         description the entity clients are (Zabbix.Sdk.csproj's ZabbixEmit="Clients"), beside the hand-written commands —
+         ZabbixCmdletGenerator never changes what ZabbixApiGenerator emits. Referencing Zabbix.Generator.dll as an
+         analyzer loads every IIncrementalGenerator in it, including ZabbixApiGenerator, whose own filter is "any
+         additional file literally named zabbix-api.json" (it does not look at ZabbixEmit before matching the file,
+         only before choosing Models vs Clients) — so the description is copied under a name that filter does not
+         match, and only ZabbixCmdletGenerator (which filters on ZabbixEmit="Cmdlets") sees it. -->
+    <ProjectReference Include="../Zabbix.Generator/Zabbix.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <AdditionalFiles Include="$(IntermediateOutputPath)zabbix-api.cmdlets.json" ZabbixEmit="Cmdlets" />
+    <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="ZabbixEmit" />
+  </ItemGroup>
+  <Target Name="ZabbixCmdletDescriptionCopy" BeforeTargets="CoreCompile;GenerateMSBuildEditorConfigFile" DependsOnTargets="PrepareForBuild">
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)../../schema/zabbix-api.json" DestinationFiles="$(IntermediateOutputPath)zabbix-api.cmdlets.json" SkipUnchangedFiles="true" />
+  </Target>
+  <ItemGroup>
+    <!-- Name completion is cached per context in the platform cache. -->
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
+    <!-- Inside pwsh the module is the application: OTLP export, only when OTEL_EXPORTER_OTLP_ENDPOINT
+         is set; the OpenTelemetry SDK is never loaded otherwise (ADR 0003 records the conflict surface this keeps in Community.Zabbix). -->
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+    <!-- Zabbix.Sdk and Zabbix.Wire only (and through them Zabbix.Api and Zabbix.Abstractions): the hosts (Zabbix.Agent), the listeners
+         (Zabbix.Proxy), EF Core and its providers are the sibling modules' (ModuleShapeTests checks the folder). -->
+    <ProjectReference Include="../Zabbix.Sdk/Zabbix.Sdk.csproj" />
+    <ProjectReference Include="../Zabbix.Wire/Zabbix.Wire.csproj" />
+    <!-- Zabbix.Proxy compiles against the ASP.NET shared framework's System.Threading.RateLimiting 10.0.0.0; Polly's
+         package graph (through Zabbix.Sdk) brings 8.0.0. Whichever module loads first loads the one copy every module
+         binds to, so the family carries one version, from here (it flows to the sibling modules with this project). -->
+    <PackageReference Include="System.Threading.RateLimiting" />
+  </ItemGroup>
+  <Import Project="../Zabbix.PowerShell.Module.targets" />
+</Project>

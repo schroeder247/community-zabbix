@@ -1,0 +1,105 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+
+Evaluated AFTER each project body: the conditions here read what the project declared about itself.
+-->
+<Project>
+  <!-- Every library is trim/AOT-analysed. An opt-out lives in the project that needs one,
+       with the reason beside it (the EF storage package: EF Core is not AOT-compatible). -->
+  <PropertyGroup Condition="'$(IsAotCompatible)' == '' and '$(OutputType)' != 'Exe' and '$(IsTestProject)' != 'true' and '$(IsRoslynComponent)' != 'true'">
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
+  <!-- Wall-clock reads, sleeps, raw threads, SemaphoreSlim throttles and sync-over-async are build errors in library
+       code (RS0030). CA1849 alone misses them in synchronous methods (measured). -->
+  <ItemGroup Condition="'$(IsTestProject)' != 'true' and '$(IsRoslynComponent)' != 'true' and '$(OutputType)' != 'Exe'">
+    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" PrivateAssets="all" />
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
+    <!-- The code-metric thresholds the CA150x rules apply where .editorconfig turns them on (Learn, "Code metrics
+         configuration"). -->
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)CodeMetricsConfig.txt" />
+  </ItemGroup>
+
+  <!-- Every library's public surface is tracked by Microsoft.CodeAnalysis.PublicApiAnalyzers — the same "library"
+       condition IsAotCompatible and the banned-symbol analyzer above use, so a new library project is under the rule
+       the day it is added (nothing here is a hand-kept list). While Directory.Build.props sets a VersionSuffix (a
+       pre-release, SemVer: nothing is shipped before the first release), PublicAPI.Shipped.txt stays EMPTY and every
+       public member is declared in PublicAPI.Unshipped.txt: the surface is frozen at the FIRST release tag, which is also the first time `Shipped.txt` gets content — moving a member there before
+       then would claim a compatibility promise that does not exist yet.
+       RS0016/RS0017 (added/removed API must be declared) are the freeze mechanism itself and stay at error, project-
+       wide: `dotnet build -warnaserror` passes only when every member is declared. Refresh after
+       an intentional API change: `tools/refresh-public-api.sh` (CONTRIBUTING.md, "Build, test and the gates"). Generated members are
+       included: the analyzers see generated trees like any other, so a generated surface (Zabbix.Api's records,
+       Zabbix's clients) appears in Unshipped.txt too — that IS the shipped surface.
+       RS0026 ("do not add multiple public overloads with optional parameters") and RS0027 are errors. Zabbix.Generator
+       answers RS0026 on each generated client overload it emits (one, several and the one-id delete of a verb, each
+       ending in the optional CancellationToken), with [SuppressMessage(Justification = ...)] on the member, as it does
+       for CA1056/CA1008/CA1720. RS0041 is not suppressed: it has no occurrence. -->
+  <ItemGroup Condition="'$(IsTestProject)' != 'true' and '$(IsRoslynComponent)' != 'true' and '$(OutputType)' != 'Exe' and '$(IsPublicApiTracked)' != 'false'">
+    <!-- The package's own build/*.targets already globs PublicAPI.Shipped.txt/PublicAPI.Unshipped.txt out of
+         $(MSBuildProjectDirectory) as AdditionalFiles when they exist (its workaround for
+         https://github.com/dotnet/roslyn/issues/4655); adding them again here duplicates the AdditionalFiles item
+         (measured: `dotnet format` refuses with "Duplicate source file"), so the two files are declared only by
+         being present on disk, one pair per library. IsPublicApiTracked opts a project OUT the same way
+         Zabbix.Generator.csproj opts itself out of pack (EnablePackageValidation="false" there): the one project this
+         condition would otherwise sweep in that is not a shipped surface, tools/Zabbix.PowerShell.HelpGen (an
+         in-process MSBuild task, "not a shipped library surface" by its own csproj comment, same as
+         Zabbix.Generator.csproj beside it — but it lacks that project's IsRoslynComponent to already exclude it). -->
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- The shipped surface is frozen by the pack, not by review. PKV*/CP* are MSBuild-task diagnostics, so CI packs
+       with `dotnet pack -warnaserror`. The baseline is the last release on nuget.org, the feed nuget.config maps every
+       package to (Community.Zabbix.* included), so CI restores it with no other source or credential (Learn, "Baseline package
+       validator"). Nothing is released yet: the first change after a release is published sets
+       ZabbixPackageValidationBaseline in Directory.Build.props to that version; until then validation covers TFM and
+       reference-assembly consistency only, and the compatibility policy (decisions.md) is held by review. -->
+  <PropertyGroup Condition="'$(IsPackable)' != 'false' and '$(IsTestProject)' != 'true' and '$(OutputType)' != 'Exe' and '$(IsRoslynComponent)' != 'true'">
+    <EnablePackageValidation>true</EnablePackageValidation>
+    <PackageValidationBaselineVersion Condition="'$(ZabbixPackageValidationBaseline)' != ''">$(ZabbixPackageValidationBaseline)</PackageValidationBaselineVersion>
+    <ApiCompatEnableRuleAttributesMustMatch>true</ApiCompatEnableRuleAttributesMustMatch>
+    <ApiCompatEnableRuleCannotChangeParameterName>true</ApiCompatEnableRuleCannotChangeParameterName>
+  </PropertyGroup>
+
+  <!-- Each package can carry its software bill of materials (microsoft/sbom-tool, Microsoft.Sbom.Targets): an SPDX 2.2
+       manifest of the package's files and resolved dependencies, written into the .nupkg at _manifest/spdx_2.2/. The
+       package is referenced by every packable library unconditionally, so the restore graph and the lock files do not
+       depend on a switch; generation runs when ZabbixSbom is true, which CI's and the release's pack pass together with
+       -m:1. Generation runs in the MSBuild node, and several nodes generating at once hang the pack (measured: a
+       parallel solution pack did not finish in 5 minutes, the serial one takes 6 seconds), so a local pack without the
+       switch is unaffected. The release extracts each manifest beside its package and attests it with the packages.
+       PrivateAssets keeps the build-time package out of the nuspec. -->
+  <ItemGroup Condition="'$(EnablePackageValidation)' == 'true'">
+    <PackageReference Include="Microsoft.Sbom.Targets" PrivateAssets="all" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(EnablePackageValidation)' == 'true' and '$(ZabbixSbom)' == 'true'">
+    <GenerateSBOM>true</GenerateSBOM>
+    <SbomGenerationPackageSupplier>$(Authors)</SbomGenerationPackageSupplier>
+    <SbomGenerationNamespaceBaseUri>$(PackageProjectUrl)</SbomGenerationNamespaceBaseUri>
+  </PropertyGroup>
+
+  <!-- Each package's readme on nuget.org is the project's own README.md: what the package is, the install, an example. -->
+  <PropertyGroup Condition="'$(IsPackable)' != 'false' and '$(IsTestProject)' != 'true' and '$(OutputType)' != 'Exe' and '$(IsRoslynComponent)' != 'true' and Exists('$(MSBuildProjectDirectory)/README.md')">
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <!-- The package's description (nuget.org's summary and the assembly's AssemblyDescription) carries the warranty
+         notice and ends with the trademark notice. -->
+    <Description>$(Description) $(ZabbixWarrantyNotice) $(ZabbixTrademarkNotice)</Description>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(PackageReadmeFile)' == 'README.md'">
+    <None Include="$(MSBuildProjectDirectory)/README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  <!-- The family ships at one version: a package's dependency on another package of the family is the exact version it
+       was packed with ([1.0.0-preview.1], not ">= 1.0.0-preview.1"), as Roslyn pins Microsoft.CodeAnalysis.Common. The
+       libraries still compile against each other's internals through InternalsVisibleTo (docs/design/decisions.md,
+       "Documented divergences"; ADR 0004, amendment), and an internal changed in one package is a MissingMethodException
+       in another resolved at a different version, so NuGet must never pick a mixed set. Runs after NuGet's pack reads
+       each ProjectReference's version and rewrites it as an exact range. -->
+  <Target Name="ZabbixExactFamilyVersions" AfterTargets="_GetProjectReferenceVersions" Condition="'$(IsPackable)' != 'false'">
+    <ItemGroup>
+      <_ZabbixExactFamilyVersion Include="@(_ProjectReferencesWithVersions)" ProjectVersion="[%(_ProjectReferencesWithVersions.ProjectVersion)]" />
+      <_ProjectReferencesWithVersions Remove="@(_ProjectReferencesWithVersions)" />
+      <_ProjectReferencesWithVersions Include="@(_ZabbixExactFamilyVersion)" />
+    </ItemGroup>
+  </Target>
+</Project>

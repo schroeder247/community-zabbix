@@ -1,0 +1,147 @@
+# Symbols library code may not use: no wall-clock reads (time is injected), no sync-over-async, no raw threads or
+# semaphores (RS0030 is an error). Each line names what to use instead. Tests are exempt.
+P:System.DateTime.Now;Time is injected: use TimeProvider.GetUtcNow()
+P:System.DateTime.UtcNow;Time is injected: use TimeProvider.GetUtcNow()
+P:System.DateTime.Today;Time is injected: use TimeProvider
+P:System.DateTimeOffset.Now;Time is injected: use TimeProvider.GetLocalNow()
+P:System.DateTimeOffset.UtcNow;Time is injected: use TimeProvider.GetUtcNow()
+M:System.Diagnostics.Stopwatch.StartNew;Elapsed time comes from TimeProvider.GetTimestamp()/GetElapsedTime()
+M:System.Diagnostics.Stopwatch.GetTimestamp;Use TimeProvider.GetTimestamp()
+P:System.Environment.TickCount;Use TimeProvider.GetTimestamp()
+P:System.Environment.TickCount64;Use TimeProvider.GetTimestamp()
+T:System.Threading.Thread;Background work is a Task, a BackgroundService or a hosted loop, never a raw thread
+T:System.Threading.SemaphoreSlim;A throttle is System.Threading.RateLimiting; a signal is a Channel
+M:System.Threading.Tasks.Task.Delay(System.Int32);Pass the TimeProvider: Task.Delay(TimeSpan, TimeProvider, CancellationToken)
+M:System.Threading.Tasks.Task.Delay(System.TimeSpan);Pass the TimeProvider: Task.Delay(TimeSpan, TimeProvider, CancellationToken)
+M:System.Threading.Tasks.Task.Delay(System.Int32,System.Threading.CancellationToken);Pass the TimeProvider
+M:System.Threading.Tasks.Task.Delay(System.TimeSpan,System.Threading.CancellationToken);Pass the TimeProvider
+M:System.Threading.PeriodicTimer.#ctor(System.TimeSpan);Pass the TimeProvider: new PeriodicTimer(period, timeProvider)
+M:System.Threading.CancellationTokenSource.#ctor(System.TimeSpan);Pass the TimeProvider: new CancellationTokenSource(delay, timeProvider)
+M:System.Threading.CancellationTokenSource.#ctor(System.Int32);Pass the TimeProvider: new CancellationTokenSource(delay, timeProvider)
+M:System.Threading.Tasks.Task.WaitAsync(System.TimeSpan);Pass the TimeProvider: WaitAsync(TimeSpan, TimeProvider, CancellationToken)
+M:System.Threading.Tasks.Task.WaitAsync(System.TimeSpan,System.Threading.CancellationToken);Pass the TimeProvider
+M:System.Threading.Tasks.Task`1.WaitAsync(System.TimeSpan);Pass the TimeProvider
+M:System.Threading.Tasks.Task`1.WaitAsync(System.TimeSpan,System.Threading.CancellationToken);Pass the TimeProvider
+M:System.Threading.Tasks.Task.Wait;No sync-over-async: await it (CA1849 covers async methods only)
+M:System.Threading.Tasks.Task.Wait(System.Int32);No sync-over-async: await it (CA1849 covers async methods only)
+M:System.Threading.Tasks.Task.Wait(System.TimeSpan);No sync-over-async: await it (CA1849 covers async methods only)
+M:System.Threading.Tasks.Task.Wait(System.Threading.CancellationToken);No sync-over-async: await it (CA1849 covers async methods only)
+M:System.Threading.Tasks.Task.Wait(System.Int32,System.Threading.CancellationToken);No sync-over-async: await it (CA1849 covers async methods only)
+M:System.Threading.Tasks.Task.Wait(System.TimeSpan,System.Threading.CancellationToken);No sync-over-async: await it (CA1849 covers async methods only)
+P:System.Threading.Tasks.Task`1.Result;No sync-over-async: await it
+M:System.Runtime.CompilerServices.TaskAwaiter.GetResult;No sync-over-async: await it
+M:System.Runtime.CompilerServices.TaskAwaiter`1.GetResult;No sync-over-async: await it
+M:System.Runtime.CompilerServices.ValueTaskAwaiter`1.GetResult;No sync-over-async: await it
+P:System.Threading.Tasks.ValueTask`1.Result;No sync-over-async: await it (the ValueTask twin of Task<T>.Result)
+M:System.Runtime.CompilerServices.ValueTaskAwaiter.GetResult;No sync-over-async: await it
+M:System.Runtime.CompilerServices.ConfiguredTaskAwaitable.ConfiguredTaskAwaiter.GetResult;No sync-over-async: ConfigureAwait(false) does not make blocking safe, await it
+M:System.Runtime.CompilerServices.ConfiguredTaskAwaitable`1.ConfiguredTaskAwaiter.GetResult;No sync-over-async: ConfigureAwait(false) does not make blocking safe, await it
+M:System.Runtime.CompilerServices.ConfiguredValueTaskAwaitable.ConfiguredValueTaskAwaiter.GetResult;No sync-over-async: await it
+M:System.Runtime.CompilerServices.ConfiguredValueTaskAwaitable`1.ConfiguredValueTaskAwaiter.GetResult;No sync-over-async: await it
+M:System.Threading.Tasks.Task.WaitAll(System.Threading.Tasks.Task[]);No sync-over-async: await Task.WhenAll
+M:System.Threading.Tasks.Task.WaitAll(System.Threading.Tasks.Task[],System.Int32);No sync-over-async: await Task.WhenAll
+M:System.Threading.Tasks.Task.WaitAll(System.Threading.Tasks.Task[],System.Threading.CancellationToken);No sync-over-async: await Task.WhenAll
+M:System.Threading.Tasks.Task.WaitAll(System.Threading.Tasks.Task[],System.Int32,System.Threading.CancellationToken);No sync-over-async: await Task.WhenAll
+M:System.Threading.Tasks.Task.WaitAll(System.Threading.Tasks.Task[],System.TimeSpan);No sync-over-async: await Task.WhenAll
+M:System.Threading.Tasks.Task.WaitAll(System.Collections.Generic.IEnumerable{System.Threading.Tasks.Task},System.Threading.CancellationToken);No sync-over-async: await Task.WhenAll
+M:System.Threading.Tasks.Task.WaitAll(System.ReadOnlySpan{System.Threading.Tasks.Task});No sync-over-async: await Task.WhenAll
+M:System.Threading.Tasks.Task.WaitAny(System.Threading.Tasks.Task[]);No sync-over-async: await Task.WhenAny
+M:System.Threading.Tasks.Task.WaitAny(System.Threading.Tasks.Task[],System.Int32);No sync-over-async: await Task.WhenAny
+M:System.Threading.Tasks.Task.WaitAny(System.Threading.Tasks.Task[],System.Threading.CancellationToken);No sync-over-async: await Task.WhenAny
+M:System.Threading.Tasks.Task.WaitAny(System.Threading.Tasks.Task[],System.Int32,System.Threading.CancellationToken);No sync-over-async: await Task.WhenAny
+M:System.Threading.Tasks.Task.WaitAny(System.Threading.Tasks.Task[],System.TimeSpan);No sync-over-async: await Task.WhenAny
+M:System.Diagnostics.Stopwatch.#ctor;Elapsed time comes from TimeProvider.GetTimestamp()/GetElapsedTime(), so a fake clock can drive it
+M:System.Threading.Timer.#ctor(System.Threading.TimerCallback);Schedule on the injected clock: TimeProvider.CreateTimer or a PeriodicTimer with the TimeProvider
+M:System.Threading.Timer.#ctor(System.Threading.TimerCallback,System.Object,System.Int32,System.Int32);Schedule on the injected clock: TimeProvider.CreateTimer or a PeriodicTimer with the TimeProvider
+M:System.Threading.Timer.#ctor(System.Threading.TimerCallback,System.Object,System.Int64,System.Int64);Schedule on the injected clock: TimeProvider.CreateTimer or a PeriodicTimer with the TimeProvider
+M:System.Threading.Timer.#ctor(System.Threading.TimerCallback,System.Object,System.TimeSpan,System.TimeSpan);Schedule on the injected clock: TimeProvider.CreateTimer or a PeriodicTimer with the TimeProvider
+M:System.Threading.Timer.#ctor(System.Threading.TimerCallback,System.Object,System.UInt32,System.UInt32);Schedule on the injected clock: TimeProvider.CreateTimer or a PeriodicTimer with the TimeProvider
+T:System.Timers.Timer;Schedule on the injected clock: TimeProvider.CreateTimer or a PeriodicTimer with the TimeProvider
+M:System.Threading.ThreadPool.QueueUserWorkItem(System.Threading.WaitCallback);Background work is a Task the owner awaits or a hosted loop, never fire-and-forget pool work
+M:System.Threading.ThreadPool.QueueUserWorkItem(System.Threading.WaitCallback,System.Object);Background work is a Task the owner awaits or a hosted loop, never fire-and-forget pool work
+M:System.Threading.ThreadPool.QueueUserWorkItem``1(System.Action{``0},``0,System.Boolean);Background work is a Task the owner awaits or a hosted loop, never fire-and-forget pool work
+M:System.Threading.ThreadPool.UnsafeQueueUserWorkItem(System.Threading.WaitCallback,System.Object);Background work is a Task the owner awaits or a hosted loop, never fire-and-forget pool work
+M:System.Threading.ThreadPool.UnsafeQueueUserWorkItem(System.Threading.IThreadPoolWorkItem,System.Boolean);Background work is a Task the owner awaits or a hosted loop, never fire-and-forget pool work
+M:System.Threading.ThreadPool.UnsafeQueueUserWorkItem``1(System.Action{``0},``0,System.Boolean);Background work is a Task the owner awaits or a hosted loop, never fire-and-forget pool work
+M:System.Threading.ManualResetEventSlim.Wait;No blocking wait: a signal is a Channel or a TaskCompletionSource, awaited
+M:System.Threading.ManualResetEventSlim.Wait(System.Int32);No blocking wait: a signal is a Channel or a TaskCompletionSource, awaited
+M:System.Threading.ManualResetEventSlim.Wait(System.TimeSpan);No blocking wait: a signal is a Channel or a TaskCompletionSource, awaited
+M:System.Threading.ManualResetEventSlim.Wait(System.Threading.CancellationToken);No blocking wait: a signal is a Channel or a TaskCompletionSource, awaited
+M:System.Threading.ManualResetEventSlim.Wait(System.Int32,System.Threading.CancellationToken);No blocking wait: a signal is a Channel or a TaskCompletionSource, awaited
+M:System.Threading.ManualResetEventSlim.Wait(System.TimeSpan,System.Threading.CancellationToken);No blocking wait: a signal is a Channel or a TaskCompletionSource, awaited
+M:System.Threading.SpinWait.SpinUntil(System.Func{System.Boolean});No blocking wait: await the condition's signal
+M:System.Threading.SpinWait.SpinUntil(System.Func{System.Boolean},System.Int32);No blocking wait: await the condition's signal
+M:System.Threading.SpinWait.SpinUntil(System.Func{System.Boolean},System.TimeSpan);No blocking wait: await the condition's signal
+T:System.Console;A library logs through ILogger and never writes to the console
+M:System.Threading.Tasks.TaskCompletionSource.#ctor;Pass TaskCreationOptions.RunContinuationsAsynchronously, so a completion never runs its awaiter's continuation inline under the completer's lock
+M:System.Threading.Tasks.TaskCompletionSource.#ctor(System.Object);Pass TaskCreationOptions.RunContinuationsAsynchronously, so a completion never runs its awaiter's continuation inline under the completer's lock
+M:System.Threading.Tasks.TaskCompletionSource`1.#ctor;Pass TaskCreationOptions.RunContinuationsAsynchronously, so a completion never runs its awaiter's continuation inline under the completer's lock
+M:System.Threading.Tasks.TaskCompletionSource`1.#ctor(System.Object);Pass TaskCreationOptions.RunContinuationsAsynchronously, so a completion never runs its awaiter's continuation inline under the completer's lock
+M:System.Threading.Tasks.TaskFactory.StartNew(System.Action);Background work is a Task the owner awaits or a hosted loop; StartNew does not unwrap an async delegate
+M:System.Threading.Tasks.TaskFactory.StartNew(System.Action,System.Threading.CancellationToken);Background work is a Task the owner awaits or a hosted loop; StartNew does not unwrap an async delegate
+M:System.Threading.Tasks.TaskFactory.StartNew(System.Action,System.Threading.Tasks.TaskCreationOptions);Background work is a Task the owner awaits or a hosted loop; StartNew does not unwrap an async delegate
+M:System.Threading.Tasks.TaskFactory.StartNew(System.Action,System.Threading.CancellationToken,System.Threading.Tasks.TaskCreationOptions,System.Threading.Tasks.TaskScheduler);Background work is a Task the owner awaits or a hosted loop; StartNew does not unwrap an async delegate
+M:System.Threading.Tasks.TaskFactory.StartNew``1(System.Func{``0});Background work is a Task the owner awaits or a hosted loop; StartNew does not unwrap an async delegate
+M:System.Threading.Tasks.TaskFactory.StartNew``1(System.Func{``0},System.Threading.CancellationToken);Background work is a Task the owner awaits or a hosted loop; StartNew does not unwrap an async delegate
+M:System.Threading.Tasks.TaskFactory.StartNew``1(System.Func{``0},System.Threading.Tasks.TaskCreationOptions);Background work is a Task the owner awaits or a hosted loop; StartNew does not unwrap an async delegate
+M:System.Threading.Tasks.TaskFactory.StartNew``1(System.Func{``0},System.Threading.CancellationToken,System.Threading.Tasks.TaskCreationOptions,System.Threading.Tasks.TaskScheduler);Background work is a Task the owner awaits or a hosted loop; StartNew does not unwrap an async delegate
+M:System.Net.Http.HttpClient.#ctor;An HttpClient comes from IHttpClientFactory (a named client), never constructed: pooled handlers, DNS refresh, the resilience pipeline
+M:System.Net.Http.HttpClient.#ctor(System.Net.Http.HttpMessageHandler);An HttpClient comes from IHttpClientFactory (a named client), never constructed: pooled handlers, DNS refresh, the resilience pipeline
+M:System.Net.Http.HttpClient.#ctor(System.Net.Http.HttpMessageHandler,System.Boolean);An HttpClient comes from IHttpClientFactory (a named client), never constructed: pooled handlers, DNS refresh, the resilience pipeline
+M:System.Threading.Tasks.Parallel.For(System.Int32,System.Int32,System.Action{System.Int32});No synchronous parallel loop in a library: Parallel.ForEachAsync, awaited
+M:System.Threading.Tasks.Parallel.ForEach``1(System.Collections.Generic.IEnumerable{``0},System.Action{``0});No synchronous parallel loop in a library: Parallel.ForEachAsync, awaited
+M:System.Threading.Tasks.Parallel.Invoke(System.Action[]);No synchronous parallel loop in a library: Task.WhenAll, awaited
+M:System.Environment.Exit(System.Int32);A library never ends its host's process: it throws, and the host decides
+M:System.Environment.FailFast(System.String);A library never ends its host's process: it throws, and the host decides
+M:System.Environment.FailFast(System.String,System.Exception);A library never ends its host's process: it throws, and the host decides
+M:System.Random.#ctor;Use Random.Shared, or RandomNumberGenerator for anything a peer must not predict
+M:System.Random.#ctor(System.Int32);Use Random.Shared, or RandomNumberGenerator for anything a peer must not predict
+M:System.Threading.Tasks.Task.Run(System.Action);Background work is a Task the owner awaits or a hosted loop; the three bridges to a synchronous contract are the recorded exceptions (decisions.md)
+M:System.Threading.Tasks.Task.Run(System.Action,System.Threading.CancellationToken);Background work is a Task the owner awaits or a hosted loop; the three bridges to a synchronous contract are the recorded exceptions (decisions.md)
+M:System.Threading.Tasks.Task.Run(System.Func{System.Threading.Tasks.Task});Background work is a Task the owner awaits or a hosted loop; the three bridges to a synchronous contract are the recorded exceptions (decisions.md)
+M:System.Threading.Tasks.Task.Run(System.Func{System.Threading.Tasks.Task},System.Threading.CancellationToken);Background work is a Task the owner awaits or a hosted loop; the three bridges to a synchronous contract are the recorded exceptions (decisions.md)
+M:System.Threading.Tasks.Task.Run``1(System.Func{``0});Background work is a Task the owner awaits or a hosted loop; the three bridges to a synchronous contract are the recorded exceptions (decisions.md)
+M:System.Threading.Tasks.Task.Run``1(System.Func{``0},System.Threading.CancellationToken);Background work is a Task the owner awaits or a hosted loop; the three bridges to a synchronous contract are the recorded exceptions (decisions.md)
+M:System.Threading.Tasks.Task.Run``1(System.Func{System.Threading.Tasks.Task{``0}});Background work is a Task the owner awaits or a hosted loop; the three bridges to a synchronous contract are the recorded exceptions (decisions.md)
+M:System.Threading.Tasks.Task.Run``1(System.Func{System.Threading.Tasks.Task{``0}},System.Threading.CancellationToken);Background work is a Task the owner awaits or a hosted loop; the three bridges to a synchronous contract are the recorded exceptions (decisions.md)
+T:System.Collections.Concurrent.BlockingCollection`1;A queue between tasks is a Channel; the cmdlet pipeline's blocking drain is the recorded exception (decisions.md)
+M:System.Threading.Tasks.Task`1.ContinueWith(System.Action{System.Threading.Tasks.Task{`0}});No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task`1.ContinueWith(System.Action{System.Threading.Tasks.Task{`0}},System.Threading.CancellationToken);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task`1.ContinueWith(System.Action{System.Threading.Tasks.Task{`0}},System.Threading.CancellationToken,System.Threading.Tasks.TaskContinuationOptions,System.Threading.Tasks.TaskScheduler);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task`1.ContinueWith(System.Action{System.Threading.Tasks.Task{`0}},System.Threading.Tasks.TaskContinuationOptions);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task`1.ContinueWith(System.Action{System.Threading.Tasks.Task{`0}},System.Threading.Tasks.TaskScheduler);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task`1.ContinueWith(System.Action{System.Threading.Tasks.Task{`0},System.Object},System.Object);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task`1.ContinueWith(System.Action{System.Threading.Tasks.Task{`0},System.Object},System.Object,System.Threading.CancellationToken);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task`1.ContinueWith(System.Action{System.Threading.Tasks.Task{`0},System.Object},System.Object,System.Threading.CancellationToken,System.Threading.Tasks.TaskContinuationOptions,System.Threading.Tasks.TaskScheduler);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task`1.ContinueWith(System.Action{System.Threading.Tasks.Task{`0},System.Object},System.Object,System.Threading.Tasks.TaskContinuationOptions);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task`1.ContinueWith(System.Action{System.Threading.Tasks.Task{`0},System.Object},System.Object,System.Threading.Tasks.TaskScheduler);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task`1.ContinueWith``1(System.Func{System.Threading.Tasks.Task{`0},``0},System.Threading.CancellationToken,System.Threading.Tasks.TaskContinuationOptions,System.Threading.Tasks.TaskScheduler);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task`1.ContinueWith``1(System.Func{System.Threading.Tasks.Task{`0},``0},System.Threading.CancellationToken);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task`1.ContinueWith``1(System.Func{System.Threading.Tasks.Task{`0},``0},System.Threading.Tasks.TaskContinuationOptions);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task`1.ContinueWith``1(System.Func{System.Threading.Tasks.Task{`0},``0},System.Threading.Tasks.TaskScheduler);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task`1.ContinueWith``1(System.Func{System.Threading.Tasks.Task{`0},``0});No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task`1.ContinueWith``1(System.Func{System.Threading.Tasks.Task{`0},System.Object,``0},System.Object,System.Threading.CancellationToken,System.Threading.Tasks.TaskContinuationOptions,System.Threading.Tasks.TaskScheduler);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task`1.ContinueWith``1(System.Func{System.Threading.Tasks.Task{`0},System.Object,``0},System.Object,System.Threading.CancellationToken);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task`1.ContinueWith``1(System.Func{System.Threading.Tasks.Task{`0},System.Object,``0},System.Object,System.Threading.Tasks.TaskContinuationOptions);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task`1.ContinueWith``1(System.Func{System.Threading.Tasks.Task{`0},System.Object,``0},System.Object,System.Threading.Tasks.TaskScheduler);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task`1.ContinueWith``1(System.Func{System.Threading.Tasks.Task{`0},System.Object,``0},System.Object);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task.ContinueWith(System.Action{System.Threading.Tasks.Task});No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task.ContinueWith(System.Action{System.Threading.Tasks.Task},System.Threading.CancellationToken);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task.ContinueWith(System.Action{System.Threading.Tasks.Task},System.Threading.CancellationToken,System.Threading.Tasks.TaskContinuationOptions,System.Threading.Tasks.TaskScheduler);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task.ContinueWith(System.Action{System.Threading.Tasks.Task},System.Threading.Tasks.TaskContinuationOptions);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task.ContinueWith(System.Action{System.Threading.Tasks.Task},System.Threading.Tasks.TaskScheduler);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task.ContinueWith(System.Action{System.Threading.Tasks.Task,System.Object},System.Object);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task.ContinueWith(System.Action{System.Threading.Tasks.Task,System.Object},System.Object,System.Threading.CancellationToken);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task.ContinueWith(System.Action{System.Threading.Tasks.Task,System.Object},System.Object,System.Threading.CancellationToken,System.Threading.Tasks.TaskContinuationOptions,System.Threading.Tasks.TaskScheduler);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task.ContinueWith(System.Action{System.Threading.Tasks.Task,System.Object},System.Object,System.Threading.Tasks.TaskContinuationOptions);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task.ContinueWith(System.Action{System.Threading.Tasks.Task,System.Object},System.Object,System.Threading.Tasks.TaskScheduler);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task.ContinueWith``1(System.Func{System.Threading.Tasks.Task,``0},System.Threading.CancellationToken,System.Threading.Tasks.TaskContinuationOptions,System.Threading.Tasks.TaskScheduler);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task.ContinueWith``1(System.Func{System.Threading.Tasks.Task,``0},System.Threading.CancellationToken);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task.ContinueWith``1(System.Func{System.Threading.Tasks.Task,``0},System.Threading.Tasks.TaskContinuationOptions);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task.ContinueWith``1(System.Func{System.Threading.Tasks.Task,``0},System.Threading.Tasks.TaskScheduler);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task.ContinueWith``1(System.Func{System.Threading.Tasks.Task,``0});No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task.ContinueWith``1(System.Func{System.Threading.Tasks.Task,System.Object,``0},System.Object,System.Threading.CancellationToken,System.Threading.Tasks.TaskContinuationOptions,System.Threading.Tasks.TaskScheduler);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task.ContinueWith``1(System.Func{System.Threading.Tasks.Task,System.Object,``0},System.Object,System.Threading.CancellationToken);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task.ContinueWith``1(System.Func{System.Threading.Tasks.Task,System.Object,``0},System.Object,System.Threading.Tasks.TaskContinuationOptions);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task.ContinueWith``1(System.Func{System.Threading.Tasks.Task,System.Object,``0},System.Object,System.Threading.Tasks.TaskScheduler);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed
+M:System.Threading.Tasks.Task.ContinueWith``1(System.Func{System.Threading.Tasks.Task,System.Object,``0},System.Object);No ContinueWith in a library: await the task in an async method, so the scheduler is not TaskScheduler.Current and a fault is observed

@@ -1,0 +1,37 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Zabbix.Abstractions/Zabbix.Abstractions.csproj" />
+    <Project Path="src/Zabbix.Generator/Zabbix.Generator.csproj" />
+    <Project Path="src/Zabbix.Api/Zabbix.Api.csproj" />
+    <Project Path="src/Zabbix.Sdk/Zabbix.Sdk.csproj" />
+    <Project Path="src/Zabbix.Wire/Zabbix.Wire.csproj" />
+    <Project Path="src/Zabbix.Agent/Zabbix.Agent.csproj" />
+    <Project Path="src/Zabbix.Proxy/Zabbix.Proxy.csproj" />
+    <Project Path="src/Zabbix.Agent.Plugins/Zabbix.Agent.Plugins.csproj" />
+    <Project Path="src/Zabbix.Agent.Storage.EntityFrameworkCore/Zabbix.Agent.Storage.EntityFrameworkCore.csproj" />
+    <Project Path="src/Zabbix.PowerShell/Zabbix.PowerShell.csproj" />
+    <Project Path="src/Zabbix.PowerShell.Agent/Zabbix.PowerShell.Agent.csproj" />
+    <Project Path="src/Zabbix.PowerShell.Proxy/Zabbix.PowerShell.Proxy.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Zabbix.Generator.Context/Zabbix.Generator.Context.csproj" />
+    <Project Path="tools/Zabbix.PowerShell.HelpGen/Zabbix.PowerShell.HelpGen.csproj" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/GettingStarted/GettingStarted.csproj" />
+    <Project Path="samples/QueryApi/QueryApi.csproj" />
+    <Project Path="samples/WatchValues/WatchValues.csproj" />
+    <Project Path="samples/SendValues/SendValues.csproj" />
+    <Project Path="samples/ReadAgentItem/ReadAgentItem.csproj" />
+    <Project Path="samples/AskServer/AskServer.csproj" />
+    <Project Path="samples/PushAgent/PushAgent.csproj" />
+    <Project Path="samples/ActiveAgent/ActiveAgent.csproj" />
+    <Project Path="samples/PassiveAgent/PassiveAgent.csproj" />
+    <Project Path="samples/ItemPlugin/ItemPlugin.csproj" />
+    <Project Path="samples/WorkerService/WorkerService.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Zabbix.Tests/Zabbix.Tests.csproj" />
+    <Project Path="tests/Zabbix.PowerShell.Tests/Zabbix.PowerShell.Tests.csproj" />
+  </Folder>
+</Solution>

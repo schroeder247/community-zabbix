@@ -1,0 +1,76 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.userprefs
+*.sln.docstates
+*.csproj.user
+
+## Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## NuGet
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+project.lock.json
+
+## IDE
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Test results
+TestResults/
+TestResults.xml
+*.trx
+coverage*/
+
+## Build staging (release.yml stages the module folder here; CI writes test results to trx/)
+stage/
+trx/
+
+## Development planning artifacts
+PLAN-*.md
+HANDOFF.md
+testResults.xml
+.claude/worktrees/
+
+## AI assistant context (local development only)
+CLAUDE.md
+.claude/
+
+# DocFX
+_site/
+api/*.yml
+api/.manifest
+__pycache__/
+
+## Zabbix sources the API model is extracted from (tools/fetch-zabbix-sources.sh) and the per-version facts the
+## extractor writes beside them; only schema/zabbix-api.json is checked in
+/.zabbix-sources/
+/schema/zabbix-api-*.json

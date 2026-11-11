@@ -1,0 +1,211 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+#
+# Analyzer policy. AnalysisLevel is 10.0-all (Directory.Build.props) with
+# CodeAnalysisTreatWarningsAsErrors, so most rules are already errors; the ids listed here pin the severity
+# when an SDK default moves, and the few switched off carry their reason.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{json,yml,yaml,slnx}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.cs]
+csharp_style_namespace_declarations = file_scoped:error
+# A file's namespace is its project's RootNamespace plus its folder path (IDE0130, as dotnet/runtime and
+# dotnet/extensions lay out their sources; docs/adr/0004-conventions.md). Move the file, not the namespace.
+dotnet_style_namespace_match_folder = true
+dotnet_diagnostic.IDE0130.severity = error
+dotnet_sort_system_directives_first = true
+
+# guards: throw helpers, every public argument validated; `?? throw` in expression position is the
+# other sanctioned form.
+dotnet_diagnostic.CA1510.severity = error
+dotnet_diagnostic.CA1511.severity = error
+dotnet_diagnostic.CA1512.severity = error
+dotnet_diagnostic.CA1513.severity = error
+dotnet_diagnostic.CA2264.severity = error
+dotnet_diagnostic.CA1062.severity = error
+dotnet_code_quality.CA1062.null_check_validation_methods = ThrowIfNull
+
+# catching: no catch (Exception); `throw;` not `throw ex;`
+dotnet_diagnostic.CA1031.severity = error
+dotnet_code_quality.CA1031.disallowed_symbol_names = T:System.Exception|T:System.SystemException
+dotnet_diagnostic.CA2200.severity = error
+
+# async: ConfigureAwait in libraries; every token forwarded; no sync-over-async
+dotnet_diagnostic.CA2007.severity = error
+dotnet_code_quality.CA2007.output_kind = DynamicallyLinkedLibrary
+dotnet_diagnostic.CA2016.severity = error
+dotnet_diagnostic.CA1849.severity = error
+
+# logging: source-generated, structured, lazy; ids unique per class (the cross-assembly check is a test)
+dotnet_diagnostic.CA1848.severity = error
+dotnet_diagnostic.CA1873.severity = error
+dotnet_diagnostic.CA2254.severity = error
+dotnet_diagnostic.CA2017.severity = error
+dotnet_diagnostic.CA2023.severity = error
+dotnet_diagnostic.CA1727.severity = error
+dotnet_diagnostic.SYSLIB1006.severity = error
+dotnet_diagnostic.SYSLIB1014.severity = error
+dotnet_diagnostic.SYSLIB1015.severity = error
+dotnet_diagnostic.SYSLIB1212.severity = error
+dotnet_diagnostic.SYSLIB1213.severity = error
+
+# shape: no List<T>/arrays on the public surface, generic collection interfaces, properties
+# where the FDG say properties, no events, no reserved suffixes. No global `api_surface = public` (it would aim
+# CA1859/CA1822 at public members, where the interface return IS the contract).
+dotnet_diagnostic.CA1002.severity = error
+dotnet_diagnostic.CA1819.severity = error
+dotnet_diagnostic.CA1010.severity = error
+dotnet_diagnostic.CA1024.severity = error
+dotnet_diagnostic.CA1721.severity = error
+dotnet_diagnostic.CA1725.severity = error
+dotnet_diagnostic.CA1003.severity = error
+dotnet_diagnostic.CA1030.severity = error
+dotnet_diagnostic.CA1711.severity = error
+dotnet_diagnostic.CA1715.severity = error
+# CA1710 stays a suggestion: a type named for what it IS keeps its name even though it
+# implements a collection (JsonObject, HttpHeaders).
+dotnet_diagnostic.CA1710.severity = suggestion
+# CA1000, CA1720 and CA1812 are errors like the rest of the block. A static factory on a generic type, a Zabbix type
+# word ("Numeric (float)") as an enum member, or an internal type a framework instantiates (EF Core's converters, the
+# container's TryAdd*) carries a [SuppressMessage] on that symbol with its reason, so a dead internal class still fails.
+dotnet_diagnostic.CA1000.severity = error
+dotnet_diagnostic.CA1720.severity = error
+dotnet_diagnostic.CA1812.severity = error
+dotnet_diagnostic.CA1852.severity = error
+dotnet_diagnostic.CA2260.severity = error
+dotnet_diagnostic.CA2211.severity = error
+
+# dispose
+dotnet_diagnostic.CA1001.severity = error
+dotnet_diagnostic.CA2000.severity = error
+dotnet_diagnostic.CA2213.severity = error
+dotnet_diagnostic.CA1816.severity = error
+dotnet_diagnostic.CA1032.severity = error
+
+# culture and comparison explicit
+dotnet_diagnostic.CA1304.severity = error
+dotnet_diagnostic.CA1305.severity = error
+dotnet_diagnostic.CA1310.severity = error
+dotnet_diagnostic.CA1311.severity = error
+dotnet_diagnostic.CA1307.severity = error
+
+# perf hygiene
+dotnet_diagnostic.CA1861.severity = error
+dotnet_diagnostic.CA1868.severity = error
+dotnet_diagnostic.CA1859.severity = error
+dotnet_diagnostic.CA2263.severity = error
+
+# style, enforced in the build (EnforceCodeStyleInBuild; IDE0005 needs GenerateDocumentationFile)
+dotnet_diagnostic.IDE0005.severity = error
+dotnet_diagnostic.IDE1006.severity = error
+dotnet_naming_rule.async_methods_end_in_async.symbols  = async_methods
+dotnet_naming_rule.async_methods_end_in_async.style    = async_suffix
+dotnet_naming_rule.async_methods_end_in_async.severity = error
+dotnet_naming_symbols.async_methods.applicable_kinds   = method
+dotnet_naming_symbols.async_methods.required_modifiers = async
+dotnet_naming_style.async_suffix.capitalization        = pascal_case
+dotnet_naming_style.async_suffix.required_suffix       = Async
+
+# Field naming as dotnet/runtime's .editorconfig writes it: constants PascalCase (the non-public intersection rule Learn
+# prescribes, since const implies static), private/internal static fields
+# s_camelCase, private/internal instance fields _camelCase (docs/adr/0004-conventions.md).
+dotnet_naming_rule.constant_fields_are_pascal_case.symbols   = constant_fields
+dotnet_naming_rule.constant_fields_are_pascal_case.style     = pascal_case_style
+dotnet_naming_rule.constant_fields_are_pascal_case.severity  = error
+dotnet_naming_symbols.constant_fields.applicable_kinds       = field
+dotnet_naming_symbols.constant_fields.applicable_accessibilities = private, internal, private_protected
+dotnet_naming_symbols.constant_fields.required_modifiers     = const
+dotnet_naming_style.pascal_case_style.capitalization         = pascal_case
+dotnet_naming_rule.static_fields_have_s_prefix.symbols       = static_fields
+dotnet_naming_rule.static_fields_have_s_prefix.style         = static_prefix_style
+dotnet_naming_rule.static_fields_have_s_prefix.severity      = error
+dotnet_naming_symbols.static_fields.applicable_kinds         = field
+dotnet_naming_symbols.static_fields.applicable_accessibilities = private, internal, private_protected
+dotnet_naming_symbols.static_fields.required_modifiers       = static
+dotnet_naming_style.static_prefix_style.required_prefix      = s_
+dotnet_naming_style.static_prefix_style.capitalization       = camel_case
+dotnet_naming_rule.instance_fields_have_underscore.symbols   = instance_fields
+dotnet_naming_rule.instance_fields_have_underscore.style     = instance_prefix_style
+dotnet_naming_rule.instance_fields_have_underscore.severity  = error
+dotnet_naming_symbols.instance_fields.applicable_kinds       = field
+dotnet_naming_symbols.instance_fields.applicable_accessibilities = private, internal, private_protected
+dotnet_naming_style.instance_prefix_style.required_prefix    = _
+dotnet_naming_style.instance_prefix_style.capitalization     = camel_case
+
+# var as dotnet/runtime writes it (explicit types; `var` only where the type is apparent goes unflagged). A suggestion,
+# not an error: enforcing it would rewrite about 300 files, churn with no defect behind it.
+csharp_style_var_for_built_in_types = false:suggestion
+csharp_style_var_when_type_is_apparent = false:none
+csharp_style_var_elsewhere = false:suggestion
+
+[tests/Zabbix*/**.cs]
+# The test projects only: tests/probes/Zabbix.Analyzers.Probe is library-shaped and must not get these relaxations.
+# Test code is the caller, not the library: capturing the test runner's context is fine, and xunit disposes
+# fixtures itself. Keeping these off here is what lets them stay errors where they matter.
+dotnet_diagnostic.CA2007.severity = none
+# Tests log casually, return what reads best, and pass what they mean to: hot-path, inline-continuation and
+# argument-guard rules are library rules. CA2000, CA2213 and CA1849 stay errors in tests too: a test that leaks
+# a socket or blocks on a task is the flake the suite exists to prevent.
+dotnet_diagnostic.CA1848.severity = none
+dotnet_diagnostic.CA1873.severity = none
+dotnet_diagnostic.CA1859.severity = none
+dotnet_diagnostic.CA1062.severity = none
+# Scenario_expected names, public-by-xunit classes, inline expected arrays, instance test methods.
+dotnet_diagnostic.CA1707.severity = none
+dotnet_diagnostic.IDE1006.severity = none
+dotnet_diagnostic.CA1515.severity = none
+dotnet_diagnostic.CA1861.severity = none
+# Probe types: a class a conformance test compiles or reflects over to prove a rule fires, never instantiated.
+dotnet_diagnostic.CA1812.severity = none
+dotnet_code_quality.CA1822.api_surface = private, internal
+# xUnit1051: every cancellable call in a test takes TestContext.Current.CancellationToken, so a cancelled run stops.
+dotnet_diagnostic.xUnit1051.severity = error
+
+# The Zabbix generator's output is compiled and analysed like hand-written code:
+# Roslyn's file-name heuristic would otherwise exempt *.g.cs from every analyzer that skips generated code. Scoped to
+# our generator: Microsoft's own generators (System.Text.Json, LoggerMessage, GlobalUsings) emit code that is not
+# IDE0161/IDE0005/CA1305 clean, and that is theirs (measured: 28 diagnostics with a blanket [*.g.cs] rule).
+# No severity is set here: an .editorconfig severity does not reach a source-generated tree (measured: a
+# [*.cs] CA1720 = none rule left 18 CA1720 errors in this output), so a rule the Zabbix model answers is suppressed
+# by the generator on the one symbol, with its reason ([SuppressMessage(Justification = …)], ZabbixApiEmitter).
+
+[samples/**.cs]
+# Applications a reader copies from: no context to preserve, and the top-level statements stay short.
+dotnet_diagnostic.CA2007.severity = none
+dotnet_diagnostic.CA1303.severity = none
+dotnet_diagnostic.CA1812.severity = none
+dotnet_diagnostic.CA1062.severity = none
+# The chain returns the agent it was given, and using disposes it; the analyzer can't see that through a method.
+dotnet_diagnostic.CA2000.severity = none
+
+[**/Zabbix.Generator/Community.Zabbix.Generator.*/**.g.cs]
+generated_code = false
+
+# Every package: results that are the answer. A channel's TryWrite/TryComplete returning false is a value refused
+# or a writer already completed, never ignorable; an unread private member is dead state (IDE0051/IDE0052).
+[src/**.cs]
+dotnet_diagnostic.CA1806.severity = error
+dotnet_code_quality.CA1806.additional_use_results_methods = TryWrite|TryComplete
+dotnet_diagnostic.IDE0051.severity = error
+dotnet_diagnostic.IDE0052.severity = error
+
+# Cyclomatic complexity (CA1502) at 15 (CodeMetricsConfig.txt, read by every library through
+# Directory.Build.targets), on the files whose members are written as named steps to stay under it:
+# ZabbixProxyConfig.Merge and ZabbixItemKey.TryParse. The rule is on for the whole file, so neither those members nor a
+# sibling can grow past it. ZabbixListenerOptions.cs is under it too: its validation reads as one named step per
+# rule family (endpoint, accept set, certificate pair, PSK pair, PSK table). The rest of the code is not under the rule yet.
+[{src/Zabbix.Proxy/Proxy/ZabbixProxyConfig.cs,src/Zabbix.Abstractions/ZabbixItemKey.cs,src/Zabbix.Proxy/Listening/ZabbixListenerOptions.cs}]
+dotnet_diagnostic.CA1502.severity = error

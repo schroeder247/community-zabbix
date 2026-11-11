@@ -1,0 +1,56 @@
+TOPIC
+    about_Community.Zabbix_Filters
+
+SHORT DESCRIPTION
+    Selecting Zabbix objects: -Name patterns, -Filter, -Search and the -Select
+    options of the Get- commands.
+
+LONG DESCRIPTION
+  -NAME
+    -Name is a PowerShell wildcard pattern, matched case-insensitively
+    against the object's name (a host's and a template's technical name, a
+    user's username, a user macro's macro, a trigger's description):
+
+        Get-ZbxHost 'web*'          # starts with web
+        Get-ZbxHost 'web0?'         # web0 and one more character
+        Get-ZbxHost 'Zabbix server' # exactly that name, in any case
+
+    Square brackets are literal, not a character set, because Zabbix names
+    carry them (item keys, 'Proxy [name]' triggers). A backtick escapes * and ?.
+    Several names select any of them. The server matches * itself; a ? or an
+    escaped * is narrowed on this side after the server's broader answer, and
+    -Limit then counts what is kept.
+
+  -FILTER
+    -Filter takes the object's whole .get parameters, as the typed record or a
+    hashtable whose keys are the record's property names or the wire's field
+    names:
+
+        Get-ZbxHost -Filter @{ filter = @{ status = 1 }; limit = 20 }
+        Get-ZbxItem -Filter ([Community.Zabbix.ZabbixItemGetParameters]@{ HostIds = '10084' })
+
+    A key that names a field of the object rather than a .get parameter
+    goes into the API's filter (@{ host = 'web-01' } sends filter.host);
+    any other key the record does not know is refused, never silently
+    dropped.
+
+  -SEARCH AND THE COMMON OPTIONS
+    Every Get- also takes -Search (a hashtable of field name to substring),
+    -SearchByAny, -StartSearch, -ExcludeSearch, -SearchWildcardsEnabled,
+    -SortField, -SortOrder and -CountOutput, which fold onto whichever
+    selection is used. -Name together with -Search keeps both conditions.
+
+  -SELECT OPTIONS
+    A -SelectX switch asks the server to return the related objects too
+    (Get-ZbxHost -SelectHostGroups fills HostGroups).
+
+  REFERENCE FILTERS
+    A Get- takes the ids option of its .get as a reference parameter
+    (Get-ZbxItem -Host, -Group, -Template): an id, a name or an object.
+
+SEE ALSO
+    about_Community.Zabbix
+    about_Wildcards
+
+KEYWORDS
+    Zabbix, filter, search, wildcard

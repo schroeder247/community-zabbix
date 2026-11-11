@@ -1,0 +1,67 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    An MSBuild task, not a console tool: Zabbix.PowerShell.csproj's ZabbixBuildHelp target builds the module's MAML help
+    from the XML doc comments already on every hand-written cmdlet class/property (<para type="synopsis"/description">,
+    ordinary <summary>) and on the generator's emitted cmdlets (ZabbixCmdletEmitter writes the same convention) — never a
+    second, hand-maintained copy.
+
+    It reads the doc-commented source (Commands/*.cs, the generator's obj/generated/**/*.g.cs) as Roslyn syntax trees
+    (CommandSourceParser) rather than reflecting over the built Community.Zabbix.PowerShell.dll: that dll is produced by the same
+    Build, so reflecting it risks locking a file the build is still writing, and would pull the module's runtime
+    dependencies (ASP.NET Core, OpenTelemetry, System.Management.Automation) into the reflecting process. The manifest
+    task (ZabbixWriteManifestExportsTask) reads the same files the same way.
+
+    MSBuild tasks (Microsoft.Build.Utilities.Task), not a spawned `dotnet` process: no Exec/`dotnet run` anywhere in
+    this build, and a UsingTask AssemblyFile pointing at this project's own output — built first because each module
+    project carries a ProjectReference to it with ReferenceOutputAssembly="false" (the same technique
+    Zabbix.Generator.csproj already uses to make an analyzer available before CoreCompile, applied here to make a task
+    available before Build). The UsingTasks name TaskFactory="TaskHostFactory": each task runs in a task host process
+    that exits with it, so a reused MSBuild node never loads this assembly and never locks it against its next build.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Community.Zabbix.PowerShell.HelpGen</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <!-- Not a shipped library surface (see the project comment above), so it opts out of the
+         PublicApiAnalyzers wiring in Directory.Build.targets that otherwise covers every non-test, non-Roslyn,
+         non-Exe project — the same reasoning that already exempts it from CS1591 below. -->
+    <IsPublicApiTracked>false</IsPublicApiTracked>
+    <!-- Build-time-only tooling: never trimmed/AOT-published, and it depends on Microsoft.Build.Framework/Utilities,
+         which are themselves not trim/AOT-analysed. -->
+    <IsAotCompatible>false</IsAotCompatible>
+    <!-- A build task, not a shipped library surface (same reasoning as Zabbix.Generator.csproj's NoWarn below it). -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <!-- Microsoft.Build.* ships no net10.0-labelled version yet (18.10.1 is built for net9.0/netstandard2.0); it
+         loads and runs fine hosted inside the net10.0 MSBuild that ships with this SDK
+         (the same in-process-task pattern used throughout .NET tooling), so this suppresses the TFM mismatch
+         warning rather than pinning a lower TargetFramework than every other project here. -->
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Provided by the MSBuild host that loads this task at run time; never copied into its own output (the same
+         ExcludeAssets="runtime" shape Zabbix.PowerShell.csproj itself uses for System.Management.Automation, for the
+         same reason: the host already has its own copy, at its own version, and a second copy on disk would only be
+         a version mismatch waiting to happen). -->
+    <PackageReference Include="Microsoft.Build.Framework" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" PrivateAssets="all" ExcludeAssets="runtime" />
+    <!-- ZabbixWriteTypesPs1XmlTask's own source of the types.ps1xml text: Zabbix.Generator's ApiDescription (the same
+         schema model ZabbixApiEmitter/ZabbixCmdletEmitter already parse) and ZabbixTypesEmitter (pure text generation
+         from it, no file I/O of its own) — an ordinary reference, not the OutputItemType="Analyzer"
+         ReferenceOutputAssembly="false" shape Zabbix.PowerShell.csproj uses to load Zabbix.Generator as a source
+         generator; this project just calls its plain C# types in-process, the same way it already reads Commands/*.cs
+         source text for MAML help. -->
+    <ProjectReference Include="../../src/Zabbix.Generator/Zabbix.Generator.csproj" Aliases="ZabbixGenerator" />
+    <!-- The generator's model carries Roslyn's DiagnosticDescriptor and checks names with SyntaxFacts; the generator keeps
+         Microsoft.CodeAnalysis private (a compiler host supplies it), so a process that calls the model outside a compiler
+         brings its own copy. -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- HelpGenTests drives the source reader and the MAML writer directly, without MSBuild. -->
+    <InternalsVisibleTo Include="Zabbix.PowerShell.Tests" />
+  </ItemGroup>
+</Project>

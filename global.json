@@ -1,0 +1,15 @@
+{
+  // The .NET 10 SDK: the libraries target net10.0, and `dotnet test` in Microsoft.Testing.Platform mode
+  // exists only there. Pinned EXACTLY: the committed packages.lock.json files record the SDK's own
+  // implicit packages (Microsoft.NET.ILLink.Tasks, Microsoft.DotNet.ILCompiler), whose versions change with every SDK
+  // patch, and CI restores in locked mode; a patch roll-forward on the runner fails that restore (NU1004) while the
+  // same tree restores locally. Moving the SDK is a reviewed change here plus `dotnet restore --force-evaluate` for the
+  // lock files, in one commit (Learn, global.json rollForward; NuGet lock files and implicit references).
+  "sdk": {
+    "version": "10.0.403",
+    "rollForward": "disable"
+  },
+  "test": {
+    "runner": "Microsoft.Testing.Platform"
+  }
+}

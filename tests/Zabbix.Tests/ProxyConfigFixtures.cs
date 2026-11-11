@@ -1,0 +1,24 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+namespace Community.Zabbix.Tests;
+
+/// <summary>
+/// Proxy configuration replies captured from live Zabbix servers (one host, then a second host added), trimmed to the tables the SDK reads; field lists and row shapes are the servers' own.
+/// </summary>
+internal static class ProxyConfigFixtures
+{
+    /// <summary>8.0.0rc1, revision 0 asked: a full sync of one host and its trapper item (trapper_hosts defaulted to {$TRAPPER.ALLOWED_HOSTS}).</summary>
+    public const string Full80 = """
+        {"full_sync":1,"config_revision":1793,"data":{"hosts":{"fields":["hostid","host","status","ipmi_authtype","ipmi_privilege","ipmi_username","ipmi_password","name","tls_connect","tls_accept","tls_issuer","tls_subject","tls_psk_identity","tls_psk"],"data":[[10828,"zbx-proxy-h1",0,-1,2,"","","zbx-proxy-h1",1,1,"","","",""]]},"items":{"fields":["itemid","type","snmp_oid","hostid","key_","delay","history","status","value_type","trapper_hosts","logtimefmt","params","ipmi_sensor","authtype","username","password","publickey","privatekey","flags","interfaceid","inventory_link","jmx_endpoint","master_itemid","timeout","url","query_fields","posts","status_codes","follow_redirects","post_type","http_proxy","headers","retrieve_mode","request_method","output_format","ssl_cert_file","ssl_key_file","ssl_key_password","verify_peer","verify_host","allow_traps"],"data":[[71029,2,"",10828,"zbx.trap","0","31d",0,4,"{$TRAPPER.ALLOWED_HOSTS}","","","",0,"","","","",0,null,0,"",null,"","","","","200",1,0,"","",0,0,0,"","","",0,0,0]]},"globalmacro":{"fields":["globalmacroid","macro","value","type"],"data":[[2,"{$SNMP_COMMUNITY}","public",0],[3,"{$TRAPPER.ALLOWED_HOSTS}","127.0.0.1,::1",0]]},"hosts_templates":{"fields":["hosttemplateid","hostid","templateid","link_type"],"data":[]},"hostmacro":{"fields":["hostmacroid","hostid","macro","value","type","automatic"],"data":[]}}}
+        """;
+
+    /// <summary>8.0.0rc1, the revision above asked after a second host was added: only that host and its item.</summary>
+    public const string Delta80 = """
+        {"config_revision":1795,"data":{"hosts":{"fields":["hostid","host","status","ipmi_authtype","ipmi_privilege","ipmi_username","ipmi_password","name","tls_connect","tls_accept","tls_issuer","tls_subject","tls_psk_identity","tls_psk"],"data":[[10829,"zbx-proxy-h2",0,-1,2,"","","zbx-proxy-h2",1,1,"","","",""]]},"items":{"fields":["itemid","type","snmp_oid","hostid","key_","delay","history","status","value_type","trapper_hosts","logtimefmt","params","ipmi_sensor","authtype","username","password","publickey","privatekey","flags","interfaceid","inventory_link","jmx_endpoint","master_itemid","timeout","url","query_fields","posts","status_codes","follow_redirects","post_type","http_proxy","headers","retrieve_mode","request_method","output_format","ssl_cert_file","ssl_key_file","ssl_key_password","verify_peer","verify_host","allow_traps"],"data":[[71042,2,"",10829,"zbx.trap2","0","31d",0,4,"{$TRAPPER.ALLOWED_HOSTS}","","","",0,"","","","",0,null,0,"",null,"","","","","200",1,0,"","",0,0,0,"","","",0,0,0]]},"globalmacro":{"fields":["globalmacroid","macro","value","type"],"data":[[2,"{$SNMP_COMMUNITY}","public",0],[3,"{$TRAPPER.ALLOWED_HOSTS}","127.0.0.1,::1",0]]}}}
+        """;
+
+    /// <summary>7.0.31, revision 0 asked: a full sync of one host and its trapper item (trapper_hosts empty).</summary>
+    public const string Full70 = """
+        {"full_sync":1,"config_revision":1798,"data":{"hosts":{"fields":["hostid","host","status","ipmi_authtype","ipmi_privilege","ipmi_username","ipmi_password","name","tls_connect","tls_accept","tls_issuer","tls_subject","tls_psk_identity","tls_psk"],"data":[[10701,"zbx-proxy-h1",0,-1,2,"","","zbx-proxy-h1",1,1,"","","",""]]},"items":{"fields":["itemid","type","snmp_oid","hostid","key_","delay","history","status","value_type","trapper_hosts","logtimefmt","params","ipmi_sensor","authtype","username","password","publickey","privatekey","flags","interfaceid","inventory_link","jmx_endpoint","master_itemid","timeout","url","query_fields","posts","status_codes","follow_redirects","post_type","http_proxy","headers","retrieve_mode","request_method","output_format","ssl_cert_file","ssl_key_file","ssl_key_password","verify_peer","verify_host","allow_traps"],"data":[[50823,2,"",10701,"zbx.trap","0","31d",0,4,"","","","",0,"","","","",0,null,0,"",null,"","","","","200",1,0,"","",0,0,0,"","","",0,0,0]]},"globalmacro":{"fields":["globalmacroid","macro","value","type"],"data":[[2,"{$SNMP_COMMUNITY}","public",0]]},"hosts_templates":{"fields":["hosttemplateid","hostid","templateid","link_type"],"data":[]},"hostmacro":{"fields":["hostmacroid","hostid","macro","value","type","automatic"],"data":[]}}}
+        """;
+}

@@ -1,0 +1,95 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+
+CONTRIBUTORS: read CONTRIBUTING.md, docs/design/architecture.md and docs/design/decisions.md before adding code. This file is evaluated BEFORE each project body, so nothing here may depend on a property a project
+sets (OutputType, IsTestProject, IsRoslynComponent). Those conditions live in Directory.Build.targets.
+-->
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <!-- The release version. A prerelease adds a VersionSuffix (1.1.0-beta.1); while one is set, PublicAPI.Shipped.txt
+         stays empty and the surface is declared in PublicAPI.Unshipped.txt (DesignConformanceTests.PublicApi.cs holds
+         both halves of that rule). The package-validation baseline (Directory.Build.targets) names the last release
+         on nuget.org: ZabbixPackageValidationBaseline, empty until 1.0.0 is published there. -->
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <VersionSuffix>alpha.1</VersionSuffix>
+    <ZabbixPackageValidationBaseline></ZabbixPackageValidationBaseline>
+    <!-- The assembly identity carries the major version only, as Microsoft.Extensions' does (10.0.0.0 for every
+         10.0.x): a MINOR or PATCH never changes the version a dependent was compiled against, so two modules built
+         against 1.0 and 1.1 bind the one copy PowerShell loads (Learn, versioning: "CONSIDER only including a major
+         version in the AssemblyVersion"). FileVersion keeps the full version. No strong name: the libraries target
+         net10.0 only, where the runtime neither validates nor uses one (decisions.md, "Assembly identity"). -->
+    <AssemblyVersion>$([System.Version]::Parse('$(VersionPrefix)').Major).0.0.0</AssemblyVersion>
+    <FileVersion>$(VersionPrefix).0</FileVersion>
+    <!-- The language and the analyzer catalogue are pinned, not "latest": a newer SDK band must not change what a tagged
+         commit compiles to or which rules fail it (Learn, AnalysisLevel: pin a version for a stable rule set). Moved
+         with the SDK band in global.json, in the same commit. -->
+    <LangVersion>14</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Deterministic>true</Deterministic>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <!-- The whole CA + IDE catalogue, style included, every rule an error. A category severity reaches only
+         default-enabled rules, so the ids the design rules name stay listed in .editorconfig. -->
+    <AnalysisLevel>10.0-all</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
+    <!-- Compiler ids that default to warnings and must not: nullable flow, undocumented public members,
+         async-iterator cancellation (CS8424-8426), switch exhaustiveness (CS8509/8524/8846/8655/8847),
+         trim and AOT analysis (each library alone; tests/probes/Zabbix.AotSmoke publishes their composition). -->
+    <WarningsAsErrors>$(WarningsAsErrors);nullable;CS1591;CS8424;CS8425;CS8426;CS8509;CS8524;CS8846;CS8655;CS8847;IL2026;IL3050</WarningsAsErrors>
+    <!-- IntelliSense XML + compiler cref validation — without it, rename fallout in <see cref> rots silently.
+         It also enables IDE0005 (unnecessary usings) in the build. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Binding is generated, never reflected. Inert in a project that does not reference the Binder package. -->
+    <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <Authors>schroeder247</Authors>
+    <Copyright>Copyright (c) 2026 schroeder247 and Community Zabbix contributors</Copyright>
+    <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/schroeder247/community-zabbix</RepositoryUrl>
+    <!-- Package metadata as dotnet/runtime's and dotnet/extensions' packages carry it (Learn, "Package authoring best
+         practices"): the project URL, Source Link to the repository (the SDK's built-in Source Link reads the git remote
+         and commit), untracked generated sources embedded in the PDB, and a symbol package (.snupkg) beside each
+         .nupkg. The icon (assets/icon.png, a white C ring with a green node on navy, the project's own picture and
+         not the Zabbix logo) and the release notes, a link to the changelog at the release's tag, are the same in
+         every package. Each packable project's own README.md is its
+         package readme (Directory.Build.targets). -->
+    <PackageProjectUrl>https://github.com/schroeder247/community-zabbix</PackageProjectUrl>
+    <!-- Zabbix's trademark policy asks every use of the mark to carry its sentence; each package's description ends with
+         it and the affiliation statement (Directory.Build.targets), word for word as every other shipped artefact
+         carries them (DesignConformanceTrademarkTests). -->
+    <ZabbixTrademarkNotice>This project is not affiliated with, endorsed by or sponsored by Zabbix LLC. Zabbix is a registered trademark of Zabbix LLC.</ZabbixTrademarkNotice>
+    <!-- The LICENSE's disclaimer of warranty (MPL-2.0, sections 6 and 7) in one sentence: every package's description
+         carries it before the trademark notice, word for word as every other shipped artefact carries it
+         (DesignConformanceWarrantyTests). -->
+    <ZabbixWarrantyNotice>Provided "as is", without warranty of any kind: use at your own risk.</ZabbixWarrantyNotice>
+    <PackageIcon>icon.png</PackageIcon>
+    <ZabbixReleaseTag>v$(VersionPrefix)</ZabbixReleaseTag>
+    <ZabbixReleaseTag Condition="'$(VersionSuffix)' != ''">v$(VersionPrefix)-$(VersionSuffix)</ZabbixReleaseTag>
+    <PackageReleaseNotes>https://github.com/schroeder247/community-zabbix/blob/$(ZabbixReleaseTag)/CHANGELOG.md</PackageReleaseNotes>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <!-- Supply chain (Learn, "Locking dependencies" and "Auditing package dependencies"): every project restores into a
+         committed packages.lock.json, and CI restores in locked mode, so a build resolves exactly the graph that was
+         reviewed; a dependency change regenerates the lock files in the same commit (`dotnet restore
+         -force-evaluate`). Every package, transitive ones included, is audited against the advisory database at the
+         lowest severity, and a hit fails the build like any warning. -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestoreLockedMode Condition="'$(GITHUB_ACTIONS)' == 'true'">true</RestoreLockedMode>
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <NuGetAuditLevel>low</NuGetAuditLevel>
+    <!-- Deterministic paths in CI builds (Source Link's guidance); a local build keeps local paths for debugging. -->
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)assets/icon.png" Pack="true" PackagePath="\" Visible="false" />
+    <!-- The credits and the licences of what the project rests on (THIRD-PARTY-NOTICES.md), in every package. -->
+    <None Include="$(MSBuildThisFileDirectory)THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="\" Visible="false" />
+  </ItemGroup>
+</Project>

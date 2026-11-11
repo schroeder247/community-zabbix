@@ -1,0 +1,87 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+
+Central Package Management (Learn, "Central Package Management"; dotnet/runtime and dotnet/extensions keep their versions
+the same way): every package version in the repository is declared here, once; a PackageReference names the package and
+its asset metadata (PrivateAssets, ExcludeAssets), never a Version. A version bump is a one-line change here.
+-->
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <!-- The platform: Microsoft.Extensions.* (10.0.x ships with the runtime; 10.x with dotnet/extensions), EF Core, ASP.NET-adjacent -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Compliance.Abstractions" Version="10.10.0" />
+    <PackageVersion Include="Microsoft.Extensions.Compliance.Redaction" Version="10.10.0" />
+    <PackageVersion Include="Microsoft.Extensions.Compliance.Testing" Version="10.10.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.Testing" Version="10.10.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.10.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Resilience" Version="10.10.0" />
+    <PackageVersion Include="Microsoft.Extensions.Telemetry" Version="10.10.0" />
+    <PackageVersion Include="Microsoft.Extensions.Telemetry.Abstractions" Version="10.10.0" />
+    <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.10.0" />
+    <PackageVersion Include="System.Management.Automation" Version="7.6.9" />
+    <PackageVersion Include="System.Text.Json" Version="10.0.12" />
+    <PackageVersion Include="System.Threading.RateLimiting" Version="10.0.12" />
+  </ItemGroup>
+
+  <!-- Third-party boundary packages (each named with its reason where it is referenced) -->
+  <ItemGroup>
+    <PackageVersion Include="BouncyCastle.Cryptography" Version="2.7.0" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.19.1" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.19.1" />
+  </ItemGroup>
+
+  <!-- The version of the ASP.NET Core runtime packs whose Kestrel socket-transport assemblies the listener modules carry,
+       one pack per platform (src/Zabbix.PowerShell.AspNetCoreTransport.targets): a reviewed version, bumped with the
+       10.0.x line above, never whichever runtime the building SDK bundles. -->
+  <PropertyGroup>
+    <ZabbixAspNetCoreRuntimePackVersion>10.0.12</ZabbixAspNetCoreRuntimePackVersion>
+  </PropertyGroup>
+
+  <!-- PowerShell (referenced, never shipped: pwsh supplies them) -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.PowerShell.Commands.Utility" Version="7.6.9" />
+    <PackageVersion Include="Microsoft.PowerShell.SDK" Version="7.6.9" />
+  </ItemGroup>
+
+  <!-- Roslyn, analyzers and MSBuild (build-time only) -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Build.Framework" Version="18.10.1" />
+    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="18.10.1" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="5.6.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="5.6.0" />
+    <!-- An SPDX 2.2 SBOM inside every package (_manifest/spdx_2.2/manifest.spdx.json), generated at pack. -->
+    <PackageVersion Include="Microsoft.Sbom.Targets" Version="4.1.13" />
+  </ItemGroup>
+
+  <!-- Tests -->
+  <ItemGroup>
+    <!-- Property-based tests: generated inputs, shrunk to the smallest failing one, replayable by seed. -->
+    <PackageVersion Include="CsCheck" Version="4.9.0" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.12.0" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="2.5.0" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.5.0" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.0" />
+    <PackageVersion Include="xunit.v3" Version="4.0.1" />
+  </ItemGroup>
+</Project>

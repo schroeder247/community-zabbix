@@ -1,0 +1,72 @@
+// The sample HelpGenTests reads: two commands of a module, written the way Commands/*.cs is, with an undecorated
+// shared base between them and an OutputType attribute whose array initializer carries a brace of its own. Get-SmpWidget
+// carries its examples as the generator writes them (<example>); Remove-SmpWidget takes its help from the help script
+// beside this file (Remove-SmpWidget.ps1).
+using System.Management.Automation;
+
+namespace Sample.Commands;
+
+/// <summary>
+/// <para type="synopsis">Gets <c>widgets</c> from the <see cref="T:Sample.WidgetStore"/>.</para>
+/// <para type="description">Gets every widget, or the widgets whose name matches <paramref name="Name"/>; with
+/// <see langword="null"/> filters, all of them.</para>
+/// </summary>
+/// <example title="Get a widget by name">
+/// <code>
+/// Get-SmpWidget -Name 'gear &amp; sprocket'
+/// </code>
+/// <para>Gets the widget named gear &amp; sprocket.</para>
+/// </example>
+/// <example title="Count the widgets of a pipeline">
+/// <code>
+/// Get-SmpWidget |
+///     Measure-Object
+/// </code>
+/// <para>Gets every widget and counts them.</para>
+/// <para>A second paragraph is a second remark.</para>
+/// </example>
+[Cmdlet(VerbsCommon.Get, "SmpWidget", DefaultParameterSetName = ByName)]
+[OutputType(typeof(global::Sample.Widget), ParameterSetName = new[] { ByName, "ById" })]
+[Alias("gsw")]
+public sealed class GetSmpWidgetCommand : PSCmdlet
+{
+    private const string ByName = "ByName";
+
+    /// <summary>The widget's name; wildcards match.</summary>
+    /// <remarks>A maintainer's note the help never shows.</remarks>
+    [Parameter(ParameterSetName = ByName, Position = 0, ValueFromPipelineByPropertyName = true)]
+    [Alias("WidgetName")]
+    [SupportsWildcards]
+    public string[]? Name { get; set; }
+
+    /// <summary>The widget's id.</summary>
+    [Parameter(Mandatory = true, ParameterSetName = "ById", ValueFromPipeline = true)]
+    public long Id { get; set; }
+
+    /// <summary>At most this many widgets.</summary>
+    [Parameter(ParameterSetName = ByName)]
+    [Parameter(ParameterSetName = "ById")]
+    public int Limit { get; set; } = 100;
+
+    // [Parameter] in a comment is not a parameter.
+    public string NotAParameter { get; set; } = string.Empty;
+}
+
+/// <summary>What every widget-changing command shares; not a command itself.</summary>
+public abstract class SmpWidgetChangeCommand : PSCmdlet
+{
+    /// <summary>Changes the widget without asking.</summary>
+    [Parameter]
+    public SwitchParameter Force { get; set; }
+}
+
+/// <summary>
+/// <para type="synopsis">Removes a widget.</para>
+/// </summary>
+[Cmdlet(VerbsCommon.Remove, "SmpWidget", SupportsShouldProcess = true)]
+public sealed class RemoveSmpWidgetCommand : SmpWidgetChangeCommand
+{
+    /// <summary>The widget to remove.</summary>
+    [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true)]
+    public global::Sample.Widget? InputObject { get; set; }
+}

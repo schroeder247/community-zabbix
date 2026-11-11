@@ -1,0 +1,168 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+name: Release
+
+# A `v<version>` tag of main releases the Community.Zabbix.* packages and the PowerShell modules Community.Zabbix,
+# Community.Zabbix.Agent and Community.Zabbix.Proxy (docs/adr/0003-powershell-module-split.md). The tag must name the packages' version, Directory.Build.props'
+# VersionPrefix plus -VersionSuffix when one is set, and the module manifests must agree with it
+# (tools/Test-ZbxReleaseVersion.ps1 holds the rules; CONTRIBUTING.md, "Releasing", explains them): v1.1.0-beta.1
+# releases a prerelease, v1.1.0 is refused while a VersionSuffix is set. Feeds: GitHub Packages always; nuget.org by
+# Trusted Publishing (an OIDC token exchanged for a short-lived key, no stored secret) when the repository variable
+# NUGET_USER names the nuget.org account whose trusted-publishing policy names this workflow; the PowerShell Gallery,
+# which has no trusted publishing, when PSGALLERY_API_KEY is set. The GitHub release carries the packages, their SPDX
+# SBOMs and the three module zips, each with a build-provenance attestation, and is marked a prerelease when the
+# version is one.
+# Two jobs: `build` restores, builds, tests and packs with read-only permissions; only `publish`, which runs no project
+# code, can write. Every action is pinned to a full commit SHA (Dependabot moves the pins).
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    # The EF store's tests need their own PostgreSQL (CI job `build` does the same); without it they skip and the
+    # executed-test floor fails the run.
+    services:
+      postgres:
+        image: docker.io/library/postgres:16
+        env:
+          POSTGRES_DB: zbxtest
+          POSTGRES_USER: zbxtest
+          POSTGRES_PASSWORD: zbxtest
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U zbxtest" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      ZABBIX_TEST_POSTGRES: Host=127.0.0.1;Port=5432;Database=zbxtest;Username=zbxtest;Password=zbxtest;Timeout=5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false   # no step pushes, so the token is not kept in .git/config
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          global-json-file: global.json
+
+      - name: The tag names the version
+        id: version
+        shell: pwsh
+        run: |
+          $release = ./tools/Test-ZbxReleaseVersion.ps1 -Tag $env:GITHUB_REF_NAME
+          "version=$($release.Version)" >> $env:GITHUB_OUTPUT
+          "prerelease=$($release.Prerelease.ToString().ToLowerInvariant())" >> $env:GITHUB_OUTPUT
+
+      - run: dotnet restore Zabbix.slnx --locked-mode
+      - run: dotnet build Zabbix.slnx --configuration Release --no-restore -warnaserror
+      - run: dotnet test --solution Zabbix.slnx --configuration Release --no-build
+      # Each package carries its SPDX 2.2 SBOM (ZabbixSbom, Directory.Build.targets; serial, see there); the release
+      # also attaches it beside the package as <package>.spdx.json.
+      - run: dotnet pack Zabbix.slnx --configuration Release --no-build -warnaserror -m:1 -p:ZabbixSbom=true --output packages
+      - name: Extract each package's SBOM beside it
+        run: |
+          for package in packages/*.nupkg; do
+            unzip -p "$package" _manifest/spdx_2.2/manifest.spdx.json > "${package%.nupkg}.spdx.json"
+            test -s "${package%.nupkg}.spdx.json"
+          done
+
+      # Three folders named after their modules; a sibling's folder without the files Community.Zabbix's already holds
+      # (tools/Stage-ZbxModules.ps1, ADR 0003). One zip per module.
+      - name: Stage the modules as folders named after them
+        shell: pwsh
+        # The version reaches the script as data, never spliced into its text.
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          ./tools/Stage-ZbxModules.ps1 -Configuration Release -Destination stage
+          foreach ($module in 'Community.Zabbix', 'Community.Zabbix.Agent', 'Community.Zabbix.Proxy') {
+            Compress-Archive -Path "stage/$module" -DestinationPath "packages/$module-$env:RELEASE_VERSION.zip"
+          }
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: release
+          path: |
+            packages
+            stage
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      attestations: write
+    # A step's `if:` is evaluated before, and cannot see, that step's own `env:`; the job therefore says only WHETHER
+    # each feed is configured, and a key is in the env of the one step that publishes with it.
+    env:
+      HAS_NUGET_USER: ${{ vars.NUGET_USER != '' }}
+      HAS_PSGALLERY_API_KEY: ${{ secrets.PSGALLERY_API_KEY != '' }}
+    steps:
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release
+
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: |
+            packages/*.nupkg
+            packages/*.snupkg
+            packages/*.spdx.json
+            packages/Community.Zabbix*.zip
+
+      - name: Publish to GitHub Packages
+        run: dotnet nuget push "packages/*.nupkg" --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+
+      - name: Exchange the workflow's OIDC token for a short-lived nuget.org key
+        id: nuget
+        if: env.HAS_NUGET_USER == 'true'
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+        with:
+          user: ${{ vars.NUGET_USER }}
+
+      - name: Publish to nuget.org
+        if: env.HAS_NUGET_USER == 'true'
+        env:
+          NUGET_API_KEY: ${{ steps.nuget.outputs.NUGET_API_KEY }}
+        run: dotnet nuget push "packages/*.nupkg" --source https://api.nuget.org/v3/index.json --api-key "$NUGET_API_KEY" --skip-duplicate
+
+      # Community.Zabbix first, then the siblings, whose packages depend on it by name
+      # (RequiredModules = @('Community.Zabbix')). The siblings skip the Gallery-side dependency lookup, which can miss a package
+      # accepted seconds earlier; the dependency is still written into their packages, and CI's
+      # tools/Test-ZbxModuleInstall.ps1 proves the three install from a feed in exactly this order.
+      - name: Publish the modules to the PowerShell Gallery
+        if: env.HAS_PSGALLERY_API_KEY == 'true'
+        shell: pwsh
+        env:
+          PSGALLERY_API_KEY: ${{ secrets.PSGALLERY_API_KEY }}
+        run: |
+          $env:PSModulePath = "$PWD/stage" + [IO.Path]::PathSeparator + $env:PSModulePath
+          Publish-PSResource -Path stage/Community.Zabbix -Repository PSGallery -ApiKey $env:PSGALLERY_API_KEY
+          foreach ($module in 'Community.Zabbix.Agent', 'Community.Zabbix.Proxy') {
+            Publish-PSResource -Path "stage/$module" -Repository PSGallery -ApiKey $env:PSGALLERY_API_KEY -SkipDependenciesCheck
+          }
+
+      - uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3
+        with:
+          prerelease: ${{ needs.build.outputs.prerelease == 'true' }}
+          generate_release_notes: true
+          body: |
+            Community Zabbix ${{ needs.build.outputs.version }}: the .NET SDK and the PowerShell modules. The change list is
+            [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md).
+          files: |
+            packages/*.nupkg
+            packages/*.snupkg
+            packages/*.spdx.json
+            packages/Community.Zabbix*.zip

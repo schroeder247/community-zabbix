@@ -1,0 +1,108 @@
+TOPIC
+    about_Community.Zabbix_Pipeline
+
+SHORT DESCRIPTION
+    What the Zabbix cmdlets take from the pipeline, when they call the
+    server, and how -WhatIf, -Confirm and Ctrl+C behave.
+
+LONG DESCRIPTION
+    What binds from the pipeline
+        Get-Help <cmdlet> -Full shows, per parameter, "Accept pipeline
+        input?". The common shapes:
+
+        - Get-Zbx<Object> takes ids by value, and -Id takes objects that
+          carry that object's own id property (HostId for Get-ZbxHost) by
+          property name.
+
+        - The reference filters of a Get- cmdlet (-Host, -Group, -Template,
+          ...) take an id, a name or an object, and bind by property name
+          from a piped object that carries the matching id. So the output of
+          one Get- narrows the next:
+
+              Get-ZbxHost -Name 'web-01' | Get-ZbxItem           # web-01's items
+              Get-ZbxHostGroup -Name 'Web servers' | Get-ZbxHost # the group's hosts
+
+        - Set-Zbx<Object> and Remove-Zbx<Object> take -InputObject by value:
+          an object, an id or a name, one per pipeline item.
+
+              Get-ZbxHost -Group 'Web servers' | Set-ZbxHost -Status Disabled
+              '10084', 'web-02' | Remove-ZbxHost -WhatIf
+
+        - New-Zbx<Object> and Set-Zbx<Object> take every field parameter
+          by property name (secrets aside), so a CSV row or a
+          [pscustomobject] whose columns are parameter names creates or
+          changes one object per row:
+
+              Import-Csv ./hosts.csv | New-ZbxHost -Group 'Linux servers'
+              [pscustomobject]@{ Name = 'h1'; InterfaceIp = '10.0.0.1' } |
+                  New-ZbxHost -Group 'Linux servers' -WhatIf
+              Import-Csv ./descriptions.csv | Set-ZbxHost   # HostId, Description
+
+          A piped Zabbix record (the output of a Get- cmdlet) binds only
+          what is its own: a reference to its own object and its own id
+          (Get-ZbxHost | New-ZbxItem takes the host's HostId, never its
+          name or description; Get-ZbxHost | Set-ZbxHost sends none of the
+          host's own fields back). A piped object that binds nothing (an
+          event piped to New-ZbxHost) is refused with InputObjectNotBound.
+          A hashtable's keys are not properties: pipe [pscustomobject]$h.
+          Parameters written on the command line win over the pipeline.
+
+        - Builder cmdlets (New-ZbxActionCondition, New-ZbxMapElement,
+          New-ZbxDashboardWidget, ...) write a value you pass to the owning
+          object's parameter, or collect with @(...).
+
+    When the server is called
+        A Get- cmdlet calls the server once per pipeline input (once in all
+        when nothing is piped) and writes every object it reads.
+
+        Set- and Remove- collect every -InputObject from the whole pipeline
+        first, resolve all names among them in one call, ask for
+        confirmation per object, and then change or delete all confirmed
+        objects in ONE call when the pipeline ends; with -PassThru, Set-
+        then reads the changed objects back in one call and writes them.
+        So nothing is written by Set- or Remove- until its input is
+        complete, and a batch is one API request, not one per object. A
+        value a piped record gives by property name (a template's own
+        Groups) applies to that record's object only, never to the others
+        of the batch.
+
+        A New- cmdlet creates one object per call or piped record (or the
+        objects its parameters describe) and writes it; -WhatIf and the
+        prompt name it (host 'web-01').
+
+    -WhatIf and -Confirm
+        New- and Set- have ConfirmImpact Medium and Remove- High. With the
+        default $ConfirmPreference (High), Remove- asks before deleting,
+        and New-/Set- do not ask. -WhatIf prints what would happen and
+        sends no change; -Confirm asks per object; -Confirm:$false and
+        -Force never ask. -WhatIf also skips the read-back: nothing is
+        written to the pipeline.
+
+    Names and errors in a pipeline
+        A name that matches no object is written as a non-terminating
+        ZabbixReferenceNotFound error and left out; a name that matches
+        more than one object (item names repeat across hosts) is written as
+        ZabbixReferenceAmbiguous and left out. The rest of the batch goes
+        on. An API error on the batch call is one non-terminating error for
+        the call. Use -ErrorAction Stop to turn either into an exception.
+
+    Stopping
+        Ctrl+C stops the pipeline: every call runs on PowerShell's pipeline
+        stop token, so a call in flight is cancelled (its HTTP request is
+        aborted) and no further call is made.
+
+EXAMPLES
+    Disable every host of a group, previewing first:
+
+        Get-ZbxHost -Group 'Web servers' | Disable-ZbxHost -WhatIf
+        Get-ZbxHost -Group 'Web servers' | Disable-ZbxHost -Confirm:$false
+
+    Delete hosts named in a file, one API call for all of them:
+
+        Get-Content ./decommissioned.txt | Remove-ZbxHost -Confirm:$false
+
+SEE ALSO
+    about_Community.Zabbix
+    about_Community.Zabbix_Properties
+    about_Pipelines
+    about_CommonParameters

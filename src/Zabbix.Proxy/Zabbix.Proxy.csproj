@@ -1,0 +1,34 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Everything that accepts connections: the listener, an own accept loop over Kestrel's socket transport (reached
+    through IConnectionListenerFactory so a test substitutes an in-memory transport; why not Kestrel's ConnectionHandler
+    pipeline is written at ZabbixListener), the trapper (values in), the passive agent (keys answered), the active and
+    passive proxy (store-and-forward speaking `proxy data`/`proxy config` as conversations) and the connector endpoint.
+    The ASP.NET Core shared framework is referenced for its connection layer (the listeners) and for HTTP, routing
+    and endpoint building (the connector endpoint, MapZabbixConnector); no web host is started by the listeners (the
+    connector is mapped onto the caller's own web application).
+  -->
+  <PropertyGroup>
+    <RootNamespace>Community.Zabbix</RootNamespace>
+    <AssemblyName>Community.Zabbix.Proxy</AssemblyName>
+    <PackageId>Community.Zabbix.Proxy</PackageId>
+    <Description>Zabbix listeners on the platform's connection layer: trapper, passive agent, active and passive proxy, connector.</Description>
+    <PackageTags>zabbix;monitoring;proxy;trapper;agent</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="../Zabbix.Agent/Zabbix.Agent.csproj" />
+    <!-- The API's vocabulary, not its client: a listener's TlsAccept is Zabbix's generated ZabbixTlsAcceptModes, the
+         same [Flags] the API's host and proxy records carry, and the connector's tags are ZabbixTag and ZabbixTagOrigin.
+         Zabbix.Sdk (the HTTP pipeline) stays out. DesignConformanceTests.Dependencies pins the three types. -->
+    <ProjectReference Include="../Zabbix.Api/Zabbix.Api.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Not the PowerShell modules: they program against the public API, as an application does (ModulePublicApiTests). -->
+    <InternalsVisibleTo Include="Zabbix.Tests" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,24 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Build-time step: writes the ZabbixApiJson context into Zabbix's obj/ before CoreCompile, from the same
+    emitter the source generator runs. System.Text.Json's generator cannot see another generator's output, so the context
+    must be real source, so this step writes it at build time. Never shipped.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsAotCompatible>false</IsAotCompatible>
+    <RootNamespace>Community.Zabbix.Generator.Context</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Zabbix.Generator/Zabbix.Generator.csproj" Aliases="ZabbixGenerator" />
+    <!-- The generator's model carries Roslyn's DiagnosticDescriptor and checks names with SyntaxFacts; the generator keeps
+         Microsoft.CodeAnalysis private (a compiler host supplies it), so a process that calls the model outside a compiler
+         brings its own copy. -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+  </ItemGroup>
+</Project>

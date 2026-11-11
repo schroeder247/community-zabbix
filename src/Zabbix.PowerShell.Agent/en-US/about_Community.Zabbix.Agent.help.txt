@@ -1,0 +1,161 @@
+TOPIC
+    about_Community.Zabbix.Agent
+
+SHORT DESCRIPTION
+    The Community.Zabbix.Agent module: run Zabbix agents in PowerShell,
+    answer item keys with scriptblocks, and provision the host the server
+    monitors them on.
+
+LONG DESCRIPTION
+    The module runs Zabbix agents as sessions of the current runspace, over
+    the Community Zabbix SDK's agent classes. A session answers the four keys
+    every Zabbix agent answers (agent.ping, agent.version, agent.hostname,
+    system.uname), Zabbix's own keys for the computer it runs on (vfs.fs.size,
+    vm.memory.size, proc.num, net.if.in, web.page.get and the rest: the
+    bundled items), and every key a scriptblock handler is registered for, so
+    a script can publish its own values to a Zabbix server without installing
+    Zabbix's agent.
+
+    -KeyRule limits the keys a session answers with Zabbix's AllowKey and
+    DenyKey lines, tried in order ('AllowKey=vfs.fs.*[*]', 'DenyKey=*');
+    -NoBundledItems leaves the bundled items out.
+
+    The module requires Community.Zabbix: Import-Module Community.Zabbix.Agent
+    imports it first, and the provisioning commands use its connection
+    (Connect-ZbxServer).
+
+            Install-PSResource Community.Zabbix.Agent
+            Import-Module Community.Zabbix.Agent
+
+    Sessions: active and passive
+        An active agent (Start-ZbxActiveAgent) connects to the server's
+        trapper port (-Server, 10051 by default), asks which active checks
+        (items of type ZabbixActive) its -Hostname has, and sends their
+        values. It needs no open port on this machine.
+
+        A passive agent (Start-ZbxPassiveAgent) listens on -Port (10050 by
+        default) and answers the server's polls of Zabbix agent items
+        (type Zabbix). It answers only the peers -AllowedPeer lets in:
+        127.0.0.1 and ::1 unless given, as Zabbix's own agent does, so name
+        the server's address or network.
+
+        Each session is kept in this runspace under its -Name, unique among
+        the agent sessions (active and passive alike), and found by that name
+        by the other commands:
+        Get-ZbxActiveAgentStatus and Get-ZbxPassiveAgentStatus show the
+        running sessions. A session runs in the background until it is
+        stopped or the runspace closes (about_Community.Zabbix_Sessions).
+
+    Handlers
+        Register-ZbxActiveAgentHandler, Register-ZbxPassiveAgentHandler (or
+        Register-ZbxAgentHandler, for either kind) add a scriptblock that
+        answers -Key. Its first argument is the parsed key, so
+        app.queue[orders] arrives with Parameters = orders; its last output,
+        as text, is the value. New-ZbxAgentHandler builds a key and
+        scriptblock binding to pipe into several sessions.
+
+        A handler runs in the session's own runspace, not the caller's: it
+        has Community.Zabbix and this module imported, but not the caller's
+        variables, functions or connections (a handler that calls the API
+        connects in its own runspace). $script: variables persist from one
+        call to the next, and the session's handlers run one at a time. A handler that throws makes the key not supported until it
+        answers again. Test-ZbxAgentItem answers a key through the built-in
+        keys, the bundled items included, or through a running session's
+        handlers with -Session, without a server; a scriptblock can read a
+        bundled key with it (Test-ZbxAgentItem -Key 'vfs.fs.size[/,pfree]' -Raw).
+
+        A scriptblock goes into the agent's Items, the same table a .NET
+        application adds its keys to (agent.Items.Add), so it answers as a
+        C# handler does, and it replaces a plugin's key or a built-in key of
+        the same name.
+
+    Plugins
+        Start-ZbxActiveAgent and Start-ZbxPassiveAgent load .NET item
+        providers from a folder, as Zabbix's agent loads modules: -Plugin
+        names each plugin, a folder under -PluginPath holding the plugin's
+        dotnet publish output, and -PluginSetting gives each plugin its
+        settings, under its name:
+
+            $settings = @{ Queues = @{ ConnectionString = 'Server=mq-01' } }
+            Start-ZbxActiveAgent -Name 'web' -HostName 'web-01' `
+                -Server 'zbx-server-01' -Plugin 'Queues' `
+                -PluginPath '/opt/zabbix-dotnet/plugins' `
+                -PluginSetting $settings
+
+        Only the plugins -Plugin names are loaded. A plugin that cannot be
+        loaded fails the start, and on Linux and macOS a plugin whose files
+        other accounts can write is refused.
+
+    Provisioning the host
+        Initialize-ZbxAgentHost -Session creates (or reuses, by host name)
+        the host the session answers as, one agent interface, and one item
+        per key the session answers: Zabbix agent items, polled on the
+        interface, for a passive session; active checks for an active one.
+        The built-in keys get the value types Zabbix's own agent templates
+        give them (agent.ping Unsigned; agent.version, agent.hostname and
+        system.uname Character); every other key gets -ValueType, Text unless
+        given. Text stores whatever a handler answers; give Unsigned or Float
+        for a key that answers numbers you want to graph.
+
+        What was created is remembered on the session:
+        Publish-ZbxAgentHost adds items for handlers registered later (and,
+        with -RemoveStale, removes those it created for keys no longer
+        answered), Get-ZbxAgentHost reads the host back with each item's
+        HasLocalHandler, Export-ZbxAgentTemplate exports it, and
+        Clear-ZbxAgentHost deletes what was created, never a host or item
+        that existed before. The server starts checking a new host when its
+        configuration cache reloads (CacheUpdateFrequency, 60 s by default).
+
+    Logs
+        A session runs in the background, so its own log is where to see why
+        values do not arrive: Get-ZbxActiveAgentLog and
+        Get-ZbxPassiveAgentLog write the entries it keeps in a bounded buffer
+        (-Tail, -Level), and Clear-ZbxActiveAgentLog and
+        Clear-ZbxPassiveAgentLog empty it. Warnings and errors a session logs
+        while no command runs are also written by the next command in the
+        runspace.
+
+    Stopping
+        Stop-ZbxActiveAgent and Stop-ZbxPassiveAgent stop a session (a
+        passive one closes its listener and frees the port) and remove it
+        from the runspace; Remove-Module and the runspace closing stop every
+        session. Stopping a session leaves the host and items on the server:
+        run Clear-ZbxAgentHost first to remove them.
+
+EXAMPLES
+    Run a passive agent with one custom key, ask it locally, have the server
+    poll it, and clean up:
+
+        Connect-ZbxServer -Uri https://zabbix.example/ -ApiToken $token
+        Start-ZbxPassiveAgent -Name 'web-agent' -Hostname 'web-02' -AllowedPeer '127.0.0.1', '10.0.0.0/24' -Port 30150
+        Register-ZbxPassiveAgentHandler -Name 'web-agent' -Key 'app.health' -ScriptBlock { 'ok' }
+        Get-ZbxAgentItem -Agent '127.0.0.1:30150' -Key 'app.health', 'agent.version'
+        Initialize-ZbxAgentHost -Session 'web-agent' -HostGroup 'Web servers' -InterfaceAddress '10.0.0.7' -PassThru
+        Get-ZbxPassiveAgentLog -Name 'web-agent' -Tail 10
+        Clear-ZbxAgentHost -Session 'web-agent' -Confirm:$false
+        Stop-ZbxPassiveAgent -Name 'web-agent'
+
+NOTE
+    Get-Help <cmdlet> -Examples shows worked examples for each cmdlet;
+    Get-Command -Module Community.Zabbix.Agent lists them.
+
+DISCLAIMER
+    Provided "as is", without warranty of any kind: use at your own risk.
+    The provisioning cmdlets create, change and delete objects on the server
+    they are connected to: try a script against a lab server first. See the
+    LICENSE (Mozilla Public License 2.0).
+
+TRADEMARK
+    This project is not affiliated with, endorsed by or sponsored by Zabbix
+    LLC. Zabbix is a registered trademark of Zabbix LLC.
+
+SEE ALSO
+    about_Community.Zabbix
+    about_Community.Zabbix_Sessions
+    Start-ZbxActiveAgent
+    Start-ZbxPassiveAgent
+    Register-ZbxAgentHandler
+    Initialize-ZbxAgentHost
+
+KEYWORDS
+    Zabbix, agent, passive, active, handler

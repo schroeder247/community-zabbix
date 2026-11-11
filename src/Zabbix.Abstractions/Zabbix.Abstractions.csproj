@@ -1,0 +1,51 @@
+<!--
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The seam every protocol shares (docs/adr/0006-protocol-split.md): the sample and its clock, the item key, the
+    component version, the options, the credential, the API transport, the exceptions and error kinds, the data
+    classifications, the telemetry names and base (each layer's log events live beside the layer, not here), the
+    JSON dialect, and the item contract an agent answers keys through (the provider, its handler and answer, and the
+    plugin entry). What one protocol alone uses lives in that protocol's package: the wire's endpoints and TLS words in
+    Zabbix.Wire, the store and the item delay in Zabbix.Agent. Depends on Microsoft's abstractions packages and Options only (a library is authored against
+    abstractions; implementations are the host's choice).
+  -->
+  <PropertyGroup>
+    <RootNamespace>Community.Zabbix</RootNamespace>
+    <AssemblyName>Community.Zabbix.Abstractions</AssemblyName>
+    <PackageId>Community.Zabbix.Abstractions</PackageId>
+    <Description>Contracts shared by the Community Zabbix SDK's packages: the value record and its clock, the item key, options, the credential, the API transport, the error kinds, and the telemetry names.</Description>
+    <PackageTags>zabbix;monitoring;abstractions</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <!-- [Secret]: a data classification, so a token or password is redacted by the host's pipeline rather than by
+         remembering not to log it (fail closed). -->
+    <PackageReference Include="Microsoft.Extensions.Compliance.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+    <!-- The item contract (docs/adr/0008-item-providers-and-plugins.md): a library registers its providers in the
+         agent's container, and a plugin's entry reads its own configuration section. -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- The code-only payloads on the options graph (a credential) are internal: the SDK sets them, a file cannot. The
+         family's assemblies share the rest of the plumbing the same way (docs/adr/0002-package-ids.md). -->
+    <InternalsVisibleTo Include="Community.Zabbix.Api" />
+    <InternalsVisibleTo Include="Community.Zabbix.Sdk" />
+    <InternalsVisibleTo Include="Community.Zabbix.Wire" />
+    <InternalsVisibleTo Include="Community.Zabbix.Agent" />
+    <InternalsVisibleTo Include="Community.Zabbix.Proxy" />
+    <InternalsVisibleTo Include="Community.Zabbix.Agent.Storage.EntityFrameworkCore" />
+    <!-- The PowerShell modules program against the SDK's public API, as an application does; what they share with the
+         libraries is the telemetry and error-type plumbing in Zabbix.Diagnostics, since they are a layer of the same
+         telemetry (ModulePublicApiTests holds them to it). No other library grants them its internals. -->
+    <InternalsVisibleTo Include="Community.Zabbix.PowerShell" />
+    <InternalsVisibleTo Include="Community.Zabbix.PowerShell.Agent" />
+    <InternalsVisibleTo Include="Community.Zabbix.PowerShell.Proxy" />
+    <InternalsVisibleTo Include="Zabbix.Tests" />
+    <InternalsVisibleTo Include="Zabbix.PowerShell.Tests" />
+  </ItemGroup>
+</Project>

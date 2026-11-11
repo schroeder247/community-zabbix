@@ -1,0 +1,73 @@
+TOPIC
+    about_Community.Zabbix_ErrorHandling
+
+SHORT DESCRIPTION
+    How the Zabbix commands report failures, and how to handle them.
+
+LONG DESCRIPTION
+    A failure is one ErrorRecord. Its FullyQualifiedErrorId names the kind of
+    failure, not its text, so a script can act on it:
+
+      ZabbixApi.<Kind>,<Command>  an API error, by the SDK's classification of
+                                  its code (ZabbixApi.Validation,
+                                  ZabbixApi.PermissionOrNotFound, ...)
+      ZabbixReferenceNotFound     a name matched no object (left out)
+      ZabbixNameNotFound          Get- -Name without a wildcard found nothing
+      ZabbixFileNotFound          a document file does not exist
+      ZabbixReferenceAmbiguous    a name matched several objects (left out)
+      ZabbixNotConnected          no Connect-ZbxServer in this runspace
+      ZabbixLog.<EventId>         an error the SDK logged
+      Zabbix<Layer>.<Kind>        a transport or protocol failure, by the
+                                  telemetry's error.type
+                                  (ZabbixHttp.ConnectionError,
+                                  ZabbixWire.ConnectionRefused, ...)
+      Zabbix.<exception type>     anything else (Zabbix.InvalidOperation)
+
+    Its CategoryInfo.Category is read from the same kind (InvalidArgument,
+    PermissionDenied, ObjectNotFound, ConnectionError, OperationTimeout, ...)
+    and its TargetObject is what the command was acting on.
+
+    Most failures are non-terminating: -ErrorAction Continue writes them and
+    carries on with the next object; -ErrorAction Stop turns the first one
+    into a terminating error that try/catch sees. What ends a command by
+    itself: no connection (ZabbixNotConnected), a parameter the binder or the
+    command refuses before anything is sent, and Connect-ZbxServer failing.
+
+        try { Get-ZbxHost -Name 'no-such-host' -ErrorAction Stop }
+        catch { $_.FullyQualifiedErrorId; $_.CategoryInfo.Category }
+        # ZabbixNameNotFound,Community.Zabbix.PowerShell.Commands.GetZbxHostCommand
+        # ObjectNotFound
+
+    Connect-ZbxServer proves a token or a user name and password before it
+    adds the connection (one authenticated read; -Credential logs in for it).
+    A credential the server refuses ends the command, adds nothing, and its
+    record's message names the server and the credential it refused; the id
+    keeps the API's kind and the category is AuthenticationError:
+
+      ZabbixApi.SessionTerminated  an API token the server does not know, or
+      ZabbixApi.NotAuthorized      one that is disabled (or a session that
+                                   ended)
+      ZabbixApi.TokenExpired       an API token past its expiry date
+      ZabbixApi.LoginFailed        a wrong user name or password, or an
+                                   account blocked after failed logins
+
+        try { Connect-ZbxServer -Uri $uri -ApiToken $token }
+        catch [Community.Zabbix.ZabbixApiException] { $_.ErrorDetails.Message }
+
+    An unreachable server is a ZabbixHttp.<Kind> error (ConnectionError,
+    NameResolutionError, ...). The tries before it are verbose records
+    (-Verbose), not warnings.
+
+    Get-ZbxError lists the recent Zabbix failures from the shell's own $Error.
+
+    A command stopped with Ctrl+C or by a command further down the pipeline
+    is not an error: it cancels the request at the wire and ends.
+
+SEE ALSO
+    about_Community.Zabbix
+    about_Try_Catch_Finally
+    about_CommonParameters
+    Get-ZbxError
+
+KEYWORDS
+    Zabbix, error, exception
