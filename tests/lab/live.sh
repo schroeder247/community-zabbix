@@ -68,10 +68,12 @@ if has csharp; then
   "$dotnet" "$root/tests/Zabbix.Tests/bin/$configuration/net10.0/Zabbix.Tests.dll" \
     --filter-class 'Community.Zabbix.Tests.Live*' --filter-class 'Community.Zabbix.Tests.EfStor*' \
     --results-directory "$results" --report-xunit-ctrf --report-xunit-ctrf-filename csharp.ctrf.json \
-    --progress off >"$results/csharp.log" 2>&1 || status=1
-  grep -E '^(failed|  total|  failed|  succeeded|  skipped)' "$results/csharp.log" >&2 || true
+    --progress off --no-ansi >"$results/csharp.log" 2>&1 || status=1
+  # The summary is read as plain text: a CI runner can colour it, and a colour code before "  total:" hides the count.
+  summary="$(perl -pe 's/\e\[[0-9;]*m//g' "$results/csharp.log")"
+  grep -E '^(failed|  total|  failed|  succeeded|  skipped)' <<<"$summary" >&2 || true
   # A filter that matches nothing passes, and would hide that no test ran.
-  if ! grep -qE '^  total: +[1-9]' "$results/csharp.log"; then
+  if ! grep -qE '^  total: +[1-9]' <<<"$summary"; then
     echo "live.sh: the csharp suite ran no tests; check the class filters above" >&2
     status=1
   fi
