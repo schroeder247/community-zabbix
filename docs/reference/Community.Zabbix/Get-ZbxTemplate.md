@@ -40,15 +40,15 @@ A template is a reusable set of items, triggers, graphs, discovery rules and das
 ### Example 1: Get a template by name
 
 ```powershell
-Get-ZbxTemplate -Name 'Web App' | Select-Object TemplateId, TechnicalName, VisibleName
+Get-ZbxTemplate -Name 'Web App' | Select-Object TemplateId, HostName, VisibleName
 ```
 
--Name matches the template's technical name exactly; TechnicalName and VisibleName carry the API's host and name.
+-Name matches the template's technical name exactly; HostName and VisibleName carry the API's host and name.
 
 ### Example 2: Get the templates linked to a host
 
 ```powershell
-Get-ZbxTemplate -Host 'web-01' | Select-Object TemplateId, TechnicalName
+Get-ZbxTemplate -Host 'web-01' | Select-Object TemplateId, HostName
 ```
 
 -Host takes a host name, id or object.
@@ -57,7 +57,7 @@ Get-ZbxTemplate -Host 'web-01' | Select-Object TemplateId, TechnicalName
 
 ```powershell
 Get-ZbxTemplate -Group 'Templates/Web' -SelectItems |
-    ForEach-Object { '{0}: {1}' -f $_.TechnicalName, ($_.Items.Key -join ', ') }
+    ForEach-Object { '{0}: {1}' -f $_.HostName, ($_.Items.Key -join ', ') }
 ```
 
 -Group takes template group names, ids or objects; -SelectItems adds each template's items.

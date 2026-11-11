@@ -15,19 +15,19 @@ public sealed class SetZbxAuthenticationCommand : ZabbixSingletonSetCmdlet<Zabbi
     [Parameter] public ZabbixAuthenticationType? AuthenticationType { get; set; }
 
     /// <summary>Whether LDAP authentication is enabled (<c>ldap_auth_enabled</c>).</summary>
-    [Parameter] public bool? LdapAuthEnabled { get; set; }
+    [Parameter] public bool? LdapAuthenticationEnabled { get; set; }
 
     /// <summary>Whether LDAP logins are case-sensitive (<c>ldap_case_sensitive</c>).</summary>
-    [Parameter] public ZabbixAuthCase? LdapCaseSensitive { get; set; }
+    [Parameter] public ZabbixAuthenticationCase? LdapCaseSensitive { get; set; }
 
     /// <summary>The default LDAP user directory (<c>ldap_userdirectoryid</c>).</summary>
     [Parameter] public ulong? LdapUserDirectoryId { get; set; }
 
     /// <summary>Whether SAML authentication is enabled (<c>saml_auth_enabled</c>).</summary>
-    [Parameter] public bool? SamlAuthEnabled { get; set; }
+    [Parameter] public bool? SamlAuthenticationEnabled { get; set; }
 
     /// <summary>Whether SAML logins are case-sensitive (<c>saml_case_sensitive</c>).</summary>
-    [Parameter] public ZabbixAuthCase? SamlCaseSensitive { get; set; }
+    [Parameter] public ZabbixAuthenticationCase? SamlCaseSensitive { get; set; }
 
     /// <summary>The minimum password length (<c>passwd_min_length</c>).</summary>
     [Parameter] public int? PasswordMinLength { get; set; }
@@ -54,7 +54,7 @@ public sealed class SetZbxAuthenticationCommand : ZabbixSingletonSetCmdlet<Zabbi
     [Parameter] public ulong? MfaId { get; set; }
 
     /// <summary>Whether HTTP authentication is enabled (<c>http_auth_enabled</c>).</summary>
-    [Parameter] public bool? HttpAuthEnabled { get; set; }
+    [Parameter] public bool? HttpAuthenticationEnabled { get; set; }
 
     /// <summary>Where the HTTP login form appears (<c>http_login_form</c>).</summary>
     [Parameter] public ZabbixHttpLoginForm? HttpLoginForm { get; set; }
@@ -63,7 +63,7 @@ public sealed class SetZbxAuthenticationCommand : ZabbixSingletonSetCmdlet<Zabbi
     [Parameter] public string? HttpStripDomains { get; set; }
 
     /// <summary>Whether HTTP logins are case-sensitive (<c>http_case_sensitive</c>).</summary>
-    [Parameter] public ZabbixAuthCase? HttpCaseSensitive { get; set; }
+    [Parameter] public ZabbixAuthenticationCase? HttpCaseSensitive { get; set; }
 
     /// <inheritdoc/>
     protected override string Subject => "the authentication settings";
@@ -72,20 +72,20 @@ public sealed class SetZbxAuthenticationCommand : ZabbixSingletonSetCmdlet<Zabbi
     protected override ZabbixAuthenticationUpdateRequest BuildRequest() => new()
     {
         AuthenticationType = AuthenticationType,
-        LdapAuthEnabled = LdapAuthEnabled,
+        LdapAuthenticationEnabled = LdapAuthenticationEnabled,
         LdapCaseSensitive = LdapCaseSensitive,
         LdapUserDirectoryId = LdapUserDirectoryId,
-        SamlAuthEnabled = SamlAuthEnabled,
+        SamlAuthenticationEnabled = SamlAuthenticationEnabled,
         SamlCaseSensitive = SamlCaseSensitive,
         PasswordMinLength = PasswordMinLength,
         PasswordCheckRules = PasswordCheckRules,
         DisabledUserGroupId = DisabledUserGroupId,
-        JitProvisionInterval = JitProvisionInterval,
+        JitProvisionInterval = JitProvisionInterval is null ? null : ZabbixDuration.Parse(JitProvisionInterval),
         SamlJitStatus = SamlJitStatus,
         LdapJitStatus = LdapJitStatus,
         MfaStatus = MfaStatus,
         MfaId = MfaId,
-        HttpAuthEnabled = HttpAuthEnabled,
+        HttpAuthenticationEnabled = HttpAuthenticationEnabled,
         HttpLoginForm = HttpLoginForm,
         HttpStripDomains = HttpStripDomains,
         HttpCaseSensitive = HttpCaseSensitive,

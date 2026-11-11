@@ -8,7 +8,7 @@ Builds a check for a network discovery rule.
 ## SYNTAX
 
 ```
-New-ZbxNetworkDiscoveryCheck [-Type] <ZabbixNetworkDiscoveryCheckType> [-Key <string>] [-SnmpOid <string>] [-SnmpCommunity <string>] [-SnmpSecurityName <string>] [-SnmpSecurityLevel <ZabbixSnmpSecurityLevel>] [-SnmpAuthPassphrase <SecureString>] [-SnmpAuthProtocol <ZabbixSnmpAuthProtocol>] [-SnmpPrivPassphrase <SecureString>] [-SnmpPrivProtocol <ZabbixSnmpPrivProtocol>] [-SnmpContextName <string>] [-Port <int>] [-Ports <string>] [-Unique] [-AdditionalProperty <Hashtable>] [<CommonParameters>]
+New-ZbxNetworkDiscoveryCheck [-Type] <ZabbixNetworkDiscoveryCheckType> [-Key <string>] [-SnmpOid <string>] [-SnmpCommunity <string>] [-SnmpSecurityName <string>] [-SnmpSecurityLevel <ZabbixSnmpSecurityLevel>] [-SnmpAuthenticationPassphrase <SecureString>] [-SnmpAuthenticationProtocol <ZabbixSnmpAuthenticationProtocol>] [-SnmpPrivacyPassphrase <SecureString>] [-SnmpPrivacyProtocol <ZabbixSnmpPrivacyProtocol>] [-SnmpContextName <string>] [-Port <int>] [-Ports <string>] [-Unique] [-AdditionalProperty <Hashtable>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -49,7 +49,7 @@ $checks = @(
     New-ZbxNetworkDiscoveryCheck -Type Icmp
     New-ZbxNetworkDiscoveryCheck -Type ZabbixAgent -Key 'system.hostname' -Port 10050 -Unique
 )
-New-ZbxNetworkDiscoveryRule -Name 'Local network' -IpRange '192.0.2.1-254' -Check $checks -Status Disabled | Out-Null
+New-ZbxNetworkDiscoveryRule -Name 'Local network' -IPRange '192.0.2.1-254' -Check $checks -Status Disabled | Out-Null
 Get-ZbxNetworkDiscoveryRule -Name 'Local network' -SelectNetworkDiscoveryChecks |
     ForEach-Object Checks | Select-Object Type, Key, Ports, Unique
 ```
@@ -148,7 +148,7 @@ The SNMPv3 security level (snmpv3_securitylevel).
 | Pipeline input | False |
 | Wildcards | False |
 
-### -SnmpAuthPassphrase
+### -SnmpAuthenticationPassphrase
 
 The SNMPv3 authentication passphrase (snmpv3_authpassphrase).
 
@@ -163,13 +163,13 @@ The SNMPv3 authentication passphrase (snmpv3_authpassphrase).
 | Pipeline input | False |
 | Wildcards | False |
 
-### -SnmpAuthProtocol
+### -SnmpAuthenticationProtocol
 
 The SNMPv3 authentication protocol (snmpv3_authprotocol).
 
 | | |
 | --- | --- |
-| Type | `ZabbixSnmpAuthProtocol` |
+| Type | `ZabbixSnmpAuthenticationProtocol` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |
@@ -178,7 +178,7 @@ The SNMPv3 authentication protocol (snmpv3_authprotocol).
 | Pipeline input | False |
 | Wildcards | False |
 
-### -SnmpPrivPassphrase
+### -SnmpPrivacyPassphrase
 
 The SNMPv3 privacy passphrase (snmpv3_privpassphrase).
 
@@ -193,13 +193,13 @@ The SNMPv3 privacy passphrase (snmpv3_privpassphrase).
 | Pipeline input | False |
 | Wildcards | False |
 
-### -SnmpPrivProtocol
+### -SnmpPrivacyProtocol
 
 The SNMPv3 privacy protocol (snmpv3_privprotocol).
 
 | | |
 | --- | --- |
-| Type | `ZabbixSnmpPrivProtocol` |
+| Type | `ZabbixSnmpPrivacyProtocol` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |

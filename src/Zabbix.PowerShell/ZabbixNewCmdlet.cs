@@ -28,7 +28,7 @@ public abstract class ZabbixNewCmdlet<TEntity> : ZabbixServerCmdlet
 
     /// <summary>
     /// A piped object, whose properties bind the command's parameters by name: an <c>Import-Csv</c> row or a
-    /// <c>[pscustomobject]</c> with <c>Name</c>, <c>InterfaceIp</c>, … columns creates one object per row. A piped Zabbix
+    /// <c>[pscustomobject]</c> with <c>Name</c>, <c>InterfaceIP</c>, … columns creates one object per row. A piped Zabbix
     /// record binds only what is its own (<see cref="ZabbixPipedRecord"/>: <c>Get-ZbxHost | New-ZbxItem</c> takes the
     /// host's id, never its name or description), and an object that binds nothing is refused.
     /// </summary>

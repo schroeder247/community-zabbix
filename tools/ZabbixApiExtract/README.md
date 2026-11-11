@@ -81,7 +81,7 @@ against the merged model, so a stale entry fails the run like any other merge pr
   single-interface shorthand fills, the id field `-Id` selects many records by, enum fields taken as switches, the
   value-form attributes a parameter carries, the visible and technical name fields of an object that has both
   (`names`: a host's `name` is `-DisplayName` and `-Name` is an alias of its `host`), and the property a field takes
-  where its own name would hide a `PSCmdlet` member (`unhide`: a host's `host` is `TechnicalName`; a field it does not
+  where its own name would hide a `PSCmdlet` member (`unhide`: a user directory's `host` is `LdapHost`; a field it does not
   list takes its name followed by `Value`); the nested-record builders (`New-Zbx<Concept>`: the record, by its
   description name, the fields taken by position, the help's words, their value forms and the fields the owner's command
   fills); and the get options every `Get-` takes as a switch (`editable`: `-Editable`). Objects, fields and records must

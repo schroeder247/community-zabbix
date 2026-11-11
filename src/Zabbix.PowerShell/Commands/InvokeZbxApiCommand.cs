@@ -38,7 +38,7 @@ public sealed class InvokeZbxApiCommand : ZabbixServerCmdlet
 
         // No -Body is no parameters: {} (JSON-RPC params must be an object or an array; null is -32600).
         JsonElement parameters = ZabbixJsonShape.FromShell(Body ?? new Hashtable());
-        if (TryRun(async cancellationToken => await ZabbixClient.SendAsync(Method!, parameters, cancellationToken).ConfigureAwait(false),
+        if (TryRun(async cancellationToken => await ZabbixClient.SendAsync(ZabbixApiMethod.Parse(Method!), parameters, cancellationToken).ConfigureAwait(false),
                 out JsonElement result, Method))
         {
             WriteObject(ZabbixJsonShape.ToShell(result), enumerateCollection: true);

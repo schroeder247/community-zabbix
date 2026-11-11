@@ -8,7 +8,7 @@ Changes a user macro.
 ## SYNTAX
 
 ```
-Set-ZbxUserMacro [-InputObject] <ZabbixReference<ZabbixUserMacro>[]> [[-Macro] <string>] [-Type <ZabbixMacroType>] [-Value <string>] [-Description <string>] [-Automatic <ZabbixMacroOrigin>] [-Config <ZabbixUserMacroConfigRequest>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Set-ZbxUserMacro [-InputObject] <ZabbixReference<ZabbixUserMacro>[]> [[-Macro] <string>] [-Type <ZabbixMacroType>] [-Value <string>] [-Description <string>] [-Origin <ZabbixMacroOrigin>] [-Configuration <ZabbixUserMacroConfigurationRequest>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -110,7 +110,7 @@ A free-form description of the macro.
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -Automatic
+### -Origin
 
 Whether the macro is managed by discovery; only the user-managed value is accepted, and a discovered macro must be converted this way before it can be changed.
 
@@ -125,13 +125,13 @@ Whether the macro is managed by discovery; only the user-managed value is accept
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -Config
+### -Configuration
 
 How the macro is presented as an input field in the host wizard.
 
 | | |
 | --- | --- |
-| Type | `ZabbixUserMacroConfigRequest` |
+| Type | `ZabbixUserMacroConfigurationRequest` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |
@@ -232,8 +232,8 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 - `ZabbixReference<ZabbixUserMacro>[]`: Bound to -InputObject (ByValue). Represents a reference to an API object: a parameter that points at an API object takes its id, its name, or the object itself piped from a Get- cmdlet, and becomes an id before the call — one parameter, three spellings, one resolution.
 - `string`: Bound to -Macro (ByPropertyName), -Value (ByPropertyName), -Description (ByPropertyName). Text.
 - `ZabbixMacroType`: Bound to -Type (ByPropertyName). The macro type values: ZBX_MACRO_TYPE_* in defines.inc.php.
-- `ZabbixMacroOrigin`: Bound to -Automatic (ByPropertyName). The macro origin values: ZBX_USERMACRO_* in defines.inc.php.
-- `ZabbixUserMacroConfigRequest`: Bound to -Config (ByPropertyName). config of a ZabbixUserMacroCreateRequest.
+- `ZabbixMacroOrigin`: Bound to -Origin (ByPropertyName). The macro origin values: ZBX_USERMACRO_* in defines.inc.php.
+- `ZabbixUserMacroConfigurationRequest`: Bound to -Configuration (ByPropertyName). config of a ZabbixUserMacroCreateRequest.
 - `PSObject`: Bound to -PipedRecord (ByValue). Each object as the API answers it.
 
 ## OUTPUTS

@@ -32,7 +32,7 @@ Disconnect-ZbxServer -Name 'admin'
 # A named connection that is not the default is reached with -Connection, by its name or by the object -PassThru
 # wrote. The current server stays what it was.
 $staging = Connect-ZbxServer -Uri 'https://zabbix.example/api_jsonrpc.php' -ApiToken $token -Name 'staging' -NoDefault -PassThru
-Get-ZbxHost -Name 'web-01' -Connection $staging | Select-Object HostId, TechnicalName
+Get-ZbxHost -Name 'web-01' -Connection $staging | Select-Object HostId, HostName
 Get-ZbxContext | Select-Object -ExpandProperty Servers
 Disconnect-ZbxServer -Name 'staging'
 #endregion

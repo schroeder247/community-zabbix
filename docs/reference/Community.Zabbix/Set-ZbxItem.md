@@ -8,7 +8,7 @@ Changes an item.
 ## SYNTAX
 
 ```
-Set-ZbxItem [-InputObject] <ZabbixReference<ZabbixItem>[]> [[-Name] <string>] [-ValueType <ZabbixItemValueType>] [-Uuid <string>] [-Type <ZabbixItemType>] [-Key <string>] [-Units <string>] [-History <string>] [-Trends <string>] [-ValueMapId <ulong>] [-InventoryLink <int>] [-LogTimeFmt <string>] [-Description <string>] [-Status <ZabbixItemStatus>] [-Tag <ZabbixTagRequest[]>] [-Preprocessing <ZabbixPreprocessingStepRequest[]>] [-Parameter <ZabbixItemParameterRequest[]>] [-Params <string>] [-Timeout <string>] [-Delay <string>] [-Username <string>] [-Password <SecureString>] [-MasterItemId <ulong>] [-InterfaceId <ulong>] [-Url <string>] [-QueryField <ZabbixItemQueryFieldRequest[]>] [-RequestMethod <ZabbixHttpRequestMethod>] [-PostType <ZabbixItemPostType>] [-Posts <string>] [-Header <ZabbixItemHeaderRequest[]>] [-StatusCodes <string>] [-FollowRedirects <bool>] [-RetrieveMode <ZabbixHttpTestRetrieveMode>] [-OutputFormat <ZabbixItemHttpOutputFormat>] [-HttpProxy <string>] [-AuthType <int>] [-VerifyPeer <bool>] [-VerifyHost <bool>] [-SslCertFile <string>] [-SslKeyFile <string>] [-SslKeyPassword <SecureString>] [-AllowTraps <bool>] [-TrapperHosts <string>] [-IpmiSensor <string>] [-JmxEndpoint <string>] [-SnmpOid <string>] [-PublicKey <string>] [-PrivateKey <string>] [-TimeShift <string>] [-LookbackLimit <string>] [-Granularity <string>] [-Query <ZabbixItemQueryRequest>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Set-ZbxItem [-InputObject] <ZabbixReference<ZabbixItem>[]> [[-Name] <string>] [-ValueType <ZabbixItemValueType>] [-Uuid <string>] [-Type <ZabbixItemType>] [-Key <string>] [-Units <string>] [-History <string>] [-Trends <string>] [-ValueMapId <ulong>] [-InventoryLink <int>] [-LogTimeFormat <string>] [-Description <string>] [-Status <ZabbixItemStatus>] [-Tag <ZabbixTagRequest[]>] [-Preprocessing <ZabbixPreprocessingStepRequest[]>] [-Parameter <ZabbixItemParameterRequest[]>] [-TypeParameters <string>] [-Timeout <string>] [-Delay <string>] [-UserName <string>] [-Password <SecureString>] [-MasterItemId <ulong>] [-InterfaceId <ulong>] [-Url <string>] [-QueryField <ZabbixItemQueryFieldRequest[]>] [-RequestMethod <ZabbixHttpRequestMethod>] [-PostType <ZabbixItemPostType>] [-Posts <string>] [-Header <ZabbixItemHeaderRequest[]>] [-StatusCodes <string>] [-FollowRedirects <bool>] [-RetrieveMode <ZabbixHttpTestRetrieveMode>] [-OutputFormat <ZabbixItemHttpOutputFormat>] [-HttpProxy <string>] [-AuthenticationType <int>] [-VerifyPeer <bool>] [-VerifyHost <bool>] [-SslCertificateFile <string>] [-SslKeyFile <string>] [-SslKeyPassword <SecureString>] [-AllowTraps <bool>] [-TrapperHosts <string>] [-IpmiSensor <string>] [-JmxEndpoint <string>] [-SnmpOid <string>] [-PublicKey <string>] [-PrivateKey <string>] [-TimeShift <string>] [-LookbackLimit <string>] [-Granularity <string>] [-Query <ZabbixItemQueryRequest>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -208,7 +208,7 @@ Which host inventory field, by its number, receives the item's latest value; 0 l
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -LogTimeFmt
+### -LogTimeFormat
 
 The pattern used to read the time stamp from each log entry; applies only to items whose value type is log.
 
@@ -298,7 +298,7 @@ The named parameters passed to the script of script items, as name and value pai
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -Params
+### -TypeParameters
 
 Parameters of the item type: the formula of a calculated item, the SQL query of a database monitor item, the script of an SSH, Telnet or script item.
 
@@ -343,7 +343,7 @@ Update interval, as a time unit with a suffix (30s, 1m) or a user macro, optiona
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -Username
+### -UserName
 
 The user name for authentication; used by SSH, Telnet, database monitor, JMX, simple check and HTTP agent items.
 
@@ -568,7 +568,7 @@ The HTTP or HTTPS proxy that HTTP agent items connect through, in the form [prot
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -AuthType
+### -AuthenticationType
 
 The authentication method, a number whose meaning depends on the item type: for an SSH agent item 0 password, 1 public key; for an HTTP agent item 0 none, 1 basic, 2 NTLM, 3 Kerberos, 4 digest. The default is 0.
 
@@ -613,7 +613,7 @@ Whether HTTP agent items check that the host name in the URL matches the server 
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -SslCertFile
+### -SslCertificateFile
 
 The path of the public SSL certificate file that HTTP agent items present to the server.
 
@@ -914,10 +914,10 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 
 - `ZabbixReference<ZabbixItem>[]`: Bound to -InputObject (ByValue). Represents a reference to an API object: a parameter that points at an API object takes its id, its name, or the object itself piped from a Get- cmdlet, and becomes an id before the call — one parameter, three spellings, one resolution.
 - `ZabbixItemValueType`: Bound to -ValueType (ByPropertyName). The item value type values: ITEM_VALUE_TYPE_* in defines.inc.php.
-- `string`: Bound to -Uuid (ByPropertyName), -Name (ByPropertyName), -Key (ByPropertyName), -Units (ByPropertyName), -History (ByPropertyName), -Trends (ByPropertyName), -LogTimeFmt (ByPropertyName), -Description (ByPropertyName), -Params (ByPropertyName), -Timeout (ByPropertyName), -Delay (ByPropertyName), -Username (ByPropertyName), -Url (ByPropertyName), -Posts (ByPropertyName), -StatusCodes (ByPropertyName), -HttpProxy (ByPropertyName), -SslCertFile (ByPropertyName), -SslKeyFile (ByPropertyName), -TrapperHosts (ByPropertyName), -IpmiSensor (ByPropertyName), -JmxEndpoint (ByPropertyName), -SnmpOid (ByPropertyName), -PublicKey (ByPropertyName), -PrivateKey (ByPropertyName), -TimeShift (ByPropertyName), -LookbackLimit (ByPropertyName), -Granularity (ByPropertyName). Text.
+- `string`: Bound to -Uuid (ByPropertyName), -Name (ByPropertyName), -Key (ByPropertyName), -Units (ByPropertyName), -History (ByPropertyName), -Trends (ByPropertyName), -LogTimeFormat (ByPropertyName), -Description (ByPropertyName), -TypeParameters (ByPropertyName), -Timeout (ByPropertyName), -Delay (ByPropertyName), -UserName (ByPropertyName), -Url (ByPropertyName), -Posts (ByPropertyName), -StatusCodes (ByPropertyName), -HttpProxy (ByPropertyName), -SslCertificateFile (ByPropertyName), -SslKeyFile (ByPropertyName), -TrapperHosts (ByPropertyName), -IpmiSensor (ByPropertyName), -JmxEndpoint (ByPropertyName), -SnmpOid (ByPropertyName), -PublicKey (ByPropertyName), -PrivateKey (ByPropertyName), -TimeShift (ByPropertyName), -LookbackLimit (ByPropertyName), -Granularity (ByPropertyName). Text.
 - `ZabbixItemType`: Bound to -Type (ByPropertyName). The item type values: ITEM_TYPE_* in defines.inc.php.
 - `ulong`: Bound to -ValueMapId (ByPropertyName), -MasterItemId (ByPropertyName), -InterfaceId (ByPropertyName).
-- `int`: Bound to -InventoryLink (ByPropertyName), -AuthType (ByPropertyName). A number.
+- `int`: Bound to -InventoryLink (ByPropertyName), -AuthenticationType (ByPropertyName). A number.
 - `ZabbixItemStatus`: Bound to -Status (ByPropertyName). The item status values: ITEM_STATUS_* in defines.inc.php.
 - `ZabbixTagRequest[]`: Bound to -Tag (ByPropertyName). A tag to set on an object: a name with an optional value, such as env=prod.
 - `ZabbixPreprocessingStepRequest[]`: Bound to -Preprocessing (ByPropertyName). A preprocessing step to set on an item, an item prototype or a discovery rule.

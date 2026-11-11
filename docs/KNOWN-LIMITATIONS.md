@@ -159,9 +159,9 @@ These are the known gaps and deliberate limits of the alpha, before 1.0.0.
   source host (`last(/web-01/key)`) still names it.
 - **A network discovery check holds its SNMPv3 passphrases as text.** `New-ZbxNetworkDiscoveryCheck` takes them as
   `SecureString` and writes the SDK's `ZabbixNetworkDiscoveryCheckRequest`, whose passphrase fields are strings (the
-  value has to reach the wire). The default view masks them; `$check.Snmpv3AuthPassphrase` reads them.
+  value has to reach the wire). The default view masks them; `$check.Snmpv3AuthenticationPassphrase` reads them.
 - **A few enumeration-like parameters are numbers.** The model keeps these fields as integers, so their parameters
-  take the number and their help lists the values: `-AuthType` on items, item prototypes, discovery rules and their
+  take the number and their help lists the values: `-AuthenticationType` on items, item prototypes, discovery rules and their
   prototypes (Zabbix gives one number two meanings, by item type: 0 password or 1 public key for SSH, 0 none to 4
   digest for HTTP), `New-`/`Set-ZbxConnector -ItemValueType` and `New-`/`Set-ZbxMediaType -TokensStatus` (bit sets no
   define names bit by bit) and `New-`/`Set-ZbxItem -InventoryLink` (the number of a host inventory field).
@@ -169,7 +169,7 @@ These are the known gaps and deliberate limits of the alpha, before 1.0.0.
   SDK clients (`client.ApmLogs`, …) and no cmdlets: a log record and a metric point carry no id, and a span's or
   trace's id is a hexadecimal OpenTelemetry id, not the decimal id the commands' `-Id` takes.
 - **Audit records and HA nodes have CUID ids, not numbers.** Zabbix keys `auditlog` and `ha_node` by 25-character
-  CUID strings (`ZBX_TYPE_CUID`), so the model types `AuditId`, `RecordSetId` and `HaNodeId` as `string`.
+  CUID strings (`ZBX_TYPE_CUID`), so the model types `AuditId`, `RecordSetId` and `HANodeId` as `string`.
   `Get-ZbxHaNode -Id` takes those strings. `Get-ZbxAuditLog` has no `-Id`: it selects by `-User`, `-From`/`-Till` and
   `-Filter` (`-Filter @{ auditids = @('ckr8jg5sa0000k6y5q11vcd2h') }` reads one record).
 - **Web scenario commands take ids.** `Remove-`, `Set-ZbxHttpTest` take `-Id` (or a piped object's `HttpTestId`), not

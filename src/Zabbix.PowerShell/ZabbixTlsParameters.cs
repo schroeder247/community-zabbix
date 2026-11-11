@@ -49,9 +49,9 @@ internal static class ZabbixTlsParameters
         ArgumentNullException.ThrowIfNull(words);
         (bool psk, bool certificate) = Kinds(words);
         ZabbixTlsAcceptModes modes = accept is { Count: > 0 }
-            ? accept.Aggregate((ZabbixTlsAcceptModes)0, (mask, mode) => mask | mode)
-            : (psk ? ZabbixTlsAcceptModes.Psk : 0) | (certificate ? ZabbixTlsAcceptModes.Certificate : 0);
-        if (modes == 0) modes = ZabbixTlsAcceptModes.Unencrypted;
+            ? accept.Aggregate(ZabbixTlsAcceptModes.None, (mask, mode) => mask | mode)
+            : (psk ? ZabbixTlsAcceptModes.Psk : ZabbixTlsAcceptModes.None) | (certificate ? ZabbixTlsAcceptModes.Certificate : ZabbixTlsAcceptModes.None);
+        if (modes == ZabbixTlsAcceptModes.None) modes = ZabbixTlsAcceptModes.Unencrypted;
         return (modes, psk || certificate ? Options(words, ZabbixTlsMode.Unencrypted) : null);
     }
 

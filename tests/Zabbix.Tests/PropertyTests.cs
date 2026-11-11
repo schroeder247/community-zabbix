@@ -216,7 +216,7 @@ public sealed class PropertyTests
                 var host = new ZabbixHost
                 {
                     HostId = id,
-                    TechnicalName = name,
+                    HostName = name,
                     Description = description,
                     Status = status,
                     MaintenanceFrom = DateTimeOffset.FromUnixTimeSeconds(from),

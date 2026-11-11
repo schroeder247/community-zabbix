@@ -390,8 +390,9 @@ public sealed class GeneratedCrudCommandsTests
     {
         // Golden: USER_TYPE_ZABBIX_USER/USER_TYPE_ZABBIX_ADMIN extract to "ZabbixUser"/"ZabbixAdmin" by default (the
         // define's own prefix repeats the family name); schema/overlay.json's "USER_TYPE" entry drops the redundant
-        // "Zabbix" prefix (RoleType.User/RoleType.Admin/RoleType.SuperAdmin).
-        Assert.Equal(["User", "Admin", "SuperAdmin"], Enum.GetNames<ZabbixRoleType>());
+        // "Zabbix" prefix (RoleType.User/RoleType.Admin/RoleType.SuperAdmin). None is the type's default, which no define
+        // names.
+        Assert.Equal(["None", "User", "Admin", "SuperAdmin"], Enum.GetNames<ZabbixRoleType>());
     }
 
     [Fact]
@@ -409,7 +410,7 @@ public sealed class GeneratedCrudCommandsTests
 
     [Theory]
     [InlineData("New-ZbxActionCondition -ConditionType HostGroup -Value 7", "conditiontype", "$c.conditiontype")]
-    [InlineData("New-ZbxLldMacroPath -LldMacro '{#FS}' -Path '$.fs'", "lld_macro", "$c.lld_macro")]
+    [InlineData("New-ZbxLldMacroPath -LowLevelDiscoveryMacro '{#FS}' -Path '$.fs'", "lld_macro", "$c.lld_macro")]
     [InlineData("New-ZbxMaintenanceTimePeriod Onetime -Period 3600", "timeperiod_type", "$c.timeperiod_type")]
     [InlineData("New-ZbxMapShape -Type Rectangle -X 10 -Y 20 -Width 30 -Height 40", "x", "$c.X")]
     [InlineData("New-ZbxTag -Tag env -Value prod", "tag", "$c.Tag")]

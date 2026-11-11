@@ -48,7 +48,7 @@ Get-ZbxUserGroup -Name 'Operators' | Select-Object UserGroupId, Name, GuiAccess,
 ### Example 2: List a group's members
 
 ```powershell
-(Get-ZbxUserGroup -Name 'Operators' -SelectUsers).Users | Select-Object Username
+(Get-ZbxUserGroup -Name 'Operators' -SelectUsers).Users | Select-Object UserName
 ```
 
 -SelectUsers adds the group's users to each group.

@@ -22,7 +22,7 @@ namespace Community.Zabbix.PowerShell;
 /// into one <see cref="JsonElement"/>, deserialized once through the <see cref="JsonTypeInfo{T}"/> the wire uses, so
 /// every converter and nested list or record is handled by the contract that (de)serializes the wire.
 /// <see cref="LanguagePrimitives.ConvertTo(object,Type)"/> is not used: it matches keys by C# name only
-/// (<c>"ipmi_username"</c> does not bind <c>IpmiUsername</c>) and cannot populate an <c>IReadOnlyList&lt;T&gt;</c>
+/// (<c>"ipmi_username"</c> does not bind <c>IpmiUserName</c>) and cannot populate an <c>IReadOnlyList&lt;T&gt;</c>
 /// property at any depth. Every member is a pure function of its arguments. <see cref="ZabbixRecordConverter"/> wraps
 /// <see cref="Bind(object?, JsonTypeInfo)"/>, so <c>[ZabbixHostCreateRequest]@{...}</c> binds through PowerShell's own
 /// parameter binder.
@@ -99,7 +99,7 @@ internal static class ZabbixJsonBinder
     /// </summary>
     /// <exception cref="ArgumentException">
     /// Two distinct keys in <paramref name="properties"/> resolve to the same wire field with different values — an
-    /// ambiguous call (e.g. <c>@{ ipmi_username = 'a'; IpmiUsername = 'b' }</c>), refused rather than silently
+    /// ambiguous call (e.g. <c>@{ ipmi_username = 'a'; IpmiUserName = 'b' }</c>), refused rather than silently
     /// picking one. Or a key names nothing <paramref name="targetType"/> (or, for a get, its entity) knows — refused,
     /// naming the key, rather than dropped by the JSON contract or ignored by the server.
     /// </exception>

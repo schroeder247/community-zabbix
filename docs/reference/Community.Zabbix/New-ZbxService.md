@@ -8,7 +8,7 @@ Creates a service.
 ## SYNTAX
 
 ```
-New-ZbxService [[-Name] <string>] [[-Algorithm] <ZabbixServiceStatusCalc>] [-Uuid <string>] [-Position <int>] [-Weight <int>] [-PropagationRule <ZabbixServiceStatusPropagation>] [-PropagationValue <int>] [-Description <string>] [-Tag <ZabbixTagRequest[]>] [-ProblemTag <ZabbixServiceProblemTagRequest[]>] [-Parent <ZabbixReference<ZabbixServiceRecord>[]>] [-Child <ZabbixReference<ZabbixServiceRecord>[]>] [-StatusRule <ZabbixServiceStatusRuleRequest[]>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+New-ZbxService [[-Name] <string>] [[-Algorithm] <ZabbixServiceStatusCalculation>] [-Uuid <string>] [-Position <int>] [-Weight <int>] [-PropagationRule <ZabbixServiceStatusPropagation>] [-PropagationValue <int>] [-Description <string>] [-Tag <ZabbixTagRequest[]>] [-ProblemTag <ZabbixServiceProblemTagRequest[]>] [-Parent <ZabbixReference<ZabbixServiceRecord>[]>] [-Child <ZabbixReference<ZabbixServiceRecord>[]>] [-StatusRule <ZabbixServiceStatusRuleRequest[]>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -84,7 +84,7 @@ How the service status is derived from its child services: always OK, the most c
 
 | | |
 | --- | --- |
-| Type | `ZabbixServiceStatusCalc` |
+| Type | `ZabbixServiceStatusCalculation` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |
@@ -275,7 +275,7 @@ Creates without a confirmation prompt even where $ConfirmPreference is at or bel
 
 ### -InputObject
 
-A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIp, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
+A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIP, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
 
 | | |
 | --- | --- |
@@ -318,7 +318,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 ## INPUTS
 
 - `string`: Bound to -Uuid (ByPropertyName), -Name (ByPropertyName), -Description (ByPropertyName). Text.
-- `ZabbixServiceStatusCalc`: Bound to -Algorithm (ByPropertyName). The service status calc values: ZBX_SERVICE_STATUS_CALC_* in defines.inc.php.
+- `ZabbixServiceStatusCalculation`: Bound to -Algorithm (ByPropertyName). The service status calculation values: ZBX_SERVICE_STATUS_CALC_* in defines.inc.php.
 - `int`: Bound to -Position (ByPropertyName), -Weight (ByPropertyName), -PropagationValue (ByPropertyName). A number.
 - `ZabbixServiceStatusPropagation`: Bound to -PropagationRule (ByPropertyName). The service status propagation values: ZBX_SERVICE_STATUS_PROPAGATION_* in defines.inc.php.
 - `ZabbixTagRequest[]`: Bound to -Tag (ByPropertyName). A tag to set on an object: a name with an optional value, such as env=prod.

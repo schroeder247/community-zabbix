@@ -20,7 +20,7 @@ needs a connection made with Connect-ZbxServer.
 
 #region Read the host as the server holds it
 # Host is the full ZabbixHost record.
-(Get-ZbxAgentHost -Session 'web-agent').Host | Select-Object TechnicalName, HostId, Status
+(Get-ZbxAgentHost -Session 'web-agent').Host | Select-Object HostName, HostId, Status
 #endregion
 
 Stop-ZbxActiveAgent -Name 'web-agent'

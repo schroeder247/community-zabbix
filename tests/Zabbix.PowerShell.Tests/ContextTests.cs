@@ -152,7 +152,7 @@ public sealed class ContextTests
         server.Release("host.get");
         PSDataCollection<PSObject> hosts = await call.Running.WaitAsync(TimeSpan.FromSeconds(30), TestContext.Current.CancellationToken);
 
-        Assert.Equal("Zabbix server", ((ZabbixHost)Assert.Single(hosts).BaseObject).TechnicalName);
+        Assert.Equal("Zabbix server", ((ZabbixHost)Assert.Single(hosts).BaseObject).HostName);
         Assert.Empty(call.Streams.Error);
         Assert.True(connection.IsReleased);
     }

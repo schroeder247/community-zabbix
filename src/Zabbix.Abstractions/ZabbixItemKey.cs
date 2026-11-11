@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Community.Zabbix;
 
@@ -20,7 +22,10 @@ namespace Community.Zabbix;
 /// (<c>tests/libs/zbxsysinfo/parse_item_key.yaml</c>): a text is a key when <c>zbx_parse_key</c>
 /// (<c>src/libs/zbxexpr/expr.c</c>) consumes all of it, and the parameters are what <c>zbx_get_param</c>
 /// (<c>src/libs/zbxparam/param.c</c>) returns. No BCL parser knows this grammar, so the scanner is owned.</para>
+/// <para>In the API's JSON a key is its text (an item's <c>key_</c>). A key a reply holds that the grammar doesn't read is
+/// kept as the server wrote it, its <see cref="Name"/> the whole text.</para>
 /// </remarks>
+[JsonConverter(typeof(ZabbixItemKeyConverter))]
 public readonly struct ZabbixItemKey : IEquatable<ZabbixItemKey>, ISpanParsable<ZabbixItemKey>, ISpanFormattable
 {
     private static readonly System.Buffers.SearchValues<char> s_nameChars = System.Buffers.SearchValues.Create("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.-_");
@@ -364,6 +369,11 @@ public readonly struct ZabbixItemKey : IEquatable<ZabbixItemKey>, ISpanParsable<
     // credential, and an exception's message reaches every log and span unredacted.
     private static string At(string rule, int index) => string.Create(CultureInfo.InvariantCulture, $"{rule} (at character {index + 1})");
 
+    /// <summary>The key a reply holds, kept as the server wrote it whether or not the grammar reads it.</summary>
+    /// <param name="text">The server's text.</param>
+    /// <returns>The key.</returns>
+    internal static ZabbixItemKey FromReply(string text) => TryParse(text, out ZabbixItemKey key, out _) ? key : new ZabbixItemKey(text, bare: true);
+
     /// <summary>The key's text, verbatim: what the server stores and what goes on the wire.</summary>
     /// <returns>The text.</returns>
     public override string ToString() => _text ?? string.Empty;
@@ -407,4 +417,21 @@ public readonly struct ZabbixItemKey : IEquatable<ZabbixItemKey>, ISpanParsable<
     /// <param name="right">The second key to compare.</param>
     /// <returns><see langword="true"/> when the keys' texts differ.</returns>
     public static bool operator !=(ZabbixItemKey left, ZabbixItemKey right) => !left.Equals(right);
+}
+
+/// <summary>Writes a <see cref="ZabbixItemKey"/> as its text, and reads the text a reply holds.</summary>
+internal sealed class ZabbixItemKeyConverter : JsonConverter<ZabbixItemKey>
+{
+    /// <inheritdoc/>
+    public override ZabbixItemKey Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        => reader.TokenType == JsonTokenType.String
+            ? ZabbixItemKey.FromReply(reader.GetString() ?? string.Empty)
+            : throw new JsonException($"An item key is text, not a {reader.TokenType}.");
+
+    /// <inheritdoc/>
+    public override void Write(Utf8JsonWriter writer, ZabbixItemKey value, JsonSerializerOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(writer);
+        writer.WriteStringValue(value.ToString());
+    }
 }

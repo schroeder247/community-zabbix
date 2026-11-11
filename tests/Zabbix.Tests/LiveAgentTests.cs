@@ -149,7 +149,7 @@ public sealed class LiveAgentTests
             int port = ((IPEndPoint)listener.LocalEndPoint!).Port;
             LiveFixtures.LiveHost host = await LiveFixtures.HostAsync(scope, "passive-agent", [], r => r with
             {
-                Interfaces = [new ZabbixHostInterfaceRequest { Type = ZabbixInterfaceType.Agent, Main = ZabbixInterfacePriority.Primary, UseIp = ZabbixHostInterfaceUseIp.Dns, Ip = "", Dns = LiveMatrix.HostFromServer, Port = port }],
+                Interfaces = [new ZabbixHostInterfaceRequest { Type = ZabbixInterfaceType.Agent, Main = ZabbixInterfacePriority.Primary, UseIP = ZabbixHostInterfaceUseIP.Dns, IP = "", Dns = LiveMatrix.HostFromServer, Port = port }],
             });
             JsonElement interfaces = await scope.Server.RpcAsync("hostinterface.get", new { hostids = new[] { host.HostId }, output = new[] { "interfaceid" } });
             string interfaceId = interfaces[0].GetProperty("interfaceid").GetString()!;

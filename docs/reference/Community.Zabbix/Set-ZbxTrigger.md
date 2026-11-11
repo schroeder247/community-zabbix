@@ -8,7 +8,7 @@ Changes a trigger.
 ## SYNTAX
 
 ```
-Set-ZbxTrigger [-InputObject] <ZabbixReference<ZabbixTrigger>[]> [[-Name] <string>] [-Expression <string>] [-EventName <string>] [-OperationalData <string>] [-Description <string>] [-Priority <ZabbixSeverity>] [-Status <ZabbixTriggerStatus>] [-Type <ZabbixTriggerType>] [-UrlName <string>] [-Url <string>] [-RecoveryMode <ZabbixRecoveryMode>] [-RecoveryExpression <string>] [-CorrelationMode <ZabbixCorrelationMode>] [-CorrelationTag <string>] [-ManualClose] [-Tag <ZabbixTagRequest[]>] [-Dependency <ZabbixReference<ZabbixTrigger>[]>] [-Uuid <string>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Set-ZbxTrigger [-InputObject] <ZabbixReference<ZabbixTrigger>[]> [[-Name] <string>] [-Expression <string>] [-EventName <string>] [-OperationalData <string>] [-Description <string>] [-Severity <ZabbixSeverity>] [-Status <ZabbixTriggerStatus>] [-Type <ZabbixTriggerType>] [-UrlName <string>] [-Url <string>] [-RecoveryMode <ZabbixRecoveryMode>] [-RecoveryExpression <string>] [-CorrelationMode <ZabbixCorrelationMode>] [-CorrelationTag <string>] [-ManualClose] [-Tag <ZabbixTagRequest[]>] [-Dependency <ZabbixReference<ZabbixTrigger>[]>] [-Uuid <string>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -20,7 +20,7 @@ A trigger is a problem expression over item values; when it becomes true the tri
 ### Example 1: Raise a trigger's severity
 
 ```powershell
-Set-ZbxTrigger -InputObject 'Too many requests on web-01' -Priority Disaster
+Set-ZbxTrigger -InputObject 'Too many requests on web-01' -Severity Disaster
 ```
 
 -InputObject (position 0) takes the trigger's name, id or object.
@@ -134,7 +134,7 @@ Free-text description of the trigger; it may contain macros. The API calls it co
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -Priority
+### -Severity
 
 Severity of the trigger, from not classified to disaster. Defaults to not classified.
 
@@ -420,7 +420,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 
 - `ZabbixReference<ZabbixTrigger>[]`: Bound to -InputObject (ByValue), -Dependency (ByPropertyName). Represents a reference to an API object: a parameter that points at an API object takes its id, its name, or the object itself piped from a Get- cmdlet, and becomes an id before the call — one parameter, three spellings, one resolution.
 - `string`: Bound to -Name (ByPropertyName), -Expression (ByPropertyName), -EventName (ByPropertyName), -OperationalData (ByPropertyName), -Description (ByPropertyName), -UrlName (ByPropertyName), -Url (ByPropertyName), -RecoveryExpression (ByPropertyName), -CorrelationTag (ByPropertyName), -Uuid (ByPropertyName). Text.
-- `ZabbixSeverity`: Bound to -Priority (ByPropertyName). A trigger or problem severity.
+- `ZabbixSeverity`: Bound to -Severity (ByPropertyName). A trigger or problem severity.
 - `ZabbixTriggerStatus`: Bound to -Status (ByPropertyName). The trigger status values: TRIGGER_STATUS_* in defines.inc.php.
 - `ZabbixTriggerType`: Bound to -Type (ByPropertyName). The trigger type values: TRIGGER_MULT_EVENT_* in defines.inc.php.
 - `ZabbixRecoveryMode`: Bound to -RecoveryMode (ByPropertyName). The recovery mode values: ZBX_RECOVERY_MODE_* in defines.inc.php.

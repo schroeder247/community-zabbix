@@ -20,7 +20,7 @@ The Wait-ZbxHost cmdlet polls host.get every -Interval until a host with the tec
 ### Example 1: Wait for a host an agent registers
 
 ```powershell
-Wait-ZbxHost -Name 'web-01' -Timeout '2m' | Select-Object TechnicalName, HostId
+Wait-ZbxHost -Name 'web-01' -Timeout '2m' | Select-Object HostName, HostId
 ```
 
 Writes the host as soon as it exists; here web-01 exists already, so it returns at once.
@@ -28,7 +28,7 @@ Writes the host as soon as it exists; here web-01 exists already, so it returns 
 ### Example 2: Wait for a new host, then configure it
 
 ```powershell
-$null = New-ZbxHost -Host 'web-02' -Group 'Web servers' -InterfaceType Agent -InterfaceIp '10.0.0.12'
+$null = New-ZbxHost -Host 'web-02' -Group 'Web servers' -InterfaceType Agent -InterfaceIP '10.0.0.12'
 Wait-ZbxHost -Name 'web-02' -Interval '5s' | Add-ZbxHostGroupMember -Group 'Linux servers'
 ```
 

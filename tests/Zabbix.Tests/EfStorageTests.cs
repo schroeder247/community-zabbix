@@ -45,7 +45,7 @@ public sealed class EfStorageTests
             }
             string? connection = Lab.Postgres;
             if (string.IsNullOrWhiteSpace(connection))
-                Assert.Skip("ZABBIX_TEST_POSTGRES is not set; point it at a PostgreSQL database the tests own, e.g. `podman run -d -p 55432:5432 -e POSTGRES_USER=zbxtest -e POSTGRES_PASSWORD=zbxtest -e POSTGRES_DB=zbxtest postgres:16-alpine` and Host=127.0.0.1;Port=55432;Database=zbxtest;Username=zbxtest;Password=zbxtest");
+                Assert.Skip("ZABBIX_TEST_POSTGRES is not set; point it at a PostgreSQL database the tests own, e.g. `podman run -d -p 55432:5432 -e POSTGRES_USER=zbxtest -e POSTGRES_PASSWORD=zbxtest -e POSTGRES_DB=zbxtest postgres:16-alpine` and Host=127.0.0.1;Port=55432;Database=zbxtest;UserName=zbxtest;Password=zbxtest");
             try
             {
                 await using var probe = new NpgsqlConnection(connection);
@@ -121,7 +121,7 @@ public sealed class EfStorageTests
 
         await store.WriteAsync(Value(1), TestContext.Current.CancellationToken);                                                 // the table appears at first use
 
-        Assert.Equal(["Clock", "Host", "IsSupported", "Key", "Value", "__seq", "__stored"], (await database.ColumnsAsync(store.Table)).Order(StringComparer.Ordinal));
+        Assert.Equal(["Clock", "HostName", "IsSupported", "Key", "Value", "__seq", "__stored"], (await database.ColumnsAsync(store.Table)).Order(StringComparer.Ordinal));
     }
 
     [Theory]

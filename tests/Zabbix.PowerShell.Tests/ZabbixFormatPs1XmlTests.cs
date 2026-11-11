@@ -62,7 +62,7 @@ public sealed class ZabbixFormatPs1XmlTests
     public void Every_clock_a_read_record_carries_shows_as_a_date_in_every_view_of_it()
     {
         // A clock field the description types "clock" (problem Clock, maintenance ActiveSince/ActiveTill, token
-        // CreatedAt/ExpiresAt, a nested record's TsDelete) is a ScriptBlock in every view, never its clock.ns text, and a
+        // CreatedAt/ExpiresAt, a nested record's DeleteTime) is a ScriptBlock in every view, never its clock.ns text, and a
         // record that carries one has a view even where PowerShell would table it by itself.
         ApiDescription description = ApiDescription.Read(File.ReadAllText(SchemaPath));
         XDocument format = XDocument.Load(GeneratedFormatPath);
@@ -137,9 +137,9 @@ public sealed class ZabbixFormatPs1XmlTests
 
         Assert.Empty(run.Errors);
         string[] lines = [.. Assert.Single(run.Output).ToString()!.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)];
-        Assert.Matches(@"^HostId\s+TechnicalName\s+VisibleName\s+Status$", lines[0]);
+        Assert.Matches(@"^HostId\s+HostName\s+VisibleName\s+Status$", lines[0]);
         Assert.Matches(@"^10084\s+web-01\s+Web One\s+Enabled$", lines[2]);
-        Assert.DoesNotContain(lines, line => line.Contains("IpmiAuthType", StringComparison.Ordinal));
+        Assert.DoesNotContain(lines, line => line.Contains("IpmiAuthenticationType", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -192,8 +192,8 @@ public sealed class ZabbixFormatPs1XmlTests
         Assert.Empty(run.Errors);
         string[] names = [.. Assert.Single(run.Output).ToString()!.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Select(line => line.Split(':')[0].Trim())];
-        Assert.Equal(["HostId", "TechnicalName", "VisibleName", "Status"], names.Take(4));
-        Assert.Contains("IpmiAuthType", names);
+        Assert.Equal(["HostId", "HostName", "VisibleName", "Status"], names.Take(4));
+        Assert.Contains("IpmiAuthenticationType", names);
         Assert.Contains("HostGroups", names);
         Assert.DoesNotContain("AdditionalFields", names);
     }

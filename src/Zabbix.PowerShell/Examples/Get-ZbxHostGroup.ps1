@@ -8,7 +8,7 @@ Get-ZbxHostGroup -Name 'Linux servers', 'Web servers' | Select-Object GroupId, N
 #region List a group's hosts
 # -SelectHosts adds each group's hosts (hostgroup.get's selectHosts) to the Hosts property.
 Get-ZbxHostGroup -Name 'Linux servers' -SelectHosts |
-    ForEach-Object { '{0}: {1}' -f $_.Name, ($_.Hosts.TechnicalName -join ', ') }
+    ForEach-Object { '{0}: {1}' -f $_.Name, ($_.Hosts.HostName -join ', ') }
 #endregion
 
 #region Get the groups a host is in, through the pipeline

@@ -5,7 +5,7 @@ namespace Community.Zabbix.PowerShell.Tests;
 /// <summary>
 /// Enum member names that keep the readable spellings of the unreleased 26.x module (docs/adr/0001-repository-layout.md):
 /// <c>schema/overlay.json</c>'s <c>members</c> overrides for <c>ZabbixScriptType</c>, <c>ZabbixHostStatus</c>,
-/// <c>ZabbixServiceStatusCalc</c>, <c>ZabbixMfaCodeLength</c> and <c>ZabbixScriptScope</c>. The wire values (extracted by
+/// <c>ZabbixServiceStatusCalculation</c>, <c>ZabbixMfaCodeLength</c> and <c>ZabbixScriptScope</c>. The wire values (extracted by
 /// <c>tools/ZabbixApiExtract</c>) are untouched; only the C# member names follow that spelling.
 /// </summary>
 public sealed class EnumMemberNamingTests
@@ -28,9 +28,9 @@ public sealed class EnumMemberNamingTests
     [Fact]
     public void ZabbixServiceStatusCalc_names_MostCritical_and_MostCriticalIfAllChildren_matching_the_shipped_module()
     {
-        Assert.Equal(0, (int)ZabbixServiceStatusCalc.SetOk);
-        Assert.Equal(1, (int)ZabbixServiceStatusCalc.MostCriticalIfAllChildren);
-        Assert.Equal(2, (int)ZabbixServiceStatusCalc.MostCritical);
+        Assert.Equal(0, (int)ZabbixServiceStatusCalculation.SetOk);
+        Assert.Equal(1, (int)ZabbixServiceStatusCalculation.MostCriticalIfAllChildren);
+        Assert.Equal(2, (int)ZabbixServiceStatusCalculation.MostCritical);
     }
 
     [Fact]

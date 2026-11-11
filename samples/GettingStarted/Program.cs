@@ -16,30 +16,32 @@ Console.WriteLine($"Zabbix API {await zabbix.GetApiVersionAsync()}");
 string hostName = prefix + "gs-web-01";
 ulong groupId = await zabbix.HostGroups.CreateAsync(prefix + "Getting started");
 ulong hostId = await zabbix.Hosts.CreateAsync(hostName, [groupId]);
-await zabbix.Items.CreateAsync(hostId, "Requests", ZabbixItemType.Trapper, "app.requests", ZabbixItemValueType.Unsigned, item =>
-    item.TrapperHosts = [IPNetwork.Parse("0.0.0.0/0"), IPNetwork.Parse("::/0")]);   // who may send to it
+ZabbixItemKey<ulong> requests = new("app.requests");                 // the item's key, and the type of its values
+await zabbix.Items.CreateAsync(hostId, requests, ZabbixItemType.Trapper, item =>
+{
+    item.Name = "Requests";
+    item.TrapperHosts = [IPNetwork.Parse("0.0.0.0/0"), IPNetwork.Parse("::/0")];   // who may send to it
+});
 Console.WriteLine($"created {hostName} ({hostId})");
 
 try
 {
     var hosts = await zabbix.Hosts.GetAsync(q =>
     {
-        q.Filter.TechnicalName = [hostName];
-        q.Output = [ZabbixHostFields.HostId, ZabbixHostFields.TechnicalName];
+        q.Filter.HostName = [hostName];
+        q.Output = [ZabbixHostFields.HostId, ZabbixHostFields.HostName];
     });
     foreach (ZabbixHost host in hosts)
-        Console.WriteLine($"host:   {host.HostId} {host.TechnicalName}");
+        Console.WriteLine($"host:   {host.HostId} {host.HostName}");
 
     var items = await zabbix.Items.GetAsync(q => q.HostIds = [hostId]);
     Console.WriteLine($"items:  {string.Join(", ", items.Select(i => i.Key))}");
-
-    ZabbixItemKey<long> requests = new("app.requests");
 
     using var wire = new ZabbixWireClient(trapper);
     ZabbixSenderResponse sent;
     do
     {
-        sent = await wire.SendAsync(hostName, requests, 42);
+        sent = await wire.SendAsync(hostName, requests, 42UL);
         if (sent.Processed == 0) await Task.Delay(TimeSpan.FromSeconds(5));
     }
     while (sent.Processed == 0);

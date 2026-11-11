@@ -202,15 +202,15 @@ public sealed class ZabbixItemDictionary : IDictionary<string, ZabbixItemCallbac
 
     /// <summary>Adds the answer for a typed item: a value at hand. A thrown exception is the reason the item isn't supported.</summary>
     /// <typeparam name="T">The item's value type, which fixes what <paramref name="answer"/> returns.</typeparam>
-    /// <param name="item">The item. Only its name counts: the dictionary answers any parameters.</param>
+    /// <param name="key">The item's typed key. Only its name counts: the dictionary answers any parameters.</param>
     /// <param name="answer">The value: <c>() =&gt; queue.Count</c>.</param>
     /// <returns>The dictionary.</returns>
     /// <exception cref="ArgumentException">The item's key is already held.</exception>
-    public ZabbixItemDictionary Add<T>(ZabbixItemKey<T> item, Func<T> answer)
+    public ZabbixItemDictionary Add<T>(ZabbixItemKey<T> key, Func<T> answer)
         where T : ISpanParsable<T>
     {
         ArgumentNullException.ThrowIfNull(answer);
-        return Add(item.Key.Name, (key, _) => ValueTask.FromResult(ZabbixAgentAnswer.Supported(key, item.Format(answer()))));
+        return Add(key.Key.Name, (asked, _) => ValueTask.FromResult(ZabbixAgentAnswer.Supported(asked, key.Format(answer()))));
     }
 
     /// <summary>
@@ -218,15 +218,15 @@ public sealed class ZabbixItemDictionary : IDictionary<string, ZabbixItemCallbac
     /// reason the item isn't supported.
     /// </summary>
     /// <typeparam name="T">The item's value type, which fixes what <paramref name="answer"/> returns.</typeparam>
-    /// <param name="item">The item. Only its name counts: the dictionary answers any parameters.</param>
+    /// <param name="key">The item's typed key. Only its name counts: the dictionary answers any parameters.</param>
     /// <param name="answer">The value for the key asked for: <c>key =&gt; orders.Count(key[0])</c>.</param>
     /// <returns>The dictionary.</returns>
     /// <exception cref="ArgumentException">The item's key is already held.</exception>
-    public ZabbixItemDictionary Add<T>(ZabbixItemKey<T> item, Func<ZabbixItemKey, T> answer)
+    public ZabbixItemDictionary Add<T>(ZabbixItemKey<T> key, Func<ZabbixItemKey, T> answer)
         where T : ISpanParsable<T>
     {
         ArgumentNullException.ThrowIfNull(answer);
-        return Add(item.Key.Name, (key, _) => ValueTask.FromResult(ZabbixAgentAnswer.Supported(key, item.Format(answer(key)))));
+        return Add(key.Key.Name, (asked, _) => ValueTask.FromResult(ZabbixAgentAnswer.Supported(asked, key.Format(answer(asked)))));
     }
 
     /// <summary>
@@ -234,15 +234,15 @@ public sealed class ZabbixItemDictionary : IDictionary<string, ZabbixItemCallbac
     /// reason the item isn't supported.
     /// </summary>
     /// <typeparam name="T">The item's value type, which fixes what <paramref name="answer"/> returns.</typeparam>
-    /// <param name="item">The item. Only its name counts: the dictionary answers any parameters.</param>
+    /// <param name="key">The item's typed key. Only its name counts: the dictionary answers any parameters.</param>
     /// <param name="answer">The value for the key asked for, within the deadline the token carries.</param>
     /// <returns>The dictionary.</returns>
     /// <exception cref="ArgumentException">The item's key is already held.</exception>
-    public ZabbixItemDictionary Add<T>(ZabbixItemKey<T> item, Func<ZabbixItemKey, CancellationToken, ValueTask<T>> answer)
+    public ZabbixItemDictionary Add<T>(ZabbixItemKey<T> key, Func<ZabbixItemKey, CancellationToken, ValueTask<T>> answer)
         where T : ISpanParsable<T>
     {
         ArgumentNullException.ThrowIfNull(answer);
-        return Add(item.Key.Name, async (key, cancellationToken) => ZabbixAgentAnswer.Supported(key, item.Format(await answer(key, cancellationToken).ConfigureAwait(false))));
+        return Add(key.Key.Name, async (asked, cancellationToken) => ZabbixAgentAnswer.Supported(asked, key.Format(await answer(asked, cancellationToken).ConfigureAwait(false))));
     }
 
     /// <summary>

@@ -8,7 +8,7 @@ Changes a host interface.
 ## SYNTAX
 
 ```
-Set-ZbxHostInterface [-InputObject] <ZabbixReference<ZabbixHostInterface>[]> [-HostId <ulong>] [-Type <ZabbixInterfaceType>] [-Ip <string>] [-Dns <string>] [-Port <string>] [-UseIp <ZabbixHostInterfaceUseIp>] [-Main <ZabbixInterfacePriority>] [-Details <ZabbixHostInterfaceDetailRequest>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Set-ZbxHostInterface [-InputObject] <ZabbixReference<ZabbixHostInterface>[]> [-HostId <ulong>] [-Type <ZabbixInterfaceType>] [-IP <string>] [-Dns <string>] [-Port <string>] [-UseIP <ZabbixHostInterfaceUseIP>] [-Main <ZabbixInterfacePriority>] [-Details <ZabbixHostInterfaceDetailRequest>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -80,7 +80,7 @@ The kind of interface: Zabbix agent, SNMP, IPMI or JMX.
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -Ip
+### -IP
 
 The IP address the interface connects to; it may be empty when the interface connects by DNS name. Required when UseIp is Ip.
 
@@ -125,13 +125,13 @@ The port the interface connects to; it may contain a user macro.
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -UseIp
+### -UseIP
 
 Whether the server connects through the IP address or the DNS name.
 
 | | |
 | --- | --- |
-| Type | `ZabbixHostInterfaceUseIp` |
+| Type | `ZabbixHostInterfaceUseIP` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |
@@ -262,8 +262,8 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 - `ZabbixReference<ZabbixHostInterface>[]`: Bound to -InputObject (ByValue). Represents a reference to an API object: a parameter that points at an API object takes its id, its name, or the object itself piped from a Get- cmdlet, and becomes an id before the call — one parameter, three spellings, one resolution.
 - `ulong`: Bound to -HostId (ByPropertyName).
 - `ZabbixInterfaceType`: Bound to -Type (ByPropertyName). The interface type values: INTERFACE_TYPE_* in defines.inc.php.
-- `string`: Bound to -Ip (ByPropertyName), -Dns (ByPropertyName), -Port (ByPropertyName). Text.
-- `ZabbixHostInterfaceUseIp`: Bound to -UseIp (ByPropertyName). The host interface use IP values: INTERFACE_USE_* in defines.inc.php.
+- `string`: Bound to -IP (ByPropertyName), -Dns (ByPropertyName), -Port (ByPropertyName). Text.
+- `ZabbixHostInterfaceUseIP`: Bound to -UseIP (ByPropertyName). The host interface use IP values: INTERFACE_USE_* in defines.inc.php.
 - `ZabbixInterfacePriority`: Bound to -Main (ByPropertyName). The interface priority values: INTERFACE_* in defines.inc.php.
 - `ZabbixHostInterfaceDetailRequest`: Bound to -Details (ByPropertyName). details of a ZabbixHostInterfaceRequest.
 - `PSObject`: Bound to -PipedRecord (ByValue). Each object as the API answers it.

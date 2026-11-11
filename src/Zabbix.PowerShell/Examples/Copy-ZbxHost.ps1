@@ -12,7 +12,7 @@ what is missing is created. The command writes the copy only with -PassThru.
 #>
 #region Copy a host
 # The copy takes web-01's groups, interfaces, items and triggers under the name web-02.
-Get-ZbxHost -Name 'web-01' | Copy-ZbxHost -NewName 'web-02' -PassThru | Select-Object TechnicalName, HostId
+Get-ZbxHost -Name 'web-01' | Copy-ZbxHost -NewName 'web-02' -PassThru | Select-Object HostName, HostId
 #endregion
 
 #region Copy a host and check what came along

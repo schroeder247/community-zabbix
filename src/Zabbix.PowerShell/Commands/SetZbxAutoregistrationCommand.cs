@@ -37,7 +37,7 @@ public sealed class SetZbxAutoregistrationCommand : ZabbixSingletonSetCmdlet<Zab
     /// <inheritdoc/>
     protected override ZabbixAutoregistrationUpdateRequest BuildRequest() => new()
     {
-        TlsAccept = TlsAccept is null ? null : TlsAccept.Aggregate((ZabbixTlsAcceptModes)0, (mask, mode) => mask | mode),
+        TlsAccept = TlsAccept is null ? null : TlsAccept.Aggregate(ZabbixTlsAcceptModes.None, (mask, mode) => mask | mode),
         TlsPskIdentity = TlsPskIdentity,
         TlsPsk = TlsPsk is null ? null : new NetworkCredential(string.Empty, TlsPsk).Password,
     };

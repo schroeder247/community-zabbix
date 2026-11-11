@@ -34,7 +34,7 @@ LONG DESCRIPTION
           changes one object per row:
 
               Import-Csv ./hosts.csv | New-ZbxHost -Group 'Linux servers'
-              [pscustomobject]@{ Name = 'h1'; InterfaceIp = '10.0.0.1' } |
+              [pscustomobject]@{ Name = 'h1'; InterfaceIP = '10.0.0.1' } |
                   New-ZbxHost -Group 'Linux servers' -WhatIf
               Import-Csv ./descriptions.csv | Set-ZbxHost   # HostId, Description
 

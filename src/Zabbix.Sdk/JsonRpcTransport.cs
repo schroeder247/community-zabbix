@@ -152,7 +152,7 @@ internal sealed class JsonRpcTransport(
         {
             Content = new ReadOnlyMemoryContent(envelope) { Headers = { ContentType = s_jsonRpc } },
         };
-        request.Options.Set(ZabbixHttp.Method, method);
+        request.Options.Set(ZabbixHttp.Method, ZabbixApiMethod.FromWire(method));
         if (_timeouts.TryGetValue(method, out TimeSpan deadline)) request.Options.Set(ZabbixHttp.Deadline, deadline);
         if (token is { Length: > 0 }) request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 

@@ -193,14 +193,14 @@ public class ZabbixWireClient : IDisposable, IAsyncDisposable
 
     /// <summary>Sends one value of a typed item to the server or proxy, collected now.</summary>
     /// <typeparam name="T">The item's value type.</typeparam>
-    /// <param name="host">The host the value belongs to, as Zabbix knows it.</param>
-    /// <param name="item">The item the value belongs to.</param>
+    /// <param name="hostName">The technical name of the host the value belongs to.</param>
+    /// <param name="key">The typed key of the item the value belongs to.</param>
     /// <param name="value">The value to send.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The trapper's counted answer.</returns>
-    public virtual Task<ZabbixSenderResponse> SendAsync<T>(string host, ZabbixItemKey<T> item, T value, CancellationToken cancellationToken = default)
+    public virtual Task<ZabbixSenderResponse> SendAsync<T>(string hostName, ZabbixItemKey<T> key, T value, CancellationToken cancellationToken = default)
         where T : ISpanParsable<T>
-        => SendAsync([ZabbixValue.From(host, item, value, _time.GetUtcNow())], cancellationToken);
+        => SendAsync([ZabbixValue.From(hostName, key, value, _time.GetUtcNow())], cancellationToken);
 
     /// <summary>Sends several values together, in the frames <see cref="ZabbixWireClientOptions.BatchSize"/> allows.</summary>
     /// <param name="build">What adds the values to the batch.</param>
@@ -217,16 +217,16 @@ public class ZabbixWireClient : IDisposable, IAsyncDisposable
     /// <summary>Reads a typed item from an agent, as <c>zabbix_get</c> does.</summary>
     /// <typeparam name="T">The item's value type.</typeparam>
     /// <param name="agent">The agent: <c>host</c> or <c>host:port</c> (port <see cref="DefaultAgentPort"/> when omitted).</param>
-    /// <param name="item">The item to read.</param>
+    /// <param name="key">The typed key of the item to read.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The value.</returns>
     /// <exception cref="ZabbixItemNotSupportedException">The agent doesn't support the item.</exception>
     /// <exception cref="FormatException">The value isn't a <typeparamref name="T"/>.</exception>
-    public virtual async Task<T> GetAgentItemAsync<T>(string agent, ZabbixItemKey<T> item, CancellationToken cancellationToken = default)
+    public virtual async Task<T> GetAgentItemAsync<T>(string agent, ZabbixItemKey<T> key, CancellationToken cancellationToken = default)
         where T : ISpanParsable<T>
     {
-        ZabbixAgentAnswer answer = await GetAgentItemAsync(agent, item.Key, cancellationToken).ConfigureAwait(false);
-        return answer is { IsSupported: true, Value: { } value } ? item.Parse(value) : throw new ZabbixItemNotSupportedException(item.Key, answer.Error);
+        ZabbixAgentAnswer answer = await GetAgentItemAsync(agent, key.Key, cancellationToken).ConfigureAwait(false);
+        return answer is { IsSupported: true, Value: { } value } ? key.Parse(value) : throw new ZabbixItemNotSupportedException(key.Key, answer.Error);
     }
 
     /// <summary>Reads an item from an agent, as <c>zabbix_get</c> does.</summary>

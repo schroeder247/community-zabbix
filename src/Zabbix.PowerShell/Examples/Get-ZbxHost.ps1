@@ -13,19 +13,19 @@ with Connect-ZbxServer.
 #>
 #region Get a host by its technical name
 # -Name matches the host's technical name (the "host" field) exactly; the result is a ZabbixHost record, whose
-# TechnicalName and VisibleName properties carry the API's host and name fields.
+# HostName and VisibleName properties carry the API's host and name fields.
 Get-ZbxHost -Name 'web-01'
 #endregion
 
 #region Find hosts with a wildcard
 # A * in -Name turns the exact match into a search, so this returns web-01, web-02 and so on.
-Get-ZbxHost -Name 'web-*' | Select-Object HostId, TechnicalName, Status
+Get-ZbxHost -Name 'web-*' | Select-Object HostId, HostName, Status
 #endregion
 
 #region Get the hosts of a group, with their interfaces and tags
 # -Group takes a host group's name, id or object; the -Select* switches add related objects to each host.
 Get-ZbxHost -Group 'Linux servers' -SelectInterfaces -SelectTags |
-    ForEach-Object { '{0}: {1}' -f $_.TechnicalName, ($_.Interfaces.Ip -join ', ') }
+    ForEach-Object { '{0}: {1}' -f $_.HostName, ($_.Interfaces.IP -join ', ') }
 #endregion
 
 #region Count the hosts of a group without reading them

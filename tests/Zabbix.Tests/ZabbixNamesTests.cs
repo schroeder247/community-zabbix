@@ -57,12 +57,13 @@ public sealed class ZabbixNamesTests
     }
 
     [Fact]
-    public void A_name_the_overlay_chose_is_kept_and_a_renamed_field_remembers_its_previous_name()
+    public void A_name_the_overlay_chose_is_kept_by_the_words_then_respelled_and_a_renamed_field_remembers_its_first_name()
     {
         FieldDescription[] fields = [.. Description.Types.SelectMany(t => t.Fields)];
 
-        Assert.Contains(fields, f => f.Wire == "host" && f.Name == "TechnicalName" && f.PreviousName is null);
-        Assert.Contains(fields, f => f.Wire == "evaltype" && f.Name == "EvalType" && f.PreviousName == "Evaltype");
+        Assert.Contains(fields, f => f.Wire == "host" && f.Name == "HostName" && f.PreviousName == "TechnicalName");
+        Assert.Contains(fields, f => f.Wire == "evaltype" && f.Name == "EvaluationType" && f.PreviousName == "Evaltype");
+        Assert.Contains(fields, f => f.Wire == "name" && f.Name == "VisibleName" && f.PreviousName is null);
         Assert.DoesNotContain(fields, f => f.PreviousName is not null && f.PreviousName == f.Name);
         Assert.All(Description.Types, t => Assert.Equal(t.Fields.Length, t.Fields.Select(f => f.Name).Distinct(StringComparer.Ordinal).Count()));
     }
@@ -101,11 +102,12 @@ public sealed class ZabbixNamesTests
     [Fact]
     public void Every_record_and_enum_name_part_the_vocabulary_cannot_split_is_a_reviewed_abbreviation()
     {
-        // config: a macro's configuration (UserMacroConfig, the API's own word); reg and exp: RegExp, the regexp object's
-        // own name; regex: the import rule's globalRegex; sli: an SLA's service level indicator (sla.getsli); h and v:
-        // HAlign and VAlign (halign, valign: a map shape's label alignment); y: the Y axis of GraphYAxisType and
-        // GraphYAxisSide. Every other part of every name is words.
-        string[] reviewed = ["config", "exp", "h", "reg", "regex", "sli", "v", "y"];
+        // reg and exp: RegExp, the regexp object's own name; regex: the import rule's globalRegex; sli: an SLA's service
+        // level indicator (sla.getsli); h and v: HAlign and VAlign (halign, valign: a map shape's label alignment); y: the Y
+        // axis of GraphYAxisType and GraphYAxisSide; a, h, i, p and u: the letters of the two-letter acronyms the
+        // respellings write in capitals (HANode, the host interface's UseIP, the role rules' UI), which a name split at each
+        // capital reads one at a time. Every other part of every name is words.
+        string[] reviewed = ["a", "exp", "h", "i", "p", "reg", "regex", "sli", "u", "v", "y"];
 
         string[] unsplit = [.. Description.Types.Select(t => t.Name).Concat(Description.Enums.Select(e => e.Name)).SelectMany(ZabbixNames.UnsplitType).Distinct().Order(StringComparer.Ordinal)];
 
@@ -122,8 +124,8 @@ public sealed class ZabbixNamesTests
     [InlineData(typeof(ZabbixTaskStatus), "InProgress", "ZBX_TM_STATUS_INPROGRESS")]
     [InlineData(typeof(ZabbixPreprocessingType), "LeftTrim", "ZBX_PREPROC_LTRIM")]
     [InlineData(typeof(ZabbixPreprocessingType), "BooleanToDecimal", "ZBX_PREPROC_BOOL2DEC")]
-    [InlineData(typeof(ZabbixGraphItemCalcFunction), "Last", "CALC_FNC_LST")]
-    [InlineData(typeof(ZabbixSnmpSecurityLevel), "AuthNoPriv", "ITEM_SNMPV3_SECURITYLEVEL_AUTHNOPRIV")]
+    [InlineData(typeof(ZabbixGraphItemCalculationFunction), "Last", "CALC_FNC_LST")]
+    [InlineData(typeof(ZabbixSnmpSecurityLevel), "AuthenticationNoPrivacy", "ITEM_SNMPV3_SECURITYLEVEL_AUTHNOPRIV")]
     public void An_enum_member_is_named_by_its_words(Type type, string member, string define)
     {
         Assert.True(Enum.IsDefined(type, Enum.Parse(type, member)), member);
@@ -133,10 +135,11 @@ public sealed class ZabbixNamesTests
     [Fact]
     public void Every_enum_member_name_part_the_vocabulary_cannot_split_is_a_reviewed_abbreviation()
     {
-        // The record and field gaps again (config, exec, exp, reg, regex), and the parts a member name keeps as one word on
-        // purpose: aes192c, aes256c, v2c and snmpv2c (cipher and SNMP version names); d, n, v and x (Pie3D, AtLeastN, V1,
-        // XPath); hashi, corp, cyber and ark (HashiCorp and CyberArk, the vendors' own spelling).
-        string[] reviewed = ["aes192c", "aes256c", "ark", "config", "corp", "cyber", "d", "exec", "exp", "hashi", "n", "reg", "regex", "snmpv2c", "v", "v2c", "x"];
+        // The record and field gaps again (exp, reg, regex), the letters of the two-letter acronyms written in capitals (a,
+        // h, i and p: HANode, DiscoveredHostIP, IP), and the parts a member name keeps as one word on purpose: aes192c,
+        // aes256c, v2c and snmpv2c (cipher and SNMP version names); d, n, v and x (Pie3D, AtLeastN, V1, XPath); hashi, corp,
+        // cyber and ark (HashiCorp and CyberArk, the vendors' own spelling).
+        string[] reviewed = ["a", "aes192c", "aes256c", "ark", "corp", "cyber", "d", "exp", "h", "hashi", "i", "n", "p", "reg", "regex", "snmpv2c", "v", "v2c", "x"];
 
         string[] unsplit = [.. Description.Enums.SelectMany(e => e.Members).Select(m => m.Name).SelectMany(ZabbixNames.UnsplitType).Distinct().Order(StringComparer.Ordinal)];
 

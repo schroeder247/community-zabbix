@@ -30,7 +30,7 @@ Writes the created group (templategroup.create, read back with templategroup.get
 ```powershell
 $group = New-ZbxTemplateGroup -Name 'Templates/Applications'
 Set-ZbxTemplate -InputObject 'Web App' -Group 'Templates/Web', $group | Out-Null
-Get-ZbxTemplate -Group $group | Select-Object TemplateId, TechnicalName
+Get-ZbxTemplate -Group $group | Select-Object TemplateId, HostName
 ```
 
 The written group object can be passed on: -Group takes names, ids or objects. Set-ZbxTemplate -Group replaces the template's groups.
@@ -107,7 +107,7 @@ Creates without a confirmation prompt even where $ConfirmPreference is at or bel
 
 ### -InputObject
 
-A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIp, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
+A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIP, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
 
 | | |
 | --- | --- |

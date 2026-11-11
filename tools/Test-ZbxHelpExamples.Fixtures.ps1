@@ -9,11 +9,11 @@ $lin = New-ZbxHostGroup -Name 'Linux servers' -Confirm:$false
 $web = New-ZbxHostGroup -Name 'Web servers' -Confirm:$false
 $tg = New-ZbxTemplateGroup -Name 'Templates/Web' -Confirm:$false
 $tpl = New-ZbxTemplate -Host 'Web App' -Group 'Templates/Web' -Confirm:$false
-$h = New-ZbxHost -Host 'web-01' -Group 'Linux servers', 'Web servers' -InterfaceType Agent -InterfaceIp '127.0.0.1' -Tag @{ env = 'prod' } -Confirm:$false
-$null = New-ZbxHost -Host 'db-01' -Group 'Linux servers' -InterfaceType Agent -InterfaceIp '127.0.0.2' -Confirm:$false
+$h = New-ZbxHost -Host 'web-01' -Group 'Linux servers', 'Web servers' -InterfaceType Agent -InterfaceIP '127.0.0.1' -Tag @{ env = 'prod' } -Confirm:$false
+$null = New-ZbxHost -Host 'db-01' -Group 'Linux servers' -InterfaceType Agent -InterfaceIP '127.0.0.2' -Confirm:$false
 $null = New-ZbxItem -HostId $h.HostId -Name 'Requests' -Key 'app.requests' -Type Trapper -ValueType Unsigned -TrapperHosts '0.0.0.0/0,::/0' -Confirm:$false
 $null = New-ZbxItem -HostId $h.HostId -Name 'Status' -Key 'app.status' -Type Trapper -ValueType Text -TrapperHosts '0.0.0.0/0,::/0' -Confirm:$false
-$null = New-ZbxTrigger -Name 'Too many requests on web-01' -Expression 'last(/web-01/app.requests)>100' -Priority High -Confirm:$false
+$null = New-ZbxTrigger -Name 'Too many requests on web-01' -Expression 'last(/web-01/app.requests)>100' -Severity High -Confirm:$false
 $null = New-ZbxUserMacro -HostId $h.HostId -Macro '{$APP.PORT}' -Value '8080' -Confirm:$false
 $null = New-ZbxUserMacro -HostId $h.HostId -Macro '{$TRAPPER.ALLOWED_HOSTS}' -Value '0.0.0.0/0,::/0' -Confirm:$false
 $null = New-ZbxUserGroup -Name 'Operators' -Confirm:$false

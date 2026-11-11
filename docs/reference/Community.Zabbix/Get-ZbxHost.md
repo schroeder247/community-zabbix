@@ -43,12 +43,12 @@ A host is a monitored device, server or application: a name, the groups it is in
 Get-ZbxHost -Name 'web-01'
 ```
 
--Name matches the host's technical name (the "host" field) exactly; the result is a ZabbixHost record, whose TechnicalName and VisibleName properties carry the API's host and name fields.
+-Name matches the host's technical name (the "host" field) exactly; the result is a ZabbixHost record, whose HostName and VisibleName properties carry the API's host and name fields.
 
 ### Example 2: Find hosts with a wildcard
 
 ```powershell
-Get-ZbxHost -Name 'web-*' | Select-Object HostId, TechnicalName, Status
+Get-ZbxHost -Name 'web-*' | Select-Object HostId, HostName, Status
 ```
 
 A * in -Name turns the exact match into a search, so this returns web-01, web-02 and so on.
@@ -57,7 +57,7 @@ A * in -Name turns the exact match into a search, so this returns web-01, web-02
 
 ```powershell
 Get-ZbxHost -Group 'Linux servers' -SelectInterfaces -SelectTags |
-    ForEach-Object { '{0}: {1}' -f $_.TechnicalName, ($_.Interfaces.Ip -join ', ') }
+    ForEach-Object { '{0}: {1}' -f $_.HostName, ($_.Interfaces.IP -join ', ') }
 ```
 
 -Group takes a host group's name, id or object; the -Select* switches add related objects to each host.

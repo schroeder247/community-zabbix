@@ -15,9 +15,9 @@ Get-ZbxProxy -Name 'proxy-*' | Select-Object Name, OperatingMode, Address, Port
 #endregion
 
 #region List the hosts each proxy monitors
-# -SelectHosts adds the hosts to each proxy; they are host records (TechnicalName is the host's technical name).
+# -SelectHosts adds the hosts to each proxy; they are host records (HostName is the host's technical name).
 Get-ZbxProxy -Name 'proxy-*' -SelectHosts |
-    Select-Object Name, @{ n = 'Hosts'; e = { $_.Hosts.TechnicalName -join ', ' } }
+    Select-Object Name, @{ n = 'Hosts'; e = { $_.Hosts.HostName -join ', ' } }
 #endregion
 
 #region Count proxies without reading them

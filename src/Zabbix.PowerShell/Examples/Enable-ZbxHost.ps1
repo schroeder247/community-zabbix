@@ -18,5 +18,5 @@ Enable-ZbxHost -InputObject 'web-01'
 
 #region Monitor every host of a group and show the result
 # The piped hosts are enabled in one host.update; -PassThru writes them back with their Status.
-Get-ZbxHost -Group 'Linux servers' | Enable-ZbxHost -PassThru | Select-Object TechnicalName, Status
+Get-ZbxHost -Group 'Linux servers' | Enable-ZbxHost -PassThru | Select-Object HostName, Status
 #endregion

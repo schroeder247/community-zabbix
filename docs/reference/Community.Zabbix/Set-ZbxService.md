@@ -8,7 +8,7 @@ Changes a service.
 ## SYNTAX
 
 ```
-Set-ZbxService [-InputObject] <ZabbixReference<ZabbixServiceRecord>[]> [[-Name] <string>] [-Uuid <string>] [-Algorithm <ZabbixServiceStatusCalc>] [-Position <int>] [-Weight <int>] [-PropagationRule <ZabbixServiceStatusPropagation>] [-PropagationValue <int>] [-Description <string>] [-Tag <ZabbixTagRequest[]>] [-ProblemTag <ZabbixServiceProblemTagRequest[]>] [-Parent <ZabbixReference<ZabbixServiceRecord>[]>] [-Child <ZabbixReference<ZabbixServiceRecord>[]>] [-StatusRule <ZabbixServiceStatusRuleRequest[]>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Set-ZbxService [-InputObject] <ZabbixReference<ZabbixServiceRecord>[]> [[-Name] <string>] [-Uuid <string>] [-Algorithm <ZabbixServiceStatusCalculation>] [-Position <int>] [-Weight <int>] [-PropagationRule <ZabbixServiceStatusPropagation>] [-PropagationValue <int>] [-Description <string>] [-Tag <ZabbixTagRequest[]>] [-ProblemTag <ZabbixServiceProblemTagRequest[]>] [-Parent <ZabbixReference<ZabbixServiceRecord>[]>] [-Child <ZabbixReference<ZabbixServiceRecord>[]>] [-StatusRule <ZabbixServiceStatusRuleRequest[]>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -86,7 +86,7 @@ How the service status is derived from its child services: always OK, the most c
 
 | | |
 | --- | --- |
-| Type | `ZabbixServiceStatusCalc` |
+| Type | `ZabbixServiceStatusCalculation` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |
@@ -336,7 +336,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 
 - `ZabbixReference<ZabbixServiceRecord>[]`: Bound to -InputObject (ByValue), -Parent (ByPropertyName), -Child (ByPropertyName). Represents a reference to an API object: a parameter that points at an API object takes its id, its name, or the object itself piped from a Get- cmdlet, and becomes an id before the call — one parameter, three spellings, one resolution.
 - `string`: Bound to -Uuid (ByPropertyName), -Name (ByPropertyName), -Description (ByPropertyName). Text.
-- `ZabbixServiceStatusCalc`: Bound to -Algorithm (ByPropertyName). The service status calc values: ZBX_SERVICE_STATUS_CALC_* in defines.inc.php.
+- `ZabbixServiceStatusCalculation`: Bound to -Algorithm (ByPropertyName). The service status calculation values: ZBX_SERVICE_STATUS_CALC_* in defines.inc.php.
 - `int`: Bound to -Position (ByPropertyName), -Weight (ByPropertyName), -PropagationValue (ByPropertyName). A number.
 - `ZabbixServiceStatusPropagation`: Bound to -PropagationRule (ByPropertyName). The service status propagation values: ZBX_SERVICE_STATUS_PROPAGATION_* in defines.inc.php.
 - `ZabbixTagRequest[]`: Bound to -Tag (ByPropertyName). A tag to set on an object: a name with an optional value, such as env=prod.

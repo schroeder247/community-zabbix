@@ -95,13 +95,14 @@ catch (HttpRequestException e)
     Console.WriteLine($"node: {e.GetType().Name}");
 }
 
-// The typed values as the generated JSON context writes and reads them: a get's fields and its sort, an item's interval, its
-// history and its allowed hosts, an interface's port from a macro, and an agent's schedule for an interval.
+// The typed values as the generated JSON context writes and reads them: a get's fields and its sort, an item's key, its
+// interval, its history and its allowed hosts, an interface's port from a macro, a proxy's port and timeout, a method, and an
+// agent's schedule for an interval.
 string queried = JsonSerializer.Serialize(
     new ZabbixHostGetParameters { Output = [ZabbixHostFields.HostId, ZabbixHostFields.VisibleName], Sort = [ZabbixHostFields.VisibleName.Descending(), ZabbixHostFields.HostId] },
     TypeInfo<ZabbixHostGetParameters>());
 string itemWritten = JsonSerializer.Serialize(
-    new ZabbixItemCreateRequest(1UL, "smoke", ZabbixItemType.Trapper, "smoke.key", ZabbixItemValueType.Unsigned)
+    new ZabbixItemCreateRequest(1UL, "smoke", ZabbixItemType.Trapper, ZabbixItemKey.Create("smoke.key", "a", "b"), ZabbixItemValueType.Unsigned)
     {
         Delay = ZabbixInterval.Parse("1m;10s/1-5,09:00-18:00"),
         History = TimeSpan.FromDays(90),
@@ -109,14 +110,18 @@ string itemWritten = JsonSerializer.Serialize(
     },
     TypeInfo<ZabbixItemCreateRequest>());
 string portWritten = JsonSerializer.Serialize(ZabbixInterface.Agent(IPAddress.Loopback) with { Port = ZabbixPort.Parse("{$AGENT_PORT}") }, TypeInfo<ZabbixHostInterfaceRequest>());
-ZabbixItem itemRead = JsonSerializer.Deserialize("""{"itemid":"7","delay":"{$DELAY}","history":"90d","trapper_hosts":"10.0.0.0/8, ::1"}""", TypeInfo<ZabbixItem>())!;
+ZabbixItem itemRead = JsonSerializer.Deserialize("""{"itemid":"7","key_":"vfs.fs.size[/,pfree]","delay":"{$DELAY}","history":"90d","trapper_hosts":"10.0.0.0/8, ::1"}""", TypeInfo<ZabbixItem>())!;
+ZabbixProxy proxyRead = JsonSerializer.Deserialize("""{"proxyid":"3","port":10051,"timeout_zabbix_agent":"1y"}""", TypeInfo<ZabbixProxy>())!;
 ZabbixHostGetParameters sortRead = JsonSerializer.Deserialize("""{"sortfield":["name","hostid"],"sortorder":["DESC"]}""", TypeInfo<ZabbixHostGetParameters>())!;
 if (!queried.Contains("""{"output":["hostid","name"],"sortfield":["name","hostid"],"sortorder":["DESC","ASC"]}""", StringComparison.Ordinal)
+    || !itemWritten.Contains("\"key_\":\"smoke.key[a,b]\"", StringComparison.Ordinal)
     || !itemWritten.Contains("\"delay\":\"1m;10s/1-5,09:00-18:00\"", StringComparison.Ordinal)
     || !itemWritten.Contains("\"history\":\"90d\"", StringComparison.Ordinal)
     || !itemWritten.Contains("\"trapper_hosts\":\"10.0.0.0/8,::1,{HOST.CONN}\"", StringComparison.Ordinal)
     || !portWritten.Contains("\"port\":\"{$AGENT_PORT}\"", StringComparison.Ordinal)
-    || itemRead.Delay?.ToString() != "{$DELAY}" || itemRead.History?.Length != TimeSpan.FromDays(90)
+    || itemRead.Key?.Parameters is not ["/", "pfree"] || itemRead.Delay?.ToString() != "{$DELAY}" || itemRead.History?.Length != TimeSpan.FromDays(90)
+    || proxyRead.Port?.Number != 10051 || proxyRead.TimeoutZabbixAgent?.Length != TimeSpan.FromDays(365)
+    || ZabbixApiMethod.Parse("HOST.GET") != ZabbixApiMethod.HostGet || !ZabbixApiMethods.IsIdempotent(ZabbixApiMethod.HostGet)
     || itemRead.TrapperHosts is not [{ Network: { } block }, { Network: { } loopback }] || block != IPNetwork.Parse("10.0.0.0/8") || loopback != IPNetwork.Parse("::1/128")
     || sortRead.Sort is not [{ Direction: System.ComponentModel.ListSortDirection.Descending } name, { Direction: System.ComponentModel.ListSortDirection.Ascending } hostId]
     || name.Field != ZabbixHostFields.VisibleName || hostId.Field != ZabbixHostFields.HostId
@@ -136,7 +141,7 @@ IConfiguration apiSection = new ConfigurationBuilder().AddInMemoryCollection(new
     ["MaxConnectionsPerServer"] = "4",
     ["Resilience:Retry:Delay"] = "00:00:00",
 }).Build();
-await using (ZabbixClient bound = ZabbixClient.CreateBuilder().Bind(apiSection).WithTimeout("host.get", TimeSpan.FromSeconds(30)).Build())
+await using (ZabbixClient bound = ZabbixClient.CreateBuilder().Bind(apiSection).WithTimeout(ZabbixApiMethod.HostGet, TimeSpan.FromSeconds(30)).Build())
 {
     if (bound.Endpoint.AbsoluteUri != "http://127.0.0.1:9/api_jsonrpc.php")
     {

@@ -13,7 +13,7 @@ Send-ZbxData [-HostName] <string> [-Key] <string> [-Value] <string> [-Clock <Dat
 
 ## DESCRIPTION
 
-The Send-ZbxData cmdlet sends values to trapper items over the sender protocol zabbix_sender uses: one value from -HostName, -Key and -Value, or a batch piped by property name (any object with Host, Key and Value, and optionally Clock and Ns), collected into one request. The trapper is -Server, else the connection's (Connect-ZbxServer -Trapper), else the active high-availability node's. With -Server no connection is needed, because the sender protocol carries no login. It writes the trapper's answer: how many values it processed and how many failed.
+The Send-ZbxData cmdlet sends values to trapper items over the sender protocol zabbix_sender uses: one value from -HostName, -Key and -Value, or a batch piped by property name (any object with HostName or Host, Key and Value, and optionally Clock and Ns), collected into one request. The trapper is -Server, else the connection's (Connect-ZbxServer -Trapper), else the active high-availability node's. With -Server no connection is needed, because the sender protocol carries no login. It writes the trapper's answer: how many values it processed and how many failed.
 
 ## EXAMPLES
 

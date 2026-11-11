@@ -163,13 +163,13 @@ public sealed class LiveApiDriftTests(ITestOutputHelper output)
                 cleanup.Add(() => client.HostGroups.DeleteAsync(groups, ct));
                 IReadOnlyList<ulong> templateGroups = await client.TemplateGroups.CreateAsync([new ZabbixTemplateGroupCreateRequest { Name = prefix + "-tg" }], ct);
                 cleanup.Add(() => client.TemplateGroups.DeleteAsync(templateGroups, ct));
-                IReadOnlyList<ulong> templates = [await client.Templates.CreateAsync(new ZabbixTemplateCreateRequest { TechnicalName = prefix + "-tpl", Groups = [new ZabbixTemplateGroupRequest { GroupId = templateGroups[0] }] }, ct)];
+                IReadOnlyList<ulong> templates = [await client.Templates.CreateAsync(new ZabbixTemplateCreateRequest { HostName = prefix + "-tpl", Groups = [new ZabbixTemplateGroupRequest { GroupId = templateGroups[0] }] }, ct)];
                 cleanup.Add(() => client.Templates.DeleteAsync(templates, ct));
 
                 // a host with an agent and an SNMPv3 interface, a tag, a macro and a PSK
                 IReadOnlyList<ulong> hosts = [await client.Hosts.CreateAsync(new ZabbixHostCreateRequest
                 {
-                    TechnicalName = prefix + "-host",
+                    HostName = prefix + "-host",
                     Groups = [new ZabbixHostGroupRequest { GroupId = groups[0] }],
                     Tags = [new ZabbixTagRequest { Tag = "zbx", Value = "crud" }],
                     Macros = [new ZabbixHostMacroRequest { Macro = "{$ZBX}", Value = "1" }],
@@ -179,14 +179,14 @@ public sealed class LiveApiDriftTests(ITestOutputHelper output)
                     TlsPsk = "0123456789abcdef0123456789abcdef",
                     Interfaces =
                     [
-                        new ZabbixHostInterfaceRequest { Type = ZabbixInterfaceType.Agent, Main = ZabbixInterfacePriority.Primary, UseIp = ZabbixHostInterfaceUseIp.Ip, Ip = "127.0.0.1", Dns = "", Port = 10050 },
+                        new ZabbixHostInterfaceRequest { Type = ZabbixInterfaceType.Agent, Main = ZabbixInterfacePriority.Primary, UseIP = ZabbixHostInterfaceUseIP.IP, IP = "127.0.0.1", Dns = "", Port = 10050 },
                         new ZabbixHostInterfaceRequest
                         {
-                            Type = ZabbixInterfaceType.Snmp, Main = ZabbixInterfacePriority.Primary, UseIp = ZabbixHostInterfaceUseIp.Ip, Ip = "127.0.0.1", Dns = "", Port = 161,
+                            Type = ZabbixInterfaceType.Snmp, Main = ZabbixInterfacePriority.Primary, UseIP = ZabbixHostInterfaceUseIP.IP, IP = "127.0.0.1", Dns = "", Port = 161,
                             Details = new ZabbixHostInterfaceDetailRequest
                             {
-                                Version = ZabbixSnmpVersion.V3, Bulk = true, SecurityName = "zbx", SecurityLevel = ZabbixSnmpSecurityLevel.AuthPriv,
-                                AuthProtocol = ZabbixSnmpAuthProtocol.Sha256, AuthPassphrase = "zbx-auth-pass", PrivProtocol = ZabbixSnmpPrivProtocol.Aes128, PrivPassphrase = "zbx-priv-pass",
+                                Version = ZabbixSnmpVersion.V3, Bulk = true, SecurityName = "zbx", SecurityLevel = ZabbixSnmpSecurityLevel.AuthenticationAndPrivacy,
+                                AuthenticationProtocol = ZabbixSnmpAuthenticationProtocol.Sha256, AuthenticationPassphrase = "zbx-auth-pass", PrivacyProtocol = ZabbixSnmpPrivacyProtocol.Aes128, PrivacyPassphrase = "zbx-priv-pass",
                             },
                         },
                     ],
@@ -195,20 +195,20 @@ public sealed class LiveApiDriftTests(ITestOutputHelper output)
                 ZabbixHost host = Assert.Single(await client.Hosts.GetAsync(new ZabbixHostGetParameters { HostIds = hosts, SelectInterfaces = ZabbixOutput.Extend, SelectTags = ZabbixOutput.Extend, SelectMacros = ZabbixOutput.Extend }, ct));
                 ZabbixHostInterfaceDetail snmp = host.Interfaces!.Single(i => i.Type == ZabbixInterfaceType.Snmp).Details!;
                 Assert.Equal(ZabbixSnmpVersion.V3, snmp.Version);
-                Assert.Equal(ZabbixSnmpSecurityLevel.AuthPriv, snmp.SecurityLevel);
-                Assert.Equal(ZabbixSnmpAuthProtocol.Sha256, snmp.AuthProtocol);
+                Assert.Equal(ZabbixSnmpSecurityLevel.AuthenticationAndPrivacy, snmp.SecurityLevel);
+                Assert.Equal(ZabbixSnmpAuthenticationProtocol.Sha256, snmp.AuthenticationProtocol);
                 Assert.Equal("crud", Assert.Single(host.Tags!).Value);
                 Assert.DoesNotContain("0123456789abcdef", host.ToString(), StringComparison.Ordinal);
 
                 // A trapper item and a dependent item from their own fields only
-                IReadOnlyList<ulong> trapper = [await client.Items.CreateAsync(new ZabbixItemCreateRequest { HostId = hosts[0], Name = "zbx trapper", Type = ZabbixItemType.Trapper, Key = "zbxtest.trap", ValueType = ZabbixItemValueType.Float }, ct)];
-                IReadOnlyList<ulong> dependent = [await client.Items.CreateAsync(new ZabbixItemCreateRequest { HostId = hosts[0], Name = "zbx dependent", Type = ZabbixItemType.Dependent, Key = "zbxtest.dep", ValueType = ZabbixItemValueType.Float, MasterItemId = trapper[0] }, ct)];
+                IReadOnlyList<ulong> trapper = [await client.Items.CreateAsync(new ZabbixItemCreateRequest { HostId = hosts[0], Name = "zbx trapper", Type = ZabbixItemType.Trapper, Key = ZabbixItemKey.Parse("zbxtest.trap"), ValueType = ZabbixItemValueType.Float }, ct)];
+                IReadOnlyList<ulong> dependent = [await client.Items.CreateAsync(new ZabbixItemCreateRequest { HostId = hosts[0], Name = "zbx dependent", Type = ZabbixItemType.Dependent, Key = ZabbixItemKey.Parse("zbxtest.dep"), ValueType = ZabbixItemValueType.Float, MasterItemId = trapper[0] }, ct)];
                 Assert.Equal(ZabbixItemType.Dependent, Assert.Single(await client.Items.GetAsync(new ZabbixItemGetParameters { ItemIds = dependent }, ct)).Type);
 
                 // history.push answers one typed row per value (the item may not be in the server's configuration
                 // cache yet, so the first row is either this item or the refusal every unknown item gets)
                 ZabbixHistoryPushResult pushed = await client.History.PushAsync(
-                    [new ZabbixHistoryPushRequest { ItemId = trapper[0], Value = JsonSerializer.SerializeToElement(1.5) }, new ZabbixHistoryPushRequest { Host = prefix + "-nohost", Key = "zbxtest.none", Value = JsonSerializer.SerializeToElement(1) }], ct);
+                    [new ZabbixHistoryPushRequest { ItemId = trapper[0], Value = JsonSerializer.SerializeToElement(1.5) }, new ZabbixHistoryPushRequest { HostName = prefix + "-nohost", Key = ZabbixItemKey.Parse("zbxtest.none"), Value = JsonSerializer.SerializeToElement(1) }], ct);
                 Assert.Equal("success", pushed.Response);
                 Assert.Equal(2, pushed.Values!.Count);
                 Assert.True(pushed.Values[0].ItemId is null || pushed.Values[0].ItemId == trapper[0], pushed.Values[0].ToString());
@@ -232,7 +232,7 @@ public sealed class LiveApiDriftTests(ITestOutputHelper output)
                     ActiveSince = now.ToDateTimeOffset(),
                     ActiveTill = DateTimeOffset.FromUnixTimeSeconds(now.Seconds + 86_400),
                     Hosts = [new ZabbixMaintenanceHostRequest { HostId = hosts[0] }],
-                    TimePeriods = [new ZabbixMaintenanceTimePeriodRequest { TimePeriodType = ZabbixTimePeriodType.Daily, Every = 2, StartTime = new TimeOnly(1, 0), Period = "3600" }],
+                    TimePeriods = [new ZabbixMaintenanceTimePeriodRequest { TimePeriodType = ZabbixTimePeriodType.Daily, Every = 2, StartTime = new TimeOnly(1, 0), Period = ZabbixDuration.Parse("3600") }],
                 }, ct)];
                 cleanup.Add(() => client.Maintenances.DeleteAsync(maintenances, ct));
                 ZabbixMaintenanceRecord maintenance = Assert.Single(await client.Maintenances.GetAsync(new ZabbixMaintenanceGetParameters { MaintenanceIds = maintenances, SelectTimePeriods = ZabbixOutput.Extend }, ct));
@@ -250,7 +250,7 @@ public sealed class LiveApiDriftTests(ITestOutputHelper output)
                 cleanup.Add(() => client.UserGroups.DeleteAsync(userGroups, ct));
                 IReadOnlyList<ulong> users = [await client.Users.CreateAsync(new ZabbixUserCreateRequest
                 {
-                    Username = prefix + "-user",
+                    UserName = prefix + "-user",
                     Password = "Zbx-test-" + Guid.NewGuid().ToString("N")[..12] + "!",
                     RoleId = 1,
                     UserGroups = [new ZabbixUserGroupRequest { UserGroupId = userGroups[0] }],
@@ -325,7 +325,7 @@ public sealed class LiveApiDriftTests(ITestOutputHelper output)
         {
             var request = new ZabbixHostCreateRequest
             {
-                TechnicalName = name,
+                HostName = name,
                 Groups = [new ZabbixHostGroupRequest { GroupId = groups[0] }],
                 InventoryMode = ZabbixHostInventoryMode.Manual,
                 AdditionalFields = new Dictionary<string, JsonElement> { ["inventory"] = JsonSerializer.SerializeToElement(new { alias = "reqext-live" }) },
@@ -357,8 +357,8 @@ public sealed class LiveApiDriftTests(ITestOutputHelper output)
             try
             {
                 hosts = await client.Hosts.CreateAsync([
-                    new ZabbixHostCreateRequest { TechnicalName = prefix + "-1", Groups = [new ZabbixHostGroupRequest { GroupId = groups[0] }] },
-                    new ZabbixHostCreateRequest { TechnicalName = prefix + "-2", Groups = [new ZabbixHostGroupRequest { GroupId = groups[0] }] }], TestContext.Current.CancellationToken);
+                    new ZabbixHostCreateRequest { HostName = prefix + "-1", Groups = [new ZabbixHostGroupRequest { GroupId = groups[0] }] },
+                    new ZabbixHostCreateRequest { HostName = prefix + "-2", Groups = [new ZabbixHostGroupRequest { GroupId = groups[0] }] }], TestContext.Current.CancellationToken);
 
                 await client.Hosts.MassUpdateAsync(new ZabbixHostMassUpdateRequest { Hosts = [.. hosts.Select(h => new ZabbixHostMassHostRequest { HostId = h })], Status = ZabbixHostStatus.Disabled }, TestContext.Current.CancellationToken);
                 await client.HostGroups.MassUpdateAsync(new ZabbixHostGroupMassUpdateRequest { Groups = [new ZabbixHostGroupMassGroupRequest { GroupId = groups[1] }], Hosts = [new ZabbixHostGroupMassHostRequest { HostId = hosts[0] }] }, TestContext.Current.CancellationToken);
@@ -367,7 +367,7 @@ public sealed class LiveApiDriftTests(ITestOutputHelper output)
                 Assert.All(read, h => Assert.Equal(ZabbixHostStatus.Disabled, h.Status));
                 Assert.Equal([groups[0], groups[1]], read.Single(h => h.HostId == hosts[0]).HostGroups!.Select(g => g.GroupId!.Value).Order());
                 Assert.Equal([groups[0]], read.Single(h => h.HostId == hosts[1]).HostGroups!.Select(g => g.GroupId!.Value));
-                output.WriteLine($"{version}: mass updates {(ZabbixApiMethods.Supports("host.massupdate", version) ? "sent" : "composed")}, state verified");
+                output.WriteLine($"{version}: mass updates {(ZabbixApiMethods.Supports(ZabbixApiMethod.HostMassUpdate, version) ? "sent" : "composed")}, state verified");
             }
             finally
             {

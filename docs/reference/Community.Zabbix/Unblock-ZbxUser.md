@@ -20,7 +20,7 @@ The Unblock-ZbxUser cmdlet clears the failed login count of the users given to -
 ### Example 1: Unblock a user
 
 ```powershell
-Unblock-ZbxUser -InputObject 'jdoe' -PassThru | Select-Object Username, AttemptFailed
+Unblock-ZbxUser -InputObject 'jdoe' -PassThru | Select-Object UserName, AttemptFailed
 ```
 
 AttemptFailed is the user's failed login count; after the unblock it is 0.

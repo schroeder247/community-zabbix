@@ -8,7 +8,7 @@ Changes a user directory.
 ## SYNTAX
 
 ```
-Set-ZbxUserDirectory [-InputObject] <ZabbixReference<ZabbixUserDirectory>[]> [[-Name] <string>] [-IdpType <ZabbixIdpType>] [-ProvisionStatus <bool>] [-Description <string>] [-LdapHost <string>] [-Port <string>] [-BaseDn <string>] [-BindDn <string>] [-BindPassword <SecureString>] [-SearchAttribute <string>] [-StartTls <bool>] [-SearchFilter <string>] [-GroupBaseDn <string>] [-UserReferenceAttribute <string>] [-GroupName <string>] [-UserUsername <string>] [-UserLastName <string>] [-GroupMember <string>] [-GroupFilter <string>] [-GroupMembership <string>] [-IdpEntityId <string>] [-SsoUrl <string>] [-SloUrl <string>] [-SpEntityId <string>] [-NameIdFormat <string>] [-UsernameAttribute <string>] [-SignMessages <bool>] [-SignAssertions <bool>] [-SignAuthnRequests <bool>] [-SignLogoutRequests <bool>] [-SignLogoutResponses <bool>] [-EncryptNameId <bool>] [-EncryptAssertions <bool>] [-ScimStatus <bool>] [-ProvisionGroup <ZabbixUserDirectoryProvisionGroupRequest[]>] [-ProvisionMedia <ZabbixUserDirectoryUpdateProvisionMediaRequest[]>] [-IdpCertificate <string>] [-SpCertificate <string>] [-SpPrivateKey <string>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Set-ZbxUserDirectory [-InputObject] <ZabbixReference<ZabbixUserDirectory>[]> [[-Name] <string>] [-IdpType <ZabbixIdpType>] [-ProvisionStatus <bool>] [-Description <string>] [-LdapHost <string>] [-Port <string>] [-BaseDN <string>] [-BindDN <string>] [-BindPassword <SecureString>] [-SearchAttribute <string>] [-StartTls <bool>] [-SearchFilter <string>] [-GroupBaseDN <string>] [-UserReferenceAttribute <string>] [-GroupName <string>] [-UserUserName <string>] [-UserLastName <string>] [-GroupMember <string>] [-GroupFilter <string>] [-GroupMembership <string>] [-IdpEntityId <string>] [-SsoUrl <string>] [-SloUrl <string>] [-SPEntityId <string>] [-NameIdFormat <string>] [-UserNameAttribute <string>] [-SignMessages <bool>] [-SignAssertions <bool>] [-SignAuthnRequests <bool>] [-SignLogoutRequests <bool>] [-SignLogoutResponses <bool>] [-EncryptNameId <bool>] [-EncryptAssertions <bool>] [-ScimStatus <bool>] [-ProvisionGroup <ZabbixUserDirectoryProvisionGroupRequest[]>] [-ProvisionMedia <ZabbixUserDirectoryUpdateProvisionMediaRequest[]>] [-IdpCertificate <string>] [-SPCertificate <string>] [-SPPrivateKey <string>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -140,7 +140,7 @@ The TCP port of the LDAP server.
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -BaseDn
+### -BaseDN
 
 The LDAP base path under which user accounts are searched, for example ou=Users,dc=example,dc=org; for direct user binding it contains the %{user} placeholder.
 
@@ -155,7 +155,7 @@ The LDAP base path under which user accounts are searched, for example ou=Users,
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -BindDn
+### -BindDN
 
 The distinguished name of the LDAP account used to bind and search the server; empty for anonymous binding and for direct user binding.
 
@@ -230,7 +230,7 @@ A custom LDAP filter used to locate the user account at login, with the %{attr} 
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -GroupBaseDn
+### -GroupBaseDN
 
 The LDAP base path under which groups are searched for the group membership check; ignored during provisioning when a group membership attribute is set.
 
@@ -275,7 +275,7 @@ The directory attribute that holds the group name used to map directory groups t
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -UserUsername
+### -UserUserName
 
 The directory attribute (also the SCIM attribute when SCIM provisioning is on) whose value becomes the name of a provisioned user, for example givenName or displayName.
 
@@ -395,7 +395,7 @@ The URL of the identity provider's SAML single logout service, to which logout r
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -SpEntityId
+### -SPEntityId
 
 The identifier of Zabbix as the SAML service provider, a URL or any string.
 
@@ -425,7 +425,7 @@ The SAML name ID format requested from the identity provider, for example urn:oa
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -UsernameAttribute
+### -UserNameAttribute
 
 The SAML attribute (also the SCIM attribute when SCIM provisioning is on) whose value is compared with the Zabbix username at login.
 
@@ -605,7 +605,7 @@ The PEM content of the identity provider certificate; accepted only when SAML ce
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -SpCertificate
+### -SPCertificate
 
 The PEM content of the service provider certificate; accepted only when SAML certificates are kept in the database, and never returned by the API.
 
@@ -620,7 +620,7 @@ The PEM content of the service provider certificate; accepted only when SAML cer
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -SpPrivateKey
+### -SPPrivateKey
 
 The PEM content of the service provider private key; accepted only when SAML certificates are kept in the database, and never returned by the API.
 
@@ -727,7 +727,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 - `ZabbixReference<ZabbixUserDirectory>[]`: Bound to -InputObject (ByValue). Represents a reference to an API object: a parameter that points at an API object takes its id, its name, or the object itself piped from a Get- cmdlet, and becomes an id before the call — one parameter, three spellings, one resolution.
 - `ZabbixIdpType`: Bound to -IdpType (ByPropertyName). The idp type values: IDP_TYPE_* in defines.inc.php.
 - `bool`: Bound to -ProvisionStatus (ByPropertyName), -StartTls (ByPropertyName), -SignMessages (ByPropertyName), -SignAssertions (ByPropertyName), -SignAuthnRequests (ByPropertyName), -SignLogoutRequests (ByPropertyName), -SignLogoutResponses (ByPropertyName), -EncryptNameId (ByPropertyName), -EncryptAssertions (ByPropertyName), -ScimStatus (ByPropertyName). True or false.
-- `string`: Bound to -Name (ByPropertyName), -Description (ByPropertyName), -LdapHost (ByPropertyName), -Port (ByPropertyName), -BaseDn (ByPropertyName), -BindDn (ByPropertyName), -SearchAttribute (ByPropertyName), -SearchFilter (ByPropertyName), -GroupBaseDn (ByPropertyName), -UserReferenceAttribute (ByPropertyName), -GroupName (ByPropertyName), -UserUsername (ByPropertyName), -UserLastName (ByPropertyName), -GroupMember (ByPropertyName), -GroupFilter (ByPropertyName), -GroupMembership (ByPropertyName), -IdpEntityId (ByPropertyName), -SsoUrl (ByPropertyName), -SloUrl (ByPropertyName), -SpEntityId (ByPropertyName), -NameIdFormat (ByPropertyName), -UsernameAttribute (ByPropertyName), -IdpCertificate (ByPropertyName), -SpCertificate (ByPropertyName), -SpPrivateKey (ByPropertyName). Text.
+- `string`: Bound to -Name (ByPropertyName), -Description (ByPropertyName), -LdapHost (ByPropertyName), -Port (ByPropertyName), -BaseDN (ByPropertyName), -BindDN (ByPropertyName), -SearchAttribute (ByPropertyName), -SearchFilter (ByPropertyName), -GroupBaseDN (ByPropertyName), -UserReferenceAttribute (ByPropertyName), -GroupName (ByPropertyName), -UserUserName (ByPropertyName), -UserLastName (ByPropertyName), -GroupMember (ByPropertyName), -GroupFilter (ByPropertyName), -GroupMembership (ByPropertyName), -IdpEntityId (ByPropertyName), -SsoUrl (ByPropertyName), -SloUrl (ByPropertyName), -SPEntityId (ByPropertyName), -NameIdFormat (ByPropertyName), -UserNameAttribute (ByPropertyName), -IdpCertificate (ByPropertyName), -SPCertificate (ByPropertyName), -SPPrivateKey (ByPropertyName). Text.
 - `ZabbixUserDirectoryProvisionGroupRequest[]`: Bound to -ProvisionGroup (ByPropertyName). provision_groups of a ZabbixUserDirectoryCreateRequest.
 - `ZabbixUserDirectoryUpdateProvisionMediaRequest[]`: Bound to -ProvisionMedia (ByPropertyName). provision_media of a ZabbixUserDirectoryUpdateRequest.
 - `PSObject`: Bound to -PipedRecord (ByValue). Each object as the API answers it.

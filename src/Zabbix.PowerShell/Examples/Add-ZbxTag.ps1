@@ -14,7 +14,7 @@ Add-ZbxTag -InputObject 'web-01' -Name 'team' -Value 'shop' -PassThru | ForEach-
 # Get-ZbxHost writes host objects; Add-ZbxTag binds each one.
 Get-ZbxHost -Group 'Linux servers' | Add-ZbxTag -Name 'backup' -Value 'daily'
 Get-ZbxHost -Group 'Linux servers' -SelectTags |
-    Select-Object TechnicalName, @{ n = 'Tags'; e = { ($_.Tags | ForEach-Object { '{0}={1}' -f $_.Tag, $_.Value }) -join ', ' } }
+    Select-Object HostName, @{ n = 'Tags'; e = { ($_.Tags | ForEach-Object { '{0}={1}' -f $_.Tag, $_.Value }) -join ', ' } }
 #endregion
 
 #region Add a tag without a value, positionally

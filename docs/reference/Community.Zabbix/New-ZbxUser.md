@@ -8,12 +8,12 @@ Creates a user.
 ## SYNTAX
 
 ```
-New-ZbxUser [[-Username] <string>] [-FirstName <string>] [-LastName <string>] [-Password <SecureString>] [-Url <string>] [-AutoLogin <bool>] [-AutoLogout <string>] [-Language <string>] [-Refresh <string>] [-Theme <string>] [-RowsPerPage <int>] [-Timezone <string>] [-RoleId <ulong>] [-UserGroup <ZabbixReference<ZabbixUserGroup>[]>] [-Media <ZabbixUserMediaRequest[]>] [-DefaultMaintenancePeriod <string>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+New-ZbxUser [[-UserName] <string>] [-FirstName <string>] [-LastName <string>] [-Password <SecureString>] [-Url <string>] [-AutoLogin <bool>] [-AutoLogout <string>] [-Language <string>] [-Refresh <string>] [-Theme <string>] [-RowsPerPage <int>] [-Timezone <string>] [-RoleId <ulong>] [-UserGroup <ZabbixReference<ZabbixUserGroup>[]>] [-Media <ZabbixUserMediaRequest[]>] [-DefaultMaintenancePeriod <string>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
 
-A user is an account that logs in to the frontend or the API, with its role, its user groups and the media it is notified on. The New-ZbxUser cmdlet sends user.create with one request field per parameter, then reads the new user back with user.get and writes it. The server requires -Username; -AdditionalProperty sets any other field by its API name and wins over a parameter. -WhatIf shows what would be created, and the command needs a connection made with Connect-ZbxServer.
+A user is an account that logs in to the frontend or the API, with its role, its user groups and the media it is notified on. The New-ZbxUser cmdlet sends user.create with one request field per parameter, then reads the new user back with user.get and writes it. The server requires -UserName; -AdditionalProperty sets any other field by its API name and wins over a parameter. -WhatIf shows what would be created, and the command needs a connection made with Connect-ZbxServer.
 
 ## EXAMPLES
 
@@ -21,8 +21,8 @@ A user is an account that logs in to the frontend or the API, with its role, its
 
 ```powershell
 $password = ConvertTo-SecureString 'Chang3-me-at-first-login!' -AsPlainText -Force
-New-ZbxUser -Username 'jdoe' -FirstName 'John' -LastName 'Doe' -Password $password -RoleId (Get-ZbxRole -Name 'User role').RoleId -UserGroup 'Operators' |
-    Select-Object UserId, Username, FirstName, LastName, RoleId
+New-ZbxUser -UserName 'jdoe' -FirstName 'John' -LastName 'Doe' -Password $password -RoleId (Get-ZbxRole -Name 'User role').RoleId -UserGroup 'Operators' |
+    Select-Object UserId, UserName, FirstName, LastName, RoleId
 ```
 
 -Password is a SecureString; -RoleId is required (read it with Get-ZbxRole) and -UserGroup takes group names, ids or objects. The created user is read back and written to the pipeline.
@@ -32,8 +32,8 @@ New-ZbxUser -Username 'jdoe' -FirstName 'John' -LastName 'Doe' -Password $passwo
 ```powershell
 $email = Get-ZbxMediaType -Name 'Email'
 $password = ConvertTo-SecureString 'Chang3-me-at-first-login!' -AsPlainText -Force
-$null = New-ZbxUser -Username 'asmith' -FirstName 'Ann' -LastName 'Smith' -Password $password -RoleId (Get-ZbxRole -Name 'User role').RoleId -UserGroup 'Operators' -Media @{ mediatypeid = $email.MediaTypeId; sendto = @('asmith@example.com'); severity = 48; period = '1-5,08:00-18:00' }
-Get-ZbxUser -Name 'asmith' -SelectUserGroups | Select-Object Username, @{ n = 'Groups'; e = { $_.UserGroups.Name -join ', ' } }
+$null = New-ZbxUser -UserName 'asmith' -FirstName 'Ann' -LastName 'Smith' -Password $password -RoleId (Get-ZbxRole -Name 'User role').RoleId -UserGroup 'Operators' -Media @{ mediatypeid = $email.MediaTypeId; sendto = @('asmith@example.com'); severity = 48; period = '1-5,08:00-18:00' }
+Get-ZbxUser -Name 'asmith' -SelectUserGroups | Select-Object UserName, @{ n = 'Groups'; e = { $_.UserGroups.Name -join ', ' } }
 ```
 
 -Media takes one hashtable per media: the media type's id, the address(es) in sendto, and optionally the severities (a bit mask, 48 = High and Disaster) and the period when it may be used.
@@ -41,11 +41,11 @@ Get-ZbxUser -Name 'asmith' -SelectUserGroups | Select-Object Username, @{ n = 'G
 ### Example 3: Create users from a CSV file
 
 ```powershell
-$rows = 'Username,FirstName,LastName', '"jdoe",John,Doe' | ConvertFrom-Csv
+$rows = 'UserName,FirstName,LastName', '"jdoe",John,Doe' | ConvertFrom-Csv
 $role = (Get-ZbxRole -Name 'User role').RoleId
 foreach ($row in $rows) {
     $random = ConvertTo-SecureString ([Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(24))) -AsPlainText -Force
-    New-ZbxUser -Username $row.Username -FirstName $row.FirstName -LastName $row.LastName -Password $random -RoleId $role -UserGroup 'Operators' -WhatIf
+    New-ZbxUser -UserName $row.UserName -FirstName $row.FirstName -LastName $row.LastName -Password $random -RoleId $role -UserGroup 'Operators' -WhatIf
 }
 ```
 
@@ -53,7 +53,7 @@ Each row (here inline; Import-Csv reads the same from a file) becomes one New-Zb
 
 ## PARAMETERS
 
-### -Username
+### -UserName
 
 Login name of the user; must be unique. Required.
 
@@ -325,7 +325,7 @@ Creates without a confirmation prompt even where $ConfirmPreference is at or bel
 
 ### -InputObject
 
-A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIp, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
+A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIP, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
 
 | | |
 | --- | --- |
@@ -367,7 +367,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 
 ## INPUTS
 
-- `string`: Bound to -Username (ByPropertyName), -FirstName (ByPropertyName), -LastName (ByPropertyName), -Url (ByPropertyName), -AutoLogout (ByPropertyName), -Language (ByPropertyName), -Refresh (ByPropertyName), -Theme (ByPropertyName), -Timezone (ByPropertyName), -DefaultMaintenancePeriod (ByPropertyName). Text.
+- `string`: Bound to -UserName (ByPropertyName), -FirstName (ByPropertyName), -LastName (ByPropertyName), -Url (ByPropertyName), -AutoLogout (ByPropertyName), -Language (ByPropertyName), -Refresh (ByPropertyName), -Theme (ByPropertyName), -Timezone (ByPropertyName), -DefaultMaintenancePeriod (ByPropertyName). Text.
 - `bool`: Bound to -AutoLogin (ByPropertyName). True or false.
 - `int`: Bound to -RowsPerPage (ByPropertyName). A number.
 - `ulong`: Bound to -RoleId (ByPropertyName).

@@ -11,7 +11,7 @@ already named -NewName is updated from the copy. The command writes the copy onl
 #>
 #region Copy a template to change it safely
 # The copy is a separate template: change it, link it to one test host, and the original stays as it is.
-Copy-ZbxTemplate -InputObject 'Web App' -NewName 'Web App v2' -PassThru | Select-Object TechnicalName, TemplateId
+Copy-ZbxTemplate -InputObject 'Web App' -NewName 'Web App v2' -PassThru | Select-Object HostName, TemplateId
 #endregion
 
 #region Preview a copy

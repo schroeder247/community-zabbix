@@ -8,7 +8,7 @@ Creates a script.
 ## SYNTAX
 
 ```
-New-ZbxScript [[-Name] <string>] [[-Scope] <ZabbixScriptScope>] [-Type <ZabbixScriptType>] [-GroupId <ulong>] [-Description <string>] [-MenuPath <string>] [-UserGroupId <ulong>] [-HostAccess <ZabbixPermissionLevel>] [-Confirmation <string>] [-Command <string>] [-ExecuteOn <ZabbixScriptExecuteOn>] [-Port <string>] [-AuthType <ZabbixItemAuthType>] [-PublicKey <string>] [-PrivateKey <string>] [-Username <string>] [-Password <SecureString>] [-Timeout <string>] [-Parameter <ZabbixScriptParameterRequest[]>] [-Url <string>] [-NewWindow <bool>] [-ManualInput <bool>] [-ManualInputPrompt <string>] [-ManualInputValidatorType <ZabbixScriptManualInputType>] [-ManualInputValidator <string>] [-ManualInputDefaultValue <string>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+New-ZbxScript [[-Name] <string>] [[-Scope] <ZabbixScriptScope>] [-Type <ZabbixScriptType>] [-GroupId <ulong>] [-Description <string>] [-MenuPath <string>] [-UserGroupId <ulong>] [-HostAccess <ZabbixPermissionLevel>] [-Confirmation <string>] [-Command <string>] [-ExecuteOn <ZabbixScriptExecuteOn>] [-Port <string>] [-AuthenticationType <ZabbixItemAuthenticationType>] [-PublicKey <string>] [-PrivateKey <string>] [-UserName <string>] [-Password <SecureString>] [-Timeout <string>] [-Parameter <ZabbixScriptParameterRequest[]>] [-Url <string>] [-NewWindow <bool>] [-ManualInput <bool>] [-ManualInputPrompt <string>] [-ManualInputValidatorType <ZabbixScriptManualInputType>] [-ManualInputValidator <string>] [-ManualInputDefaultValue <string>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -20,7 +20,7 @@ A script is a command, webhook or URL users run from a host or event menu, or an
 ### Example 1: Create a script
 
 ```powershell
-New-ZbxScript -Name 'Reboot host' -Scope ManualHost -Type Ssh -Command 'sudo systemctl reboot' -Username 'zabbix' -Port '22'
+New-ZbxScript -Name 'Reboot host' -Scope ManualHost -Type Ssh -Command 'sudo systemctl reboot' -UserName 'zabbix' -Port '22'
 ```
 
 Creates a script named Reboot host. The command writes the new script, read back from the server.
@@ -207,13 +207,13 @@ TCP port an SSH or Telnet script connects to.
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -AuthType
+### -AuthenticationType
 
 Authentication method of an SSH script: password or public key.
 
 | | |
 | --- | --- |
-| Type | `ZabbixItemAuthType` |
+| Type | `ZabbixItemAuthenticationType` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |
@@ -252,7 +252,7 @@ File holding the private half of the key pair, which an SSH script that signs in
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -Username
+### -UserName
 
 User name for SSH and TELNET scripts; required for those types.
 
@@ -449,7 +449,7 @@ Creates without a confirmation prompt even where $ConfirmPreference is at or bel
 
 ### -InputObject
 
-A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIp, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
+A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIP, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
 
 | | |
 | --- | --- |
@@ -491,13 +491,13 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 
 ## INPUTS
 
-- `string`: Bound to -Name (ByPropertyName), -Description (ByPropertyName), -MenuPath (ByPropertyName), -Confirmation (ByPropertyName), -Command (ByPropertyName), -Port (ByPropertyName), -PublicKey (ByPropertyName), -PrivateKey (ByPropertyName), -Username (ByPropertyName), -Timeout (ByPropertyName), -Url (ByPropertyName), -ManualInputPrompt (ByPropertyName), -ManualInputValidator (ByPropertyName), -ManualInputDefaultValue (ByPropertyName). Text.
+- `string`: Bound to -Name (ByPropertyName), -Description (ByPropertyName), -MenuPath (ByPropertyName), -Confirmation (ByPropertyName), -Command (ByPropertyName), -Port (ByPropertyName), -PublicKey (ByPropertyName), -PrivateKey (ByPropertyName), -UserName (ByPropertyName), -Timeout (ByPropertyName), -Url (ByPropertyName), -ManualInputPrompt (ByPropertyName), -ManualInputValidator (ByPropertyName), -ManualInputDefaultValue (ByPropertyName). Text.
 - `ZabbixScriptScope`: Bound to -Scope (ByPropertyName). The script scope values: ZBX_SCRIPT_SCOPE_* in defines.inc.php.
 - `ZabbixScriptType`: Bound to -Type (ByPropertyName). The script type values: ZBX_SCRIPT_TYPE_* in defines.inc.php.
 - `ulong`: Bound to -GroupId (ByPropertyName), -UserGroupId (ByPropertyName).
 - `ZabbixPermissionLevel`: Bound to -HostAccess (ByPropertyName). An access level: what a user group has to a host or template group, what a user or user group has to a shared dashboard or map, and the host permission a script needs.
 - `ZabbixScriptExecuteOn`: Bound to -ExecuteOn (ByPropertyName). The script execute on values: ZBX_SCRIPT_EXECUTE_ON_* in defines.inc.php.
-- `ZabbixItemAuthType`: Bound to -AuthType (ByPropertyName). The item auth type values: ITEM_AUTHTYPE_* in defines.inc.php.
+- `ZabbixItemAuthenticationType`: Bound to -AuthenticationType (ByPropertyName). The item authentication type values: ITEM_AUTHTYPE_* in defines.inc.php.
 - `ZabbixScriptParameterRequest[]`: Bound to -Parameter (ByPropertyName). parameters of a ZabbixScriptCreateRequest.
 - `bool`: Bound to -NewWindow (ByPropertyName), -ManualInput (ByPropertyName). True or false.
 - `ZabbixScriptManualInputType`: Bound to -ManualInputValidatorType (ByPropertyName). The script manual input type values: ZBX_SCRIPT_MANUALINPUT_TYPE_* in defines.inc.php.

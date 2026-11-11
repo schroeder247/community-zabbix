@@ -190,14 +190,14 @@ public sealed class AdversarialOutputTests
         Assert.Empty(run.Errors);
         string[] names = [.. run.Output.Select(o => (string)o.BaseObject)];
         Assert.Contains("HostId", names);
-        Assert.Contains("TechnicalName", names);
+        Assert.Contains("HostName", names);
         Assert.Contains("ZzExtra", names);
     }
 
     [Fact]
     public void An_unmodelled_field_is_named_as_the_records_name_members_and_typed_as_its_value()
     {
-        // vendor_name beside TechnicalName takes the records' member naming, not wire casing, and Get-Member types a string as its value, not JsonElement.
+        // vendor_name beside HostName takes the records' member naming, not wire casing, and Get-Member types a string as its value, not JsonElement.
         using Shell shell = Shell.Open();
         object host = Entities().Single(e => e is ZabbixHost);
 

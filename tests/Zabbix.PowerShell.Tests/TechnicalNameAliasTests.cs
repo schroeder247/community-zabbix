@@ -6,7 +6,7 @@ namespace Community.Zabbix.PowerShell.Tests;
 
 /// <summary>
 /// The technical name and the display name: <c>host.create</c>/<c>template.create</c>/<c>hostprototype.create</c> carry
-/// both a "host" wire field (the technical, unique name; <c>TechnicalName</c> on every record) and a "name" wire field
+/// both a "host" wire field (the technical, unique name; <c>HostName</c> on every record) and a "name" wire field
 /// (the visible name; <c>VisibleName</c>). The cmdlets take the technical name as <c>-Name</c> (alias <c>-Host</c>), the
 /// name <c>Get-ZbxHost -Name</c> selects by, and the visible name as <c>-DisplayName</c>, on every object with both
 /// (<c>cmdlets.objects.&lt;object&gt;.names</c>).
@@ -23,7 +23,7 @@ public sealed class TechnicalNameAliasTests
         using Shell shell = Shell.Open();
         shell.Connect(server);
 
-        Run run = shell.Invoke("New-ZbxHost -Name web-01 -Group @('7') -InterfaceType Agent -InterfaceIp '127.0.0.1' -InterfacePort '10050' -Confirm:$false");
+        Run run = shell.Invoke("New-ZbxHost -Name web-01 -Group @('7') -InterfaceType Agent -InterfaceIP '127.0.0.1' -InterfacePort '10050' -Confirm:$false");
 
         Assert.Empty(run.Errors);
         JsonElement request = Assert.Single(server.ParamsOf("host.create"));
@@ -135,7 +135,7 @@ public sealed class TechnicalNameAliasTests
     {
         using Shell shell = Shell.Open();
 
-        Run run = shell.Invoke("$p = (Get-Command New-ZbxHostPrototype).Parameters; '{0} {1} {2} {3}' -f $p.ContainsKey('Name'), $p.ContainsKey('DisplayName'), $p.ContainsKey('TechnicalName'), ($p['Name'].Aliases -join ',')");
+        Run run = shell.Invoke("$p = (Get-Command New-ZbxHostPrototype).Parameters; '{0} {1} {2} {3}' -f $p.ContainsKey('Name'), $p.ContainsKey('DisplayName'), $p.ContainsKey('HostName'), ($p['Name'].Aliases -join ',')");
 
         Assert.Empty(run.Errors);
         Assert.Equal("True True False Host", Assert.Single(run.Output).ToString());

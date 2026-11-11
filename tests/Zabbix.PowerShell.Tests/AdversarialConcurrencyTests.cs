@@ -79,7 +79,7 @@ public sealed class AdversarialConcurrencyTests
             {
                 Call call = calls[i];
                 Assert.All(call.Streams.Error, error => Assert.Equal(ErrorCategory.ResourceUnavailable, error.CategoryInfo.Category));
-                Assert.All(outputs[i].Select(o => (ZabbixHost)o.BaseObject), host => Assert.StartsWith("h", host.TechnicalName, StringComparison.Ordinal));
+                Assert.All(outputs[i].Select(o => (ZabbixHost)o.BaseObject), host => Assert.StartsWith("h", host.HostName, StringComparison.Ordinal));
                 Assert.Equal(40, outputs[i].Count + call.Streams.Error.Count);
             }
             Assert.True(connection.IsReleased);
@@ -147,11 +147,11 @@ public sealed class AdversarialConcurrencyTests
         Run again = owner.Invoke($"Import-Module '{Shell.Manifest}'; Connect-ZbxServer -Uri '{server.Endpoint}' -ApiToken (ConvertTo-SecureString 't' -AsPlainText -Force); Get-ZbxHost");
 
         Assert.Empty(removed.Errors);
-        Assert.Equal("web-01", ((ZabbixHost)Assert.Single(hosts).BaseObject).TechnicalName);
+        Assert.Equal("web-01", ((ZabbixHost)Assert.Single(hosts).BaseObject).HostName);
         Assert.Empty(call.Streams.Error);
         Assert.True(connection.IsReleased);
         Assert.Empty(again.Errors);
-        Assert.Equal("web-01", ((ZabbixHost)Assert.Single(again.Output).BaseObject).TechnicalName);
+        Assert.Equal("web-01", ((ZabbixHost)Assert.Single(again.Output).BaseObject).HostName);
     }
 
     [Fact]

@@ -29,7 +29,7 @@ Disable-ZbxHost -InputObject 'db-01'
 
 ```powershell
 Get-ZbxHost -Name 'web-*' | Disable-ZbxHost -WhatIf
-Get-ZbxHost -Name 'web-*' | Disable-ZbxHost -PassThru | Select-Object TechnicalName, Status
+Get-ZbxHost -Name 'web-*' | Disable-ZbxHost -PassThru | Select-Object HostName, Status
 ```
 
 -WhatIf names each host the command would disable; -PassThru writes the hosts back with their Status.

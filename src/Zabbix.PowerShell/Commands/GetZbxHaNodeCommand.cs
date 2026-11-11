@@ -12,11 +12,11 @@ namespace Community.Zabbix.PowerShell.Commands;
 /// </para>
 /// </summary>
 /// <remarks>
-/// Hand-written: <c>ZabbixHaNodeGetParameters</c> has <c>filter</c> but no <c>search</c>, so it cannot implement
+/// Hand-written: <c>ZabbixHANodeGetParameters</c> has <c>filter</c> but no <c>search</c>, so it cannot implement
 /// <see cref="IZabbixGetParameters"/>.
 /// </remarks>
 [Cmdlet(VerbsCommon.Get, "ZbxHaNode", DefaultParameterSetName = ZabbixParameterSets.All)]
-[OutputType(typeof(ZabbixHaNode))]
+[OutputType(typeof(ZabbixHANode))]
 public sealed class GetZbxHaNodeCommand : ZabbixServerCmdlet
 {
     /// <summary>The node ids: CUIDs, 25-character strings, not numbers.</summary>
@@ -34,7 +34,7 @@ public sealed class GetZbxHaNodeCommand : ZabbixServerCmdlet
 
     /// <summary>The node's status; exact match.</summary>
     [Parameter(ParameterSetName = ZabbixParameterSets.All)]
-    public ZabbixHaNodeStatus? Status { get; set; }
+    public ZabbixHANodeStatus? Status { get; set; }
 
     /// <inheritdoc/>
     protected override void ProcessRecord()
@@ -47,11 +47,11 @@ public sealed class GetZbxHaNodeCommand : ZabbixServerCmdlet
             if (Address is not null) filter["address"] = Address;
             if (Status is not null) filter["status"] = (int)Status.Value;
         }
-        var parameters = new ZabbixHaNodeGetParameters
+        var parameters = new ZabbixHANodeGetParameters
         {
-            HaNodeIds = ParameterSetName == ZabbixParameterSets.ById ? [.. Id!] : null,
+            HANodeIds = ParameterSetName == ZabbixParameterSets.ById ? [.. Id!] : null,
             Filter = new(filter),
         };
-        WriteAll(cancellationToken => ZabbixClient.HaNodes.GetAsync(parameters, cancellationToken), parameters);
+        WriteAll(cancellationToken => ZabbixClient.HANodes.GetAsync(parameters, cancellationToken), parameters);
     }
 }

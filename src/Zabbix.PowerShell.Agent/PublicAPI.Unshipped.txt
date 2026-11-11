@@ -147,6 +147,8 @@ Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus.ZabbixAgentHostStatus
 Community.Zabbix.PowerShell.Commands.ZabbixAgentKindCommand
 Community.Zabbix.PowerShell.Commands.ZabbixAgentKindCommand.ZabbixAgentKindCommand() -> void
 Community.Zabbix.PowerShell.Commands.ZabbixAgentSession
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSession.AgentStatus.get -> Community.Zabbix.ZabbixComponentStatus?
+Community.Zabbix.PowerShell.Commands.ZabbixAgentSession.DestinationStatus.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixComponentStatus!>!
 Community.Zabbix.PowerShell.Commands.ZabbixAgentSession.DisposeAsync() -> System.Threading.Tasks.ValueTask
 Community.Zabbix.PowerShell.Commands.ZabbixAgentSession.Kind.get -> string!
 Community.Zabbix.PowerShell.Commands.ZabbixAgentSession.Listener.get -> Community.Zabbix.Listening.ZabbixListener?
@@ -202,5 +204,3 @@ static Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus.operator !
 static Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus.operator ==(Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus? left, Community.Zabbix.PowerShell.Commands.ZabbixAgentHostItemStatus? right) -> bool
 static Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus.operator !=(Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus? left, Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus? right) -> bool
 static Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus.operator ==(Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus? left, Community.Zabbix.PowerShell.Commands.ZabbixAgentHostStatus? right) -> bool
-Community.Zabbix.PowerShell.Commands.ZabbixAgentSession.AgentStatus.get -> Community.Zabbix.ZabbixComponentStatus?
-Community.Zabbix.PowerShell.Commands.ZabbixAgentSession.DestinationStatus.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixComponentStatus!>!

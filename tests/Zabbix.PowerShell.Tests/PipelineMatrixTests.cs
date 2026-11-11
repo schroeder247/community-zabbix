@@ -400,6 +400,7 @@ public sealed class PipelineMatrixTests
             {
                 "string" => "'zbx-x'",
                 // a typed grammar's text: what the record's type reads (ZabbixTypedFields)
+                "itemkey" => "'zbx.x'",
                 "port" => "'10050'",
                 "interval" or "duration" => "'1m'",
                 "int" or "long" or "double" or "bool" => "0",

@@ -47,7 +47,7 @@ public sealed class LiveSenderTests
             tree.Add(v);
         Assert.Equal([values[0].Clock, values[1].Clock], tree.Select(v => v.Clock));
         Assert.Equal([values[0].Value, values[1].Value], tree.Select(v => v.Value));
-        Assert.All(tree, v => Assert.Equal(host.Host, v.Host));
+        Assert.All(tree, v => Assert.Equal(host.Host, v.HostName));
     }
 
     [Theory, MemberData(nameof(LiveMatrix.Versions), MemberType = typeof(LiveMatrix))]

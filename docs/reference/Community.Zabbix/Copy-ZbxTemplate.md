@@ -20,7 +20,7 @@ The Copy-ZbxTemplate cmdlet exports the template in -InputObject with configurat
 ### Example 1: Copy a template to change it safely
 
 ```powershell
-Copy-ZbxTemplate -InputObject 'Web App' -NewName 'Web App v2' -PassThru | Select-Object TechnicalName, TemplateId
+Copy-ZbxTemplate -InputObject 'Web App' -NewName 'Web App v2' -PassThru | Select-Object HostName, TemplateId
 ```
 
 The copy is a separate template: change it, link it to one test host, and the original stays as it is.

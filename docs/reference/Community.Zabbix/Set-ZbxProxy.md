@@ -37,7 +37,7 @@ Get-ZbxProxy writes proxy objects and Set-ZbxProxy binds each one (proxy.update,
 
 ```powershell
 Set-ZbxProxy 'proxy-01' -Host 'web-01', 'db-01'
-Get-ZbxHost -Name 'web-01', 'db-01' | Select-Object TechnicalName, MonitoredBy
+Get-ZbxHost -Name 'web-01', 'db-01' | Select-Object HostName, MonitoredBy
 ```
 
 -Host replaces the list of hosts the proxy monitors; the hosts' MonitoredBy becomes Proxy.

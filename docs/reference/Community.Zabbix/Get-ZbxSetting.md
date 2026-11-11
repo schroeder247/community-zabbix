@@ -20,7 +20,7 @@ The Get-ZbxSetting cmdlet reads the global settings of Administration > General 
 ### Example 1: Read the work period and the default theme
 
 ```powershell
-Get-ZbxSetting | Select-Object WorkPeriod, DefaultTheme, DefaultLang
+Get-ZbxSetting | Select-Object WorkPeriod, DefaultTheme, DefaultLanguage
 ```
 
 WorkPeriod is the days and hours graphs shade as working time.

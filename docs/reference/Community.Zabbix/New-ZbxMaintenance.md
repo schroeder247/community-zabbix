@@ -8,7 +8,7 @@ Creates a maintenance period.
 ## SYNTAX
 
 ```
-New-ZbxMaintenance [[-Name] <string>] [-MaintenanceType <ZabbixMaintenanceDataCollectionType>] [-Description <string>] [-ActiveSince <DateTimeOffset>] [-ActiveTill <DateTimeOffset>] [-TagsEvalType <ZabbixEvalType>] [-Tag <ZabbixMaintenanceTagRequest[]>] [-Group <ZabbixReference<ZabbixHostGroup>[]>] [-HostReference <ZabbixReference<ZabbixHost>[]>] [-TimePeriod <ZabbixMaintenanceTimePeriodRequest[]>] [-Trigger <ZabbixReference<ZabbixTrigger>[]>] [-EventName <ZabbixMaintenanceEventNameRequest[]>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+New-ZbxMaintenance [[-Name] <string>] [-MaintenanceType <ZabbixMaintenanceDataCollectionType>] [-Description <string>] [-ActiveSince <DateTimeOffset>] [-ActiveTill <DateTimeOffset>] [-TagsEvaluationType <ZabbixEvaluationType>] [-Tag <ZabbixMaintenanceTagRequest[]>] [-Group <ZabbixReference<ZabbixHostGroup>[]>] [-HostReference <ZabbixReference<ZabbixHost>[]>] [-TimePeriod <ZabbixMaintenanceTimePeriodRequest[]>] [-Trigger <ZabbixReference<ZabbixTrigger>[]>] [-EventName <ZabbixMaintenanceEventNameRequest[]>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -45,7 +45,7 @@ New-ZbxMaintenance -Name 'Database upgrade' -Group 'Linux servers' -MaintenanceT
 $now = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
 $window = New-ZbxMaintenanceTimePeriod -TimePeriodType Onetime -StartDate $now -Period 3600
 $null = New-ZbxMaintenance -Name 'Checkout release' -Host 'web-01', 'db-01' -Tag @{ tag = 'env'; operator = 0; value = 'prod' } -ActiveSince $now -ActiveTill ($now + 3600) -TimePeriod $window
-(Get-ZbxMaintenance -Name 'Checkout release' -SelectTags -SelectHosts) | Select-Object Name, @{ n = 'Hosts'; e = { $_.Hosts.TechnicalName -join ', ' } }, @{ n = 'Tags'; e = { $_.Tags | ForEach-Object { '{0}={1}' -f $_.tag, $_.value } } }
+(Get-ZbxMaintenance -Name 'Checkout release' -SelectTags -SelectHosts) | Select-Object Name, @{ n = 'Hosts'; e = { $_.Hosts.HostName -join ', ' } }, @{ n = 'Tags'; e = { $_.Tags | ForEach-Object { '{0}={1}' -f $_.tag, $_.value } } }
 ```
 
 With data collection on, -Tag limits the maintenance to problems whose tags match; other problems on the same hosts still alert. Each tag is a hashtable (operator 2 = Like, 0 = Equals).
@@ -127,13 +127,13 @@ End of the maintenance window as a Unix time. The window ends just before this i
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -TagsEvalType
+### -TagsEvaluationType
 
 How the problem tags are combined: And/Or (the default), where tags with different names must all match, or Or, where any tag may match. Allowed only for maintenance with data collection.
 
 | | |
 | --- | --- |
-| Type | `ZabbixEvalType` |
+| Type | `ZabbixEvaluationType` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |
@@ -264,7 +264,7 @@ Creates without a confirmation prompt even where $ConfirmPreference is at or bel
 
 ### -InputObject
 
-A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIp, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
+A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIP, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
 
 | | |
 | --- | --- |
@@ -309,7 +309,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 - `string`: Bound to -Name (ByPropertyName), -Description (ByPropertyName). Text.
 - `ZabbixMaintenanceDataCollectionType`: Bound to -MaintenanceType (ByPropertyName). The maintenance data collection type values: MAINTENANCE_TYPE_* in defines.inc.php.
 - `DateTimeOffset`: Bound to -ActiveSince (ByPropertyName), -ActiveTill (ByPropertyName).
-- `ZabbixEvalType`: Bound to -TagsEvalType (ByPropertyName). The eval type values: MAINTENANCE_TAG_EVAL_TYPE_* in defines.inc.php.
+- `ZabbixEvaluationType`: Bound to -TagsEvaluationType (ByPropertyName). The evaluation type values: MAINTENANCE_TAG_EVAL_TYPE_* in defines.inc.php.
 - `ZabbixMaintenanceTagRequest[]`: Bound to -Tag (ByPropertyName). tags of a ZabbixMaintenanceCreateRequest.
 - `ZabbixReference<ZabbixHostGroup>[]`: Bound to -Group (ByPropertyName). Represents a reference to an API object: a parameter that points at an API object takes its id, its name, or the object itself piped from a Get- cmdlet, and becomes an id before the call — one parameter, three spellings, one resolution.
 - `ZabbixReference<ZabbixHost>[]`: Bound to -HostReference (ByPropertyName). Represents a reference to an API object: a parameter that points at an API object takes its id, its name, or the object itself piped from a Get- cmdlet, and becomes an id before the call — one parameter, three spellings, one resolution.

@@ -8,7 +8,7 @@ Changes a script.
 ## SYNTAX
 
 ```
-Set-ZbxScript [-InputObject] <ZabbixReference<ZabbixScript>[]> [[-Name] <string>] [-Scope <ZabbixScriptScope>] [-Type <ZabbixScriptType>] [-GroupId <ulong>] [-Description <string>] [-MenuPath <string>] [-UserGroupId <ulong>] [-HostAccess <ZabbixPermissionLevel>] [-Confirmation <string>] [-Command <string>] [-ExecuteOn <ZabbixScriptExecuteOn>] [-Port <string>] [-AuthType <ZabbixItemAuthType>] [-PublicKey <string>] [-PrivateKey <string>] [-Username <string>] [-Password <SecureString>] [-Timeout <string>] [-Parameter <ZabbixScriptParameterRequest[]>] [-Url <string>] [-NewWindow <bool>] [-ManualInput <bool>] [-ManualInputPrompt <string>] [-ManualInputValidatorType <ZabbixScriptManualInputType>] [-ManualInputValidator <string>] [-ManualInputDefaultValue <string>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Set-ZbxScript [-InputObject] <ZabbixReference<ZabbixScript>[]> [[-Name] <string>] [-Scope <ZabbixScriptScope>] [-Type <ZabbixScriptType>] [-GroupId <ulong>] [-Description <string>] [-MenuPath <string>] [-UserGroupId <ulong>] [-HostAccess <ZabbixPermissionLevel>] [-Confirmation <string>] [-Command <string>] [-ExecuteOn <ZabbixScriptExecuteOn>] [-Port <string>] [-AuthenticationType <ZabbixItemAuthenticationType>] [-PublicKey <string>] [-PrivateKey <string>] [-UserName <string>] [-Password <SecureString>] [-Timeout <string>] [-Parameter <ZabbixScriptParameterRequest[]>] [-Url <string>] [-NewWindow <bool>] [-ManualInput <bool>] [-ManualInputPrompt <string>] [-ManualInputValidatorType <ZabbixScriptManualInputType>] [-ManualInputValidator <string>] [-ManualInputDefaultValue <string>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -230,13 +230,13 @@ Port for SSH/Telnet scripts.
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -AuthType
+### -AuthenticationType
 
 SSH authentication type (0 = password, 1 = public key).
 
 | | |
 | --- | --- |
-| Type | `ZabbixItemAuthType` |
+| Type | `ZabbixItemAuthenticationType` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |
@@ -275,7 +275,7 @@ File holding the private half of the key pair, which an SSH script that signs in
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -Username
+### -UserName
 
 User name for SSH and TELNET scripts; required for those types.
 
@@ -530,13 +530,13 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 ## INPUTS
 
 - `ZabbixReference<ZabbixScript>[]`: Bound to -InputObject (ByValue). Represents a reference to an API object: a parameter that points at an API object takes its id, its name, or the object itself piped from a Get- cmdlet, and becomes an id before the call — one parameter, three spellings, one resolution.
-- `string`: Bound to -Name (ByPropertyName), -Description (ByPropertyName), -MenuPath (ByPropertyName), -Confirmation (ByPropertyName), -Command (ByPropertyName), -Port (ByPropertyName), -PublicKey (ByPropertyName), -PrivateKey (ByPropertyName), -Username (ByPropertyName), -Timeout (ByPropertyName), -Url (ByPropertyName), -ManualInputPrompt (ByPropertyName), -ManualInputValidator (ByPropertyName), -ManualInputDefaultValue (ByPropertyName). Text.
+- `string`: Bound to -Name (ByPropertyName), -Description (ByPropertyName), -MenuPath (ByPropertyName), -Confirmation (ByPropertyName), -Command (ByPropertyName), -Port (ByPropertyName), -PublicKey (ByPropertyName), -PrivateKey (ByPropertyName), -UserName (ByPropertyName), -Timeout (ByPropertyName), -Url (ByPropertyName), -ManualInputPrompt (ByPropertyName), -ManualInputValidator (ByPropertyName), -ManualInputDefaultValue (ByPropertyName). Text.
 - `ZabbixScriptScope`: Bound to -Scope (ByPropertyName). The script scope values: ZBX_SCRIPT_SCOPE_* in defines.inc.php.
 - `ZabbixScriptType`: Bound to -Type (ByPropertyName). The script type values: ZBX_SCRIPT_TYPE_* in defines.inc.php.
 - `ulong`: Bound to -GroupId (ByPropertyName), -UserGroupId (ByPropertyName).
 - `ZabbixPermissionLevel`: Bound to -HostAccess (ByPropertyName). An access level: what a user group has to a host or template group, what a user or user group has to a shared dashboard or map, and the host permission a script needs.
 - `ZabbixScriptExecuteOn`: Bound to -ExecuteOn (ByPropertyName). The script execute on values: ZBX_SCRIPT_EXECUTE_ON_* in defines.inc.php.
-- `ZabbixItemAuthType`: Bound to -AuthType (ByPropertyName). The item auth type values: ITEM_AUTHTYPE_* in defines.inc.php.
+- `ZabbixItemAuthenticationType`: Bound to -AuthenticationType (ByPropertyName). The item authentication type values: ITEM_AUTHTYPE_* in defines.inc.php.
 - `ZabbixScriptParameterRequest[]`: Bound to -Parameter (ByPropertyName). parameters of a ZabbixScriptCreateRequest.
 - `bool`: Bound to -NewWindow (ByPropertyName), -ManualInput (ByPropertyName). True or false.
 - `ZabbixScriptManualInputType`: Bound to -ManualInputValidatorType (ByPropertyName). The script manual input type values: ZBX_SCRIPT_MANUALINPUT_TYPE_* in defines.inc.php.

@@ -39,7 +39,7 @@ public sealed class ConnectorTests
         ZabbixConnectorValue value = Assert.IsType<ZabbixConnectorValue>(records[0]);
         ZabbixConnectorEvent @event = Assert.IsType<ZabbixConnectorEvent>(records[1]);
         Assert.Equal(100UL, value.ItemId);
-        Assert.Equal("web-01", value.Host!.Host);
+        Assert.Equal("web-01", value.Host!.HostName);
         Assert.Equal(0.42, value.Value.GetDouble());
         Assert.Equal(new ZabbixClock(1_700_000_000, 501), value.Exact);
         Assert.Equal("cpu", value.ItemTags![0].Value);

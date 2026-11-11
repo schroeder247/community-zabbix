@@ -8,7 +8,7 @@ Changes a host.
 ## SYNTAX
 
 ```
-Set-ZbxHost [-InputObject] <ZabbixReference<ZabbixHost>[]> [[-Name] <string>] [-Template <ZabbixReference<ZabbixTemplate>[]>] [-TemplatesClear <ZabbixReference<ZabbixTemplate>[]>] [-Tag <ZabbixTagRequest[]>] [-Macro <ZabbixHostUpdateMacroRequest[]>] [-MonitoredBy <ZabbixMonitoredBy>] [-ProxyId <ulong>] [-ProxyGroupId <ulong>] [-TlsConnect <ZabbixTlsConnectMode>] [-TlsAccept <ZabbixTlsAcceptModes>] [-TlsPskIdentity <string>] [-TlsPsk <SecureString>] [-TlsIssuer <string>] [-TlsSubject <string>] [-Group <ZabbixReference<ZabbixHostGroup>[]>] [-Status <ZabbixHostStatus>] [-InventoryMode <ZabbixHostInventoryMode>] [-IpmiAuthType <ZabbixIpmiAuthType>] [-IpmiPrivilege <ZabbixIpmiPrivilege>] [-IpmiUsername <string>] [-IpmiPassword <SecureString>] [-DisplayName <string>] [-Description <string>] [-Interface <ZabbixHostInterfaceRequest[]>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Set-ZbxHost [-InputObject] <ZabbixReference<ZabbixHost>[]> [[-Name] <string>] [-Template <ZabbixReference<ZabbixTemplate>[]>] [-TemplatesClear <ZabbixReference<ZabbixTemplate>[]>] [-Tag <ZabbixTagRequest[]>] [-Macro <ZabbixHostUpdateMacroRequest[]>] [-MonitoredBy <ZabbixMonitoredBy>] [-ProxyId <ulong>] [-ProxyGroupId <ulong>] [-TlsConnect <ZabbixTlsConnectMode>] [-TlsAccept <ZabbixTlsAcceptModes>] [-TlsPskIdentity <string>] [-TlsPsk <SecureString>] [-TlsIssuer <string>] [-TlsSubject <string>] [-Group <ZabbixReference<ZabbixHostGroup>[]>] [-Status <ZabbixHostStatus>] [-InventoryMode <ZabbixHostInventoryMode>] [-IpmiAuthenticationType <ZabbixIpmiAuthenticationType>] [-IpmiPrivilege <ZabbixIpmiPrivilege>] [-IpmiUserName <string>] [-IpmiPassword <SecureString>] [-DisplayName <string>] [-Description <string>] [-Interface <ZabbixHostInterfaceRequest[]>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -20,7 +20,7 @@ A host is a monitored device, server or application: a name, the groups it is in
 ### Example 1: Disable a host
 
 ```powershell
-Set-ZbxHost 'web-02' -Status Disabled -PassThru | Select-Object TechnicalName, Status
+Set-ZbxHost 'web-02' -Status Disabled -PassThru | Select-Object HostName, Status
 ```
 
 -InputObject (position 0) takes a host name, id or object. Set-ZbxHost writes nothing by itself; -PassThru reads the changed host back and writes it.
@@ -29,7 +29,7 @@ Set-ZbxHost 'web-02' -Status Disabled -PassThru | Select-Object TechnicalName, S
 
 ```powershell
 Get-ZbxHost -Group 'Web servers' | Set-ZbxHost -Description 'Front end pool' -PassThru |
-    Select-Object TechnicalName, Description
+    Select-Object HostName, Description
 ```
 
 Get-ZbxHost writes host objects and Set-ZbxHost binds each one; every host gets the same change (host.update).
@@ -39,8 +39,8 @@ Get-ZbxHost writes host objects and Set-ZbxHost binds each one; every host gets 
 ```powershell
 Set-ZbxHost 'web-02' -Group 'Web servers', 'Linux servers' -Template 'Web App'
 Get-ZbxHost -Name 'web-02' -SelectHostGroups -SelectParentTemplates |
-    Select-Object TechnicalName, @{ n = 'Groups'; e = { $_.HostGroups.Name -join ', ' } },
-        @{ n = 'Templates'; e = { $_.ParentTemplates.TechnicalName -join ', ' } }
+    Select-Object HostName, @{ n = 'Groups'; e = { $_.HostGroups.Name -join ', ' } },
+        @{ n = 'Templates'; e = { $_.ParentTemplates.HostName -join ', ' } }
 ```
 
 -Template and -Group REPLACE the host's current lists (host.update semantics): list every group the host should stay in. -TemplatesClear unlinks a template and deletes what it brought.
@@ -326,13 +326,13 @@ Technical name of the host, unique among hosts and templates; an active agent's 
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -IpmiAuthType
+### -IpmiAuthenticationType
 
 IPMI authentication algorithm used to reach the host.
 
 | | |
 | --- | --- |
-| Type | `ZabbixIpmiAuthType` |
+| Type | `ZabbixIpmiAuthenticationType` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |
@@ -356,7 +356,7 @@ IPMI privilege level requested from the BMC.
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -IpmiUsername
+### -IpmiUserName
 
 User name for IPMI checks on the host.
 
@@ -528,11 +528,11 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 - `ulong`: Bound to -ProxyId (ByPropertyName), -ProxyGroupId (ByPropertyName).
 - `ZabbixTlsConnectMode`: Bound to -TlsConnect (ByPropertyName). The TLS connect mode values: HOST_ENCRYPTION_* in defines.inc.php.
 - `ZabbixTlsAcceptModes`: Bound to -TlsAccept (ByPropertyName). The connections a host or proxy accepts: a set of HOST_ENCRYPTION_* bits.
-- `string`: Bound to -TlsPskIdentity (ByPropertyName), -TlsIssuer (ByPropertyName), -TlsSubject (ByPropertyName), -Name (ByPropertyName), -IpmiUsername (ByPropertyName), -DisplayName (ByPropertyName), -Description (ByPropertyName). Text.
+- `string`: Bound to -TlsPskIdentity (ByPropertyName), -TlsIssuer (ByPropertyName), -TlsSubject (ByPropertyName), -Name (ByPropertyName), -IpmiUserName (ByPropertyName), -DisplayName (ByPropertyName), -Description (ByPropertyName). Text.
 - `ZabbixReference<ZabbixHostGroup>[]`: Bound to -Group (ByPropertyName). Represents a reference to an API object: a parameter that points at an API object takes its id, its name, or the object itself piped from a Get- cmdlet, and becomes an id before the call — one parameter, three spellings, one resolution.
 - `ZabbixHostStatus`: Bound to -Status (ByPropertyName). The host status values: HOST_STATUS_* in defines.inc.php.
 - `ZabbixHostInventoryMode`: Bound to -InventoryMode (ByPropertyName). The host inventory mode values: HOST_INVENTORY_* in defines.inc.php.
-- `ZabbixIpmiAuthType`: Bound to -IpmiAuthType (ByPropertyName). The IPMI auth type values: IPMI_AUTHTYPE_* in defines.inc.php.
+- `ZabbixIpmiAuthenticationType`: Bound to -IpmiAuthenticationType (ByPropertyName). The IPMI authentication type values: IPMI_AUTHTYPE_* in defines.inc.php.
 - `ZabbixIpmiPrivilege`: Bound to -IpmiPrivilege (ByPropertyName). The IPMI privilege values: IPMI_PRIVILEGE_* in defines.inc.php.
 - `ZabbixHostInterfaceRequest[]`: Bound to -Interface (ByPropertyName). interfaces of a ZabbixHostCreateRequest.
 - `PSObject`: Bound to -PipedRecord (ByValue). Each object as the API answers it.

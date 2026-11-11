@@ -5,10 +5,11 @@
 Sends values to a server's or proxy's trapper, as zabbix_sender does.
 .DESCRIPTION
 The Send-ZbxData cmdlet sends values to trapper items over the sender protocol zabbix_sender uses: one value from
--HostName, -Key and -Value, or a batch piped by property name (any object with Host, Key and Value, and optionally
-Clock and Ns), collected into one request. The trapper is -Server, else the connection's (Connect-ZbxServer -Trapper),
-else the active high-availability node's. With -Server no connection is needed, because the sender protocol carries no
-login. It writes the trapper's answer: how many values it processed and how many failed.
+-HostName, -Key and -Value, or a batch piped by property name (any object with HostName or Host, Key and Value, and
+optionally Clock and Ns), collected into one request. The trapper is -Server, else the connection's
+(Connect-ZbxServer -Trapper), else the active high-availability node's. With -Server no connection is needed, because
+the sender protocol carries no login. It writes the trapper's answer: how many values it processed and how many
+failed.
 #>
 # Wait until the server's configuration cache has loaded this web-01 (up to CacheUpdateFrequency, 60 s by default); a
 # cache that still holds a deleted web-01 of the same name accepts values for it too, so check the value reached this probe item.

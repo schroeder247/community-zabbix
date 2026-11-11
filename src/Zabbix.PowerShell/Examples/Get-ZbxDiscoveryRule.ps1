@@ -23,5 +23,5 @@ Get-ZbxDiscoveryRule -Template 'Linux by Zabbix agent' | Select-Object Name, Key
 #region Get the rules of the hosts a search finds, through the pipeline
 # Get-ZbxHost writes host objects; Get-ZbxDiscoveryRule binds each one to -Host. -SelectHosts adds the owning host.
 Get-ZbxHost -Name 'web-01' | Get-ZbxDiscoveryRule -SelectHosts |
-    Select-Object @{ n = 'Host'; e = { $_.Hosts.TechnicalName } }, Name, Key
+    Select-Object @{ n = 'Host'; e = { $_.Hosts.HostName } }, Name, Key
 #endregion

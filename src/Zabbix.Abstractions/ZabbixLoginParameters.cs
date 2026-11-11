@@ -6,10 +6,10 @@ using System.Text.Json.Serialization;
 namespace Community.Zabbix;
 
 /// <summary>The <c>user.login</c> parameters, asking for the user record (<c>userData</c>). Its text form never carries the password.</summary>
-/// <param name="Username">The user.</param>
+/// <param name="UserName">The user.</param>
 /// <param name="Password">The password.</param>
 internal sealed record ZabbixLoginParameters(
-    [property: JsonPropertyName("username")] string Username,
+    [property: JsonPropertyName("username")] string UserName,
     [property: JsonPropertyName("password"), ZabbixSecret] string Password)
 {
     /// <summary>Ask for the user record rather than the bare session id, so the login can see <c>mfaid</c>.</summary>
@@ -17,5 +17,5 @@ internal sealed record ZabbixLoginParameters(
     public bool UserData { get; init; } = true;
 
     /// <inheritdoc/>
-    public override string ToString() => string.Create(CultureInfo.InvariantCulture, $"{nameof(ZabbixLoginParameters)} {{ Username = {Username} }}");
+    public override string ToString() => string.Create(CultureInfo.InvariantCulture, $"{nameof(ZabbixLoginParameters)} {{ UserName = {UserName} }}");
 }

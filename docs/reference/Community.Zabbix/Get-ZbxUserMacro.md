@@ -59,7 +59,7 @@ A piped host binds -Host by its HostId. Macro names are matched here with Where-
 
 ```powershell
 Get-ZbxUserMacro -Host 'web-01', 'db-01' -Search @{ macro = 'APP.' } -SelectHosts |
-    Select-Object @{ n = 'Host'; e = { $_.Hosts.TechnicalName } }, Macro, Value
+    Select-Object @{ n = 'Host'; e = { $_.Hosts.HostName } }, Macro, Value
 ```
 
 -Search is usermacro.get's substring search, keyed by the API field name (macro).

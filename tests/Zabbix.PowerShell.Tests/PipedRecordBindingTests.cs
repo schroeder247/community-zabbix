@@ -57,7 +57,7 @@ public sealed class PipedRecordBindingTests
         using Shell shell = Shell.Open();
         shell.Connect(server);
 
-        Run run = shell.Invoke("[pscustomobject]@{ Name = 'h1'; InterfaceIp = '10.0.0.1'; Description = 'from a row' } | New-ZbxHost -Group 2 -Confirm:$false -Verbose");
+        Run run = shell.Invoke("[pscustomobject]@{ Name = 'h1'; InterfaceIP = '10.0.0.1'; Description = 'from a row' } | New-ZbxHost -Group 2 -Confirm:$false -Verbose");
 
         Assert.Empty(run.Errors);
         Assert.Contains(run.Verbose, line => line.Contains("\"New host\" on target \"host 'h1'\"", StringComparison.Ordinal));
@@ -76,7 +76,7 @@ public sealed class PipedRecordBindingTests
         shell.Connect(server);
 
         // The prompt's text (what -WhatIf prints) is the verbose line -Confirm:$false -Verbose writes: target 'h1'.
-        Run run = shell.Invoke("[pscustomobject]@{ Name = 'h1'; InterfaceIp = '10.0.0.1' } | New-ZbxHost -Group g -WhatIf");
+        Run run = shell.Invoke("[pscustomobject]@{ Name = 'h1'; InterfaceIP = '10.0.0.1' } | New-ZbxHost -Group g -WhatIf");
 
         Assert.Empty(run.Errors);
         Assert.Empty(server.ParamsOf("host.create"));
@@ -92,7 +92,7 @@ public sealed class PipedRecordBindingTests
         using Shell shell = Shell.Open();
         shell.Connect(server);
         string csv = Path.Combine(Path.GetTempPath(), $"hosts-{Guid.NewGuid():N}.csv");
-        await File.WriteAllTextAsync(csv, "Name,InterfaceIp,Group\nweb-01,10.0.0.1,Linux servers\nweb-02,10.0.0.2,Linux servers\n", TestContext.Current.CancellationToken);
+        await File.WriteAllTextAsync(csv, "Name,InterfaceIP,Group\nweb-01,10.0.0.1,Linux servers\nweb-02,10.0.0.2,Linux servers\n", TestContext.Current.CancellationToken);
         try
         {
             Run run = shell.Invoke("Import-Csv -LiteralPath $csv | New-ZbxHost -Confirm:$false", new Dictionary<string, object?> { ["csv"] = csv });

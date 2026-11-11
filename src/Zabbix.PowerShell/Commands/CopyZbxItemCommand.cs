@@ -74,7 +74,7 @@ public sealed class CopyZbxItemCommand : ZabbixServerCmdlet
             Filter = Key is { Length: > 0 } ? new() { ["key_"] = Key } : null,
         };
         IReadOnlyList<ZabbixItem> items = await ListAsync(ZabbixClient.Items.GetAsync(itemParameters, cancellationToken), cancellationToken).ConfigureAwait(false);
-        foreach (string missing in (Key ?? []).Where(key => !items.Any(item => string.Equals(item.Key, key, StringComparison.Ordinal))))
+        foreach (string missing in (Key ?? []).Where(key => !items.Any(item => string.Equals(item.Key?.ToString(), key, StringComparison.Ordinal))))
         {
             ZabbixPipeline.Current?.Post(new ErrorWrite(new ErrorRecord(new ItemNotFoundException($"{SourceHost} has no item with the key '{missing}'"),
                 "ZabbixItemNotFound", ErrorCategory.ObjectNotFound, missing)));
@@ -100,8 +100,8 @@ public sealed class CopyZbxItemCommand : ZabbixServerCmdlet
         {
             // Retargeted structurally, the host's own "host" and "name" members (a text replace would also rewrite any
             // value that happens to equal the source's name).
-            host["host"] = target.TechnicalName;
-            host["name"] = target.VisibleName ?? target.TechnicalName;
+            host["host"] = target.HostName;
+            host["name"] = target.VisibleName ?? target.HostName;
             var rules = new ZabbixConfigurationImportRuleRequest
             {
                 Hosts = new ZabbixConfigurationImportRuleHostRequest { CreateMissing = false, UpdateExisting = false },
@@ -113,7 +113,7 @@ public sealed class CopyZbxItemCommand : ZabbixServerCmdlet
         var copied = new ZabbixItemGetParameters
         {
             HostIds = [.. targets.Select(target => target.HostId!.Value)],
-            Filter = new() { ["key_"] = items.Select(item => item.Key!).ToArray() },
+            Filter = new() { ["key_"] = items.Select(item => item.Key.ToString()!).ToArray() },
         };
         return await ListAsync(ZabbixClient.Items.GetAsync(copied, cancellationToken), cancellationToken).ConfigureAwait(false);
     }

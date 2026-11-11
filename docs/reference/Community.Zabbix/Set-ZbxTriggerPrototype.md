@@ -8,7 +8,7 @@ Changes a trigger prototype.
 ## SYNTAX
 
 ```
-Set-ZbxTriggerPrototype [-InputObject] <ZabbixReference<ZabbixTriggerPrototype>[]> [[-Name] <string>] [-Expression <string>] [-EventName <string>] [-OperationalData <string>] [-Description <string>] [-Priority <ZabbixSeverity>] [-Status <ZabbixTriggerStatus>] [-Type <ZabbixTriggerType>] [-UrlName <string>] [-Url <string>] [-RecoveryMode <ZabbixRecoveryMode>] [-RecoveryExpression <string>] [-CorrelationMode <ZabbixCorrelationMode>] [-CorrelationTag <string>] [-ManualClose] [-Tag <ZabbixTagRequest[]>] [-Dependency <ZabbixReference<ZabbixTrigger>[]>] [-Discover <ZabbixTriggerDiscoverMode>] [-Uuid <string>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Set-ZbxTriggerPrototype [-InputObject] <ZabbixReference<ZabbixTriggerPrototype>[]> [[-Name] <string>] [-Expression <string>] [-EventName <string>] [-OperationalData <string>] [-Description <string>] [-Severity <ZabbixSeverity>] [-Status <ZabbixTriggerStatus>] [-Type <ZabbixTriggerType>] [-UrlName <string>] [-Url <string>] [-RecoveryMode <ZabbixRecoveryMode>] [-RecoveryExpression <string>] [-CorrelationMode <ZabbixCorrelationMode>] [-CorrelationTag <string>] [-ManualClose] [-Tag <ZabbixTagRequest[]>] [-Dependency <ZabbixReference<ZabbixTrigger>[]>] [-Discover <ZabbixTriggerDiscoverMode>] [-Uuid <string>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -20,7 +20,7 @@ A trigger prototype is the pattern a discovery rule turns into one trigger per e
 ### Example 1: Change a trigger prototype
 
 ```powershell
-Set-ZbxTriggerPrototype -InputObject 'Free space is low on {#FSNAME}' -Priority High
+Set-ZbxTriggerPrototype -InputObject 'Free space is low on {#FSNAME}' -Severity High
 ```
 
 Makes the triggers made from the trigger prototype Free space is low on {#FSNAME} raise high-severity problems.
@@ -28,7 +28,7 @@ Makes the triggers made from the trigger prototype Free space is low on {#FSNAME
 ### Example 2: Change a trigger prototype and write the result
 
 ```powershell
-Set-ZbxTriggerPrototype -InputObject 'Free space is low on {#FSNAME}' -Priority High -PassThru
+Set-ZbxTriggerPrototype -InputObject 'Free space is low on {#FSNAME}' -Severity High -PassThru
 ```
 
 The same change with -PassThru, which reads the trigger prototype Free space is low on {#FSNAME} back from the server and writes it; without it the command writes nothing.
@@ -125,7 +125,7 @@ Free-text description of the trigger prototype; it may contain macros. The API c
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -Priority
+### -Severity
 
 The severity of triggers discovered from the prototype; not classified by default.
 
@@ -426,7 +426,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 
 - `ZabbixReference<ZabbixTriggerPrototype>[]`: Bound to -InputObject (ByValue). Represents a reference to an API object: a parameter that points at an API object takes its id, its name, or the object itself piped from a Get- cmdlet, and becomes an id before the call — one parameter, three spellings, one resolution.
 - `string`: Bound to -Name (ByPropertyName), -Expression (ByPropertyName), -EventName (ByPropertyName), -OperationalData (ByPropertyName), -Description (ByPropertyName), -UrlName (ByPropertyName), -Url (ByPropertyName), -RecoveryExpression (ByPropertyName), -CorrelationTag (ByPropertyName), -Uuid (ByPropertyName). Text.
-- `ZabbixSeverity`: Bound to -Priority (ByPropertyName). A trigger or problem severity.
+- `ZabbixSeverity`: Bound to -Severity (ByPropertyName). A trigger or problem severity.
 - `ZabbixTriggerStatus`: Bound to -Status (ByPropertyName). The trigger status values: TRIGGER_STATUS_* in defines.inc.php.
 - `ZabbixTriggerType`: Bound to -Type (ByPropertyName). The trigger type values: TRIGGER_MULT_EVENT_* in defines.inc.php.
 - `ZabbixRecoveryMode`: Bound to -RecoveryMode (ByPropertyName). The recovery mode values: ZBX_RECOVERY_MODE_* in defines.inc.php.

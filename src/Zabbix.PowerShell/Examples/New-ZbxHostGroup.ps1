@@ -18,7 +18,7 @@ Remove-ZbxHostGroup -InputObject 'Databases/PostgreSQL', 'Databases' -Confirm:$f
 # replaces the host's groups, so list every group the host should stay in.
 $group = New-ZbxHostGroup -Name 'Databases'
 Set-ZbxHost 'db-01' -Group 'Linux servers', $group | Out-Null
-Get-ZbxHost -Group $group | Select-Object HostId, TechnicalName
+Get-ZbxHost -Group $group | Select-Object HostId, HostName
 #endregion
 
 #region Preview the change first

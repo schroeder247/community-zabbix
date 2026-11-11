@@ -89,7 +89,7 @@ handler chain and is never routed through a bounded buffer (a request/reply call
 also has to free deadlocks). The data plane is a graph of bounded stages. They meet at exactly one seam — the
 sender, which is a request/reply client *and* the last stage of the push path — and nowhere else.
 
-**One sample.** `ZabbixValue(Host, Key, Value, Time)` is the record on every edge of both planes:
+**One sample.** `ZabbixValue(HostName, Key, Value, Time)` is the record on every edge of both planes:
 what a history read yields, what a watcher yields, what an agent's source produces, what a proxy
 stores, what the sender frames. It is a `record`; its `Key` is a `ZabbixItemKey`; its `Time` is a `DateTimeOffset`,
 over an internal exact instant (seconds and nanoseconds, as the wire carries it); it is converted at the edge that needs another schema

@@ -72,7 +72,7 @@ public sealed class ZabbixFrontendTests
         ["maintenance"] = (new ZabbixMaintenanceRecord { MaintenanceId = 3, Name = "Weekly & nightly" }, ZabbixPageView.Default,
             "zabbix.php?action=maintenance.list&filter_set=1&filter_name=Weekly%20%26%20nightly",
             "zabbix.php?action=popup&popup=maintenance.edit&maintenanceid=3", null),
-        ["user"] = (new ZabbixUser { UserId = 1, Username = "Admin" }, ZabbixPageView.Default, "zabbix.php?action=user.edit&userid=1", null, null),
+        ["user"] = (new ZabbixUser { UserId = 1, UserName = "Admin" }, ZabbixPageView.Default, "zabbix.php?action=user.edit&userid=1", null, null),
         ["usergroup"] = (new ZabbixUserGroup { UserGroupId = 7, Name = "Zabbix administrators" }, ZabbixPageView.Default,
             "zabbix.php?action=usergroup.edit&usrgrpid=7", null, null),
         ["proxy"] = (new ZabbixProxy { ProxyId = 11, Name = "proxy-a" }, ZabbixPageView.Default,

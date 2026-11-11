@@ -112,7 +112,7 @@ public sealed class RequestShapeTests
         await hosts.CreateAsync("web-02", [42UL], TestContext.Current.CancellationToken);
         await hosts.CreateAsync("web-03", [42UL], h => h.VisibleName = "Web 3", TestContext.Current.CancellationToken);
 
-        Assert.Equal(["web-02", "web-03"], [.. hosts.Created.Select(request => request.TechnicalName)]);
+        Assert.Equal(["web-02", "web-03"], [.. hosts.Created.Select(request => request.HostName)]);
         Assert.Equal("Web 3", hosts.Created[1].VisibleName);
     }
 
@@ -355,7 +355,7 @@ public sealed class RequestShapeTests
                 offenders.Add($"{record.Name}: {setting.Length} public constructors set the required members");
                 continue;
             }
-            string[] expected = [.. required.OrderBy(property => IsList(property.PropertyType)).Select(property => char.ToLowerInvariant(property.Name[0]) + property.Name[1..])];
+            string[] expected = [.. required.OrderBy(property => IsList(property.PropertyType)).Select(property => CamelCase(property.Name))];
             string[] taken = [.. constructor.GetParameters().Select(parameter => parameter.Name!)];
             if (!expected.SequenceEqual(taken, StringComparer.Ordinal))
             {
@@ -376,11 +376,12 @@ public sealed class RequestShapeTests
     }
 
     /// <summary>
-    /// A request a client sends has setters on its optional fields, which a lambda sets, and sets its required fields once
-    /// (<c>init</c>), so a node's lambda can't change the id it updates.
+    /// A request a client sends has setters on its fields, which a lambda sets, the required ones too, so a lambda can change
+    /// what a short create filled in (ADR 0013, section 3: an item created from a typed key is named after its key until the
+    /// lambda names it); an id it requires is set once (<c>init</c>), so a node's lambda can't change the id it updates.
     /// </summary>
     [Fact]
-    public void Every_request_s_optional_fields_have_setters_and_its_required_ones_are_set_once()
+    public void Every_request_s_fields_have_setters_and_its_required_ids_are_set_once()
     {
         List<string> offenders = [];
         Type[] requests = [.. SentRequests()];
@@ -388,9 +389,9 @@ public sealed class RequestShapeTests
         {
             foreach (PropertyInfo property in request.GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(property => property.Name != "AdditionalFields"))
             {
-                bool required = property.IsDefined(typeof(RequiredMemberAttribute));
+                bool requiredId = property.IsDefined(typeof(RequiredMemberAttribute)) && property.PropertyType == typeof(ulong);
                 if (property.SetMethod is not { IsPublic: true } setter) offenders.Add($"{request.Name}.{property.Name}: no setter");
-                else if (InitOnly(setter) != required) offenders.Add($"{request.Name}.{property.Name}: {(required ? "required, and settable after construction" : "optional, and set only in an initializer")}");
+                else if (InitOnly(setter) != requiredId) offenders.Add($"{request.Name}.{property.Name}: {(requiredId ? "a required id, and settable after construction" : "set only in an initializer")}");
             }
         }
 
@@ -435,7 +436,7 @@ public sealed class RequestShapeTests
             {
                 shortCreates++;
                 Type[] fields = [.. create.GetParameters()[..^1].Select(parameter => parameter.ParameterType)];
-                if (client.GetMethod("CreateAsync", [.. fields, action, typeof(CancellationToken)]) is not { IsVirtual: true } configured)
+                if (LambdaForm(creates, create, action) is not { IsVirtual: true } configured)
                     offenders.Add($"{client.Name}.CreateAsync({string.Join(", ", fields.Select(field => field.Name))}): no virtual lambda form");
                 else if (!configured.GetParameters()[^1].HasDefaultValue)
                     offenders.Add($"{client.Name}.CreateAsync({string.Join(", ", fields.Select(field => field.Name))}): the lambda form's token isn't optional");
@@ -541,4 +542,33 @@ public sealed class RequestShapeTests
             return Task.FromResult(1UL);
         }
     }
+
+    // A parameter's name for a member, as the capitalization conventions write one: a leading acronym is lower case whole
+    // (IP: ip), and before a word all but the word's capital (IPRange: ipRange).
+    private static string CamelCase(string member)
+    {
+        int capitals = 0;
+        while (capitals < member.Length && char.IsUpper(member[capitals])) capitals++;
+        int lower = capitals <= 1 ? 1 : capitals == member.Length ? capitals : capitals - 1;
+        return new string([.. member[..lower].Select(char.ToLowerInvariant)]) + member[lower..];
+    }
+
+    // The overload of create that takes create's parameters, then the lambda, then the token: a generic create's by its
+    // generic parameters (CreateAsync<T>(hostId, key, type) beside CreateAsync<T>(hostId, key, type, configure)).
+    private static MethodInfo? LambdaForm(MethodInfo[] creates, MethodInfo create, Type action)
+    {
+        Type[] fields = [.. create.GetParameters()[..^1].Select(parameter => parameter.ParameterType)];
+        return creates.FirstOrDefault(other => other.GetParameters() is { } parameters && parameters.Length == fields.Length + 2
+            && other.GetGenericArguments().Length == create.GetGenericArguments().Length
+            && parameters[^2].ParameterType == action && parameters[^1].ParameterType == typeof(CancellationToken)
+            && fields.Select((field, i) => Same(field, parameters[i].ParameterType)).All(same => same));
+    }
+
+    // Two parameter types are the same, a generic method's type parameters by their position.
+    private static bool Same(Type one, Type other)
+        => one.IsGenericParameter || other.IsGenericParameter
+            ? one.IsGenericParameter && other.IsGenericParameter && one.GenericParameterPosition == other.GenericParameterPosition
+            : one.IsGenericType && other.IsGenericType
+                ? one.GetGenericTypeDefinition() == other.GetGenericTypeDefinition() && one.GetGenericArguments().Zip(other.GetGenericArguments()).All(pair => Same(pair.First, pair.Second))
+                : one == other;
 }

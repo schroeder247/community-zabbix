@@ -205,7 +205,7 @@ public partial class ZabbixClient : IZabbixNode, IDisposable, IAsyncDisposable
     /// await using ZabbixClient zabbix = ZabbixClient.CreateBuilder()
     ///     .WithEndpoint("https://zabbix.example/")
     ///     .WithToken(token)
-    ///     .WithTimeout("configuration.import", TimeSpan.FromMinutes(5))
+    ///     .WithTimeout(ZabbixApiMethod.ConfigurationImport, TimeSpan.FromMinutes(5))
     ///     .Build();
     /// </code>
     /// </example>
@@ -323,26 +323,48 @@ public partial class ZabbixClient : IZabbixNode, IDisposable, IAsyncDisposable
     public virtual async Task<ZabbixFrontend> GetFrontendAsync(CancellationToken cancellationToken = default)
         => new(FrontendUri, await GetApiVersionAsync(cancellationToken).ConfigureAwait(false));
 
-    /// <summary>The request/reply transport the clients and <see cref="SendAsync(string, JsonElement, CancellationToken)"/> share.</summary>
+    /// <summary>The request/reply transport the clients and <see cref="SendAsync(ZabbixApiMethod, JsonElement, CancellationToken)"/> share.</summary>
     internal IZabbixTransport Transport => Built(_transport);
 
     /// <summary>The clients the generated properties (<see cref="Hosts"/>, <see cref="Items"/>, …) hand out.</summary>
     internal ZabbixApi Api => Built(_api);
 
-    /// <inheritdoc cref="IZabbixTransport.SendAsync{TParameters, TResult}"/>
+    /// <summary>Calls <paramref name="method"/> and reads its <c>result</c> as <typeparamref name="TResult"/>.</summary>
+    /// <typeparam name="TParameters">The parameters' type.</typeparam>
+    /// <typeparam name="TResult">The result's type.</typeparam>
+    /// <param name="method">The API method: <see cref="ZabbixApiMethod.HostGet"/>, or <c>new ZabbixApiMethod("object.method")</c>.</param>
+    /// <param name="parameters">The method's parameters, written as the request's <c>params</c>.</param>
+    /// <param name="parametersInfo">The type information the parameters are serialized with.</param>
+    /// <param name="resultInfo">The type information the <c>result</c> is read with.</param>
+    /// <param name="cancellationToken">A cancellation token, which reaches the socket.</param>
+    /// <returns>The call's <c>result</c>, read as <typeparamref name="TResult"/>.</returns>
+    /// <exception cref="ArgumentException"><paramref name="method"/> is the default value.</exception>
+    /// <exception cref="ZabbixApiException">The API answered with an error object.</exception>
+    /// <exception cref="ObjectDisposedException">The client was disposed.</exception>
     public virtual Task<TResult> SendAsync<TParameters, TResult>(
-        string method, TParameters parameters, JsonTypeInfo<TParameters> parametersInfo, JsonTypeInfo<TResult> resultInfo, CancellationToken cancellationToken = default)
+        ZabbixApiMethod method, TParameters parameters, JsonTypeInfo<TParameters> parametersInfo, JsonTypeInfo<TResult> resultInfo, CancellationToken cancellationToken = default)
     {
+        ZabbixApiMethod.ThrowIfDefault(method);
         ThrowIfDisposed();
-        return Transport.SendAsync(method, parameters, parametersInfo, resultInfo, cancellationToken);
+        return Transport.SendAsync(method.Name, parameters, parametersInfo, resultInfo, cancellationToken);
     }
 
-    /// <inheritdoc cref="IZabbixTransport.SendAsync{TParameters}"/>
+    /// <summary>Calls <paramref name="method"/> and returns its raw <c>result</c>.</summary>
+    /// <typeparam name="TParameters">The parameters' type.</typeparam>
+    /// <param name="method">The API method: <see cref="ZabbixApiMethod.HostGet"/>, or <c>new ZabbixApiMethod("object.method")</c>.</param>
+    /// <param name="parameters">The method's parameters, written as the request's <c>params</c>.</param>
+    /// <param name="parametersInfo">The type information the parameters are serialized with.</param>
+    /// <param name="cancellationToken">A cancellation token, which reaches the socket.</param>
+    /// <returns>The call's <c>result</c>, as the server answered it.</returns>
+    /// <exception cref="ArgumentException"><paramref name="method"/> is the default value.</exception>
+    /// <exception cref="ZabbixApiException">The API answered with an error object.</exception>
+    /// <exception cref="ObjectDisposedException">The client was disposed.</exception>
     public virtual Task<JsonElement> SendAsync<TParameters>(
-        string method, TParameters parameters, JsonTypeInfo<TParameters> parametersInfo, CancellationToken cancellationToken = default)
+        ZabbixApiMethod method, TParameters parameters, JsonTypeInfo<TParameters> parametersInfo, CancellationToken cancellationToken = default)
     {
+        ZabbixApiMethod.ThrowIfDefault(method);
         ThrowIfDisposed();
-        return Transport.SendAsync(method, parameters, parametersInfo, cancellationToken);
+        return Transport.SendAsync(method.Name, parameters, parametersInfo, cancellationToken);
     }
 
     /// <summary>
@@ -351,18 +373,18 @@ public partial class ZabbixClient : IZabbixNode, IDisposable, IAsyncDisposable
     /// from text (<c>JsonDocument.Parse(text).RootElement</c>) or build them with
     /// <see cref="JsonSerializer.SerializeToElement{TValue}(TValue, JsonTypeInfo{TValue})"/>.
     /// </summary>
-    /// <param name="method">The API method, e.g. <c>host.get</c>.</param>
+    /// <param name="method">The API method: <see cref="ZabbixApiMethod.HostGet"/>, or <c>new ZabbixApiMethod("object.method")</c>.</param>
     /// <param name="parameters">The method's parameters, as JSON.</param>
     /// <param name="cancellationToken">A cancellation token, which reaches the socket.</param>
     /// <returns>The call's <c>result</c>, as the server answered it.</returns>
-    /// <exception cref="ArgumentException"><paramref name="method"/> is empty.</exception>
+    /// <exception cref="ArgumentException"><paramref name="method"/> is the default value.</exception>
     /// <exception cref="ZabbixApiException">The API answered with an error object.</exception>
     /// <exception cref="ObjectDisposedException">The client was disposed.</exception>
-    public virtual Task<JsonElement> SendAsync(string method, JsonElement parameters, CancellationToken cancellationToken = default)
+    public virtual Task<JsonElement> SendAsync(ZabbixApiMethod method, JsonElement parameters, CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(method);
+        ZabbixApiMethod.ThrowIfDefault(method);
         ThrowIfDisposed();
-        return Transport.SendAsync(method, parameters, s_element, cancellationToken);
+        return Transport.SendAsync(method.Name, parameters, s_element, cancellationToken);
     }
 
     /// <summary>

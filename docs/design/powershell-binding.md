@@ -266,7 +266,7 @@ The module implements the verdicts above:
   `-Id` on every `-InputObject`; a piped object's own id property on a reference filter or an owner (`-HostId` on
   `Get-ZbxItem -Host`, `-TemplateId` on a `New-` that creates on a host or template), which is how
   `Get-ZbxHost | Get-ZbxItem` binds by property name; the spelling of a name that would hide a `PSCmdlet` member
-  (`-Host` for `-TechnicalName`, `-HostReference`; the property's name is `cmdlets.objects.<object>.unhide` in
+  (`-Host` for `-HostName`, `-HostReference`; the property's name is `cmdlets.objects.<object>.unhide` in
   `schema/overlay.json`, else the name followed by `Value`); the one name host-like objects share for a field (`-Name`,
   `-DisplayName`, for the objects `cmdlets.objects.<object>.names` lists); and PowerShell's own path and computer aliases (`-PSPath`, `-LP`, `-ComputerName`).
   `ModuleShapeTests.Every_parameter_alias_binds_what_a_name_cannot` holds the rule.

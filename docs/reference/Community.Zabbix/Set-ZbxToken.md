@@ -8,7 +8,7 @@ Changes an API token.
 ## SYNTAX
 
 ```
-Set-ZbxToken [-InputObject] <ZabbixReference<ZabbixToken>[]> [[-Name] <string>] [-Description <string>] [-Status <ZabbixAuthToken>] [-ExpiresAt <DateTimeOffset>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Set-ZbxToken [-InputObject] <ZabbixReference<ZabbixToken>[]> [[-Name] <string>] [-Description <string>] [-Status <ZabbixAuthenticationToken>] [-ExpiresAt <DateTimeOffset>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -86,7 +86,7 @@ Whether the token is enabled; a disabled token cannot authenticate requests.
 
 | | |
 | --- | --- |
-| Type | `ZabbixAuthToken` |
+| Type | `ZabbixAuthenticationToken` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |
@@ -201,7 +201,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 
 - `ZabbixReference<ZabbixToken>[]`: Bound to -InputObject (ByValue). Represents a reference to an API object: a parameter that points at an API object takes its id, its name, or the object itself piped from a Get- cmdlet, and becomes an id before the call — one parameter, three spellings, one resolution.
 - `string`: Bound to -Name (ByPropertyName), -Description (ByPropertyName). Text.
-- `ZabbixAuthToken`: Bound to -Status (ByPropertyName). The auth token values: ZBX_AUTH_TOKEN_* in defines.inc.php.
+- `ZabbixAuthenticationToken`: Bound to -Status (ByPropertyName). The authentication token values: ZBX_AUTH_TOKEN_* in defines.inc.php.
 - `DateTimeOffset`: Bound to -ExpiresAt (ByPropertyName).
 - `PSObject`: Bound to -PipedRecord (ByValue). Each object as the API answers it.
 

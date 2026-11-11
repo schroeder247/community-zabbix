@@ -130,7 +130,7 @@ One page per command, the same text `Get-Help <command> -Full` shows; `Get-Help 
 | [Remove-ZbxItemPrototype](Remove-ZbxItemPrototype.md) | Removes item prototypes. |
 | [Set-ZbxItemPrototype](Set-ZbxItemPrototype.md) | Changes an item prototype. |
 | [New-ZbxLldFilterCondition](New-ZbxLldFilterCondition.md) | Builds a discovery filter condition for the -Filter conditions of New-ZbxDiscoveryRule and Set-ZbxDiscoveryRule. |
-| [New-ZbxLldMacroPath](New-ZbxLldMacroPath.md) | Builds an LLD macro path for the -MacroPaths of New-ZbxDiscoveryRule and Set-ZbxDiscoveryRule. |
+| [New-ZbxLldMacroPath](New-ZbxLldMacroPath.md) | Builds an LLD macro path for the -LowLevelDiscoveryMacroPath of New-ZbxDiscoveryRule and Set-ZbxDiscoveryRule. |
 | [Get-ZbxMaintenance](Get-ZbxMaintenance.md) | Gets the maintenance periods that cover planned work. |
 | [New-ZbxMaintenance](New-ZbxMaintenance.md) | Creates a maintenance period. |
 | [Remove-ZbxMaintenance](Remove-ZbxMaintenance.md) | Removes maintenance periods. |

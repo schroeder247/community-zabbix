@@ -36,7 +36,7 @@ $checks = @(
     New-ZbxNetworkDiscoveryCheck -Type Icmp
     New-ZbxNetworkDiscoveryCheck -Type ZabbixAgent -Key 'system.hostname' -Port 10050 -Unique
 )
-New-ZbxNetworkDiscoveryRule -Name 'Local network' -IpRange '192.0.2.1-254' -Check $checks -Status Disabled | Out-Null
+New-ZbxNetworkDiscoveryRule -Name 'Local network' -IPRange '192.0.2.1-254' -Check $checks -Status Disabled | Out-Null
 Get-ZbxNetworkDiscoveryRule -Name 'Local network' -SelectNetworkDiscoveryChecks |
     ForEach-Object Checks | Select-Object Type, Key, Ports, Unique
 #endregion

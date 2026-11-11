@@ -8,7 +8,7 @@ Creates a web scenario on a host.
 ## SYNTAX
 
 ```
-New-ZbxHttpTest [-Name] <string> [-HostReference] <ZabbixReference<ZabbixHost>> [-Step] <ZabbixHttpTestStepRequest[]> [-Delay <string>] [-Retries <int>] [-Agent <string>] [-HttpProxy <string>] [-Status <ZabbixHttpTestStatus>] [-Authentication <ZabbixHttpAuthentication>] [-HttpUser <string>] [-HttpPassword <SecureString>] [-VerifyPeer <bool>] [-VerifyHost <bool>] [-SslCertFile <string>] [-SslKeyFile <string>] [-SslKeyPassword <SecureString>] [-Variable <ZabbixHttpTestVariableRequest[]>] [-Header <ZabbixHttpTestHeaderRequest[]>] [-Tag <ZabbixTagRequest[]>] [-AdditionalProperty <Hashtable>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+New-ZbxHttpTest [-Name] <string> [-HostReference] <ZabbixReference<ZabbixHost>> [-Step] <ZabbixHttpTestStepRequest[]> [-Delay <string>] [-Retries <int>] [-Agent <string>] [-HttpProxy <string>] [-Status <ZabbixHttpTestStatus>] [-Authentication <ZabbixHttpAuthentication>] [-HttpUser <string>] [-HttpPassword <SecureString>] [-VerifyPeer <bool>] [-VerifyHost <bool>] [-SslCertificateFile <string>] [-SslKeyFile <string>] [-SslKeyPassword <SecureString>] [-Variable <ZabbixHttpTestVariableRequest[]>] [-Header <ZabbixHttpTestHeaderRequest[]>] [-Tag <ZabbixTagRequest[]>] [-AdditionalProperty <Hashtable>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -235,7 +235,7 @@ Verify the host name in the peer's SSL certificate.
 | Pipeline input | False |
 | Wildcards | False |
 
-### -SslCertFile
+### -SslCertificateFile
 
 The SSL client certificate file (ssl_cert_file), relative to the server's SSLCertLocation.
 

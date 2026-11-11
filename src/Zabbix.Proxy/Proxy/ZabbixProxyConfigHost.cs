@@ -4,7 +4,7 @@ namespace Community.Zabbix.Proxy;
 
 /// <summary>A host the proxy monitors, as the server's <c>hosts</c> table sends it.</summary>
 /// <param name="HostId">The host's id.</param>
-/// <param name="Host">The technical name, which senders and agents use.</param>
+/// <param name="HostName">The technical name, which senders and agents use.</param>
 /// <param name="Name">The visible name.</param>
 /// <param name="Status">Whether it is monitored.</param>
-public sealed record ZabbixProxyConfigHost(ulong HostId, string Host, string Name, ZabbixHostStatus Status);
+public sealed record ZabbixProxyConfigHost(ulong HostId, string HostName, string Name, ZabbixHostStatus Status);

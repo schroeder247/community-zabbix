@@ -53,6 +53,6 @@ internal sealed record ZabbixSenderItem(
     public static ZabbixSenderItem From(ZabbixValue value)
     {
         ArgumentNullException.ThrowIfNull(value);
-        return new ZabbixSenderItem(value.Host, value.Key.ToString(), value.Value, value.Clock, value.IsSupported ? null : 1);
+        return new ZabbixSenderItem(value.HostName, value.Key.ToString(), value.Value, value.Clock, value.IsSupported ? null : 1);
     }
 }

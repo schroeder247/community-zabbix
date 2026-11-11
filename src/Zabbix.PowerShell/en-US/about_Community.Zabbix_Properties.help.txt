@@ -9,10 +9,10 @@ SHORT DESCRIPTION
 LONG DESCRIPTION
     Two names for one field
         Every API field has its wire name (host, name, key_, groupids) and
-        the SDK's property name (TechnicalName, VisibleName, Key, GroupIds).
+        the SDK's property name (HostName, VisibleName, Key, GroupIds).
         Objects the module writes use the property names:
 
-            PS> Get-ZbxHost -Name 'web-01' | Select-Object HostId, TechnicalName, VisibleName
+            PS> Get-ZbxHost -Name 'web-01' | Select-Object HostId, HostName, VisibleName
 
         Everything the module reads from you accepts either name: a key in a
         hashtable may be the wire name or the property name, compared

@@ -8,7 +8,7 @@ Changes a connector.
 ## SYNTAX
 
 ```
-Set-ZbxConnector [-InputObject] <ZabbixReference<ZabbixConnector>[]> [[-Name] <string>] [-Protocol <ZabbixConnectorProtocol>] [-DataType <ZabbixConnectorDataType>] [-Url <string>] [-ItemValueType <int>] [-AuthType <ZabbixHttpAuthentication>] [-Username <string>] [-Password <SecureString>] [-Token <SecureString>] [-MaxRecords <int>] [-MaxSenders <int>] [-MaxAttempts <int>] [-AttemptInterval <string>] [-Timeout <string>] [-HttpProxy <string>] [-VerifyPeer <bool>] [-VerifyHost <bool>] [-SslCertFile <string>] [-SslKeyFile <string>] [-SslKeyPassword <SecureString>] [-Description <string>] [-Status <ZabbixConnectorStatus>] [-TagsEvalType <ZabbixConditionEvalType>] [-Tag <ZabbixConnectorTagRequest[]>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Set-ZbxConnector [-InputObject] <ZabbixReference<ZabbixConnector>[]> [[-Name] <string>] [-Protocol <ZabbixConnectorProtocol>] [-DataType <ZabbixConnectorDataType>] [-Url <string>] [-ItemValueType <int>] [-AuthenticationType <ZabbixHttpAuthentication>] [-UserName <string>] [-Password <SecureString>] [-Token <SecureString>] [-MaxRecords <int>] [-MaxSenders <int>] [-MaxAttempts <int>] [-AttemptInterval <string>] [-Timeout <string>] [-HttpProxy <string>] [-VerifyPeer <bool>] [-VerifyHost <bool>] [-SslCertificateFile <string>] [-SslKeyFile <string>] [-SslKeyPassword <SecureString>] [-Description <string>] [-Status <ZabbixConnectorStatus>] [-TagsEvaluationType <ZabbixConditionEvaluationType>] [-Tag <ZabbixConnectorTagRequest[]>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -125,7 +125,7 @@ A bitmask of the item value types the connector streams when it sends item value
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -AuthType
+### -AuthenticationType
 
 How the connector authenticates to the receiver: none, basic, NTLM, Kerberos, digest or bearer token.
 
@@ -140,7 +140,7 @@ How the connector authenticates to the receiver: none, basic, NTLM, Kerberos, di
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -Username
+### -UserName
 
 The user name for basic, NTLM, Kerberos or digest authentication.
 
@@ -305,7 +305,7 @@ Whether the connector checks that the host name in the URL matches the receiver 
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -SslCertFile
+### -SslCertificateFile
 
 The path of the public SSL certificate file that the connector presents to the receiver.
 
@@ -380,13 +380,13 @@ Whether the connector is enabled; a disabled connector streams nothing.
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -TagsEvalType
+### -TagsEvaluationType
 
 How the tag conditions combine: And/Or requires every tag name to match while conditions on the same tag name combine with OR; Or requires any condition to match.
 
 | | |
 | --- | --- |
-| Type | `ZabbixConditionEvalType` |
+| Type | `ZabbixConditionEvaluationType` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |
@@ -500,14 +500,14 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 ## INPUTS
 
 - `ZabbixReference<ZabbixConnector>[]`: Bound to -InputObject (ByValue). Represents a reference to an API object: a parameter that points at an API object takes its id, its name, or the object itself piped from a Get- cmdlet, and becomes an id before the call — one parameter, three spellings, one resolution.
-- `string`: Bound to -Name (ByPropertyName), -Url (ByPropertyName), -Username (ByPropertyName), -AttemptInterval (ByPropertyName), -Timeout (ByPropertyName), -HttpProxy (ByPropertyName), -SslCertFile (ByPropertyName), -SslKeyFile (ByPropertyName), -Description (ByPropertyName). Text.
+- `string`: Bound to -Name (ByPropertyName), -Url (ByPropertyName), -UserName (ByPropertyName), -AttemptInterval (ByPropertyName), -Timeout (ByPropertyName), -HttpProxy (ByPropertyName), -SslCertificateFile (ByPropertyName), -SslKeyFile (ByPropertyName), -Description (ByPropertyName). Text.
 - `ZabbixConnectorProtocol`: Bound to -Protocol (ByPropertyName). The connector protocol values: ZBX_STREAMING_PROTOCOL_* in defines.inc.php.
 - `ZabbixConnectorDataType`: Bound to -DataType (ByPropertyName). The connector data type values: ZBX_CONNECTOR_DATA_TYPE_* in defines.inc.php.
 - `int`: Bound to -ItemValueType (ByPropertyName), -MaxRecords (ByPropertyName), -MaxSenders (ByPropertyName), -MaxAttempts (ByPropertyName). A number.
-- `ZabbixHttpAuthentication`: Bound to -AuthType (ByPropertyName). The HTTP authentication values: ZBX_HTTP_AUTH_* in defines.inc.php.
+- `ZabbixHttpAuthentication`: Bound to -AuthenticationType (ByPropertyName). The HTTP authentication values: ZBX_HTTP_AUTH_* in defines.inc.php.
 - `bool`: Bound to -VerifyPeer (ByPropertyName), -VerifyHost (ByPropertyName). True or false.
 - `ZabbixConnectorStatus`: Bound to -Status (ByPropertyName). The connector status values: ZBX_CONNECTOR_STATUS_* in defines.inc.php.
-- `ZabbixConditionEvalType`: Bound to -TagsEvalType (ByPropertyName). The condition eval type values: CONDITION_EVAL_TYPE_* in defines.inc.php.
+- `ZabbixConditionEvaluationType`: Bound to -TagsEvaluationType (ByPropertyName). The condition evaluation type values: CONDITION_EVAL_TYPE_* in defines.inc.php.
 - `ZabbixConnectorTagRequest[]`: Bound to -Tag (ByPropertyName). tags of a ZabbixConnectorCreateRequest.
 - `PSObject`: Bound to -PipedRecord (ByValue). Each object as the API answers it.
 

@@ -8,22 +8,26 @@ using System.Text.Json.Serialization;
 namespace Community.Zabbix;
 
 /// <summary>
-/// Represents a length of time as Zabbix spells it: how long an item's history and trends are kept, or how long its check
-/// may take. A <see cref="TimeSpan"/> converts to one, <c>i.History = TimeSpan.FromDays(90)</c> sends <c>90d</c>, and
-/// <see cref="Parse(string)"/> takes a macro: <c>ZabbixDuration.Parse("{$HISTORY}")</c>.
+/// Represents a length of time as Zabbix spells it: how long an item's history and trends are kept, how long a check or a
+/// script may take, how long an escalation step or a session lasts. A <see cref="TimeSpan"/> converts to one,
+/// <c>i.History = TimeSpan.FromDays(90)</c> sends <c>90d</c>, and <see cref="Parse(string)"/> takes a macro:
+/// <c>ZabbixDuration.Parse("{$HISTORY}")</c>.
 /// </summary>
 /// <remarks>
 /// <para>
 /// A length is a whole number of seconds, written bare or with an <c>s</c>, <c>m</c>, <c>h</c>, <c>d</c> or <c>w</c>
-/// suffix, or a macro: a user macro, or an LLD macro, which Zabbix takes in a prototype. It's the first part of a
-/// <see cref="ZabbixInterval"/>, without the flexible and scheduling intervals that may follow one. Empty text is Zabbix's
-/// own empty value, which an item's timeout reads as its proxy's or server's.
+/// suffix, or a macro: a user macro, or an LLD macro, which Zabbix takes in a prototype. A few fields also take a month,
+/// <c>M</c> (30 days), and a year, <c>y</c> (365 days): the settings' <c>max_period</c> and <c>period_default</c>, the
+/// LDAP provisioning interval. It's the first part of a <see cref="ZabbixInterval"/>, without the flexible and scheduling
+/// intervals that may follow one. Empty text is Zabbix's own empty value, which an item's timeout reads as its proxy's or
+/// server's.
 /// </para>
 /// <para>
-/// Parsing checks the grammar, and leaves the ranges to the server, which knows the field: history is <c>0</c> or from an
-/// hour to 25 years, and a timeout from a second to 10 minutes. Lengths are equal when they're written the same, as Zabbix
-/// stores what it's given. The default value is <c>0</c>. A value read from a reply is kept as the server wrote it, even
-/// where a newer Zabbix writes more than this grammar; <see cref="Length"/> is then <see langword="null"/>.
+/// Parsing checks the grammar, and leaves the ranges and the suffixes a field takes to the server, which knows the field:
+/// history is <c>0</c> or from an hour to 25 years, and a timeout from a second to 10 minutes. Lengths are equal when
+/// they're written the same, as Zabbix stores what it's given. The default value is <c>0</c>. A value read from a reply is
+/// kept as the server wrote it, even where a newer Zabbix writes more than this grammar; <see cref="Length"/> is then
+/// <see langword="null"/>.
 /// </para>
 /// </remarks>
 [JsonConverter(typeof(ZabbixDurationConverter))]
@@ -40,7 +44,7 @@ public readonly record struct ZabbixDuration : ISpanParsable<ZabbixDuration>
         get
         {
             if (_text is null) return TimeSpan.Zero;
-            long? seconds = ZabbixIntervalGrammar.Length(_text, out int length);
+            long? seconds = ZabbixIntervalGrammar.LengthWithYear(_text, out int length);
             return seconds is { } whole && length == _text.Length ? TimeSpan.FromSeconds(whole) : null;
         }
     }
@@ -57,7 +61,7 @@ public readonly record struct ZabbixDuration : ISpanParsable<ZabbixDuration>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="length"/> is negative, isn't a whole number of seconds, or is longer than 2,147,483,647 seconds.</exception>
     public static ZabbixDuration FromTimeSpan(TimeSpan length) => new(Text(length, nameof(length)));
 
-    /// <summary>Parses Zabbix's spelling of a length of time: <c>90d</c>, <c>3s</c>, <c>{$HISTORY}</c>, or empty.</summary>
+    /// <summary>Parses Zabbix's spelling of a length of time: <c>90d</c>, <c>3s</c>, <c>2y</c>, <c>{$HISTORY}</c>, or empty.</summary>
     /// <param name="s">The length, as Zabbix spells it.</param>
     /// <returns>The length.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="s"/> is <see langword="null"/>.</exception>
@@ -68,13 +72,13 @@ public readonly record struct ZabbixDuration : ISpanParsable<ZabbixDuration>
         return Parse(s.AsSpan());
     }
 
-    /// <summary>Parses Zabbix's spelling of a length of time: <c>90d</c>, <c>3s</c>, <c>{$HISTORY}</c>, or empty.</summary>
+    /// <summary>Parses Zabbix's spelling of a length of time: <c>90d</c>, <c>3s</c>, <c>2y</c>, <c>{$HISTORY}</c>, or empty.</summary>
     /// <param name="s">The length, as Zabbix spells it.</param>
     /// <returns>The length.</returns>
     /// <exception cref="FormatException"><paramref name="s"/> is neither a length nor a macro.</exception>
     public static ZabbixDuration Parse(ReadOnlySpan<char> s)
         => TryParse(s, out ZabbixDuration result) ? result
-            : throw new FormatException($"'{s}' isn't a length of time Zabbix takes: write a whole number of seconds with an optional s, m, h, d or w suffix, or a macro.");
+            : throw new FormatException($"'{s}' isn't a length of time Zabbix takes: write a whole number of seconds with an optional s, m, h, d, w, M or y suffix, or a macro.");
 
     /// <summary>Parses Zabbix's spelling of a length of time, and says whether it is one.</summary>
     /// <param name="s">The length, as Zabbix spells it.</param>
@@ -95,7 +99,7 @@ public readonly record struct ZabbixDuration : ISpanParsable<ZabbixDuration>
         result = default;
         if (!s.IsEmpty)
         {
-            _ = ZabbixIntervalGrammar.Length(s, out int length);
+            _ = ZabbixIntervalGrammar.LengthWithYear(s, out int length);
             if (length != s.Length) return false;
         }
         result = new(s.ToString());

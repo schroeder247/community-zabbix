@@ -16,7 +16,7 @@ dotnet add package Community.Zabbix.Abstractions
 using Community.Zabbix;
 
 var value = new ZabbixValue("web-01", "system.cpu.load[all,avg1]", "0.42", DateTimeOffset.UtcNow);
-Console.WriteLine($"{value.Host} {value.Key.Name}({value.Key.Parameters[0]}) = {value.Value} at {value.Time}");
+Console.WriteLine($"{value.HostName} {value.Key.Name}({value.Key.Parameters[0]}) = {value.Value} at {value.Time}");
 ```
 
 Requires .NET 10 (`net10.0`). Works with Zabbix 7.0, 7.4 and 8.0 ([known limitations](https://github.com/schroeder247/community-zabbix/blob/main/docs/KNOWN-LIMITATIONS.md)).

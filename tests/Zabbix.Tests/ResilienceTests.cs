@@ -71,7 +71,7 @@ public sealed class ResilienceTests
     [InlineData("host.create", false)]
     [InlineData("host.delete", false)]
     [InlineData("user.login", false)]
-    public void Only_reads_are_idempotent(string method, bool idempotent) => Assert.Equal(idempotent, ZabbixHttp.IsIdempotent(method));
+    public void Only_reads_are_idempotent(string method, bool idempotent) => Assert.Equal(idempotent, ZabbixApiMethods.IsIdempotent(ZabbixApiMethod.Parse(method)));
 
     /// <summary>Answers by script, per attempt: each entry is the reply body of one attempt, the id echoed.</summary>
     private sealed class ReplyScript(params string[] results) : HttpMessageHandler

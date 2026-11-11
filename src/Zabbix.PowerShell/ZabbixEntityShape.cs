@@ -82,7 +82,7 @@ internal static class ZabbixEntityShape
         ArgumentNullException.ThrowIfNull(resultInfo);
         ArgumentNullException.ThrowIfNull(buildIdSelection);
         ArgumentNullException.ThrowIfNull(materialize);
-        string method = api + ".get";
+        ZabbixApiMethod method = ZabbixApiMethod.Parse(api + ".get");
         return new ZabbixEntityShape<TEntity>(api, idField, nameField, idOf, nameOf,
             selectByName: async (client, names, cancellationToken) =>
             {

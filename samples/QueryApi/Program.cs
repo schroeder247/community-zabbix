@@ -10,11 +10,11 @@ string token = Environment.GetEnvironmentVariable("ZABBIX_API_TOKEN")
 await using var zabbix = new ZabbixClient(endpoint, token);
 Console.WriteLine($"Zabbix API {await zabbix.GetApiVersionAsync()}");
 
-var hosts = await zabbix.Hosts.GetAsync(q => q.Output = [ZabbixHostFields.HostId, ZabbixHostFields.TechnicalName, ZabbixHostFields.VisibleName]);
+var hosts = await zabbix.Hosts.GetAsync(q => q.Output = [ZabbixHostFields.HostId, ZabbixHostFields.HostName, ZabbixHostFields.VisibleName]);
 foreach (ZabbixHost host in hosts)
     Console.WriteLine(host.VisibleName);
 
-if (hosts is [{ TechnicalName: { } first }, ..])
+if (hosts is [{ HostName: { } first }, ..])
 {
     await foreach (ZabbixValue value in zabbix.Hosts[first].GetLatestAsync())
         Console.WriteLine($"{value.Key} = {value.Value}");

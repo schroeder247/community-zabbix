@@ -24,10 +24,10 @@ Get-ZbxHost -Group 'Linux servers' |
 #endregion
 
 #region Create a calculated item on a template
-# A piped template binds -HostId through its TemplateId. -Params is the calculated item's formula; the item is
+# A piped template binds -HostId through its TemplateId. -TypeParameters is the calculated item's formula; the item is
 # inherited by every host the template is linked to.
 Get-ZbxTemplate -Name 'Web App' |
     New-ZbxItem -Name 'Requests per minute' -Key 'app.requests.rate' -Type Calculated -ValueType Float `
-        -Params 'avg(//app.requests,1m)' -Delay '1m' -Units 'rpm' |
-    Select-Object ItemId, Key, Params
+        -TypeParameters 'avg(//app.requests,1m)' -Delay '1m' -Units 'rpm' |
+    Select-Object ItemId, Key, TypeParameters
 #endregion

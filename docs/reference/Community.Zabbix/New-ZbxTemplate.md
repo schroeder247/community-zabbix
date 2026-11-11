@@ -20,7 +20,7 @@ A template is a reusable set of items, triggers, graphs, discovery rules and das
 ### Example 1: Create a template in a template group
 
 ```powershell
-New-ZbxTemplate -Host 'Nginx by HTTP' -Group 'Templates/Web' | Select-Object TemplateId, TechnicalName
+New-ZbxTemplate -Host 'Nginx by HTTP' -Group 'Templates/Web' | Select-Object TemplateId, HostName
 ```
 
 -Host is the template's technical name; -Group takes template group names, ids or objects. The created template is read back and written.
@@ -32,8 +32,8 @@ New-ZbxTemplate -Host 'Web App Nginx' -Group 'Templates/Web' -LinkedTemplate 'Ng
     -Description 'Nginx in front of the shop' -Tag @{ tag = 'class'; value = 'software' } `
     -Macro @{ macro = '{$NGINX.PORT}'; value = '8080' } | Out-Null
 Get-ZbxTemplate -Name 'Web App Nginx' -SelectParentTemplates -SelectTags -SelectMacros |
-    Select-Object TechnicalName, Description,
-        @{ n = 'Links'; e = { $_.ParentTemplates.TechnicalName } },
+    Select-Object HostName, Description,
+        @{ n = 'Links'; e = { $_.ParentTemplates.HostName } },
         @{ n = 'Macros'; e = { $_.Macros.Macro } }
 ```
 
@@ -264,7 +264,7 @@ Creates without a confirmation prompt even where $ConfirmPreference is at or bel
 
 ### -InputObject
 
-A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIp, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
+A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIP, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
 
 | | |
 | --- | --- |

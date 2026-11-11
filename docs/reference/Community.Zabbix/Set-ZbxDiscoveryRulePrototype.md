@@ -8,7 +8,7 @@ Changes a discovery rule prototype.
 ## SYNTAX
 
 ```
-Set-ZbxDiscoveryRulePrototype [-InputObject] <ZabbixReference<ZabbixDiscoveryRulePrototype>[]> [[-Name] <string>] [-LifetimeType <ZabbixLldLifetimeType>] [-Uuid <string>] [-Type <ZabbixItemType>] [-Key <string>] [-Lifetime <string>] [-EnabledLifetimeType <ZabbixLldEnabledLifetimeType>] [-EnabledLifetime <string>] [-Description <string>] [-Status <ZabbixItemStatus>] [-Discover <ZabbixItemDiscoverMode>] [-Preprocessing <ZabbixPreprocessingStepRequest[]>] [-LldMacroPath <ZabbixDiscoveryRulePrototypeLldMacroPathRequest[]>] [-Filter <ZabbixDiscoveryRulePrototypeFilterRequest>] [-Override <ZabbixDiscoveryRulePrototypeOverrideRequest[]>] [-Parameter <ZabbixDiscoveryRulePrototypeParameterRequest[]>] [-Params <string>] [-Timeout <string>] [-Delay <string>] [-Username <string>] [-Password <SecureString>] [-MasterItemId <ulong>] [-InterfaceId <ulong>] [-Url <string>] [-QueryField <ZabbixDiscoveryRulePrototypeQueryFieldRequest[]>] [-RequestMethod <ZabbixHttpRequestMethod>] [-PostType <ZabbixItemPostType>] [-Posts <string>] [-Header <ZabbixDiscoveryRulePrototypeHeaderRequest[]>] [-StatusCodes <string>] [-FollowRedirects <bool>] [-RetrieveMode <ZabbixHttpTestRetrieveMode>] [-OutputFormat <ZabbixItemHttpOutputFormat>] [-HttpProxy <string>] [-AuthType <int>] [-VerifyPeer <bool>] [-VerifyHost <bool>] [-SslCertFile <string>] [-SslKeyFile <string>] [-SslKeyPassword <SecureString>] [-AllowTraps <bool>] [-TrapperHosts <string>] [-IpmiSensor <string>] [-JmxEndpoint <string>] [-SnmpOid <string>] [-PublicKey <string>] [-PrivateKey <string>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Set-ZbxDiscoveryRulePrototype [-InputObject] <ZabbixReference<ZabbixDiscoveryRulePrototype>[]> [[-Name] <string>] [-LifetimeType <ZabbixLowLevelDiscoveryLifetimeType>] [-Uuid <string>] [-Type <ZabbixItemType>] [-Key <string>] [-Lifetime <string>] [-EnabledLifetimeType <ZabbixLowLevelDiscoveryEnabledLifetimeType>] [-EnabledLifetime <string>] [-Description <string>] [-Status <ZabbixItemStatus>] [-Discover <ZabbixItemDiscoverMode>] [-Preprocessing <ZabbixPreprocessingStepRequest[]>] [-LowLevelDiscoveryMacroPath <ZabbixDiscoveryRulePrototypeLowLevelDiscoveryMacroPathRequest[]>] [-Filter <ZabbixDiscoveryRulePrototypeFilterRequest>] [-Override <ZabbixDiscoveryRulePrototypeOverrideRequest[]>] [-Parameter <ZabbixDiscoveryRulePrototypeParameterRequest[]>] [-TypeParameters <string>] [-Timeout <string>] [-Delay <string>] [-UserName <string>] [-Password <SecureString>] [-MasterItemId <ulong>] [-InterfaceId <ulong>] [-Url <string>] [-QueryField <ZabbixDiscoveryRulePrototypeQueryFieldRequest[]>] [-RequestMethod <ZabbixHttpRequestMethod>] [-PostType <ZabbixItemPostType>] [-Posts <string>] [-Header <ZabbixDiscoveryRulePrototypeHeaderRequest[]>] [-StatusCodes <string>] [-FollowRedirects <bool>] [-RetrieveMode <ZabbixHttpTestRetrieveMode>] [-OutputFormat <ZabbixItemHttpOutputFormat>] [-HttpProxy <string>] [-AuthenticationType <int>] [-VerifyPeer <bool>] [-VerifyHost <bool>] [-SslCertificateFile <string>] [-SslKeyFile <string>] [-SslKeyPassword <SecureString>] [-AllowTraps <bool>] [-TrapperHosts <string>] [-IpmiSensor <string>] [-JmxEndpoint <string>] [-SnmpOid <string>] [-PublicKey <string>] [-PrivateKey <string>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -56,7 +56,7 @@ What happens to discovered resources that are no longer found: deleted once the 
 
 | | |
 | --- | --- |
-| Type | `ZabbixLldLifetimeType` |
+| Type | `ZabbixLowLevelDiscoveryLifetimeType` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |
@@ -146,7 +146,7 @@ What happens to discovered resources that are no longer found before they are de
 
 | | |
 | --- | --- |
-| Type | `ZabbixLldEnabledLifetimeType` |
+| Type | `ZabbixLowLevelDiscoveryEnabledLifetimeType` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |
@@ -230,13 +230,13 @@ Preprocessing steps applied to the discovered data before it is processed, in ex
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -LldMacroPath
+### -LowLevelDiscoveryMacroPath
 
 LLD macros mapped to the JSONPath or selector that extracts each macro value from the discovered data.
 
 | | |
 | --- | --- |
-| Type | `ZabbixDiscoveryRulePrototypeLldMacroPathRequest[]` |
+| Type | `ZabbixDiscoveryRulePrototypeLowLevelDiscoveryMacroPathRequest[]` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |
@@ -290,7 +290,7 @@ Name and value pairs passed to the script of a Script or Browser rule; names mus
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -Params
+### -TypeParameters
 
 Parameters of the item type: the formula of a calculated item, the SQL query of a database monitor item, the script of an SSH, Telnet or script item.
 
@@ -335,7 +335,7 @@ Update interval, as a time unit with a suffix (30s, 1m) or a user macro, optiona
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -Username
+### -UserName
 
 User name for authentication; required for SSH and TELNET agent rules and used by simple check, database monitor, JMX agent and HTTP agent rules.
 
@@ -560,7 +560,7 @@ HTTP or HTTPS proxy connection string used by HTTP agent rules.
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -AuthType
+### -AuthenticationType
 
 Authentication method, which depends on the type. For SSH agent rules: 0 for password, 1 for public key. For HTTP agent rules: 0 for none, 1 for basic, 2 for NTLM, 3 for Kerberos, 4 for Digest.
 
@@ -605,7 +605,7 @@ Whether HTTP agent rules validate that the host name matches the server certific
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -SslCertFile
+### -SslCertificateFile
 
 Path of the public SSL certificate file used for client authentication by HTTP agent rules.
 
@@ -845,14 +845,14 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 ## INPUTS
 
 - `ZabbixReference<ZabbixDiscoveryRulePrototype>[]`: Bound to -InputObject (ByValue). Represents a reference to an API object: a parameter that points at an API object takes its id, its name, or the object itself piped from a Get- cmdlet, and becomes an id before the call — one parameter, three spellings, one resolution.
-- `ZabbixLldLifetimeType`: Bound to -LifetimeType (ByPropertyName). The LLD lifetime type values: ZBX_LLD_DELETE_* in defines.inc.php.
-- `string`: Bound to -Uuid (ByPropertyName), -Name (ByPropertyName), -Key (ByPropertyName), -Lifetime (ByPropertyName), -EnabledLifetime (ByPropertyName), -Description (ByPropertyName), -Params (ByPropertyName), -Timeout (ByPropertyName), -Delay (ByPropertyName), -Username (ByPropertyName), -Url (ByPropertyName), -Posts (ByPropertyName), -StatusCodes (ByPropertyName), -HttpProxy (ByPropertyName), -SslCertFile (ByPropertyName), -SslKeyFile (ByPropertyName), -TrapperHosts (ByPropertyName), -IpmiSensor (ByPropertyName), -JmxEndpoint (ByPropertyName), -SnmpOid (ByPropertyName), -PublicKey (ByPropertyName), -PrivateKey (ByPropertyName). Text.
+- `ZabbixLowLevelDiscoveryLifetimeType`: Bound to -LifetimeType (ByPropertyName). The low level discovery lifetime type values: ZBX_LLD_DELETE_* in defines.inc.php.
+- `string`: Bound to -Uuid (ByPropertyName), -Name (ByPropertyName), -Key (ByPropertyName), -Lifetime (ByPropertyName), -EnabledLifetime (ByPropertyName), -Description (ByPropertyName), -TypeParameters (ByPropertyName), -Timeout (ByPropertyName), -Delay (ByPropertyName), -UserName (ByPropertyName), -Url (ByPropertyName), -Posts (ByPropertyName), -StatusCodes (ByPropertyName), -HttpProxy (ByPropertyName), -SslCertificateFile (ByPropertyName), -SslKeyFile (ByPropertyName), -TrapperHosts (ByPropertyName), -IpmiSensor (ByPropertyName), -JmxEndpoint (ByPropertyName), -SnmpOid (ByPropertyName), -PublicKey (ByPropertyName), -PrivateKey (ByPropertyName). Text.
 - `ZabbixItemType`: Bound to -Type (ByPropertyName). The item type values: ITEM_TYPE_* in defines.inc.php.
-- `ZabbixLldEnabledLifetimeType`: Bound to -EnabledLifetimeType (ByPropertyName). The LLD enabled lifetime type values: ZBX_LLD_DISABLE_* in defines.inc.php.
+- `ZabbixLowLevelDiscoveryEnabledLifetimeType`: Bound to -EnabledLifetimeType (ByPropertyName). The low level discovery enabled lifetime type values: ZBX_LLD_DISABLE_* in defines.inc.php.
 - `ZabbixItemStatus`: Bound to -Status (ByPropertyName). The item status values: ITEM_STATUS_* in defines.inc.php.
 - `ZabbixItemDiscoverMode`: Bound to -Discover (ByPropertyName). The item discover mode values: ITEM_* in defines.inc.php.
 - `ZabbixPreprocessingStepRequest[]`: Bound to -Preprocessing (ByPropertyName). A preprocessing step to set on an item, an item prototype or a discovery rule.
-- `ZabbixDiscoveryRulePrototypeLldMacroPathRequest[]`: Bound to -LldMacroPath (ByPropertyName). lld_macro_paths of a ZabbixDiscoveryRulePrototypeCreateRequest.
+- `ZabbixDiscoveryRulePrototypeLowLevelDiscoveryMacroPathRequest[]`: Bound to -LowLevelDiscoveryMacroPath (ByPropertyName). lld_macro_paths of a ZabbixDiscoveryRulePrototypeCreateRequest.
 - `ZabbixDiscoveryRulePrototypeFilterRequest`: Bound to -Filter (ByPropertyName). filter of a ZabbixDiscoveryRulePrototypeCreateRequest.
 - `ZabbixDiscoveryRulePrototypeOverrideRequest[]`: Bound to -Override (ByPropertyName). overrides of a ZabbixDiscoveryRulePrototypeCreateRequest.
 - `ZabbixDiscoveryRulePrototypeParameterRequest[]`: Bound to -Parameter (ByPropertyName). parameters of a ZabbixDiscoveryRulePrototypeCreateRequest.
@@ -864,7 +864,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 - `bool`: Bound to -FollowRedirects (ByPropertyName), -VerifyPeer (ByPropertyName), -VerifyHost (ByPropertyName), -AllowTraps (ByPropertyName). True or false.
 - `ZabbixHttpTestRetrieveMode`: Bound to -RetrieveMode (ByPropertyName). The HTTP test retrieve mode values: HTTPTEST_STEP_RETRIEVE_MODE_* in defines.inc.php.
 - `ZabbixItemHttpOutputFormat`: Bound to -OutputFormat (ByPropertyName). The item HTTP output format values: HTTPCHECK_STORE_* in defines.inc.php.
-- `int`: Bound to -AuthType (ByPropertyName). A number.
+- `int`: Bound to -AuthenticationType (ByPropertyName). A number.
 - `PSObject`: Bound to -PipedRecord (ByValue). Each object as the API answers it.
 
 ## OUTPUTS

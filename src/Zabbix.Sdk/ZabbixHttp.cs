@@ -6,7 +6,8 @@ namespace Community.Zabbix;
 
 /// <summary>
 /// Provides the request options the SDK's HTTP pipeline reads, so a handler added through
-/// <see cref="ZabbixClientBuilderExtensions.ConfigureHttpClientBuilder"/> can tell a read from a write and see a request's deadline.
+/// <see cref="ZabbixClientBuilderExtensions.ConfigureHttpClientBuilder"/> can see a request's method and deadline, and tell a
+/// read from a write with <see cref="ZabbixApiMethods.IsIdempotent(ZabbixApiMethod)"/>.
 /// </summary>
 public static class ZabbixHttp
 {
@@ -30,7 +31,7 @@ public static class ZabbixHttp
     internal static string GetResilienceName(string name = "") => GetClientName(name) + "-standard";
 
     /// <summary>The JSON-RPC method a request carries, so the retry gate can tell a read from a write.</summary>
-    public static HttpRequestOptionsKey<string> Method { get; } = new("Zabbix.Method");
+    public static HttpRequestOptionsKey<ZabbixApiMethod> Method { get; } = new("Zabbix.Method");
 
     /// <summary>The deadline a request carries when <see cref="ZabbixClientOptions.Timeouts"/> names its method: it replaces the attempt and total timeouts.</summary>
     public static HttpRequestOptionsKey<TimeSpan> Deadline { get; } = new("Zabbix.Deadline");
@@ -40,17 +41,11 @@ public static class ZabbixHttp
     // writes, and requiresAuthentication()) says which. A write is never retried (a host.create sent twice is two hosts).
     // Zabbix lower-cases the method before routing (strtolower in CLocalApiClient::callMethod), so the table ignores case.
 
-    /// <summary>Whether <paramref name="method"/> may be safely sent again.</summary>
-    /// <param name="method">The JSON-RPC method.</param>
-    /// <returns><see langword="true"/> when the method may be sent again after a transient failure.</returns>
-    public static bool IsIdempotent(string? method)
-        => method is not null && ZabbixApiMethods.IsIdempotent(method);
-
     /// <summary>
     /// Whether <paramref name="method"/> must be sent without an <c>Authorization</c> header: its
     /// <c>requiresAuthentication()</c> is false. 7.0 refuses the header on all of them; 8.0 accepts it on
     /// <c>apiinfo.version</c> only (<c>supportsAuthentication()</c>), so none carries one.
     /// </summary>
     /// <param name="method">The JSON-RPC method.</param>
-    internal static bool IsAnonymous(string method) => !ZabbixApiMethods.RequiresAuthentication(method);
+    internal static bool IsAnonymous(string method) => !ZabbixApiMethods.RequiresAuthentication(ZabbixApiMethod.FromWire(method));
 }

@@ -160,7 +160,7 @@ await zabbix.Items[itemId].DeleteAsync();
 | Method | What it does | What it returns |
 | --- | --- | --- |
 | `GetAsync` | Reads the objects its parameters select. Pass a lambda that sets them, a `*GetParameters` record, or nothing for every object. | The records |
-| `FindAsync` | Reads one object by id | The record, or `null` when there's none you may read |
+| `FindAsync` | Reads one object by id, on a client whose objects have an id of their own: history and trends, whose rows share their item's id, have none | The record, or `null` when there's none you may read |
 | `CountAsync` | Counts objects, with the same parameters (`countOutput`) | The count |
 | `CreateAsync`, `UpdateAsync` | Changes one object or several | The ids the server answered |
 | `DeleteAsync` | Deletes one object or several | For several, the ids the server answered. For one, nothing. |
@@ -189,7 +189,7 @@ The parameters of a get:
 var hosts = await zabbix.Hosts.GetAsync(q =>
 {
     q.Output = [ZabbixHostFields.HostId, ZabbixHostFields.VisibleName];
-    q.SelectInterfaces = [ZabbixHostInterfaceFields.Ip, ZabbixHostInterfaceFields.Port];
+    q.SelectInterfaces = [ZabbixHostInterfaceFields.IP, ZabbixHostInterfaceFields.Port];
     q.Sort = [ZabbixHostFields.VisibleName.Descending(), ZabbixHostFields.HostId];
 });
 ```
@@ -226,6 +226,9 @@ ulong id = await zabbix.Hosts.CreateAsync("web-02", [linux], h =>
     h.Tags = [("env", "prod")];
 });
 
+ZabbixItemKey<ulong> pending = new("orders.pending");
+ulong pendingId = await zabbix.Items.CreateAsync(id, pending, ZabbixItemType.Trapper);
+
 await zabbix.Hosts["web-02"].UpdateAsync(h => h.Status = ZabbixHostStatus.Disabled);
 await zabbix.Items[itemId].UpdateAsync(i => i.Delay = TimeSpan.FromMinutes(5));
 await zabbix.HostGroups["Linux servers"].UpdateAsync(g => g.Name = "Linux");
@@ -233,6 +236,12 @@ await zabbix.HostGroups["Linux servers"].UpdateAsync(g => g.Name = "Linux");
 
 - A request's required fields are `required` members, and its constructor takes them in the order the create does. Its other fields
   have setters, which the lambda sets. What you leave unset isn't sent, so an update changes only what you set.
+- An item's create takes a typed key, as a send and a read do. The item's key is the key's text, and so is its name unless the
+  lambda sets `Name`. Its value type follows the key's type: unsigned for the integer types (`long`, `int`, `ulong` and the rest),
+  `bool` and `DateTimeOffset`, float for `double`, `decimal` and `TimeSpan`, and text for `string` and any other type.
+- Zabbix refuses a negative value for an unsigned item when the value arrives, not when you create the item. A key whose values
+  can be negative takes the value type as an argument:
+  `CreateAsync(hostId, balance, ZabbixItemType.Trapper, ZabbixItemValueType.Float)`. So does a character or a log item.
 - A create also takes the request itself, which a target-typed `new` builds:
   `await zabbix.Hosts.CreateAsync(new("web-03", [linux]) { VisibleName = "Web 3" })`. Several requests go in one call as a list.
 - A node by name reads its object's id first, and throws `ZabbixNotFoundException` when there's none. A node by id sends the update
@@ -246,8 +255,9 @@ await zabbix.HostGroups["Linux servers"].UpdateAsync(g => g.Name = "Linux");
 | A user macro | A pair: `Macros = [("{$SNMP_COMMUNITY}", "public")]` |
 | A host's interface | `ZabbixInterface.Agent`, `Snmp`, `Ipmi`, or `Jmx`, at an `IPAddress` or a DNS name, on the port Zabbix uses for the kind unless you pass one |
 | An item's update interval | A `TimeSpan`: `Delay = TimeSpan.FromMinutes(5)` sends `5m`. For a macro or a flexible interval, `ZabbixInterval.Parse("1m;10s/1-5,09:00-18:00")` |
-| How long an item's history and trends are kept, and its timeout | A `TimeSpan`: `History = TimeSpan.FromDays(90)` sends `90d`. For a macro, `ZabbixDuration.Parse("{$HISTORY}")` |
-| An interface's port | A number: `Port = 10050`. For a macro, `ZabbixPort.Parse("{$AGENT_PORT}")`, which a factory's interface takes with `with { Port = … }` |
+| A length of time: how long an item's history and trends are kept, a timeout, a discovery rule's lifetime, an action's escalation period, and every other time unit the API takes | A `TimeSpan`: `History = TimeSpan.FromDays(90)` sends `90d`. For a macro, `ZabbixDuration.Parse("{$HISTORY}")` |
+| A port: an interface's, a proxy's, a script's, a user directory's, or a media type's SMTP port | A number: `Port = 10050`. For a macro, `ZabbixPort.Parse("{$AGENT_PORT}")`, which a factory's interface takes with `with { Port = … }` |
+| An item's key | A `ZabbixItemKey`: `Key = ZabbixItemKey.Create("vfs.fs.size", "/", "pfree")`, or a typed key's `Key` |
 | The hosts that may send to a trapper item | Addresses and blocks: `TrapperHosts = [IPNetwork.Parse("10.0.0.0/8"), IPAddress.IPv6Loopback]`. For a DNS name or a macro, `ZabbixPeer.Parse("monitor.example")`, and for Zabbix's list, `ZabbixPeer.ParseList("10.0.0.0/8, ::1")` |
 
 - The first interface of each type in a host's list is its main one, unless you mark another with
@@ -264,7 +274,7 @@ await zabbix.HostGroups["Linux servers"].UpdateAsync(g => g.Name = "Linux");
 
 ```csharp
 Version version = await zabbix.GetApiVersionAsync();
-bool hasRules = ZabbixApiMethods.Supports("ceprule.get", version);
+bool hasRules = ZabbixApiMethods.Supports(ZabbixApiMethod.CepRuleGet, version);
 ```
 
 `GetApiVersionAsync` reads the server's version once per client. That version gates every method and request field that isn't in all
@@ -273,6 +283,9 @@ Its `Method`, `Field`, `ServerVersion`, `Since`, `RemovedIn`, and `Replacement` 
 
 - Versions compare by major and minor.
 - To test first, call `ZabbixApiMethods.Supports(method, version)` or `ZabbixApiMethods.SupportsField(method, field, version)`.
+- A `ZabbixApiMethod` names a method. Its members name every method of the three versions, `ZabbixApiMethod.HostGet` among them; for
+  one the SDK doesn't name, write `new ZabbixApiMethod("object.method")` or `ZabbixApiMethod.Parse(name)`. A string doesn't convert to
+  one.
 - A method the model doesn't know goes to the server, which answers.
 
 Zabbix 8.0 removed `host.massupdate`, `template.massupdate`, `hostgroup.massupdate`, `templategroup.massupdate`, and
@@ -314,7 +327,7 @@ Change the pipeline per client, with the verbs of a builder or of a [registered 
 builder.Services.AddZabbixClient("prod")
     .WithEndpoint("https://zabbix.example/")
     .WithToken(token)
-    .WithTimeout("configuration.import", TimeSpan.FromMinutes(5))   // this method's attempt and total timeout
+    .WithTimeout(ZabbixApiMethod.ConfigurationImport, TimeSpan.FromMinutes(5))   // this method's attempt and total timeout
     .ConfigureResilience(resilience =>
     {
         resilience.Retry.MaxRetryAttempts = 5;
@@ -348,8 +361,8 @@ The pipeline keeps the standard handler's defaults:
 Every JSON-RPC call is a POST, so the SDK decides by the method. A read is retried after a transient failure. A write never is, because
 a write that failed may still have happened.
 
-- A read is a method the model marks as safe to send twice (`ZabbixHttp.IsIdempotent(method)`). A method the model doesn't know isn't
-  retried.
+- A read is a method the model marks as safe to send twice (`ZabbixApiMethods.IsIdempotent(method)`). A method the model doesn't know
+  isn't retried. A handler you add reads a request's method from its `ZabbixHttp.Method` option.
 - A transient failure is the standard handler's (a 5xx, 408, or 429 status, a connection failure, or an attempt timeout) or the API's
   `-32603` answer (`ZabbixApiException.IsTransient`).
 - An application error (`-32500`, `Database` included) is never retried.
@@ -417,7 +430,7 @@ The `Community.Zabbix` module has a command for each API object, built on this c
 ```powershell
 Connect-ZbxServer -Uri https://zabbix.example/ -ApiToken (Read-Host -AsSecureString 'API token')
 
-Get-ZbxHost -Name 'web-*' | Format-Table TechnicalName, VisibleName, Status
+Get-ZbxHost -Name 'web-*' | Format-Table HostName, VisibleName, Status
 Invoke-ZbxApi -Method host.get -Body @{ output = 'hostid'; limit = 1 }
 Get-ZbxHost -Name web-01 | Show-ZbxPage
 ```

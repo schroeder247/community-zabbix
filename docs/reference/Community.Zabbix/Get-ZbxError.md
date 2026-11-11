@@ -41,7 +41,7 @@ Get-ZbxError reads the session's own $Error, keeping only the module's failures,
 ```powershell
 'web-02', 'web-01' | ForEach-Object {
     New-ZbxHost -Host $_ -Group 'Web servers' -ErrorAction SilentlyContinue
-} | Select-Object TechnicalName
+} | Select-Object HostName
 Get-ZbxError -Last 1 | ForEach-Object {
     if ($_.FullyQualifiedErrorId -like 'ZabbixApi.*') { 'The server refused: ' + $_.Exception.Message }
     else { 'Other failure: ' + $_.Exception.Message }

@@ -40,7 +40,7 @@ A trigger is a problem expression over item values; when it becomes true the tri
 ### Example 1: List a host's triggers
 
 ```powershell
-Get-ZbxTrigger -Host 'web-01' | Select-Object TriggerId, Name, Priority, Value
+Get-ZbxTrigger -Host 'web-01' | Select-Object TriggerId, Name, Severity, Value
 ```
 
 -Host takes a host name, id or object. Value is the trigger's current state (Ok or Problem).
@@ -49,7 +49,7 @@ Get-ZbxTrigger -Host 'web-01' | Select-Object TriggerId, Name, Priority, Value
 
 ```powershell
 Get-ZbxTrigger -Name 'Too many requests on web-01' -SelectHosts |
-    Select-Object Name, @{ n = 'Host'; e = { $_.Hosts.TechnicalName } }, Priority
+    Select-Object Name, @{ n = 'Host'; e = { $_.Hosts.HostName } }, Severity
 ```
 
 -Name matches the trigger's description (its name in the frontend) exactly; a * makes it a search.
@@ -76,8 +76,8 @@ A piped item binds -Item by its ItemId; -SelectItems adds the items each trigger
 ```powershell
 Get-ZbxTrigger -Group 'Web servers' -SelectHosts |
     Where-Object Value -EQ 'Problem' |
-    Sort-Object Priority -Descending |
-    Select-Object @{ n = 'Host'; e = { $_.Hosts.TechnicalName } }, Name, Priority
+    Sort-Object Severity -Descending |
+    Select-Object @{ n = 'Host'; e = { $_.Hosts.HostName } }, Name, Severity
 ```
 
 A realistic check for a script: every trigger of the group whose Value is Problem, most severe first.

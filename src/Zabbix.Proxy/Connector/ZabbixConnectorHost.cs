@@ -5,6 +5,8 @@ using System.Text.Json.Serialization;
 namespace Community.Zabbix.Connector;
 
 /// <summary>A host as a connector line names it.</summary>
+/// <param name="HostName">The host's technical name.</param>
+/// <param name="Name">The host's visible name.</param>
 public sealed record ZabbixConnectorHost(
-    [property: JsonPropertyName("host")] string? Host,
+    [property: JsonPropertyName("host")] string? HostName,
     [property: JsonPropertyName("name")] string? Name);

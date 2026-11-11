@@ -57,10 +57,10 @@ A * in -Name turns the exact match into a search.
 
 ```powershell
 Get-ZbxProxy -Name 'proxy-*' -SelectHosts |
-    Select-Object Name, @{ n = 'Hosts'; e = { $_.Hosts.TechnicalName -join ', ' } }
+    Select-Object Name, @{ n = 'Hosts'; e = { $_.Hosts.HostName -join ', ' } }
 ```
 
--SelectHosts adds the hosts to each proxy; they are host records (TechnicalName is the host's technical name).
+-SelectHosts adds the hosts to each proxy; they are host records (HostName is the host's technical name).
 
 ### Example 4: Count proxies without reading them
 

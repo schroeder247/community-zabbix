@@ -38,10 +38,10 @@ internal sealed class ZabbixWatcher : IZabbixWatcher
 
     // The poll loop is the only writer of what follows; readers see Current through one volatile snapshot.
     private readonly Dictionary<ulong, WatchedItem> _items = [];
-    private Dictionary<(string Host, ZabbixItemKey Key), WatchedItem>? _byKey;
-    private Dictionary<ulong, (string Host, ZabbixItemKey Key, ZabbixItemValueType Type)>? _ids;
-    private readonly Dictionary<(string Host, ZabbixItemKey Key), ZabbixValue> _latest = [];
-    private FrozenDictionary<(string Host, ZabbixItemKey Key), ZabbixValue> _current = FrozenDictionary<(string Host, ZabbixItemKey Key), ZabbixValue>.Empty;
+    private Dictionary<(string HostName, ZabbixItemKey Key), WatchedItem>? _byKey;
+    private Dictionary<ulong, (string HostName, ZabbixItemKey Key, ZabbixItemValueType Type)>? _ids;
+    private readonly Dictionary<(string HostName, ZabbixItemKey Key), ZabbixValue> _latest = [];
+    private FrozenDictionary<(string HostName, ZabbixItemKey Key), ZabbixValue> _current = FrozenDictionary<(string HostName, ZabbixItemKey Key), ZabbixValue>.Empty;
     private long _highWater;
     private long _refreshedAt;
     private bool _seeded;
@@ -86,7 +86,7 @@ internal sealed class ZabbixWatcher : IZabbixWatcher
     public ZabbixWatchPlan Plan { get; }
 
     /// <inheritdoc/>
-    public IReadOnlyDictionary<(string Host, ZabbixItemKey Key), ZabbixValue> Current => Volatile.Read(ref _current);
+    public IReadOnlyDictionary<(string HostName, ZabbixItemKey Key), ZabbixValue> Current => Volatile.Read(ref _current);
 
     /// <inheritdoc/>
     public long SucceededPolls => Interlocked.Read(ref _succeeded);
@@ -219,11 +219,11 @@ internal sealed class ZabbixWatcher : IZabbixWatcher
         if (_items.Count == 0) return;
         long high = _highWater;
         // The two views of the item set, rebuilt only when a refresh changed it, not on every tick.
-        Dictionary<(string Host, ZabbixItemKey Key), WatchedItem> byKey = _byKey ??= _items.Values.ToDictionary(item => (item.Host, item.Key));
-        Dictionary<ulong, (string Host, ZabbixItemKey Key, ZabbixItemValueType Type)> ids = _ids ??= _items.ToDictionary(item => item.Key, item => (item.Value.Host, item.Value.Key, item.Value.Type));
+        Dictionary<(string HostName, ZabbixItemKey Key), WatchedItem> byKey = _byKey ??= _items.Values.ToDictionary(item => (item.Host, item.Key));
+        Dictionary<ulong, (string HostName, ZabbixItemKey Key, ZabbixItemValueType Type)> ids = _ids ??= _items.ToDictionary(item => item.Key, item => (item.Value.Host, item.Value.Key, item.Value.Type));
         await foreach (ZabbixValue value in _node.ReadHistoryAsync(ids, _highWater - _lateness, to: null, stopping).ConfigureAwait(false))
         {
-            WatchedItem item = byKey[(value.Host, value.Key)];
+            WatchedItem item = byKey[(value.HostName, value.Key)];
             if (value.Clock <= item.LastSeen) continue;                                  // read on an earlier tick
             item.LastSeen = value.Clock;
             high = Math.Max(high, value.Clock.Seconds);
@@ -234,7 +234,7 @@ internal sealed class ZabbixWatcher : IZabbixWatcher
 
     private void Emit(ZabbixValue value)
     {
-        _latest[(value.Host, value.Key)] = value;
+        _latest[(value.HostName, value.Key)] = value;
         _dirty = true;
         _readers.Write(value);                                                            // a dropped value is counted by OnDropped
     }

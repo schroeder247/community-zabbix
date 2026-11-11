@@ -49,7 +49,7 @@ Get-ZbxHostGroup -Name 'Linux servers', 'Web servers' | Select-Object GroupId, N
 
 ```powershell
 Get-ZbxHostGroup -Name 'Linux servers' -SelectHosts |
-    ForEach-Object { '{0}: {1}' -f $_.Name, ($_.Hosts.TechnicalName -join ', ') }
+    ForEach-Object { '{0}: {1}' -f $_.Name, ($_.Hosts.HostName -join ', ') }
 ```
 
 -SelectHosts adds each group's hosts (hostgroup.get's selectHosts) to the Hosts property.

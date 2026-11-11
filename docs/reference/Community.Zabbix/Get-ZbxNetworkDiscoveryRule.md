@@ -40,7 +40,7 @@ A network discovery rule scans IP ranges on a schedule with its checks and repor
 ### Example 1: Get a discovery rule by name
 
 ```powershell
-Get-ZbxNetworkDiscoveryRule -Name 'Local network' | Select-Object NetworkDiscoveryRuleId, Name, IpRange, Delay, Status
+Get-ZbxNetworkDiscoveryRule -Name 'Local network' | Select-Object NetworkDiscoveryRuleId, Name, IPRange, Delay, Status
 ```
 
 -Name matches the rule's name exactly; the result is a ZabbixNetworkDiscoveryRule record.
@@ -58,7 +58,7 @@ Get-ZbxNetworkDiscoveryRule -Name 'Local network' -SelectNetworkDiscoveryChecks 
 
 ```powershell
 Get-ZbxNetworkDiscoveryRule -Search @{ iprange = '192.0.2.' } | Where-Object Name -in 'Local network', 'Office printers' |
-    Select-Object Name, IpRange
+    Select-Object Name, IPRange
 ```
 
 -Search matches substrings of wire fields (here iprange); several rules come back in one call.

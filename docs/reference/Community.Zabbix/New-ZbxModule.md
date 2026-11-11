@@ -8,7 +8,7 @@ Creates a frontend module.
 ## SYNTAX
 
 ```
-New-ZbxModule [-ModuleIdentifier <string>] [-RelativePath <string>] [-Status <ZabbixModuleStatus>] [-Config <JsonElement>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+New-ZbxModule [-ModuleIdentifier <string>] [-RelativePath <string>] [-Status <ZabbixModuleStatus>] [-Configuration <JsonElement>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -72,7 +72,7 @@ Whether the module is enabled; disabled by default. Left out, the server stores 
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -Config
+### -Configuration
 
 The configuration of the module as a free-form object; empty when omitted. Takes a hashtable, an ordered dictionary, a [pscustomobject] or an array of them, JSON text, or a JsonElement.
 
@@ -119,7 +119,7 @@ Creates without a confirmation prompt even where $ConfirmPreference is at or bel
 
 ### -InputObject
 
-A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIp, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
+A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIP, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
 
 | | |
 | --- | --- |
@@ -163,7 +163,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 
 - `string`: Bound to -ModuleIdentifier (ByPropertyName), -RelativePath (ByPropertyName). Text.
 - `ZabbixModuleStatus`: Bound to -Status (ByPropertyName). The module status values: MODULE_STATUS_* in defines.inc.php.
-- `JsonElement`: Bound to -Config (ByPropertyName).
+- `JsonElement`: Bound to -Configuration (ByPropertyName).
 - `PSObject`: Bound to -InputObject (ByValue). Each object as the API answers it.
 
 ## OUTPUTS

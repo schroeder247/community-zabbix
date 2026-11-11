@@ -17,25 +17,25 @@ public sealed class ZabbixSendBatch
 
     /// <summary>Adds a value, collected now.</summary>
     /// <typeparam name="T">The item's value type.</typeparam>
-    /// <param name="host">The host the value belongs to, as Zabbix knows it.</param>
-    /// <param name="item">The item the value belongs to.</param>
+    /// <param name="hostName">The technical name of the host the value belongs to.</param>
+    /// <param name="key">The typed key of the item the value belongs to.</param>
     /// <param name="value">The value to send.</param>
     /// <returns>The batch.</returns>
-    public ZabbixSendBatch Add<T>(string host, ZabbixItemKey<T> item, T value)
+    public ZabbixSendBatch Add<T>(string hostName, ZabbixItemKey<T> key, T value)
         where T : ISpanParsable<T>
-        => Add(host, item, value, _time.GetUtcNow());
+        => Add(hostName, key, value, _time.GetUtcNow());
 
     /// <summary>Adds a value collected at <paramref name="time"/>.</summary>
     /// <typeparam name="T">The item's value type.</typeparam>
-    /// <param name="host">The host the value belongs to, as Zabbix knows it.</param>
-    /// <param name="item">The item the value belongs to.</param>
+    /// <param name="hostName">The technical name of the host the value belongs to.</param>
+    /// <param name="key">The typed key of the item the value belongs to.</param>
     /// <param name="value">The value to send.</param>
     /// <param name="time">When the value was collected.</param>
     /// <returns>The batch.</returns>
-    public ZabbixSendBatch Add<T>(string host, ZabbixItemKey<T> item, T value, DateTimeOffset time)
+    public ZabbixSendBatch Add<T>(string hostName, ZabbixItemKey<T> key, T value, DateTimeOffset time)
         where T : ISpanParsable<T>
     {
-        _values.Add(ZabbixValue.From(host, item, value, time));
+        _values.Add(ZabbixValue.From(hostName, key, value, time));
         return this;
     }
 }

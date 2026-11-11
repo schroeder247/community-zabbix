@@ -224,14 +224,14 @@ public abstract class ZabbixServerCmdlet : ZabbixCmdlet
     {
         if (given is { Count: > 0 }) return given;
         if (Connected.Trapper is { Count: > 0 } configured) return configured;
-        var active = new ZabbixHaNodeGetParameters
+        var active = new ZabbixHANodeGetParameters
         {
-            Output = [ZabbixHaNodeFields.Address, ZabbixHaNodeFields.Port, ZabbixHaNodeFields.Status],
-            Filter = new() { ["status"] = (long)ZabbixHaNodeStatus.Active },
+            Output = [ZabbixHANodeFields.Address, ZabbixHANodeFields.Port, ZabbixHANodeFields.Status],
+            Filter = new() { ["status"] = (long)ZabbixHANodeStatus.Active },
         };
-        foreach (ZabbixHaNode ha in await ListAsync(ZabbixClient.HaNodes.GetAsync(active, cancellationToken), cancellationToken).ConfigureAwait(false))
+        foreach (ZabbixHANode ha in await ListAsync(ZabbixClient.HANodes.GetAsync(active, cancellationToken), cancellationToken).ConfigureAwait(false))
         {
-            if (!string.IsNullOrEmpty(ha.Address)) return [new DnsEndPoint(ha.Address, ha.Port ?? ZabbixWireClient.DefaultServerPort)];
+            if (!string.IsNullOrEmpty(ha.Address)) return [new DnsEndPoint(ha.Address, ha.Port?.Number ?? ZabbixWireClient.DefaultServerPort)];
         }
         throw new InvalidOperationException(
             $"The trapper of {Connected.Name} is not known and hanode.get names no active node: pass -Server host:port, or Connect-ZbxServer -Trapper host:port.");

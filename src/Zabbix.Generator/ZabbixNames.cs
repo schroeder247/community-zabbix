@@ -13,7 +13,8 @@ namespace Community.Zabbix.Generator;
 /// <c>OpmessageGrp</c>, <c>hk_trends</c> → <c>HkTrends</c>. This splits each part into the fewest words
 /// <c>schema/words.json</c> knows (embedded in this assembly) and renders them: <c>SortOrder</c>,
 /// <c>OperationMessageGroup</c>, <c>HousekeepingTrends</c>. It applies only to a name that is exactly that mechanical
-/// capitalisation — a name the overlay chose (<c>TechnicalName</c>, <c>EvalType</c>) is the reviewed one and wins —
+/// capitalisation — a name the overlay chose (<c>VisibleName</c>, <c>EvalType</c>) is the reviewed one and wins here, and
+/// <see cref="ZabbixRespellings"/> respells every name afterwards (<c>EvalType</c> is <c>EvaluationType</c>) —
 /// and once, in <see cref="ApiDescription.Read(string, List{EmitProblem})"/>, so the records, the cmdlets, the views and the converters all see the
 /// same name. The name it replaced is kept as <see cref="FieldDescription.PreviousName"/>, which the cmdlet emitter
 /// keeps as a parameter alias.

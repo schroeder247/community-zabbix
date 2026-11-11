@@ -85,7 +85,7 @@ public sealed class TestZbxMediaTypeCommand : ZabbixServerWireCmdlet
             ? kind switch
             {
                 ZabbixMediaTypeKind.Webhook => ZabbixAlertParameters.Webhook(saved.Select(parameter => new KeyValuePair<string, string>(parameter.Name ?? string.Empty, parameter.Value ?? string.Empty))),
-                ZabbixMediaTypeKind.Exec => ZabbixAlertParameters.Script(saved.OrderBy(parameter => parameter.Position ?? 0).Select(parameter => parameter.Value ?? string.Empty)),
+                ZabbixMediaTypeKind.Script => ZabbixAlertParameters.Script(saved.OrderBy(parameter => parameter.Position ?? 0).Select(parameter => parameter.Value ?? string.Empty)),
                 _ => null,
             }
             : null;

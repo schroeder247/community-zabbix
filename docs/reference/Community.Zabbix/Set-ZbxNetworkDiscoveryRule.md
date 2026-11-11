@@ -8,7 +8,7 @@ Changes a network discovery rule.
 ## SYNTAX
 
 ```
-Set-ZbxNetworkDiscoveryRule [-InputObject] <ZabbixReference<ZabbixNetworkDiscoveryRule>[]> [[-Name] <string>] [-ProxyId <ulong>] [-IpRange <string>] [-Delay <string>] [-Status <ZabbixNetworkDiscoveryRuleStatus>] [-ConcurrencyMax <int>] [-Check <ZabbixNetworkDiscoveryCheckRequest[]>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Set-ZbxNetworkDiscoveryRule [-InputObject] <ZabbixReference<ZabbixNetworkDiscoveryRule>[]> [[-Name] <string>] [-ProxyId <ulong>] [-IPRange <string>] [-Delay <string>] [-Status <ZabbixNetworkDiscoveryRuleStatus>] [-ConcurrencyMax <int>] [-Check <ZabbixNetworkDiscoveryCheckRequest[]>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -80,7 +80,7 @@ Network discovery rule name; no two rules may share it.
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -IpRange
+### -IPRange
 
 Addresses to scan, as a comma-separated list of single IP addresses, ranges such as 192.168.1.1-255, and CIDR subnets; each range may cover at most 65536 addresses.
 
@@ -246,7 +246,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 
 - `ZabbixReference<ZabbixNetworkDiscoveryRule>[]`: Bound to -InputObject (ByValue). Represents a reference to an API object: a parameter that points at an API object takes its id, its name, or the object itself piped from a Get- cmdlet, and becomes an id before the call — one parameter, three spellings, one resolution.
 - `ulong`: Bound to -ProxyId (ByPropertyName).
-- `string`: Bound to -Name (ByPropertyName), -IpRange (ByPropertyName), -Delay (ByPropertyName). Text.
+- `string`: Bound to -Name (ByPropertyName), -IPRange (ByPropertyName), -Delay (ByPropertyName). Text.
 - `ZabbixNetworkDiscoveryRuleStatus`: Bound to -Status (ByPropertyName). The network discovery rule status values: DRULE_STATUS_* in defines.inc.php.
 - `int`: Bound to -ConcurrencyMax (ByPropertyName). A number.
 - `ZabbixNetworkDiscoveryCheckRequest[]`: Bound to -Check (ByPropertyName). Network discovery check request class.

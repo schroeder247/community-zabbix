@@ -17,7 +17,7 @@ Get-ZbxHost -Group 'Linux servers' | Get-ZbxUserMacro |
 #region Search macros by part of their name
 # -Search is usermacro.get's substring search, keyed by the API field name (macro).
 Get-ZbxUserMacro -Host 'web-01', 'db-01' -Search @{ macro = 'APP.' } -SelectHosts |
-    Select-Object @{ n = 'Host'; e = { $_.Hosts.TechnicalName } }, Macro, Value
+    Select-Object @{ n = 'Host'; e = { $_.Hosts.HostName } }, Macro, Value
 #endregion
 
 #region List the global macros

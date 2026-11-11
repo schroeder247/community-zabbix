@@ -61,7 +61,7 @@ public abstract class ZabbixNode : IZabbixNode
     private async Task<IReadOnlyList<ZabbixItem>> SameKeyAsync(ZabbixItemKey key, CancellationToken cancellationToken)
     {
         IReadOnlyList<ZabbixItem> named = await Client.Items.GetAsync(Selection.ToKeySearch(), cancellationToken).ConfigureAwait(false);
-        return [.. named.Where(item => ZabbixItemKey.TryParse(item.Key, out ZabbixItemKey other) && other.Name == key.Name && other.Parameters.SequenceEqual(key.Parameters))];
+        return [.. named.Where(item => item.Key is { } other && other.Name == key.Name && other.Parameters.SequenceEqual(key.Parameters))];
     }
 
     /// <summary>
@@ -138,7 +138,7 @@ public abstract class ZabbixNode : IZabbixNode
     public virtual async IAsyncEnumerable<ZabbixValue> GetHistoryAsync(DateTimeOffset from, DateTimeOffset? to = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var keys = new ZabbixItemKeyReport(Logger);
-        Dictionary<ulong, (string Host, ZabbixItemKey Key, ZabbixItemValueType Type)> items = [];
+        Dictionary<ulong, (string HostName, ZabbixItemKey Key, ZabbixItemValueType Type)> items = [];
         await foreach (ZabbixItem item in GetItemsAsync(cancellationToken).ConfigureAwait(false))
             if (item is { ItemId: { } id, ValueType: { } type, HostName: { } host } && keys.TryRead(item, out ZabbixItemKey key)) items[id] = (host, key, type);
 
@@ -149,7 +149,7 @@ public abstract class ZabbixNode : IZabbixNode
     }
 
     /// <summary>The history of <paramref name="items"/> from second <paramref name="from"/>, one cursor per value type, merged in clock order.</summary>
-    internal IAsyncEnumerable<ZabbixValue> ReadHistoryAsync(IReadOnlyDictionary<ulong, (string Host, ZabbixItemKey Key, ZabbixItemValueType Type)> items, long from, long? to, CancellationToken cancellationToken)
+    internal IAsyncEnumerable<ZabbixValue> ReadHistoryAsync(IReadOnlyDictionary<ulong, (string HostName, ZabbixItemKey Key, ZabbixItemValueType Type)> items, long from, long? to, CancellationToken cancellationToken)
     {
         ILogger logger = Logger;
         List<IAsyncEnumerable<ZabbixValue>> cursors = [.. items
@@ -161,9 +161,9 @@ public abstract class ZabbixNode : IZabbixNode
 
         // A row for an item that was not asked about, or with no value, is not history.get's answer to this read: the
         // reply is the server's fault (invalid_response), never a KeyNotFoundException or an empty value read as data.
-        static ZabbixValue ToValue(IReadOnlyDictionary<ulong, (string Host, ZabbixItemKey Key, ZabbixItemValueType Type)> items, (ZabbixHistoryRecord Record, ZabbixClock Clock) row)
-            => row.Record.ItemId is { } id && items.TryGetValue(id, out (string Host, ZabbixItemKey Key, ZabbixItemValueType Type) item)
-                ? new(item.Host, item.Key, row.Record.Value ?? throw new InvalidDataException($"The history.get reply carries a row of item {id} without a value."), row.Clock)
+        static ZabbixValue ToValue(IReadOnlyDictionary<ulong, (string HostName, ZabbixItemKey Key, ZabbixItemValueType Type)> items, (ZabbixHistoryRecord Record, ZabbixClock Clock) row)
+            => row.Record.ItemId is { } id && items.TryGetValue(id, out (string HostName, ZabbixItemKey Key, ZabbixItemValueType Type) item)
+                ? new(item.HostName, item.Key, row.Record.Value ?? throw new InvalidDataException($"The history.get reply carries a row of item {id} without a value."), row.Clock)
                 : throw new InvalidDataException($"The history.get reply carries a row of item {row.Record.ItemId?.ToString(CultureInfo.InvariantCulture) ?? "(none)"}, which was not asked for.");
     }
 

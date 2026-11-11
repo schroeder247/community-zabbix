@@ -274,7 +274,7 @@ public sealed class ParameterShapeTests
     [InlineData("New-ZbxMediaType", "Name", 0)]
     [InlineData("New-ZbxMediaType", "Type", 1)]
     [InlineData("New-ZbxRole", "Type", 1)]
-    [InlineData("New-ZbxUser", "Username", 0)]
+    [InlineData("New-ZbxUser", "UserName", 0)]
     [InlineData("New-ZbxUserMacro", "Macro", 0)]
     [InlineData("New-ZbxUserMacro", "Value", 1)]
     [InlineData("New-ZbxHostInterface", "HostId", 0)]
@@ -394,8 +394,8 @@ public sealed class ParameterShapeTests
             "ActiveSince: DateOnly, DateTimeOffset",
             "ActiveTill: DateOnly, DateTimeOffset",
             "Agent: DnsEndPoint, String",
-            "AuthType: Enum, Int32",
-            "Config: JsonElement, Record",
+            "AuthenticationType: Enum, Int32",
+            "Configuration: JsonElement, Record",
             "Details: Record, SwitchParameter",
             "EventName: Record, String",
             "Expression: Record, String",
@@ -421,7 +421,7 @@ public sealed class ParameterShapeTests
             "Timeout: String, TimeSpan",
             "Type: Enum, String",
             "Url: Record, String",
-            "UseIp: Enum, SwitchParameter",
+            "UseIP: Enum, SwitchParameter",
             "User: Record, Reference",
             "UserGroup: Record, Reference",
             "Value: Object, String",

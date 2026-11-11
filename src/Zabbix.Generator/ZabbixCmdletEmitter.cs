@@ -156,7 +156,7 @@ internal sealed partial class ZabbixCmdletEmitter(ApiDescription api)
         if (id is null) return null;
         FieldDescription? nameField = EntityNameField(service.Object, read);
         FieldDescription? idsField = getParameters.Fields.FirstOrDefault(f => f.Kind == "list:id" && f.Wire == id.Wire + "s");
-        return new EntityInfo(service.Object, Noun(service.Client), read, getParameters, id.Wire, id.Name, id.Kind, nameField?.Wire, nameField?.Name, idsField?.Name);
+        return new EntityInfo(service.Object, service.CmdletNoun ?? Noun(service.Client), read, getParameters, id.Wire, id.Name, id.Kind, nameField?.Wire, nameField?.Name, idsField?.Name);
     }
 
     /// <summary>
@@ -608,8 +608,8 @@ internal sealed partial class ZabbixCmdletEmitter(ApiDescription api)
         }
     }
 
-    // New-ZbxHost's single-interface shorthand: -InterfaceType/-InterfaceIp/-InterfaceDns/
-    // -InterfacePort/-UseIp build exactly one interface, the most common way scripts create a host in one line, which
+    // New-ZbxHost's single-interface shorthand: -InterfaceType/-InterfaceIP/-InterfaceDns/
+    // -InterfacePort/-UseIP build exactly one interface, the most common way scripts create a host in one line, which
     // -Interface (a typed ZabbixHostInterfaceRequest[], the "list:object" shape Param() emits) cannot express. The
     // shorthand is additive, not exclusive: passing both -Interface and the shorthand appends the shorthand-built
     // interface to whatever -Interface already carries. The object and its list field are the description's
@@ -709,16 +709,16 @@ internal sealed partial class ZabbixCmdletEmitter(ApiDescription api)
     private static void EmitHostInterfaceShorthandParameters(StringBuilder code)
     {
         code.Append("    /// <summary>The type of the one interface this shorthand adds to -Interface. Default\n");
-        code.Append("    /// Agent when any of -InterfaceIp/-InterfaceDns/-InterfacePort/-UseIp is bound but -InterfaceType is not.</summary>\n");
+        code.Append("    /// Agent when any of -InterfaceIP/-InterfaceDns/-InterfacePort/-UseIP is bound but -InterfaceType is not.</summary>\n");
         code.Append("    [global::System.Management.Automation.Parameter(ValueFromPipelineByPropertyName = true)]\n    public global::Community.Zabbix.ZabbixInterfaceType? InterfaceType { get; set; }\n\n");
         code.Append("    /// <summary>The shorthand interface's IP address. Default 127.0.0.1.</summary>\n");
-        code.Append("    [global::System.Management.Automation.Parameter(ValueFromPipelineByPropertyName = true)]\n    public string? InterfaceIp { get; set; }\n\n");
+        code.Append("    [global::System.Management.Automation.Parameter(ValueFromPipelineByPropertyName = true)]\n    public string? InterfaceIP { get; set; }\n\n");
         code.Append("    /// <summary>The shorthand interface's DNS name.</summary>\n");
         code.Append("    [global::System.Management.Automation.Parameter(ValueFromPipelineByPropertyName = true)]\n    public string? InterfaceDns { get; set; }\n\n");
         code.Append("    /// <summary>The shorthand interface's port. Default 10050 (161 for -InterfaceType Snmp).</summary>\n");
         code.Append("    [global::System.Management.Automation.Parameter(ValueFromPipelineByPropertyName = true)]\n    public string? InterfacePort { get; set; }\n\n");
         code.Append("    /// <summary>Connect by IP instead of DNS for the shorthand interface. Default: by IP, or by DNS when only -InterfaceDns is given.</summary>\n");
-        code.Append("    [global::System.Management.Automation.Parameter(ValueFromPipelineByPropertyName = true)]\n    public global::System.Management.Automation.SwitchParameter UseIp { get; set; } = new global::System.Management.Automation.SwitchParameter(true);\n\n");
+        code.Append("    [global::System.Management.Automation.Parameter(ValueFromPipelineByPropertyName = true)]\n    public global::System.Management.Automation.SwitchParameter UseIP { get; set; } = new global::System.Management.Automation.SwitchParameter(true);\n\n");
     }
 
     private static void EmitHostInterfaceShorthandMerge(StringBuilder code)
@@ -726,19 +726,19 @@ internal sealed partial class ZabbixCmdletEmitter(ApiDescription api)
         code.Append('\n');
         code.Append("    // New-ZbxHost's single-interface shorthand: builds exactly one\n");
         code.Append("    // ZabbixHostInterfaceRequest from the shorthand parameters above and appends it to -Interface. Gated on\n");
-        code.Append("    // MyInvocation.BoundParameters, not a null check: every shorthand parameter has a non-null default (UseIp\n");
+        code.Append("    // MyInvocation.BoundParameters, not a null check: every shorthand parameter has a non-null default (UseIP\n");
         code.Append("    // defaults true), so a null check cannot tell \"not given\" from \"given the default\".\n");
         code.Append("    private global::Community.Zabbix.ZabbixHostInterfaceRequest[]? MergeInterfaces(global::Community.Zabbix.ZabbixHostInterfaceRequest[]? interfaces)\n    {\n");
-        code.Append("        if (!MyInvocation.BoundParameters.ContainsKey(nameof(InterfaceType)) && !MyInvocation.BoundParameters.ContainsKey(nameof(InterfaceIp))\n");
+        code.Append("        if (!MyInvocation.BoundParameters.ContainsKey(nameof(InterfaceType)) && !MyInvocation.BoundParameters.ContainsKey(nameof(InterfaceIP))\n");
         code.Append("            && !MyInvocation.BoundParameters.ContainsKey(nameof(InterfaceDns)) && !MyInvocation.BoundParameters.ContainsKey(nameof(InterfacePort))\n");
-        code.Append("            && !MyInvocation.BoundParameters.ContainsKey(nameof(UseIp)))\n");
+        code.Append("            && !MyInvocation.BoundParameters.ContainsKey(nameof(UseIP)))\n");
         code.Append("            return interfaces;\n");
         code.Append("        global::Community.Zabbix.ZabbixInterfaceType type = InterfaceType ?? global::Community.Zabbix.ZabbixInterfaceType.Agent;\n");
-        // -InterfaceDns alone must not create useip=1 on 127.0.0.1, an interface that never reaches the named host. A DNS name without an address means connect by DNS, unless -UseIp says otherwise.
-        code.Append("        bool useIp = MyInvocation.BoundParameters.ContainsKey(nameof(UseIp)) ? UseIp.IsPresent : InterfaceDns is null || InterfaceIp is not null;\n");
+        // -InterfaceDns alone must not create useip=1 on 127.0.0.1, an interface that never reaches the named host. A DNS name without an address means connect by DNS, unless -UseIP says otherwise.
+        code.Append("        bool useIP = MyInvocation.BoundParameters.ContainsKey(nameof(UseIP)) ? UseIP.IsPresent : InterfaceDns is null || InterfaceIP is not null;\n");
         code.Append("        var shorthand = new global::Community.Zabbix.ZabbixHostInterfaceRequest\n        {\n");
-        code.Append("            Type = type,\n            Main = global::Community.Zabbix.ZabbixInterfacePriority.Primary,\n            UseIp = useIp ? global::Community.Zabbix.ZabbixHostInterfaceUseIp.Ip : global::Community.Zabbix.ZabbixHostInterfaceUseIp.Dns,\n");
-        code.Append("            Ip = InterfaceIp ?? (useIp ? \"127.0.0.1\" : string.Empty),\n            Dns = InterfaceDns ?? string.Empty,\n");
+        code.Append("            Type = type,\n            Main = global::Community.Zabbix.ZabbixInterfacePriority.Primary,\n            UseIP = useIP ? global::Community.Zabbix.ZabbixHostInterfaceUseIP.IP : global::Community.Zabbix.ZabbixHostInterfaceUseIP.Dns,\n");
+        code.Append("            IP = InterfaceIP ?? (useIP ? \"127.0.0.1\" : string.Empty),\n            Dns = InterfaceDns ?? string.Empty,\n");
         code.Append("            Port = InterfacePort is null ? (type == global::Community.Zabbix.ZabbixInterfaceType.Snmp ? 161 : 10050) : global::Community.Zabbix.ZabbixPort.Parse(InterfacePort),\n");
         code.Append("        };\n");
         code.Append("        return interfaces is null ? [shorthand] : [.. interfaces, shorthand];\n    }\n");
@@ -823,7 +823,7 @@ internal sealed partial class ZabbixCmdletEmitter(ApiDescription api)
 
     // An object whose requests carry a visible name beside a technical one (cmdlets.objects.<object>.names: a host's
     // "name" beside its "host") takes the technical name as -Name, the name Get-Zbx<Object> -Name selects by and the
-    // records call TechnicalName, and the visible name as -DisplayName (VisibleName on the records). Every other field
+    // records call HostName, and the visible name as -DisplayName (VisibleName on the records). Every other field
     // takes its member's name.
     private string CmdletPropertyName(string? serviceObject, FieldDescription field)
     {
@@ -852,7 +852,7 @@ internal sealed partial class ZabbixCmdletEmitter(ApiDescription api)
     // A parameter named after one of PSCmdlet's own members (-Host is the host a command filters or creates on;
     // PSCmdlet.Host is the PowerShell host) would hide it with `new`. The property takes a name of its own and the
     // parameter keeps its spelling as an alias: the name the description gives the field (cmdlets.objects.<object>.unhide:
-    // the technical name of a host is TechnicalName, as on the read record), else its own name followed by Value; a
+    // the technical name of a host is HostName, as on the read record), else its own name followed by Value; a
     // reference filter is <Member>Reference.
     private static bool HidesCmdletMember(string name) => Array.IndexOf(s_cmdletMembers, name) >= 0;
 
@@ -899,7 +899,7 @@ internal sealed partial class ZabbixCmdletEmitter(ApiDescription api)
         // pipeline — Get-ZbxHost | New-ZbxItem ..., and a template's TemplateId the same.
         bool owner = create && info.Reference is null && info.IsId && field.Wire == "hostid";
         // A generated New-/Set- takes every field by property name, so an Import-Csv row or a [pscustomobject] with Name,
-        // InterfaceIp, ... columns creates or changes one object per row; the base unbinds what a piped Zabbix record
+        // InterfaceIP, ... columns creates or changes one object per row; the base unbinds what a piped Zabbix record
         // bound that is not its own (ZabbixPipedRecord). A secret is never taken from a piped object: a SecureString
         // has no conversion from a column's text, and a column of plaintext secrets is what the type exists to prevent.
         bool byPropertyName = info.Reference is not null || owner || (serviceObject is not null && !info.Secret);
@@ -1054,6 +1054,7 @@ internal sealed partial class ZabbixCmdletEmitter(ApiDescription api)
             case ZabbixTypedFields.Port: return new("string?", false, false, false, Parse: "global::Community.Zabbix.ZabbixPort.Parse");
             case ZabbixTypedFields.Duration: return new("string?", false, false, false, Parse: "global::Community.Zabbix.ZabbixDuration.Parse");
             case ZabbixTypedFields.Peers: return new("string?", false, false, false, Parse: "global::Community.Zabbix.ZabbixPeer.ParseList");
+            case ZabbixTypedFields.ItemKey: return new("string?", false, false, false, Parse: "global::Community.Zabbix.ZabbixItemKey.Parse");
         }
         if (field.Kind.StartsWith("enum:", StringComparison.Ordinal))
         {

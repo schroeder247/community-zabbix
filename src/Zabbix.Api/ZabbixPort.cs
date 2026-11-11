@@ -9,14 +9,16 @@ using System.Text.Json.Serialization;
 namespace Community.Zabbix;
 
 /// <summary>
-/// Represents the port of a host's interface as Zabbix takes it: a number from 0 to 65535, or a macro that holds one. An
+/// Represents a port as Zabbix takes it: a number from 0 to 65535, or a macro that holds one, where the field takes a
+/// macro. A host interface's, a proxy's, a script's, a user directory's and a media type's SMTP port are one. An
 /// <see cref="int"/> converts to one, <c>h.Port = 161</c>, and <see cref="Parse(string)"/> takes a macro:
 /// <c>ZabbixPort.Parse("{$SNMP_PORT}")</c>.
 /// </summary>
 /// <remarks>
 /// A macro is a user macro, or an LLD macro, which Zabbix takes in a host prototype's interface (<c>CHostInterface.php</c>
-/// and <c>CHostPrototype.php</c> 7.0 check a port so). The default value is port 0. A value read from a reply is kept as
-/// the server wrote it, even where a newer Zabbix writes more than this grammar.
+/// and <c>CHostPrototype.php</c> 7.0 check a port so); which fields take a macro is the server's to say. The default value
+/// is port 0. A value read from a reply, text or a number, is kept as the server wrote it, even where a newer Zabbix
+/// writes more than this grammar.
 /// </remarks>
 [JsonConverter(typeof(ZabbixPortConverter))]
 public readonly record struct ZabbixPort : ISpanParsable<ZabbixPort>

@@ -56,7 +56,7 @@ New-ZbxUser needs -RoleId; read it by name.
 ### Example 3: Show which users have a role
 
 ```powershell
-Get-ZbxRole -Name 'User role' -SelectUsers | Select-Object -ExpandProperty Users | Select-Object Username
+Get-ZbxRole -Name 'User role' -SelectUsers | Select-Object -ExpandProperty Users | Select-Object UserName
 ```
 
 -SelectUsers adds the role's users to each role.

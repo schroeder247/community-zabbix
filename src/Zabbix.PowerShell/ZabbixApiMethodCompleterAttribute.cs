@@ -22,8 +22,9 @@ internal sealed class ZabbixApiMethodCompleterAttribute : ArgumentCompleterFacto
     /// <param name="version">The server's API version, when known.</param>
     internal static IEnumerable<string> Methods(string? word, Version? version)
         => ZabbixApiMethods.All.Keys
-            .Where(method => method.StartsWith(word ?? string.Empty, StringComparison.OrdinalIgnoreCase))
+            .Where(method => method.Name.StartsWith(word ?? string.Empty, StringComparison.OrdinalIgnoreCase))
             .Where(method => version is null || ZabbixApiMethods.Supports(method, version))
+            .Select(method => method.Name)
             .Order(StringComparer.Ordinal);
 
     private sealed class Completer : IArgumentCompleter

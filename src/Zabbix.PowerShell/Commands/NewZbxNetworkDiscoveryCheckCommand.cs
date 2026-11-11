@@ -61,19 +61,19 @@ public sealed class NewZbxNetworkDiscoveryCheckCommand : ZabbixCmdlet
 
     /// <summary>The SNMPv3 authentication passphrase (<c>snmpv3_authpassphrase</c>).</summary>
     [Parameter]
-    public SecureString? SnmpAuthPassphrase { get; set; }
+    public SecureString? SnmpAuthenticationPassphrase { get; set; }
 
     /// <summary>The SNMPv3 authentication protocol (<c>snmpv3_authprotocol</c>).</summary>
     [Parameter]
-    public ZabbixSnmpAuthProtocol? SnmpAuthProtocol { get; set; }
+    public ZabbixSnmpAuthenticationProtocol? SnmpAuthenticationProtocol { get; set; }
 
     /// <summary>The SNMPv3 privacy passphrase (<c>snmpv3_privpassphrase</c>).</summary>
     [Parameter]
-    public SecureString? SnmpPrivPassphrase { get; set; }
+    public SecureString? SnmpPrivacyPassphrase { get; set; }
 
     /// <summary>The SNMPv3 privacy protocol (<c>snmpv3_privprotocol</c>).</summary>
     [Parameter]
-    public ZabbixSnmpPrivProtocol? SnmpPrivProtocol { get; set; }
+    public ZabbixSnmpPrivacyProtocol? SnmpPrivacyProtocol { get; set; }
 
     /// <summary>The SNMPv3 context name (<c>snmpv3_contextname</c>).</summary>
     [Parameter]
@@ -112,10 +112,10 @@ public sealed class NewZbxNetworkDiscoveryCheckCommand : ZabbixCmdlet
             Ports = Ports ?? Port?.ToString(CultureInfo.InvariantCulture),
             Snmpv3SecurityName = SnmpSecurityName,
             Snmpv3SecurityLevel = SnmpSecurityLevel,
-            Snmpv3AuthPassphrase = SnmpAuthPassphrase is null ? null : new NetworkCredential(string.Empty, SnmpAuthPassphrase).Password,
-            Snmpv3AuthProtocol = SnmpAuthProtocol,
-            Snmpv3PrivPassphrase = SnmpPrivPassphrase is null ? null : new NetworkCredential(string.Empty, SnmpPrivPassphrase).Password,
-            Snmpv3PrivProtocol = SnmpPrivProtocol,
+            Snmpv3AuthenticationPassphrase = SnmpAuthenticationPassphrase is null ? null : new NetworkCredential(string.Empty, SnmpAuthenticationPassphrase).Password,
+            Snmpv3AuthenticationProtocol = SnmpAuthenticationProtocol,
+            Snmpv3PrivacyPassphrase = SnmpPrivacyPassphrase is null ? null : new NetworkCredential(string.Empty, SnmpPrivacyPassphrase).Password,
+            Snmpv3PrivacyProtocol = SnmpPrivacyProtocol,
             Snmpv3ContextName = SnmpContextName,
         };
         try

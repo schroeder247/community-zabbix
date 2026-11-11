@@ -905,7 +905,7 @@ public sealed class FluentApiTests
         Assert.True(bound.Port > 0);
         Assert.Equal(1, response.Processed);
         Assert.True(values.Reader.TryRead(out ZabbixValue? taken));
-        Assert.Equal("web-01", taken.Host);
+        Assert.Equal("web-01", taken.HostName);
         Assert.Equal("42", taken.Value);
     }
 
@@ -1014,7 +1014,7 @@ public sealed class FluentApiTests
             .WithMaxConnectionsPerServer(20)
             .WithMaxResponseContentBytes(1024)
             .WithTimeout(TimeSpan.FromMinutes(1))
-            .WithTimeout("history.get", TimeSpan.FromMinutes(2))
+            .WithTimeout(ZabbixApiMethod.HistoryGet, TimeSpan.FromMinutes(2))
             .Configure(options => options.Timeouts["configuration.import"] = TimeSpan.FromMinutes(5))
             .ConfigureResilience(resilience => resilience.Retry.MaxRetryAttempts = 5);
 
@@ -1080,7 +1080,7 @@ public sealed class FluentApiTests
         Assert.Equal("endpoint", Assert.Throws<ArgumentException>(() => builder.WithEndpoint(new Uri("zabbix", UriKind.Relative))).ParamName);
         Assert.Throws<UriFormatException>(() => builder.WithEndpoint("zabbix.example"));
         Assert.Equal("token", Assert.ThrowsAny<ArgumentException>(() => builder.WithToken("a token")).ParamName);
-        Assert.Equal("method", Assert.ThrowsAny<ArgumentException>(() => builder.WithTimeout(" ", TimeSpan.FromMinutes(1))).ParamName);
+        Assert.Equal("method", Assert.ThrowsAny<ArgumentException>(() => builder.WithTimeout(default(ZabbixApiMethod), TimeSpan.FromMinutes(1))).ParamName);
     }
 
     [Fact]
@@ -1248,11 +1248,11 @@ public sealed class FluentApiTests
         List<ZabbixValue> latest = await web.GetLatestAsync(TestContext.Current.CancellationToken).ToListAsync(TestContext.Current.CancellationToken);
         List<ZabbixHostNode> hosts = await fluent.Zabbix.HostGroups["Linux"].Hosts.ToListAsync(TestContext.Current.CancellationToken);
 
-        Assert.Equal("web-01", web.Name);
+        Assert.Equal("web-01", web.HostName);
         Assert.Empty(latest);
         JsonElement sent = fluent.Api.ParamsOf("item.get").First();
         Assert.Equal(("web-01", "Linux"), (sent.GetProperty("host").GetString(), sent.GetProperty("group").GetString()));
-        Assert.Equal(["web-01"], hosts.Select(host => host.Name));
+        Assert.Equal(["web-01"], hosts.Select(host => host.HostName));
         Assert.Equal("7", fluent.Api.ParamsOf("host.get").Last().GetProperty("groupids")[0].GetString());
     }
 
@@ -1278,7 +1278,7 @@ public sealed class FluentApiTests
         await fluent.Zabbix.Hosts.GetAsync(new ZabbixHostGetParameters { Limit = 4 });
 #pragma warning restore xUnit1051
 
-        Assert.Equal("web-01", Assert.Single(all).TechnicalName);
+        Assert.Equal("web-01", Assert.Single(all).HostName);
         Assert.Equal([null, 1, 2, null, null, 3, 4], fluent.Api.ParamsOf("host.get").Select(sent => sent.TryGetProperty("limit", out JsonElement limit) ? limit.GetInt32() : (int?)null));
     }
 
@@ -1295,7 +1295,7 @@ public sealed class FluentApiTests
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => fluent.Zabbix.Hosts.CountAsync(cancelled));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => fluent.Zabbix.Hosts.CreateAsync("web-02", [1UL], cancelled));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => fluent.Zabbix.Hosts.DeleteAsync(1UL, cancelled));
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => fluent.Zabbix.SendAsync("host.get", JsonDocument.Parse("{}").RootElement, cancelled));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => fluent.Zabbix.SendAsync(ZabbixApiMethod.HostGet, JsonDocument.Parse("{}").RootElement, cancelled));
         await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
             await fluent.Zabbix.Hosts["web-01"].GetHistoryAsync(ZabbixItemKeys.Cpu.Load(), TimeSpan.FromHours(1), cancelled).ToListAsync(TestContext.Current.CancellationToken));
 

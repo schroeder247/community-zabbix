@@ -118,7 +118,7 @@ internal static class ZabbixAgentHostProvisioning
             new ZabbixItemGetParameters { HostIds = [hostId] }, cancellationToken).ConfigureAwait(false);
         Dictionary<string, ulong> byKey = new(StringComparer.Ordinal);
         foreach (ZabbixItem item in existing)
-            if (item.Key is { } key && item.ItemId is { } id) byKey[key] = id;
+            if (item.Key is { } key && item.ItemId is { } id) byKey[key.ToString()] = id;
 
         foreach (string key in keys)
         {
@@ -133,7 +133,7 @@ internal static class ZabbixAgentHostProvisioning
                 HostId = hostId,
                 Name = DeriveName(key),
                 Type = type,
-                Key = key,
+                Key = ZabbixItemKey.Parse(key),
                 InterfaceId = type == ZabbixItemType.Zabbix ? interfaceId : null,
                 ValueType = ValueTypeOf(key, valueType),
                 Delay = TimeSpan.FromMinutes(1),
@@ -193,7 +193,7 @@ internal static class ZabbixAgentHostProvisioning
         List<ZabbixAgentHostItemStatus> items =
         [
             .. (host.Items ?? []).Where(item => item.Key is not null && item.ItemId is not null)
-                .Select(item => new ZabbixAgentHostItemStatus(item.Key!, item.ItemId!.Value, localHandlerKeys?.Contains(item.Key!) ?? false)),
+                .Select(item => new ZabbixAgentHostItemStatus(item.Key!.Value.ToString(), item.ItemId!.Value, localHandlerKeys?.Contains(item.Key!.Value.ToString()) ?? false)),
         ];
         return new ZabbixAgentHostStatus(host, items);
     }

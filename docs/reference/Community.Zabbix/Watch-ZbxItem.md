@@ -35,7 +35,7 @@ The Watch-ZbxItem cmdlet starts a watch: a session of this runspace that reads, 
 
 ```powershell
 Watch-ZbxItem -Name 'items' -HostName 'web-01' -Key 'zabbix[host,,items]' -Interval '2s'
-Receive-ZbxWatch -Name 'items' | Select-Object -First 1 | Select-Object Host, Key, Value
+Receive-ZbxWatch -Name 'items' | Select-Object -First 1 | Select-Object HostName, Key, Value
 Stop-ZbxWatch -Name 'items'
 ```
 

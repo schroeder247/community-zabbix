@@ -21,7 +21,7 @@ $backup | Import-ZbxConfiguration -Format Yaml -Rules @{
     Templates = @{ CreateMissing = $true }
     Items     = @{ CreateMissing = $true }
 } -Confirm:$false | Out-Null
-Get-ZbxTemplate -Name 'Web App' | Select-Object TemplateId, TechnicalName
+Get-ZbxTemplate -Name 'Web App' | Select-Object TemplateId, HostName
 #endregion
 
 #region Put a host back the way a file describes it
@@ -31,7 +31,7 @@ $path = Join-Path ([IO.Path]::GetTempPath()) 'web-01.yaml'
 Export-ZbxConfiguration -Host 'web-01' -Path $path
 Set-ZbxHost 'web-01' -Description 'changed by hand' | Out-Null
 Import-ZbxConfiguration -Path $path -Rules @{ Hosts = @{ UpdateExisting = $true } } -Confirm:$false | Out-Null
-Get-ZbxHost -Name 'web-01' | Select-Object TechnicalName, Description
+Get-ZbxHost -Name 'web-01' | Select-Object HostName, Description
 Remove-Item $path
 #endregion
 

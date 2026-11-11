@@ -2,7 +2,7 @@
 # License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
 #region Describe a template
 # -InputObject (position 0) takes the template's name, id or object.
-Set-ZbxTemplate -InputObject 'Web App' -Description 'Monitors the web application tier' -PassThru | Select-Object TechnicalName, Description
+Set-ZbxTemplate -InputObject 'Web App' -Description 'Monitors the web application tier' -PassThru | Select-Object HostName, Description
 #endregion
 
 #region Set a template's macros

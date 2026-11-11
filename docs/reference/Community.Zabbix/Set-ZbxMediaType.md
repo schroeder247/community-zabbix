@@ -8,7 +8,7 @@ Changes a media type.
 ## SYNTAX
 
 ```
-Set-ZbxMediaType [-InputObject] <ZabbixReference<ZabbixMediaType>[]> [[-Name] <string>] [-Type <ZabbixMediaTypeKind>] [-SmtpServer <string>] [-SmtpHelo <string>] [-SmtpEmail <string>] [-ExecPath <string>] [-GsmModem <string>] [-Username <string>] [-Password <SecureString>] [-Status <ZabbixMediaTypeStatus>] [-SmtpPort <int>] [-SmtpSecurity <ZabbixSmtpSecurity>] [-SmtpVerifyPeer <bool>] [-SmtpVerifyHost <bool>] [-SmtpAuthentication <ZabbixSmtpAuthentication>] [-Provider <ZabbixMediaTypeEmailProvider>] [-ExecParams <string>] [-MaxSessions <int>] [-MaxAttempts <int>] [-AttemptInterval <string>] [-ContentType <ZabbixMediaMessageFormat>] [-MessageFormat <ZabbixMediaMessageFormat>] [-Script <string>] [-Timeout <string>] [-ProcessTags <bool>] [-ShowEventMenu <ZabbixEventMenu>] [-EventMenuUrl <string>] [-EventMenuName <string>] [-Description <string>] [-Parameter <ZabbixMediaTypeParameterRequest[]>] [-MessageTemplate <ZabbixMediaTypeMessageTemplateRequest[]>] [-RedirectionUrl <string>] [-ClientId <string>] [-ClientSecret <SecureString>] [-AuthorizationUrl <string>] [-TokenUrl <string>] [-TokensStatus <int>] [-AccessToken <SecureString>] [-AccessTokenUpdated <DateTimeOffset>] [-AccessExpiresIn <int>] [-RefreshToken <SecureString>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Set-ZbxMediaType [-InputObject] <ZabbixReference<ZabbixMediaType>[]> [[-Name] <string>] [-Type <ZabbixMediaTypeKind>] [-SmtpServer <string>] [-SmtpHelo <string>] [-SmtpEmail <string>] [-ScriptName <string>] [-GsmModem <string>] [-UserName <string>] [-Password <SecureString>] [-Status <ZabbixMediaTypeStatus>] [-SmtpPort <string>] [-SmtpSecurity <ZabbixSmtpSecurity>] [-SmtpVerifyPeer <bool>] [-SmtpVerifyHost <bool>] [-SmtpAuthentication <ZabbixSmtpAuthentication>] [-Provider <ZabbixMediaTypeEmailProvider>] [-ScriptParameters <string>] [-MaxSessions <int>] [-MaxAttempts <int>] [-AttemptInterval <string>] [-ContentType <ZabbixMediaMessageFormat>] [-MessageFormat <ZabbixMediaMessageFormat>] [-Script <string>] [-Timeout <string>] [-ProcessTags <bool>] [-ShowEventMenu <ZabbixEventMenu>] [-EventMenuUrl <string>] [-EventMenuName <string>] [-Description <string>] [-Parameter <ZabbixMediaTypeParameterRequest[]>] [-MessageTemplate <ZabbixMediaTypeMessageTemplateRequest[]>] [-RedirectionUrl <string>] [-ClientId <string>] [-ClientSecret <SecureString>] [-AuthorizationUrl <string>] [-TokenUrl <string>] [-TokensStatus <int>] [-AccessToken <SecureString>] [-AccessTokenUpdated <DateTimeOffset>] [-AccessExpiresIn <int>] [-RefreshToken <SecureString>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -125,7 +125,7 @@ The sender address that email media types put on outgoing messages.
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -ExecPath
+### -ScriptName
 
 The file name of the alert script that script media types run.
 
@@ -155,7 +155,7 @@ The serial device of the GSM modem that SMS media types send through.
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -Username
+### -UserName
 
 The user name that email media types use for SMTP password authentication.
 
@@ -206,7 +206,7 @@ The port of the SMTP server, from 1 to 65535.
 
 | | |
 | --- | --- |
-| Type | `int` |
+| Type | `string` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |
@@ -290,7 +290,7 @@ The email provider preset that email media types use: generic SMTP, Gmail, Gmail
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -ExecParams
+### -ScriptParameters
 
 The parameters of script media types as one string with each parameter on its own line. Deprecated in Zabbix 7.0 and removed in 7.4; use the parameters list instead.
 
@@ -756,13 +756,13 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 
 - `ZabbixReference<ZabbixMediaType>[]`: Bound to -InputObject (ByValue). Represents a reference to an API object: a parameter that points at an API object takes its id, its name, or the object itself piped from a Get- cmdlet, and becomes an id before the call — one parameter, three spellings, one resolution.
 - `ZabbixMediaTypeKind`: Bound to -Type (ByPropertyName). The media type kind values: MEDIA_TYPE_* in defines.inc.php.
-- `string`: Bound to -Name (ByPropertyName), -SmtpServer (ByPropertyName), -SmtpHelo (ByPropertyName), -SmtpEmail (ByPropertyName), -ExecPath (ByPropertyName), -GsmModem (ByPropertyName), -Username (ByPropertyName), -ExecParams (ByPropertyName), -AttemptInterval (ByPropertyName), -Script (ByPropertyName), -Timeout (ByPropertyName), -EventMenuUrl (ByPropertyName), -EventMenuName (ByPropertyName), -Description (ByPropertyName), -RedirectionUrl (ByPropertyName), -ClientId (ByPropertyName), -AuthorizationUrl (ByPropertyName), -TokenUrl (ByPropertyName). Text.
+- `string`: Bound to -Name (ByPropertyName), -SmtpServer (ByPropertyName), -SmtpHelo (ByPropertyName), -SmtpEmail (ByPropertyName), -ScriptName (ByPropertyName), -GsmModem (ByPropertyName), -UserName (ByPropertyName), -SmtpPort (ByPropertyName), -ScriptParameters (ByPropertyName), -AttemptInterval (ByPropertyName), -Script (ByPropertyName), -Timeout (ByPropertyName), -EventMenuUrl (ByPropertyName), -EventMenuName (ByPropertyName), -Description (ByPropertyName), -RedirectionUrl (ByPropertyName), -ClientId (ByPropertyName), -AuthorizationUrl (ByPropertyName), -TokenUrl (ByPropertyName). Text.
 - `ZabbixMediaTypeStatus`: Bound to -Status (ByPropertyName). The media type status values: MEDIA_TYPE_STATUS_* in defines.inc.php.
-- `int`: Bound to -SmtpPort (ByPropertyName), -MaxSessions (ByPropertyName), -MaxAttempts (ByPropertyName), -TokensStatus (ByPropertyName), -AccessExpiresIn (ByPropertyName). A number.
 - `ZabbixSmtpSecurity`: Bound to -SmtpSecurity (ByPropertyName). The SMTP security values: SMTP_SECURITY_* in defines.inc.php.
 - `bool`: Bound to -SmtpVerifyPeer (ByPropertyName), -SmtpVerifyHost (ByPropertyName), -ProcessTags (ByPropertyName). True or false.
 - `ZabbixSmtpAuthentication`: Bound to -SmtpAuthentication (ByPropertyName). The SMTP authentication values: SMTP_AUTHENTICATION_* in defines.inc.php.
 - `ZabbixMediaTypeEmailProvider`: Bound to -Provider (ByPropertyName). CMediatypeHelper::EMAIL_PROVIDER_*.
+- `int`: Bound to -MaxSessions (ByPropertyName), -MaxAttempts (ByPropertyName), -TokensStatus (ByPropertyName), -AccessExpiresIn (ByPropertyName). A number.
 - `ZabbixMediaMessageFormat`: Bound to -ContentType (ByPropertyName), -MessageFormat (ByPropertyName). The media message format values: ZBX_MEDIA_MESSAGE_FORMAT_* in defines.inc.php.
 - `ZabbixEventMenu`: Bound to -ShowEventMenu (ByPropertyName). The event menu values: ZBX_EVENT_MENU_* in defines.inc.php.
 - `ZabbixMediaTypeParameterRequest[]`: Bound to -Parameter (ByPropertyName). parameters of a ZabbixMediaTypeCreateRequest.

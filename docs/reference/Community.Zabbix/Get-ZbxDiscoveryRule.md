@@ -10,25 +10,25 @@ Gets the discovery rules that find the parts of hosts and templates.
 ### All (Default)
 
 ```
-Get-ZbxDiscoveryRule [-Limit <int>] [-SortField <string[]>] [-Id <ulong[]>] [-Group <ZabbixReference<ZabbixHostGroup>[]>] [-Template <ZabbixReference<ZabbixTemplate>[]>] [-HostReference <ZabbixReference<ZabbixHost>[]>] [-Interface <ZabbixReference<ZabbixHostInterface>[]>] [-SelectHosts] [-SelectItems] [-SelectTriggers] [-SelectGraphs] [-SelectHostPrototypes] [-SelectFilter] [-SelectLldMacroPaths] [-SelectPreprocessing] [-SelectOverrides] [-SelectDiscoveryRule] [-SelectDiscoveryData] [-SelectDiscoveryRulePrototypes] [-Editable] [-InputObject <PSObject>] [-SortOrder <ZabbixSortOrder[]>] [-Search <Hashtable>] [-SearchByAny] [-StartSearch] [-ExcludeSearch] [-SearchWildcardsEnabled] [-CountOutput] [-Connection <ZabbixConnection>] [-First <UInt64>] [-Skip <UInt64>] [-IncludeTotalCount] [<CommonParameters>]
+Get-ZbxDiscoveryRule [-Limit <int>] [-SortField <string[]>] [-Id <ulong[]>] [-Group <ZabbixReference<ZabbixHostGroup>[]>] [-Template <ZabbixReference<ZabbixTemplate>[]>] [-HostReference <ZabbixReference<ZabbixHost>[]>] [-Interface <ZabbixReference<ZabbixHostInterface>[]>] [-SelectHosts] [-SelectItems] [-SelectTriggers] [-SelectGraphs] [-SelectHostPrototypes] [-SelectFilter] [-SelectLowLevelDiscoveryMacroPaths] [-SelectPreprocessing] [-SelectOverrides] [-SelectDiscoveryRule] [-SelectDiscoveryData] [-SelectDiscoveryRulePrototypes] [-Editable] [-InputObject <PSObject>] [-SortOrder <ZabbixSortOrder[]>] [-Search <Hashtable>] [-SearchByAny] [-StartSearch] [-ExcludeSearch] [-SearchWildcardsEnabled] [-CountOutput] [-Connection <ZabbixConnection>] [-First <UInt64>] [-Skip <UInt64>] [-IncludeTotalCount] [<CommonParameters>]
 ```
 
 ### ByName
 
 ```
-Get-ZbxDiscoveryRule [-Name] <string[]> [-Limit <int>] [-SortField <string[]>] [-Group <ZabbixReference<ZabbixHostGroup>[]>] [-Template <ZabbixReference<ZabbixTemplate>[]>] [-HostReference <ZabbixReference<ZabbixHost>[]>] [-Interface <ZabbixReference<ZabbixHostInterface>[]>] [-SelectHosts] [-SelectItems] [-SelectTriggers] [-SelectGraphs] [-SelectHostPrototypes] [-SelectFilter] [-SelectLldMacroPaths] [-SelectPreprocessing] [-SelectOverrides] [-SelectDiscoveryRule] [-SelectDiscoveryData] [-SelectDiscoveryRulePrototypes] [-Editable] [-InputObject <PSObject>] [-SortOrder <ZabbixSortOrder[]>] [-Search <Hashtable>] [-SearchByAny] [-StartSearch] [-ExcludeSearch] [-SearchWildcardsEnabled] [-CountOutput] [-Connection <ZabbixConnection>] [-First <UInt64>] [-Skip <UInt64>] [-IncludeTotalCount] [<CommonParameters>]
+Get-ZbxDiscoveryRule [-Name] <string[]> [-Limit <int>] [-SortField <string[]>] [-Group <ZabbixReference<ZabbixHostGroup>[]>] [-Template <ZabbixReference<ZabbixTemplate>[]>] [-HostReference <ZabbixReference<ZabbixHost>[]>] [-Interface <ZabbixReference<ZabbixHostInterface>[]>] [-SelectHosts] [-SelectItems] [-SelectTriggers] [-SelectGraphs] [-SelectHostPrototypes] [-SelectFilter] [-SelectLowLevelDiscoveryMacroPaths] [-SelectPreprocessing] [-SelectOverrides] [-SelectDiscoveryRule] [-SelectDiscoveryData] [-SelectDiscoveryRulePrototypes] [-Editable] [-InputObject <PSObject>] [-SortOrder <ZabbixSortOrder[]>] [-Search <Hashtable>] [-SearchByAny] [-StartSearch] [-ExcludeSearch] [-SearchWildcardsEnabled] [-CountOutput] [-Connection <ZabbixConnection>] [-First <UInt64>] [-Skip <UInt64>] [-IncludeTotalCount] [<CommonParameters>]
 ```
 
 ### ById
 
 ```
-Get-ZbxDiscoveryRule [-SortField <string[]>] -Id <ulong[]> [-Group <ZabbixReference<ZabbixHostGroup>[]>] [-Template <ZabbixReference<ZabbixTemplate>[]>] [-HostReference <ZabbixReference<ZabbixHost>[]>] [-Interface <ZabbixReference<ZabbixHostInterface>[]>] [-SelectHosts] [-SelectItems] [-SelectTriggers] [-SelectGraphs] [-SelectHostPrototypes] [-SelectFilter] [-SelectLldMacroPaths] [-SelectPreprocessing] [-SelectOverrides] [-SelectDiscoveryRule] [-SelectDiscoveryData] [-SelectDiscoveryRulePrototypes] [-Editable] [-InputObject <PSObject>] [-SortOrder <ZabbixSortOrder[]>] [-Search <Hashtable>] [-SearchByAny] [-StartSearch] [-ExcludeSearch] [-SearchWildcardsEnabled] [-CountOutput] [-Connection <ZabbixConnection>] [-First <UInt64>] [-Skip <UInt64>] [-IncludeTotalCount] [<CommonParameters>]
+Get-ZbxDiscoveryRule [-SortField <string[]>] -Id <ulong[]> [-Group <ZabbixReference<ZabbixHostGroup>[]>] [-Template <ZabbixReference<ZabbixTemplate>[]>] [-HostReference <ZabbixReference<ZabbixHost>[]>] [-Interface <ZabbixReference<ZabbixHostInterface>[]>] [-SelectHosts] [-SelectItems] [-SelectTriggers] [-SelectGraphs] [-SelectHostPrototypes] [-SelectFilter] [-SelectLowLevelDiscoveryMacroPaths] [-SelectPreprocessing] [-SelectOverrides] [-SelectDiscoveryRule] [-SelectDiscoveryData] [-SelectDiscoveryRulePrototypes] [-Editable] [-InputObject <PSObject>] [-SortOrder <ZabbixSortOrder[]>] [-Search <Hashtable>] [-SearchByAny] [-StartSearch] [-ExcludeSearch] [-SearchWildcardsEnabled] [-CountOutput] [-Connection <ZabbixConnection>] [-First <UInt64>] [-Skip <UInt64>] [-IncludeTotalCount] [<CommonParameters>]
 ```
 
 ### ByFilter
 
 ```
-Get-ZbxDiscoveryRule [-SortField <string[]>] -Filter <ZabbixDiscoveryRuleGetParameters> [-Group <ZabbixReference<ZabbixHostGroup>[]>] [-Template <ZabbixReference<ZabbixTemplate>[]>] [-HostReference <ZabbixReference<ZabbixHost>[]>] [-Interface <ZabbixReference<ZabbixHostInterface>[]>] [-SelectHosts] [-SelectItems] [-SelectTriggers] [-SelectGraphs] [-SelectHostPrototypes] [-SelectFilter] [-SelectLldMacroPaths] [-SelectPreprocessing] [-SelectOverrides] [-SelectDiscoveryRule] [-SelectDiscoveryData] [-SelectDiscoveryRulePrototypes] [-Editable] [-InputObject <PSObject>] [-SortOrder <ZabbixSortOrder[]>] [-Search <Hashtable>] [-SearchByAny] [-StartSearch] [-ExcludeSearch] [-SearchWildcardsEnabled] [-CountOutput] [-Connection <ZabbixConnection>] [-First <UInt64>] [-Skip <UInt64>] [-IncludeTotalCount] [<CommonParameters>]
+Get-ZbxDiscoveryRule [-SortField <string[]>] -Filter <ZabbixDiscoveryRuleGetParameters> [-Group <ZabbixReference<ZabbixHostGroup>[]>] [-Template <ZabbixReference<ZabbixTemplate>[]>] [-HostReference <ZabbixReference<ZabbixHost>[]>] [-Interface <ZabbixReference<ZabbixHostInterface>[]>] [-SelectHosts] [-SelectItems] [-SelectTriggers] [-SelectGraphs] [-SelectHostPrototypes] [-SelectFilter] [-SelectLowLevelDiscoveryMacroPaths] [-SelectPreprocessing] [-SelectOverrides] [-SelectDiscoveryRule] [-SelectDiscoveryData] [-SelectDiscoveryRulePrototypes] [-Editable] [-InputObject <PSObject>] [-SortOrder <ZabbixSortOrder[]>] [-Search <Hashtable>] [-SearchByAny] [-StartSearch] [-ExcludeSearch] [-SearchWildcardsEnabled] [-CountOutput] [-Connection <ZabbixConnection>] [-First <UInt64>] [-Skip <UInt64>] [-IncludeTotalCount] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -65,7 +65,7 @@ Get-ZbxDiscoveryRule -Template 'Linux by Zabbix agent' | Select-Object Name, Key
 
 ```powershell
 Get-ZbxHost -Name 'web-01' | Get-ZbxDiscoveryRule -SelectHosts |
-    Select-Object @{ n = 'Host'; e = { $_.Hosts.TechnicalName } }, Name, Key
+    Select-Object @{ n = 'Host'; e = { $_.Hosts.HostName } }, Name, Key
 ```
 
 Get-ZbxHost writes host objects; Get-ZbxDiscoveryRule binds each one to -Host. -SelectHosts adds the owning host.
@@ -297,7 +297,7 @@ Return the filter of the rule in the filter property.
 | Pipeline input | False |
 | Wildcards | False |
 
-### -SelectLldMacroPaths
+### -SelectLowLevelDiscoveryMacroPaths
 
 Return the LLD macro paths of the rule in the lld_macro_paths property.
 

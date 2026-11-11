@@ -33,7 +33,7 @@ public sealed class ZabbixVersionException : NotSupportedException, IZabbixError
     /// <param name="method">The API method.</param>
     /// <param name="serverVersion">The server's version.</param>
     /// <param name="capability">What the table says about the method.</param>
-    internal ZabbixVersionException(string method, Version serverVersion, ZabbixApiMethod capability)
+    internal ZabbixVersionException(ZabbixApiMethod method, Version serverVersion, ZabbixApiMethodInfo capability)
         : base(Describe(method, serverVersion, capability))
     {
         Method = method;
@@ -66,8 +66,8 @@ public sealed class ZabbixVersionException : NotSupportedException, IZabbixError
         Replacement = field.Replacement;
     }
 
-    /// <summary>The API method, e.g. <c>host.massupdate</c>.</summary>
-    public string? Method { get; }
+    /// <summary>The API method, e.g. <see cref="ZabbixApiMethod.HostMassUpdate"/>; <see langword="null"/> when the refusal names none.</summary>
+    public ZabbixApiMethod? Method { get; }
 
     /// <summary>The request field the server refuses, e.g. <c>hostids</c>; null when the whole method is missing.</summary>
     public string? Field { get; }
@@ -84,7 +84,7 @@ public sealed class ZabbixVersionException : NotSupportedException, IZabbixError
     /// <summary>The first version without it, if it was removed.</summary>
     public Version? RemovedIn { get; }
 
-    private static string Describe(string method, Version server, ZabbixApiMethod capability)
+    private static string Describe(ZabbixApiMethod method, Version server, ZabbixApiMethodInfo capability)
         => capability.RemovedIn is { } removed && ZabbixApiMethods.AtLeast(server, removed)
             ? $"Zabbix {server} does not have {method}: it was removed in {removed.ToString(2)}" + (capability.Replacement is { } use ? $"; {use}." : ".")
             : $"Zabbix {server} does not have {method}: it arrived in {capability.Since.ToString(2)}.";

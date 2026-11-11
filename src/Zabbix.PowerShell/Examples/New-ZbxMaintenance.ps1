@@ -27,5 +27,5 @@ New-ZbxMaintenance -Name 'Database upgrade' -Group 'Linux servers' -MaintenanceT
 $now = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
 $window = New-ZbxMaintenanceTimePeriod -TimePeriodType Onetime -StartDate $now -Period 3600
 $null = New-ZbxMaintenance -Name 'Checkout release' -Host 'web-01', 'db-01' -Tag @{ tag = 'env'; operator = 0; value = 'prod' } -ActiveSince $now -ActiveTill ($now + 3600) -TimePeriod $window
-(Get-ZbxMaintenance -Name 'Checkout release' -SelectTags -SelectHosts) | Select-Object Name, @{ n = 'Hosts'; e = { $_.Hosts.TechnicalName -join ', ' } }, @{ n = 'Tags'; e = { $_.Tags | ForEach-Object { '{0}={1}' -f $_.tag, $_.value } } }
+(Get-ZbxMaintenance -Name 'Checkout release' -SelectTags -SelectHosts) | Select-Object Name, @{ n = 'Hosts'; e = { $_.Hosts.HostName -join ', ' } }, @{ n = 'Tags'; e = { $_.Tags | ForEach-Object { '{0}={1}' -f $_.tag, $_.value } } }
 #endregion

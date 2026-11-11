@@ -1,6 +1,6 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
-$null = New-ZbxUser -Username 'jdoe' -Password (ConvertTo-SecureString 'Chang3-me-at-first-login!' -AsPlainText -Force) -RoleId (Get-ZbxRole -Name 'User role').RoleId -UserGroup 'Operators'
+$null = New-ZbxUser -UserName 'jdoe' -Password (ConvertTo-SecureString 'Chang3-me-at-first-login!' -AsPlainText -Force) -RoleId (Get-ZbxRole -Name 'User role').RoleId -UserGroup 'Operators'
 
 <#
 .SYNOPSIS
@@ -13,7 +13,7 @@ would change.
 #>
 #region Unblock a user
 # AttemptFailed is the user's failed login count; after the unblock it is 0.
-Unblock-ZbxUser -InputObject 'jdoe' -PassThru | Select-Object Username, AttemptFailed
+Unblock-ZbxUser -InputObject 'jdoe' -PassThru | Select-Object UserName, AttemptFailed
 #endregion
 
 #region Unblock every user with failed logins

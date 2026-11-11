@@ -38,7 +38,7 @@ The tag is merged with the host's current tags (host.update with the full list),
 ```powershell
 Get-ZbxHost -Group 'Linux servers' | Add-ZbxTag -Name 'backup' -Value 'daily'
 Get-ZbxHost -Group 'Linux servers' -SelectTags |
-    Select-Object TechnicalName, @{ n = 'Tags'; e = { ($_.Tags | ForEach-Object { '{0}={1}' -f $_.Tag, $_.Value }) -join ', ' } }
+    Select-Object HostName, @{ n = 'Tags'; e = { ($_.Tags | ForEach-Object { '{0}={1}' -f $_.Tag, $_.Value }) -join ', ' } }
 ```
 
 Get-ZbxHost writes host objects; Add-ZbxTag binds each one.

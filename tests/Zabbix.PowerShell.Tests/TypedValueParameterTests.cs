@@ -62,7 +62,7 @@ public sealed class TypedValueParameterTests
         using Shell shell = Shell.Open();
         shell.Connect(server);
 
-        Run run = shell.Invoke("New-ZbxHost -Host web-01 -Group @('7') -InterfaceType Agent -InterfaceIp '127.0.0.1' -InterfacePort '{$AGENT_PORT}' -Confirm:$false");
+        Run run = shell.Invoke("New-ZbxHost -Host web-01 -Group @('7') -InterfaceType Agent -InterfaceIP '127.0.0.1' -InterfacePort '{$AGENT_PORT}' -Confirm:$false");
 
         Assert.Empty(run.Errors);
         JsonElement iface = Assert.Single(Assert.Single(server.ParamsOf("host.create")).GetProperty("interfaces").EnumerateArray());

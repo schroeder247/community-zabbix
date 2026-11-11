@@ -8,7 +8,7 @@ Creates a trigger.
 ## SYNTAX
 
 ```
-New-ZbxTrigger [[-Name] <string>] [[-Expression] <string>] [-Uuid <string>] [-EventName <string>] [-OperationalData <string>] [-Description <string>] [-Priority <ZabbixSeverity>] [-Status <ZabbixTriggerStatus>] [-Type <ZabbixTriggerType>] [-UrlName <string>] [-Url <string>] [-RecoveryMode <ZabbixRecoveryMode>] [-RecoveryExpression <string>] [-CorrelationMode <ZabbixCorrelationMode>] [-CorrelationTag <string>] [-ManualClose] [-Tag <ZabbixTagRequest[]>] [-Dependency <ZabbixReference<ZabbixTrigger>[]>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+New-ZbxTrigger [[-Name] <string>] [[-Expression] <string>] [-Uuid <string>] [-EventName <string>] [-OperationalData <string>] [-Description <string>] [-Severity <ZabbixSeverity>] [-Status <ZabbixTriggerStatus>] [-Type <ZabbixTriggerType>] [-UrlName <string>] [-Url <string>] [-RecoveryMode <ZabbixRecoveryMode>] [-RecoveryExpression <string>] [-CorrelationMode <ZabbixCorrelationMode>] [-CorrelationTag <string>] [-ManualClose] [-Tag <ZabbixTagRequest[]>] [-Dependency <ZabbixReference<ZabbixTrigger>[]>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -20,17 +20,17 @@ A trigger is a problem expression over item values; when it becomes true the tri
 ### Example 1: Create a trigger on an item's last value
 
 ```powershell
-New-ZbxTrigger -Name 'Request backlog on web-01' -Expression 'last(/web-01/app.requests)>500' -Priority Average |
-    Select-Object TriggerId, Name, Priority
+New-ZbxTrigger -Name 'Request backlog on web-01' -Expression 'last(/web-01/app.requests)>500' -Severity Average |
+    Select-Object TriggerId, Name, Severity
 ```
 
--Name (position 0) is the trigger's name and -Expression (position 1) the problem expression; -Priority is the severity of the problems it raises.
+-Name (position 0) is the trigger's name and -Expression (position 1) the problem expression; -Severity is the severity of the problems it raises.
 
 ### Example 2: Create a trigger that recovers on its own expression
 
 ```powershell
 New-ZbxTrigger -Name 'Sustained load on web-01' -Expression 'avg(/web-01/app.requests,5m)>200' `
-    -RecoveryMode RecoveryExpression -RecoveryExpression 'avg(/web-01/app.requests,5m)<150' -Priority High |
+    -RecoveryMode RecoveryExpression -RecoveryExpression 'avg(/web-01/app.requests,5m)<150' -Severity High |
     Select-Object Name, RecoveryMode
 ```
 
@@ -39,7 +39,7 @@ With -RecoveryMode RecoveryExpression the problem ends only when -RecoveryExpres
 ### Example 3: Create a trigger with tags and an operational data line
 
 ```powershell
-New-ZbxTrigger -Name 'No requests on web-01' -Expression 'nodata(/web-01/app.requests,10m)=1' -Priority Warning `
+New-ZbxTrigger -Name 'No requests on web-01' -Expression 'nodata(/web-01/app.requests,10m)=1' -Severity Warning `
     -Tag @{ tag = 'service'; value = 'shop' } -OperationalData 'Last value: {ITEM.LASTVALUE1}' | Select-Object Name
 ```
 
@@ -137,7 +137,7 @@ Free-text description of the trigger; it may contain macros. The API calls it co
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -Priority
+### -Severity
 
 Severity of the trigger, from not classified to disaster. Defaults to not classified.
 
@@ -349,7 +349,7 @@ Creates without a confirmation prompt even where $ConfirmPreference is at or bel
 
 ### -InputObject
 
-A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIp, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
+A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIP, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
 
 | | |
 | --- | --- |
@@ -392,7 +392,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 ## INPUTS
 
 - `string`: Bound to -Uuid (ByPropertyName), -Name (ByPropertyName), -Expression (ByPropertyName), -EventName (ByPropertyName), -OperationalData (ByPropertyName), -Description (ByPropertyName), -UrlName (ByPropertyName), -Url (ByPropertyName), -RecoveryExpression (ByPropertyName), -CorrelationTag (ByPropertyName). Text.
-- `ZabbixSeverity`: Bound to -Priority (ByPropertyName). A trigger or problem severity.
+- `ZabbixSeverity`: Bound to -Severity (ByPropertyName). A trigger or problem severity.
 - `ZabbixTriggerStatus`: Bound to -Status (ByPropertyName). The trigger status values: TRIGGER_STATUS_* in defines.inc.php.
 - `ZabbixTriggerType`: Bound to -Type (ByPropertyName). The trigger type values: TRIGGER_MULT_EVENT_* in defines.inc.php.
 - `ZabbixRecoveryMode`: Bound to -RecoveryMode (ByPropertyName). The recovery mode values: ZBX_RECOVERY_MODE_* in defines.inc.php.

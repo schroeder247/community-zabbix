@@ -18,7 +18,7 @@ Set-ZbxMaintenance -InputObject 'Patch window' -ActiveTill ($m.ActiveSince + [Ti
 # -Host (the alias of -HostReference) and -Group replace the whole list, they do not add to it: include every host
 # that should stay covered.
 Set-ZbxMaintenance -InputObject 'Patch window' -Host 'web-01', 'db-01'
-(Get-ZbxMaintenance -Name 'Patch window' -SelectHosts).Hosts.TechnicalName
+(Get-ZbxMaintenance -Name 'Patch window' -SelectHosts).Hosts.HostName
 #endregion
 
 #region Update every maintenance a search finds, through the pipeline

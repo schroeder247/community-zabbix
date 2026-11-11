@@ -35,11 +35,23 @@ its package (`Community.Zabbix.Sdk.dll`), and the namespaces and telemetry names
 - **A per-version API model** (`Community.Zabbix.Api`). Every object record, enum, parameter set and request, generated at build
   time from a description extracted from the Zabbix 7.0, 7.4 and 8.0 sources. A member carries the versions that have
   it, and a call the connected server's version does not support throws `ZabbixVersionException` before anything is
-  sent. On 8.0 the removed `*.massupdate` methods and `hostinterface.replacehostinterfaces` are emulated.
+  sent. On 8.0 the removed `*.massupdate` methods and `hostinterface.replacehostinterfaces` are emulated. A method is a
+  `ZabbixApiMethod`, as an HTTP method is an `HttpMethod`: `ZabbixApiMethod.ConfigurationImport` for each method the model
+  knows and `new ZabbixApiMethod("acme.ping")` or `ZabbixApiMethod.Parse` for another, equal in any case;
+  `ZabbixApiMethods.Supports(method, version)` and `IsIdempotent(method)` answer for it, and
+  `WithTimeout(ZabbixApiMethod.ConfigurationImport, TimeSpan.FromMinutes(5))` sets its timeout. Names are spelled out and a
+  two-letter acronym is written in capitals (`EvaluationType`, `LowLevelDiscoveryMacroPaths`, `UserName`, `IP`, `HANodes`,
+  `OSFull`); a host's technical name is `HostName` on every record, node and value, and a member is named for what its type
+  says rather than its wire name (a host's `DiscoveryKind`, history.get's `ValueType`, a trigger's `Severity`). Every simple
+  enum has a zero value, `None` where the API defines none (the server refuses it), and a flags enum's zero is `None`.
 - **Typed items** ([ADR 0012](docs/adr/0012-typed-bcl-fluent-api.md)). `ZabbixItemKey<T>` declares a key with its type, and
   `ZabbixItemKeys` is the typed catalogue of Zabbix's own keys, whose choices are enums of their own (`ZabbixAverageWindow`,
   `ZabbixCpuLoadScope`, `ZabbixFileTypes`, `ZabbixProcessState`, `ZabbixTcpService`, `ZabbixDnsRecordType`, …). Sends, reads,
-  polls and agents' answers take them.
+  polls and agents' answers take them, as `key`, and so does `item.create`:
+  `zabbix.Items.CreateAsync(hostId, new ZabbixItemKey<ulong>("orders.pending"), ZabbixItemType.Trapper)` creates the item,
+  named by its key unless a lambda names it, with the value type the key's type gives (the integer types, `bool` and
+  `DateTimeOffset` unsigned, `double`, `decimal` and `TimeSpan` float, text and the rest text). Zabbix refuses a negative value
+  for an unsigned item when it arrives, so a key whose values can be negative passes `ZabbixItemValueType.Float`.
 - **A fluent API** ([ADR 0012](docs/adr/0012-typed-bcl-fluent-api.md)). `zabbix.Hosts.GetAsync(q => q.Search.VisibleName = "web")`,
   `zabbix.Hosts.CreateAsync("web-02", [groupId])`, `zabbix.Items[id].DeleteAsync()`, `zabbix.Hosts["web-01"].GetAsync()` and
   `zabbix.HostGroups["Linux"].Hosts["web-01"]`. Writes take a lambda, as reads do
@@ -68,9 +80,13 @@ its package (`Community.Zabbix.Sdk.dll`), and the namespaces and telemetry names
   prototype's and a discovery rule's update interval is a `ZabbixInterval`,
   which converts from a `TimeSpan` (`Delay = TimeSpan.FromMinutes(5)` sends `5m`) and parses macros and flexible and
   scheduling intervals; so is the interval an active agent is assigned (`ZabbixItemAssignment.Delay`) and the one a proxy's
-  configuration holds (`ZabbixProxyConfigItem.Delay`), and `GetNextCheck` answers when an agent checks it. An item's history,
-  trends and timeout, and a discovery rule's timeout, are a `ZabbixDuration`, from a `TimeSpan` (`History = TimeSpan.FromDays(90)`
-  sends `90d`) or a macro. An interface's port is a `ZabbixPort`, from an `int` or a macro. A trapper item's allowed hosts are
+  configuration holds (`ZabbixProxyConfigItem.Delay`), and `GetNextCheck` answers when an agent checks it. Every length of time
+  the API takes is a `ZabbixDuration`, from a `TimeSpan` (`History = TimeSpan.FromDays(90)` sends `90d`) or a macro: an
+  item's history, trends and timeout, a discovery rule's lifetimes, an action's escalation period, a web scenario's and a
+  network discovery rule's interval, a proxy's and the settings' timeouts, the housekeeper's periods and the rest. Every port
+  is a `ZabbixPort`, from an `int` or a macro: an interface's, a proxy's, a script's, a user directory's and a media type's
+  SMTP port. An item's key is a `ZabbixItemKey` on every record that holds one, and a reply keyed by the ids it was asked
+  about is keyed by `ulong` (`zabbix.Scripts.GetByHostAsync`). A trapper item's allowed hosts are
   a list of `ZabbixPeer`, each from an `IPAddress`, an `IPNetwork`, a DNS name or a macro, sent as Zabbix's comma-separated
   text, and `ZabbixListenerOptions.ParseAllowedPeers()` reads a listener's list as the same entries. Each reads back what the
   server sends. The PowerShell modules keep their text parameters (`-Delay 5m`, `-History 90d`, `-InterfacePort 10050`,
@@ -80,6 +96,8 @@ its package (`Community.Zabbix.Sdk.dll`), and the namespaces and telemetry names
   (`zabbix.HostGroups["Linux"]`) also reads, updates and deletes the group, and reaches its hosts by name; a typed read takes
   its key, `host.GetLastAsync(ZabbixItemKeys.Cpu.Load())`; every `Get…Async` throws `ZabbixNotFoundException` when there's
   nothing to return, and its `Find…Async` returns `null`; `IZabbixWatcher` streams the history collected since its last read.
+  A client finds a record by id only where the record has an id of its own: history and trends, whose rows share their
+  item's id, are read with `GetAsync`.
 - **The framed-TCP wire** (`Community.Zabbix.Wire`, a package of its own: an API consumer takes no TLS stack). `ZabbixWireClient`
   sends values, reads an item from an agent and asks a server, with PSK and certificate TLS and the HA node walk.
   `new ZabbixWireClient("zbx-server-01")` takes a server; `ZabbixWireClient.CreateBuilder()` sets more (`WithServer` for the one

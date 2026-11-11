@@ -66,8 +66,8 @@ public sealed class AdministrationCommandsTests
 
         Run run = shell.Invoke("""
             Test-ZbxUserDirectory ([Community.Zabbix.ZabbixUserDirectoryTestRequest]@{
-                Host = 'ldap.example'; Port = '389'; BaseDn = 'dc=example'; SearchAttribute = 'uid'
-                TestUsername = 'probe'; TestPassword = 'secret'
+                Host = 'ldap.example'; Port = '389'; BaseDN = 'dc=example'; SearchAttribute = 'uid'
+                TestUserName = 'probe'; TestPassword = 'secret'
             })
             """);
 

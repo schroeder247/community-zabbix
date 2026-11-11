@@ -298,7 +298,7 @@ public sealed class TypedItemTests
         Assert.Equal(
             [("web-01", "poll.value", "1"), ("web-01", "poll.async", "2"), ("web-01", "poll.service", "7"), ("web-01", "poll.service.async", "8"),
              ("other", "poll.untyped", "3"), ("other", "poll.untyped.async", "4"), ("other", "poll.many", "5")],
-            read.Select(value => (value.Host, value.Key.ToString(), value.Value)));
+            read.Select(value => (value.HostName, value.Key.ToString(), value.Value)));
     }
 
     [Fact]

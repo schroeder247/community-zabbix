@@ -178,7 +178,7 @@ public sealed record ZabbixPageTarget
     /// <returns>The target of the object's page; <see langword="null"/> when the object is <see langword="null"/>.</returns>
     [return: NotNullIfNotNull(nameof(host))]
     public static ZabbixPageTarget? FromZabbixHost(ZabbixHost? host)
-        => host is null ? null : new(ZabbixPageKind.Host, host.HostId, host.VisibleName ?? host.TechnicalName);
+        => host is null ? null : new(ZabbixPageKind.Host, host.HostId, host.VisibleName ?? host.HostName);
 
     /// <summary>The host group's page (the named form of the implicit conversion).</summary>
     /// <param name="group">The host group.</param>
@@ -192,7 +192,7 @@ public sealed record ZabbixPageTarget
     /// <returns>The target of the object's page; <see langword="null"/> when the object is <see langword="null"/>.</returns>
     [return: NotNullIfNotNull(nameof(template))]
     public static ZabbixPageTarget? FromZabbixTemplate(ZabbixTemplate? template)
-        => template is null ? null : new(ZabbixPageKind.Template, template.TemplateId, template.VisibleName ?? template.TechnicalName);
+        => template is null ? null : new(ZabbixPageKind.Template, template.TemplateId, template.VisibleName ?? template.HostName);
 
     /// <summary>The template group's page (the named form of the implicit conversion).</summary>
     /// <param name="group">The template group.</param>
@@ -304,7 +304,7 @@ public sealed record ZabbixPageTarget
     /// <returns>The target of the object's page; <see langword="null"/> when the object is <see langword="null"/>.</returns>
     [return: NotNullIfNotNull(nameof(user))]
     public static ZabbixPageTarget? FromZabbixUser(ZabbixUser? user)
-        => user is null ? null : new(ZabbixPageKind.User, user.UserId, user.Username);
+        => user is null ? null : new(ZabbixPageKind.User, user.UserId, user.UserName);
 
     /// <summary>The user group's page (the named form of the implicit conversion).</summary>
     /// <param name="group">The user group.</param>

@@ -21,7 +21,7 @@ Get-ZbxMaintenance -Name 'Patch window' -SelectHostGroups -SelectHosts -SelectTi
     [pscustomobject]@{
         Name   = $_.Name
         Groups = $_.HostGroupsRead.Name -join ', '
-        Hosts  = $_.Hosts.TechnicalName -join ', '
+        Hosts  = $_.Hosts.HostName -join ', '
         Until  = $_.ActiveTill.UtcDateTime
     }
 }

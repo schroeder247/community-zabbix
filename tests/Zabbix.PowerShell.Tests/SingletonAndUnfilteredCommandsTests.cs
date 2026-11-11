@@ -38,8 +38,8 @@ public sealed class SingletonAndUnfilteredCommandsTests
         Run run = shell.Invoke("Set-ZbxHousekeeping -HousekeepingHistory '31d' -PassThru");
 
         Assert.Empty(run.Errors);
-        dynamic settings = Assert.Single(run.Output).BaseObject;
-        Assert.Equal("31d", settings.HousekeepingHistory);
+        var settings = Assert.IsType<ZabbixHousekeepingSettings>(Assert.Single(run.Output).BaseObject);
+        Assert.Equal(ZabbixDuration.Parse("31d"), settings.HousekeepingHistory);
         JsonElement request = Assert.Single(server.ParamsOf("housekeeping.update"));
         Assert.Equal("31d", request.GetProperty("hk_history").GetString());
         Assert.False(request.TryGetProperty("hk_trends", out _));
@@ -252,7 +252,7 @@ public sealed class SingletonAndUnfilteredCommandsTests
         Run run = shell.Invoke("Get-ZbxHaNode -Id ckr8jg5sa0000k6y5q11vcd2h");
 
         Assert.Empty(run.Errors);
-        Assert.Equal("ckr8jg5sa0000k6y5q11vcd2h", Assert.Single(run.Output).Properties["HaNodeId"].Value);
+        Assert.Equal("ckr8jg5sa0000k6y5q11vcd2h", Assert.Single(run.Output).Properties["HANodeId"].Value);
         JsonElement request = Assert.Single(server.ParamsOf("hanode.get"));
         Assert.Equal("ckr8jg5sa0000k6y5q11vcd2h", Assert.Single(request.GetProperty("ha_nodeids").EnumerateArray()).GetString());
     }
@@ -404,7 +404,7 @@ public sealed class SingletonAndUnfilteredCommandsTests
         Run run = shell.Invoke("""
             $s = ConvertTo-SecureString 'hunter2-auth' -AsPlainText -Force
             $p = ConvertTo-SecureString 'hunter2-priv' -AsPlainText -Force
-            $c = New-ZbxNetworkDiscoveryCheck -Type SnmpV3 -SnmpOid sysName.0 -SnmpAuthPassphrase $s -SnmpPrivPassphrase $p
+            $c = New-ZbxNetworkDiscoveryCheck -Type SnmpV3 -SnmpOid sysName.0 -SnmpAuthenticationPassphrase $s -SnmpPrivacyPassphrase $p
             $c | Out-String
             $c | Format-List | Out-String
             """);
@@ -427,7 +427,7 @@ public sealed class SingletonAndUnfilteredCommandsTests
         using Shell shell = Shell.Open();
         shell.Connect(server);
 
-        Run run = shell.Invoke($"New-ZbxNetworkDiscoveryRule -Name next-rule -IpRange 10.0.0.1-10 {checks} -Confirm:$false");
+        Run run = shell.Invoke($"New-ZbxNetworkDiscoveryRule -Name next-rule -IPRange 10.0.0.1-10 {checks} -Confirm:$false");
 
         Assert.Empty(run.Errors);
         JsonElement check = Assert.Single(Assert.Single(server.ParamsOf("drule.create")).GetProperty("dchecks").EnumerateArray());

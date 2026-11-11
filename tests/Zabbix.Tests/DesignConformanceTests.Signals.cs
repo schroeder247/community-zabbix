@@ -69,10 +69,10 @@ public sealed partial class DesignConformanceTests
         await using ServiceProvider provider = services.BuildValidated();
         await using IZabbixWatcher watcher = provider.GetRequiredService<ZabbixClient>()
             .Watch(new ZabbixWatchPlan(TimeSpan.FromMinutes(1)));
-        IReadOnlyDictionary<string, ZabbixApiMethod> methods = ZabbixApiMethods.All;
-        IReadOnlyDictionary<(string Host, ZabbixItemKey Key), ZabbixValue> current = watcher.Current;
+        IReadOnlyDictionary<ZabbixApiMethod, ZabbixApiMethodInfo> methods = ZabbixApiMethods.All;
+        IReadOnlyDictionary<(string HostName, ZabbixItemKey Key), ZabbixValue> current = watcher.Current;
 
-        Assert.Throws<KeyNotFoundException>(() => methods["no.such.method"]);
+        Assert.Throws<KeyNotFoundException>(() => methods[new ZabbixApiMethod("no.such")]);
         Assert.Throws<KeyNotFoundException>(() => current[("web-01", ZabbixItemKey.Parse("agent.ping"))]);
         Assert.Throws<ArgumentOutOfRangeException>(() => ZabbixItemKey.Parse("agent.ping")[0]);    // a position, not a key
     }

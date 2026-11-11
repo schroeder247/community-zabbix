@@ -77,7 +77,7 @@ Connect-ZbxServer -Uri https://zabbix.example/ -ApiToken $token -Trapper zabbix.
 
 ```powershell
 Get-ZbxHostGroup -Name 'Linux servers' | Select-Object GroupId, Name
-Get-ZbxHost -Name 'Zabbix server' | Select-Object HostId, TechnicalName, VisibleName, Status
+Get-ZbxHost -Name 'Zabbix server' | Select-Object HostId, HostName, VisibleName, Status
 Get-ZbxHost -Name 'Zabbix server' | Get-Member -MemberType Property
 ```
 
@@ -86,12 +86,12 @@ GroupId Name
 ------- ----
 2       Linux servers
 
-HostId TechnicalName VisibleName   Status
------- ------------- -----------   ------
+HostId HostName      VisibleName   Status
+------ --------      -----------   ------
 10084  Zabbix server Zabbix server Enabled
 ```
 
-- Results are typed records with the SDK's property names. A host's technical name (the API's `host`) is `TechnicalName`, and its visible name
+- Results are typed records with the SDK's property names. A host's technical name (the API's `host`) is `HostName`, and its visible name
   (`name`) is `VisibleName`. `Get-Member` lists them: 48 on a 7.0 host.
 - `-Name` ignores case. `*` and `?` are wildcards (`Get-ZbxHost -Name 'web-*'`). Without one, it matches the whole name.
 
@@ -99,7 +99,7 @@ HostId TechnicalName VisibleName   Status
 
 ```powershell
 $group = New-ZbxHostGroup -Name 'Web servers'
-$web = New-ZbxHost -Name 'web-01' -Group 'Web servers' -InterfaceType Agent -InterfaceIp '10.0.0.11' `
+$web = New-ZbxHost -Name 'web-01' -Group 'Web servers' -InterfaceType Agent -InterfaceIP '10.0.0.11' `
     -Tag @{ env = 'prod'; role = 'web' }
 $item = New-ZbxItem -HostId $web.HostId -Name 'Requests' -Key 'app.requests' -Type Trapper -ValueType Unsigned `
     -TrapperHosts '0.0.0.0/0,::/0'
@@ -120,7 +120,7 @@ A `New-` command creates the object and writes it back as the server stored it.
 | --- | --- |
 | `-Name` | The API's `host` field. `-Host` is its alias, and the visible name is `-DisplayName`. |
 | `-Group` | Names, ids, or objects. |
-| `-InterfaceType`, `-InterfaceIp` | One agent interface, on port 10050 by default. `-Interface` takes any number, as hashtables. |
+| `-InterfaceType`, `-InterfaceIP` | One agent interface, on port 10050 by default. `-Interface` takes any number, as hashtables. |
 | `-Tag` | One hashtable per tag, or one hashtable of `name = value` pairs, as here. |
 | `-TrapperHosts` | The item's allow-list of senders. 8.0 defaults it to `{$TRAPPER.ALLOWED_HOSTS}` (localhost). `0.0.0.0/0,::/0` accepts everyone, which is right only on a lab server. |
 | `-AdditionalProperty` | Any field without a parameter (`Get-Help about_Community.Zabbix_Properties`). |
@@ -129,7 +129,7 @@ A `New-` command creates the object and writes it back as the server stored it.
 
 ```powershell
 Get-ZbxHost -Name 'web-*' | Set-ZbxHost -Description 'Front-end web server' -WhatIf
-Get-ZbxHost -Name 'web-*' | Set-ZbxHost -Description 'Front-end web server' -PassThru | Select-Object TechnicalName, Description
+Get-ZbxHost -Name 'web-*' | Set-ZbxHost -Description 'Front-end web server' -PassThru | Select-Object HostName, Description
 Add-ZbxTag -InputObject 'web-01' -Name 'team' -Value 'platform'
 (Get-ZbxHost -Name 'web-01' -SelectTags).Tags | Select-Object Tag, Value
 ```
@@ -137,9 +137,9 @@ Add-ZbxTag -InputObject 'web-01' -Name 'team' -Value 'platform'
 ```text
 What if: Performing the operation "Set host" on target "host 'web-01' (14524)".
 
-TechnicalName Description
-------------- -----------
-web-01        Front-end web server
+HostName Description
+-------- -----------
+web-01   Front-end web server
 
 Tag  Value
 ---  -----

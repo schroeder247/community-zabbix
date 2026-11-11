@@ -11,11 +11,11 @@ that starts an agent waits for its host before configuring it. It needs a connec
 #>
 #region Wait for a host an agent registers
 # Writes the host as soon as it exists; here web-01 exists already, so it returns at once.
-Wait-ZbxHost -Name 'web-01' -Timeout '2m' | Select-Object TechnicalName, HostId
+Wait-ZbxHost -Name 'web-01' -Timeout '2m' | Select-Object HostName, HostId
 #endregion
 
 #region Wait for a new host, then configure it
 # -Interval sets how often to look; the pipeline continues with the host once it is there.
-$null = New-ZbxHost -Host 'web-02' -Group 'Web servers' -InterfaceType Agent -InterfaceIp '10.0.0.12'
+$null = New-ZbxHost -Host 'web-02' -Group 'Web servers' -InterfaceType Agent -InterfaceIP '10.0.0.12'
 Wait-ZbxHost -Name 'web-02' -Interval '5s' | Add-ZbxHostGroupMember -Group 'Linux servers'
 #endregion

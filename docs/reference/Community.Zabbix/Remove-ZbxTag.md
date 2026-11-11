@@ -47,7 +47,7 @@ With -Value, only the tag with that exact name and value is removed.
 ```powershell
 Get-ZbxHost -Group 'Web servers' | Remove-ZbxTag -Name 'env' -WhatIf
 Get-ZbxHost -Group 'Web servers' | Remove-ZbxTag -Name 'env' -Confirm:$false
-Get-ZbxHost -Group 'Web servers' -SelectTags | Select-Object TechnicalName, @{ n = 'TagCount'; e = { @($_.Tags).Count } }
+Get-ZbxHost -Group 'Web servers' -SelectTags | Select-Object HostName, @{ n = 'TagCount'; e = { @($_.Tags).Count } }
 ```
 
 Get-ZbxHost writes host objects; Remove-ZbxTag binds each one. Hosts without the tag are left as they are.

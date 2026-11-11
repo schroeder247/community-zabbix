@@ -40,7 +40,7 @@ $backup | Import-ZbxConfiguration -Format Yaml -Rules @{
     Templates = @{ CreateMissing = $true }
     Items     = @{ CreateMissing = $true }
 } -Confirm:$false | Out-Null
-Get-ZbxTemplate -Name 'Web App' | Select-Object TemplateId, TechnicalName
+Get-ZbxTemplate -Name 'Web App' | Select-Object TemplateId, HostName
 ```
 
 -Rules says what each object family may do (the typed rules of configuration.import; a hashtable casts to it). An import always asks for a second confirmation, so a script passes -Confirm:$false (or -Force).
@@ -52,7 +52,7 @@ $path = Join-Path ([IO.Path]::GetTempPath()) 'web-01.yaml'
 Export-ZbxConfiguration -Host 'web-01' -Path $path
 Set-ZbxHost 'web-01' -Description 'changed by hand' | Out-Null
 Import-ZbxConfiguration -Path $path -Rules @{ Hosts = @{ UpdateExisting = $true } } -Confirm:$false | Out-Null
-Get-ZbxHost -Name 'web-01' | Select-Object TechnicalName, Description
+Get-ZbxHost -Name 'web-01' | Select-Object HostName, Description
 Remove-Item $path
 ```
 

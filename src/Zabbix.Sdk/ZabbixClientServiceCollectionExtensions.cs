@@ -93,7 +93,7 @@ public static class ZabbixClientServiceCollectionExtensions
     /// builder.Services.AddZabbixClient("prod")
     ///     .WithEndpoint("https://zabbix.example/")
     ///     .WithToken(token)
-    ///     .WithTimeout("configuration.import", TimeSpan.FromMinutes(5));
+    ///     .WithTimeout(ZabbixApiMethod.ConfigurationImport, TimeSpan.FromMinutes(5));
     /// // later, from the container
     /// ZabbixClient prod = services.GetRequiredService&lt;IZabbixClientFactory&gt;().Create("prod");
     /// </code>
@@ -217,7 +217,7 @@ public static class ZabbixClientServiceCollectionExtensions
                 options.Retry.ShouldHandle = async arguments =>
                 {
                     HttpRequestMessage? request = arguments.Context.GetRequestMessage();
-                    if (request is null || !request.Options.TryGetValue(ZabbixHttp.Method, out string? method) || !ZabbixHttp.IsIdempotent(method))
+                    if (request is null || !request.Options.TryGetValue(ZabbixHttp.Method, out ZabbixApiMethod method) || !ZabbixApiMethods.IsIdempotent(method))
                         return false;
                     if (await transient(arguments).ConfigureAwait(false)) return true;
                     return arguments.Outcome.Result is { } response

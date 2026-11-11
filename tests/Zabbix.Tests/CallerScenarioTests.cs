@@ -59,7 +59,7 @@ public sealed class CallerScenarioTests
 
         long last = await zabbix.Hosts["web-01"].GetLastAsync(Requests, cancellationToken);
         double load = await zabbix.Hosts["web-01"].GetLastAsync(ZabbixItemKeys.Cpu.Load(), cancellationToken);
-        await foreach (ZabbixSample<long> sample in zabbix.Hosts["web-01"].GetHistoryAsync(Requests, TimeSpan.FromHours(1), cancellationToken)) _ = sample.Value + last + load + created + hosts.Count + web.Count + host.TechnicalName!.Length;
+        await foreach (ZabbixSample<long> sample in zabbix.Hosts["web-01"].GetHistoryAsync(Requests, TimeSpan.FromHours(1), cancellationToken)) _ = sample.Value + last + load + created + hosts.Count + web.Count + host.HostName!.Length;
     }
 
     private static async Task WireAsync(CancellationToken cancellationToken)

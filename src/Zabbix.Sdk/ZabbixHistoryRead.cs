@@ -36,7 +36,7 @@ internal static class ZabbixHistoryRead
     /// </summary>
     internal static ZabbixHistoryGetParameters Page(ZabbixItemValueType type, IReadOnlyList<ulong> itemIds, long from, long? to, int? limit) => new()
     {
-        History = type,
+        ValueType = type,
         ItemIds = itemIds,
         Output = s_output,
         TimeFrom = DateTimeOffset.FromUnixTimeSeconds(from),

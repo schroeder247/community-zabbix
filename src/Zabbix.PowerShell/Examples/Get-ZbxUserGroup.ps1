@@ -1,6 +1,6 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
-$null = New-ZbxUser -Username 'jdoe' -Password (ConvertTo-SecureString 'Chang3-me-at-first-login!' -AsPlainText -Force) -RoleId (Get-ZbxRole -Name 'User role').RoleId -UserGroup 'Operators'
+$null = New-ZbxUser -UserName 'jdoe' -Password (ConvertTo-SecureString 'Chang3-me-at-first-login!' -AsPlainText -Force) -RoleId (Get-ZbxRole -Name 'User role').RoleId -UserGroup 'Operators'
 
 #region Get a user group by name
 # -Name matches exactly; a * turns it into a search. The result is a ZabbixUserGroup record.
@@ -9,7 +9,7 @@ Get-ZbxUserGroup -Name 'Operators' | Select-Object UserGroupId, Name, GuiAccess,
 
 #region List a group's members
 # -SelectUsers adds the group's users to each group.
-(Get-ZbxUserGroup -Name 'Operators' -SelectUsers).Users | Select-Object Username
+(Get-ZbxUserGroup -Name 'Operators' -SelectUsers).Users | Select-Object UserName
 #endregion
 
 #region Find the groups a user is in

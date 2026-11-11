@@ -16,7 +16,7 @@ Get-ZbxProxy -Name 'proxy-01' | Set-ZbxProxy -AllowedAddresses '10.0.0.0/24' -Pa
 #region Move hosts onto the proxy
 # -Host replaces the list of hosts the proxy monitors; the hosts' MonitoredBy becomes Proxy.
 Set-ZbxProxy 'proxy-01' -Host 'web-01', 'db-01'
-Get-ZbxHost -Name 'web-01', 'db-01' | Select-Object TechnicalName, MonitoredBy
+Get-ZbxHost -Name 'web-01', 'db-01' | Select-Object HostName, MonitoredBy
 #endregion
 
 #region Turn an active proxy into a passive one

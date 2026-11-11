@@ -9,7 +9,7 @@ namespace Community.Zabbix.PowerShell;
 /// complete names: the API's name for it (<c>host</c>), its id and name fields on the wire (<c>hostid</c>, <c>host</c>),
 /// how to read them off a record, and one <c>.get</c> selecting by name. The generator emits one per entity into
 /// <see cref="ZabbixEntities"/>; the selection goes through the client's raw call,
-/// <see cref="ZabbixClient.SendAsync{TParameters, TResult}(string, TParameters, JsonTypeInfo{TParameters}, JsonTypeInfo{TResult}, CancellationToken)"/>,
+/// <see cref="ZabbixClient.SendAsync{TParameters, TResult}(ZabbixApiMethod, TParameters, JsonTypeInfo{TParameters}, JsonTypeInfo{TResult}, CancellationToken)"/>,
 /// with the SDK's JSON contract, as an application calls a method no generated client names.
 /// </summary>
 /// <typeparam name="TEntity">The read model record.</typeparam>

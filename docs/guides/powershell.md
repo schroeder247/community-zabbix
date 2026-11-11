@@ -17,7 +17,7 @@ Install-PSResource Community.Zabbix.Proxy      # proxy sessions, proxy protocol 
 Import-Module Community.Zabbix
 $token = Read-Host -AsSecureString 'API token'
 Connect-ZbxServer -Uri https://zabbix.example/ -ApiToken $token
-Get-ZbxHost -Name 'web-*' | Format-Table TechnicalName, VisibleName, Status
+Get-ZbxHost -Name 'web-*' | Format-Table HostName, VisibleName, Status
 Get-ZbxHost -Name web-01 | Show-ZbxPage                  # the host's page in the web frontend
 ```
 
@@ -70,7 +70,7 @@ Get-ZbxHostGroup -Filter @{ with_hosts = $true }                    # -Filter ta
 Get-ZbxItem -Host web-01 -Search @{ key_ = 'system.cpu' } -CountOutput
 ```
 
-- Results are typed records with the SDK's property names. A host's technical name (the API's `host`) is `TechnicalName`, and its visible name
+- Results are typed records with the SDK's property names. A host's technical name (the API's `host`) is `HostName`, and its visible name
   (`name`) is `VisibleName`. A field the server sends that a record doesn't model still reads as a property.
 - A `Get-` selects by `-Id`, by `-Name` (ignoring case; a backtick escapes `*` and `?`), by a reference such as `-Host` or `-Group` (a name, an id, or
   an object), or by `-Filter`.
@@ -81,7 +81,7 @@ Get-ZbxItem -Host web-01 -Search @{ key_ = 'system.cpu' } -CountOutput
 ## Create and change objects
 
 ```powershell
-New-ZbxHost -Name web-02 -Group 'Linux servers' -InterfaceType Agent -InterfaceIp '10.0.0.12' -Tag @{ env = 'prod' }
+New-ZbxHost -Name web-02 -Group 'Linux servers' -InterfaceType Agent -InterfaceIP '10.0.0.12' -Tag @{ env = 'prod' }
 Get-ZbxHost -Name 'web-*' | Set-ZbxHost -Description 'web tier' -PassThru
 ```
 

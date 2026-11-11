@@ -59,12 +59,12 @@ public sealed partial class DesignConformanceTests
         SyntaxTree tree = Sources.ParseText("""
             class A
             {
-                [Community.Zabbix.ZabbixPersonal] public string Username { get; } = "";
-                void M() => throw new System.Security.Authentication.AuthenticationException($"User '{Username}' must use MFA.");
+                [Community.Zabbix.ZabbixPersonal] public string UserName { get; } = "";
+                void M() => throw new System.Security.Authentication.AuthenticationException($"User '{UserName}' must use MFA.");
             }
             """, "src/X/A.cs");
 
-        Assert.Equal(["A.cs:4: Username"], ClassifiedValuesInMessages([tree]));
+        Assert.Equal(["A.cs:4: UserName"], ClassifiedValuesInMessages([tree]));
     }
 
     [Fact]

@@ -38,7 +38,7 @@ public sealed class ZabbixWatch : IZabbixSession
     public ZabbixWatchPlan Plan => _watcher.Plan;
 
     /// <summary>The latest value of every item seen so far, by host and key.</summary>
-    public IReadOnlyDictionary<(string Host, ZabbixItemKey Key), ZabbixValue> Current => _watcher.Current;
+    public IReadOnlyDictionary<(string HostName, ZabbixItemKey Key), ZabbixValue> Current => _watcher.Current;
 
     /// <summary>How many ticks read what they had to read.</summary>
     public long SucceededPolls => _watcher.SucceededPolls;

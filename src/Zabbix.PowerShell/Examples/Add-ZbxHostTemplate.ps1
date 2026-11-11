@@ -12,10 +12,10 @@ Connect-ZbxServer.
 #region Link a template to a host
 # -InputObject (position 0) takes the host and -Template (position 1) the template, each by name, id or object.
 Add-ZbxHostTemplate -InputObject 'db-01' -Template 'Web App'
-Get-ZbxHost -Name 'db-01' -SelectParentTemplates | ForEach-Object { $_.ParentTemplates.TechnicalName }
+Get-ZbxHost -Name 'db-01' -SelectParentTemplates | ForEach-Object { $_.ParentTemplates.HostName }
 #endregion
 
 #region Link a template to every host of a group
 # The hosts piped from Get-ZbxHost are linked in one call; -PassThru writes them back.
-Get-ZbxHost -Group 'Web servers' | Add-ZbxHostTemplate -Template 'Web App' -PassThru | Select-Object TechnicalName
+Get-ZbxHost -Group 'Web servers' | Add-ZbxHostTemplate -Template 'Web App' -PassThru | Select-Object HostName
 #endregion

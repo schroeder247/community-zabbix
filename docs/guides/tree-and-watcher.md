@@ -83,7 +83,7 @@ List<ZabbixValue> values = await zabbix.Hosts["web-01"].GetLatestAsync().ToListA
 ```csharp
 await foreach (ZabbixHostNode host in zabbix.HostGroups["Linux servers"].Hosts)
     await foreach (ZabbixItemNode item in host.Items)
-        Console.WriteLine($"{host.Name} {item.Key}");
+        Console.WriteLine($"{host.HostName} {item.Key}");
 ```
 
 | What you call | On | What you get |
@@ -182,11 +182,11 @@ if (await zabbix.Hosts["web-01"].Items[key].FindLastValueAsync() is { } last)
     Console.WriteLine($"{key.Name}: {last.As<double>():0.0} % free at {last.Time:u}");
 ```
 
-Every read and watch yields `ZabbixValue(Host, Key, Value, Time)`:
+Every read and watch yields `ZabbixValue(HostName, Key, Value, Time)`:
 
 | Member | What it holds |
 | --- | --- |
-| `Host` | The host's technical name. |
+| `HostName` | The host's technical name. |
 | `Key` | A `ZabbixItemKey`. Its verbatim text is its identity, as the server matches it: `k["a"]` and `k[a]` are two keys. `Name` and `Parameters` are the parsed view. `ZabbixItemKey.Parse`, `TryParse`, and `Create` build one. |
 | `Value` | The value as text, the form Zabbix carries it in. `As<T>()` reads it as a type. |
 | `Time` | A `DateTimeOffset`, to its 100 ns. Zabbix stores nanoseconds, and the SDK keeps them when it forwards a value. |

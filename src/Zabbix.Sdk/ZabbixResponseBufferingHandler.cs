@@ -83,7 +83,7 @@ internal sealed class ZabbixResponseBufferingHandler(long maxBytes) : Delegating
 
     private static InvalidDataException TooLarge(HttpRequestMessage request, long bound)
     {
-        string method = request.Options.TryGetValue(ZabbixHttp.Method, out string? name) ? name : "the request";
+        string method = request.Options.TryGetValue(ZabbixHttp.Method, out ZabbixApiMethod name) ? name.Name : "the request";
         return new InvalidDataException(string.Create(System.Globalization.CultureInfo.InvariantCulture,
             $"The reply to {method} is larger than MaxResponseContentBytes ({bound} bytes)."));
     }

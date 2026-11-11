@@ -55,7 +55,7 @@ LONG DESCRIPTION
 
         Results are typed records (Community.Zabbix.ZabbixHost,
         Community.Zabbix.ZabbixItem, ...). Their property names are the
-        SDK's: a host's technical name is TechnicalName (the API's "host"
+        SDK's: a host's technical name is HostName (the API's "host"
         field) and its visible name is VisibleName (the API's "name").
         Get-Member lists them. A field the server sends that the record does
         not model still reads as a property (see

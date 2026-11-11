@@ -8,7 +8,7 @@ Builds an action operation for the -Operation of New-ZbxAction and Set-ZbxAction
 ## SYNTAX
 
 ```
-New-ZbxActionOperation [-OperationType] <ZabbixOperationType> [-EscalationPeriod <string>] [-EscalationStepFrom <int>] [-EscalationStepTo <int>] [-EvalType <ZabbixConditionEvalType>] [-OperationCondition <ZabbixActionOperationConditionRequest[]>] [-OperationMessage <ZabbixActionOperationMessageRequest>] [-OperationMessageGroup <ZabbixReference<ZabbixUserGroup>[]>] [-OperationMessageUser <ZabbixReference<ZabbixUser>[]>] [-OperationCommand <ZabbixActionOperationCommandRequest>] [-OperationCommandGroup <ZabbixReference<ZabbixHostGroup>[]>] [-OperationCommandHost <ZabbixReference<ZabbixHost>[]>] [-OperationGroup <ZabbixReference<ZabbixHostGroup>[]>] [-OperationTemplate <ZabbixReference<ZabbixTemplate>[]>] [-OperationInventory <ZabbixActionOperationInventoryRequest>] [-OperationTag <ZabbixActionOperationTagRequest[]>] [<CommonParameters>]
+New-ZbxActionOperation [-OperationType] <ZabbixOperationType> [-EscalationPeriod <string>] [-EscalationStepFrom <int>] [-EscalationStepTo <int>] [-EvaluationType <ZabbixConditionEvaluationType>] [-OperationCondition <ZabbixActionOperationConditionRequest[]>] [-OperationMessage <ZabbixActionOperationMessageRequest>] [-OperationMessageGroup <ZabbixReference<ZabbixUserGroup>[]>] [-OperationMessageUser <ZabbixReference<ZabbixUser>[]>] [-OperationCommand <ZabbixActionOperationCommandRequest>] [-OperationCommandGroup <ZabbixReference<ZabbixHostGroup>[]>] [-OperationCommandHost <ZabbixReference<ZabbixHost>[]>] [-OperationGroup <ZabbixReference<ZabbixHostGroup>[]>] [-OperationTemplate <ZabbixReference<ZabbixTemplate>[]>] [-OperationInventory <ZabbixActionOperationInventoryRequest>] [-OperationTag <ZabbixActionOperationTagRequest[]>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -104,13 +104,13 @@ Escalation step at which the operation ends, from 0 to 99999, where 0 repeats th
 | Pipeline input | False |
 | Wildcards | False |
 
-### -EvalType
+### -EvaluationType
 
 How the operation conditions are combined: and/or, and, or or. Applies only to operations of trigger actions.
 
 | | |
 | --- | --- |
-| Type | `ZabbixConditionEvalType` |
+| Type | `ZabbixConditionEvaluationType` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |

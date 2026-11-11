@@ -53,7 +53,7 @@ internal static class ZabbixPropertyOverrides
     /// <summary>
     /// Whether <paramref name="properties"/> carries a key naming this field — by its own wire name
     /// (<paramref name="wireField"/>, e.g. <c>ipmi_username</c>) or, since <see cref="Apply{TRequest}"/> accepts
-    /// either, its C# property name (<paramref name="propertyName"/>, e.g. <c>IpmiUsername</c>). Used by generated
+    /// either, its C# property name (<paramref name="propertyName"/>, e.g. <c>IpmiUserName</c>). Used by generated
     /// <c>CreateAsync</c>/<c>BuildRequest</c> to decide whether a required field (which a
     /// generated <c>New-</c>/<c>Set-</c> does not mark <c>Mandatory</c>) was nonetheless supplied — through
     /// <c>-AdditionalProperty</c>, when its own named parameter was not bound.

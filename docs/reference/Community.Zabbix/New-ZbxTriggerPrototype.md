@@ -8,7 +8,7 @@ Creates a trigger prototype.
 ## SYNTAX
 
 ```
-New-ZbxTriggerPrototype [[-Name] <string>] [[-Expression] <string>] [-Uuid <string>] [-EventName <string>] [-OperationalData <string>] [-Description <string>] [-Priority <ZabbixSeverity>] [-Status <ZabbixTriggerStatus>] [-Type <ZabbixTriggerType>] [-UrlName <string>] [-Url <string>] [-RecoveryMode <ZabbixRecoveryMode>] [-RecoveryExpression <string>] [-CorrelationMode <ZabbixCorrelationMode>] [-CorrelationTag <string>] [-ManualClose] [-Tag <ZabbixTagRequest[]>] [-Dependency <ZabbixReference<ZabbixTrigger>[]>] [-Discover <ZabbixTriggerDiscoverMode>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+New-ZbxTriggerPrototype [[-Name] <string>] [[-Expression] <string>] [-Uuid <string>] [-EventName <string>] [-OperationalData <string>] [-Description <string>] [-Severity <ZabbixSeverity>] [-Status <ZabbixTriggerStatus>] [-Type <ZabbixTriggerType>] [-UrlName <string>] [-Url <string>] [-RecoveryMode <ZabbixRecoveryMode>] [-RecoveryExpression <string>] [-CorrelationMode <ZabbixCorrelationMode>] [-CorrelationTag <string>] [-ManualClose] [-Tag <ZabbixTagRequest[]>] [-Dependency <ZabbixReference<ZabbixTrigger>[]>] [-Discover <ZabbixTriggerDiscoverMode>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -21,7 +21,7 @@ A trigger prototype is the pattern a discovery rule turns into one trigger per e
 
 ```powershell
 $key = (Get-ZbxItemPrototype -Host 'web-01' -Name 'Used space on {#FSNAME}').Key
-New-ZbxTriggerPrototype -Name 'Free space is low on {#FSNAME}' -Expression "last(/web-01/$key)>90" -Priority Warning
+New-ZbxTriggerPrototype -Name 'Free space is low on {#FSNAME}' -Expression "last(/web-01/$key)>90" -Severity Warning
 ```
 
 Creates a trigger prototype named Free space is low on {#FSNAME}. The command writes the new trigger prototype, read back from the server.
@@ -118,7 +118,7 @@ Free-text description of the trigger prototype; it may contain macros. The API c
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -Priority
+### -Severity
 
 The severity of triggers discovered from the prototype; not classified by default.
 
@@ -345,7 +345,7 @@ Creates without a confirmation prompt even where $ConfirmPreference is at or bel
 
 ### -InputObject
 
-A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIp, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
+A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIP, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
 
 | | |
 | --- | --- |
@@ -388,7 +388,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 ## INPUTS
 
 - `string`: Bound to -Uuid (ByPropertyName), -Name (ByPropertyName), -Expression (ByPropertyName), -EventName (ByPropertyName), -OperationalData (ByPropertyName), -Description (ByPropertyName), -UrlName (ByPropertyName), -Url (ByPropertyName), -RecoveryExpression (ByPropertyName), -CorrelationTag (ByPropertyName). Text.
-- `ZabbixSeverity`: Bound to -Priority (ByPropertyName). A trigger or problem severity.
+- `ZabbixSeverity`: Bound to -Severity (ByPropertyName). A trigger or problem severity.
 - `ZabbixTriggerStatus`: Bound to -Status (ByPropertyName). The trigger status values: TRIGGER_STATUS_* in defines.inc.php.
 - `ZabbixTriggerType`: Bound to -Type (ByPropertyName). The trigger type values: TRIGGER_MULT_EVENT_* in defines.inc.php.
 - `ZabbixRecoveryMode`: Bound to -RecoveryMode (ByPropertyName). The recovery mode values: ZBX_RECOVERY_MODE_* in defines.inc.php.

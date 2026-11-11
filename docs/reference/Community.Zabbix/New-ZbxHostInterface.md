@@ -8,12 +8,12 @@ Creates a host interface.
 ## SYNTAX
 
 ```
-New-ZbxHostInterface [[-HostId] <ulong>] [-Type <ZabbixInterfaceType>] [-Ip <string>] [-Dns <string>] [-Port <string>] [-UseIp <ZabbixHostInterfaceUseIp>] [-Main <ZabbixInterfacePriority>] [-Details <ZabbixHostInterfaceDetailRequest>] [-InterfaceId <ulong>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+New-ZbxHostInterface [[-HostId] <ulong>] [-Type <ZabbixInterfaceType>] [-IP <string>] [-Dns <string>] [-Port <string>] [-UseIP <ZabbixHostInterfaceUseIP>] [-Main <ZabbixInterfacePriority>] [-Details <ZabbixHostInterfaceDetailRequest>] [-InterfaceId <ulong>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
 
-A host interface is an address a host is polled on: a Zabbix agent, SNMP, IPMI or JMX endpoint with its IP address or DNS name and port. The New-ZbxHostInterface cmdlet sends hostinterface.create with one request field per parameter, then reads the new host interface back with hostinterface.get and writes it. The server requires -Type, -Port, -UseIp and -Main; -AdditionalProperty sets any other field by its API name and wins over a parameter. A host or template piped from Get-ZbxHost or Get-ZbxTemplate binds -HostId, so one command creates a host interface on each. -WhatIf shows what would be created, and the command needs a connection made with Connect-ZbxServer.
+A host interface is an address a host is polled on: a Zabbix agent, SNMP, IPMI or JMX endpoint with its IP address or DNS name and port. The New-ZbxHostInterface cmdlet sends hostinterface.create with one request field per parameter, then reads the new host interface back with hostinterface.get and writes it. The server requires -Type, -Port, -UseIP and -Main; -AdditionalProperty sets any other field by its API name and wins over a parameter. A host or template piped from Get-ZbxHost or Get-ZbxTemplate binds -HostId, so one command creates a host interface on each. -WhatIf shows what would be created, and the command needs a connection made with Connect-ZbxServer.
 
 ## EXAMPLES
 
@@ -21,8 +21,8 @@ A host interface is an address a host is polled on: a Zabbix agent, SNMP, IPMI o
 
 ```powershell
 $hostId = (Get-ZbxHost -Name 'web-01').HostId
-New-ZbxHostInterface -HostId $hostId -Type Agent -Ip '10.0.0.21' -Dns '' -Port '10050' -UseIp Ip -Main 0 |
-    Select-Object InterfaceId, Type, Ip, Port, Main
+New-ZbxHostInterface -HostId $hostId -Type Agent -IP '10.0.0.21' -Dns '' -Port '10050' -UseIP IP -Main 0 |
+    Select-Object InterfaceId, Type, IP, Port, Main
 ```
 
 -HostId takes the host's id; -Main 0 makes it an additional interface of its type (each type has one main interface). The API requires -Dns even when the interface connects by IP, so pass '' for an IP-only interface.
@@ -30,19 +30,19 @@ New-ZbxHostInterface -HostId $hostId -Type Agent -Ip '10.0.0.21' -Dns '' -Port '
 ### Example 2: Add a JMX interface reached by DNS name, through the pipeline
 
 ```powershell
-Get-ZbxHost -Name 'db-01' | New-ZbxHostInterface -Type Jmx -Dns 'db-01.example.com' -Ip '' -Port '12345' -UseIp Dns -Main 1 |
+Get-ZbxHost -Name 'db-01' | New-ZbxHostInterface -Type Jmx -Dns 'db-01.example.com' -IP '' -Port '12345' -UseIP Dns -Main 1 |
     Select-Object InterfaceId, Type, Dns, Port
 ```
 
-A piped host binds -HostId by its HostId property. -UseIp Dns connects by -Dns, so -Ip may be empty.
+A piped host binds -HostId by its HostId property. -UseIP Dns connects by -Dns, so -IP may be empty.
 
 ### Example 3: Add an SNMPv2 interface
 
 ```powershell
 $hostId = (Get-ZbxHost -Name 'db-01').HostId
-New-ZbxHostInterface -HostId $hostId -Type Snmp -Ip '127.0.0.2' -Dns '' -Port '161' -UseIp Ip -Main 1 `
+New-ZbxHostInterface -HostId $hostId -Type Snmp -IP '127.0.0.2' -Dns '' -Port '161' -UseIP IP -Main 1 `
     -AdditionalProperty @{ details = @{ version = 2; community = '{$SNMP_COMMUNITY}' } } |
-    Select-Object InterfaceId, Type, Ip, Port, @{ n = 'Community'; e = { $_.Details.Community } }
+    Select-Object InterfaceId, Type, IP, Port, @{ n = 'Community'; e = { $_.Details.Community } }
 ```
 
 An SNMP interface also needs its SNMP details (version, community); there is no parameter per detail, so -AdditionalProperty passes the API's details object as it is documented.
@@ -79,7 +79,7 @@ The kind of interface: Zabbix agent, SNMP, IPMI or JMX.
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -Ip
+### -IP
 
 The IP address the interface connects to; it may be empty when the interface connects by DNS name. Required when UseIp is Ip.
 
@@ -124,13 +124,13 @@ The port the interface connects to; it may contain a user macro.
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -UseIp
+### -UseIP
 
 Whether the server connects through the IP address or the DNS name.
 
 | | |
 | --- | --- |
-| Type | `ZabbixHostInterfaceUseIp` |
+| Type | `ZabbixHostInterfaceUseIP` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |
@@ -216,7 +216,7 @@ Creates without a confirmation prompt even where $ConfirmPreference is at or bel
 
 ### -InputObject
 
-A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIp, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
+A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIP, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
 
 | | |
 | --- | --- |
@@ -260,8 +260,8 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 
 - `ulong`: Bound to -HostId (ByPropertyName), -InterfaceId (ByPropertyName).
 - `ZabbixInterfaceType`: Bound to -Type (ByPropertyName). The interface type values: INTERFACE_TYPE_* in defines.inc.php.
-- `string`: Bound to -Ip (ByPropertyName), -Dns (ByPropertyName), -Port (ByPropertyName). Text.
-- `ZabbixHostInterfaceUseIp`: Bound to -UseIp (ByPropertyName). The host interface use IP values: INTERFACE_USE_* in defines.inc.php.
+- `string`: Bound to -IP (ByPropertyName), -Dns (ByPropertyName), -Port (ByPropertyName). Text.
+- `ZabbixHostInterfaceUseIP`: Bound to -UseIP (ByPropertyName). The host interface use IP values: INTERFACE_USE_* in defines.inc.php.
 - `ZabbixInterfacePriority`: Bound to -Main (ByPropertyName). The interface priority values: INTERFACE_* in defines.inc.php.
 - `ZabbixHostInterfaceDetailRequest`: Bound to -Details (ByPropertyName). details of a ZabbixHostInterfaceRequest.
 - `PSObject`: Bound to -InputObject (ByValue). Each object as the API answers it.

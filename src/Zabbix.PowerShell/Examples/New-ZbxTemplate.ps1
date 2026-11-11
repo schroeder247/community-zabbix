@@ -4,7 +4,7 @@
 #region Create a template in a template group
 # -Host is the template's technical name; -Group takes template group names, ids or objects. The created
 # template is read back and written.
-New-ZbxTemplate -Host 'Nginx by HTTP' -Group 'Templates/Web' | Select-Object TemplateId, TechnicalName
+New-ZbxTemplate -Host 'Nginx by HTTP' -Group 'Templates/Web' | Select-Object TemplateId, HostName
 #endregion
 
 #region Create a template that links another, with tags and a macro
@@ -14,8 +14,8 @@ New-ZbxTemplate -Host 'Web App Nginx' -Group 'Templates/Web' -LinkedTemplate 'Ng
     -Description 'Nginx in front of the shop' -Tag @{ tag = 'class'; value = 'software' } `
     -Macro @{ macro = '{$NGINX.PORT}'; value = '8080' } | Out-Null
 Get-ZbxTemplate -Name 'Web App Nginx' -SelectParentTemplates -SelectTags -SelectMacros |
-    Select-Object TechnicalName, Description,
-        @{ n = 'Links'; e = { $_.ParentTemplates.TechnicalName } },
+    Select-Object HostName, Description,
+        @{ n = 'Links'; e = { $_.ParentTemplates.HostName } },
         @{ n = 'Macros'; e = { $_.Macros.Macro } }
 #endregion
 

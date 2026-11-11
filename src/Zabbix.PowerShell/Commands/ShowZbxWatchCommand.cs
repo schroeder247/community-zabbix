@@ -51,9 +51,9 @@ public sealed class ShowZbxWatchCommand : ZabbixCmdlet
     private static string Render(ZabbixWatch watch)
     {
         var rows = watch.Current
-            .OrderBy(entry => entry.Key.Host, StringComparer.Ordinal)
+            .OrderBy(entry => entry.Key.HostName, StringComparer.Ordinal)
             .ThenBy(entry => entry.Key.Key.ToString(), StringComparer.Ordinal)
-            .Select(entry => new string?[] { entry.Key.Host, entry.Key.Key.ToString(), entry.Value.Value, entry.Value.Time.ToString("O", CultureInfo.InvariantCulture) })
+            .Select(entry => new string?[] { entry.Key.HostName, entry.Key.Key.ToString(), entry.Value.Value, entry.Value.Time.ToString("O", CultureInfo.InvariantCulture) })
             .ToList();
         string table = ZabbixAnsiRendering.Table(["Host", "Key", "Value", "Clock"], rows);
         return $"{watch.Name}  (succeeded={watch.SucceededPolls} failed={watch.FailedPolls} dropped={watch.Dropped})\n{table}";

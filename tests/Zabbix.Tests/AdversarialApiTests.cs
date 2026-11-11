@@ -56,7 +56,7 @@ public sealed class AdversarialApiTests
         await Assert.ThrowsAsync<InvalidDataException>(() => client.HostInterfaces.ReplaceHostInterfacesAsync(new ZabbixHostInterfaceReplaceHostInterfacesRequest
         {
             HostId = 10,
-            Interfaces = [new ZabbixHostInterfaceReplaceHostInterfacesInterfaceRequest { Type = ZabbixInterfaceType.Agent, Ip = "127.0.0.1", Dns = "", Port = 10050 }],
+            Interfaces = [new ZabbixHostInterfaceReplaceHostInterfacesInterfaceRequest { Type = ZabbixInterfaceType.Agent, IP = "127.0.0.1", Dns = "", Port = 10050 }],
         }, TestContext.Current.CancellationToken));
     }
 

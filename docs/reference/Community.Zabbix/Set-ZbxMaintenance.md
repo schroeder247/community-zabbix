@@ -8,7 +8,7 @@ Changes a maintenance period.
 ## SYNTAX
 
 ```
-Set-ZbxMaintenance [-InputObject] <ZabbixReference<ZabbixMaintenanceRecord>[]> [[-Name] <string>] [-MaintenanceType <ZabbixMaintenanceDataCollectionType>] [-Description <string>] [-ActiveSince <DateTimeOffset>] [-ActiveTill <DateTimeOffset>] [-TagsEvalType <ZabbixEvalType>] [-Tag <ZabbixMaintenanceTagRequest[]>] [-Group <ZabbixReference<ZabbixHostGroup>[]>] [-HostReference <ZabbixReference<ZabbixHost>[]>] [-TimePeriod <ZabbixMaintenanceTimePeriodRequest[]>] [-Trigger <ZabbixReference<ZabbixTrigger>[]>] [-EventName <ZabbixMaintenanceEventNameRequest[]>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Set-ZbxMaintenance [-InputObject] <ZabbixReference<ZabbixMaintenanceRecord>[]> [[-Name] <string>] [-MaintenanceType <ZabbixMaintenanceDataCollectionType>] [-Description <string>] [-ActiveSince <DateTimeOffset>] [-ActiveTill <DateTimeOffset>] [-TagsEvaluationType <ZabbixEvaluationType>] [-Tag <ZabbixMaintenanceTagRequest[]>] [-Group <ZabbixReference<ZabbixHostGroup>[]>] [-HostReference <ZabbixReference<ZabbixHost>[]>] [-TimePeriod <ZabbixMaintenanceTimePeriodRequest[]>] [-Trigger <ZabbixReference<ZabbixTrigger>[]>] [-EventName <ZabbixMaintenanceEventNameRequest[]>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -32,7 +32,7 @@ Set-ZbxMaintenance -InputObject 'Patch window' -ActiveTill ($m.ActiveSince + [Ti
 
 ```powershell
 Set-ZbxMaintenance -InputObject 'Patch window' -Host 'web-01', 'db-01'
-(Get-ZbxMaintenance -Name 'Patch window' -SelectHosts).Hosts.TechnicalName
+(Get-ZbxMaintenance -Name 'Patch window' -SelectHosts).Hosts.HostName
 ```
 
 -Host (the alias of -HostReference) and -Group replace the whole list, they do not add to it: include every host that should stay covered.
@@ -138,13 +138,13 @@ End of the maintenance window as a Unix time. The window ends just before this i
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -TagsEvalType
+### -TagsEvaluationType
 
 How the problem tags are combined: And/Or (the default), where tags with different names must all match, or Or, where any tag may match. Allowed only for maintenance with data collection.
 
 | | |
 | --- | --- |
-| Type | `ZabbixEvalType` |
+| Type | `ZabbixEvaluationType` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |
@@ -336,7 +336,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 - `string`: Bound to -Name (ByPropertyName), -Description (ByPropertyName). Text.
 - `ZabbixMaintenanceDataCollectionType`: Bound to -MaintenanceType (ByPropertyName). The maintenance data collection type values: MAINTENANCE_TYPE_* in defines.inc.php.
 - `DateTimeOffset`: Bound to -ActiveSince (ByPropertyName), -ActiveTill (ByPropertyName).
-- `ZabbixEvalType`: Bound to -TagsEvalType (ByPropertyName). The eval type values: MAINTENANCE_TAG_EVAL_TYPE_* in defines.inc.php.
+- `ZabbixEvaluationType`: Bound to -TagsEvaluationType (ByPropertyName). The evaluation type values: MAINTENANCE_TAG_EVAL_TYPE_* in defines.inc.php.
 - `ZabbixMaintenanceTagRequest[]`: Bound to -Tag (ByPropertyName). tags of a ZabbixMaintenanceCreateRequest.
 - `ZabbixReference<ZabbixHostGroup>[]`: Bound to -Group (ByPropertyName). Represents a reference to an API object: a parameter that points at an API object takes its id, its name, or the object itself piped from a Get- cmdlet, and becomes an id before the call — one parameter, three spellings, one resolution.
 - `ZabbixReference<ZabbixHost>[]`: Bound to -HostReference (ByPropertyName). Represents a reference to an API object: a parameter that points at an API object takes its id, its name, or the object itself piped from a Get- cmdlet, and becomes an id before the call — one parameter, three spellings, one resolution.

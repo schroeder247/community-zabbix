@@ -167,7 +167,7 @@ public sealed class CmdletShapeTests
          ],
          "cmdlets": {
           "objects": {
-           "server": {"names": {"display": "name", "technical": "host"}, "unhide": {"host": "TechnicalName"}}
+           "server": {"names": {"display": "name", "technical": "host"}, "unhide": {"host": "HostName"}}
           }
          }
         }

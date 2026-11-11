@@ -72,7 +72,7 @@ public sealed class ZabbixClientTests
         await using ServiceProvider provider = services.BuildValidated();
         ZabbixClient client = provider.GetRequiredService<ZabbixClient>();
 
-        JsonElement result = await client.SendAsync("host.get", JsonDocument.Parse("""{"countOutput":true}""").RootElement, TestContext.Current.CancellationToken);
+        JsonElement result = await client.SendAsync(ZabbixApiMethod.HostGet, JsonDocument.Parse("""{"countOutput":true}""").RootElement, TestContext.Current.CancellationToken);
 
         Assert.Equal(JsonValueKind.Array, result.ValueKind);
         Assert.Equal(["Bearer given-in-code"], authorizations);

@@ -40,7 +40,7 @@ A user is an account that logs in to the frontend or the API, with its role, its
 ### Example 1: Get a user by username
 
 ```powershell
-Get-ZbxUser -Name 'jdoe' | Select-Object UserId, Username, FirstName, LastName, RoleId
+Get-ZbxUser -Name 'jdoe' | Select-Object UserId, UserName, FirstName, LastName, RoleId
 ```
 
 -Name matches the username exactly; a * turns it into a search. The result is a ZabbixUser record.
@@ -48,7 +48,7 @@ Get-ZbxUser -Name 'jdoe' | Select-Object UserId, Username, FirstName, LastName, 
 ### Example 2: List the members of a user group
 
 ```powershell
-Get-ZbxUser -UserGroup 'Operators' | Select-Object Username, FirstName, LastName
+Get-ZbxUser -UserGroup 'Operators' | Select-Object UserName, FirstName, LastName
 ```
 
 -UserGroup takes a user group's name, id or object.
@@ -56,7 +56,7 @@ Get-ZbxUser -UserGroup 'Operators' | Select-Object Username, FirstName, LastName
 ### Example 3: Show each user's role and groups
 
 ```powershell
-Get-ZbxUser -Name 'Admin', 'jdoe' -SelectRole -SelectUserGroups | Select-Object Username,
+Get-ZbxUser -Name 'Admin', 'jdoe' -SelectRole -SelectUserGroups | Select-Object UserName,
     @{ n = 'Role'; e = { $_.Role.Name } }, @{ n = 'Groups'; e = { $_.UserGroups.Name -join ', ' } }
 ```
 
@@ -65,7 +65,7 @@ Get-ZbxUser -Name 'Admin', 'jdoe' -SelectRole -SelectUserGroups | Select-Object 
 ### Example 4: Find the users who are notified by e-mail
 
 ```powershell
-Get-ZbxUser -MediaType 'Email' | Select-Object Username
+Get-ZbxUser -MediaType 'Email' | Select-Object UserName
 ```
 
 -MediaType takes a media type's name, id or object and returns the users with a media of that type.

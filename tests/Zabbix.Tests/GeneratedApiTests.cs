@@ -186,7 +186,7 @@ public sealed class GeneratedApiTests
         {
             Output = ZabbixOutput.Extend,
             Filter = new() { ["host"] = new[] { "web-01", "web-02" } },
-            SelectInterfaces = [ZabbixHostInterfaceFields.Ip, ZabbixHostInterfaceFields.Port],
+            SelectInterfaces = [ZabbixHostInterfaceFields.IP, ZabbixHostInterfaceFields.Port],
             MonitoredHosts = true,
             Limit = 5,
         }, TestContext.Current.CancellationToken);
@@ -195,7 +195,7 @@ public sealed class GeneratedApiTests
         Assert.Equal(10UL, host.HostId);
         Assert.Equal(ZabbixHostStatus.Disabled, host.Status);                                // HOST_STATUS_NOT_MONITORED = 1
         Assert.Equal(ZabbixTlsConnectMode.Psk, host.TlsConnect);
-        Assert.Equal(ZabbixDiscoveryKinds.Discovered, host.Flags);
+        Assert.Equal(ZabbixDiscoveryKinds.Discovered, host.DiscoveryKind);
         JsonElement sent = api.ParamsOf("host.get").Single();
         Assert.Equal("extend", sent.GetProperty("output").GetString());
         Assert.Equal(["ip", "port"], sent.GetProperty("selectInterfaces").EnumerateArray().Select(e => e.GetString()));
@@ -211,7 +211,7 @@ public sealed class GeneratedApiTests
         using ScriptedApi api = new ScriptedApi().On("item.get", "\"1234\"").On("host.get", "null");
         (ZabbixClient client, _) = Build(api);
 
-        long count = await client.Items.CountAsync(new ZabbixItemGetParameters { Host = "web-01" }, TestContext.Current.CancellationToken);
+        long count = await client.Items.CountAsync(new ZabbixItemGetParameters { HostName = "web-01" }, TestContext.Current.CancellationToken);
 
         Assert.Equal(1234, count);
         Assert.True(api.ParamsOf("item.get").Single().GetProperty("countOutput").GetBoolean());
@@ -229,7 +229,7 @@ public sealed class GeneratedApiTests
 
         ulong created = await client.Hosts.CreateAsync(new ZabbixHostCreateRequest
         {
-            TechnicalName = "web-03",
+            HostName = "web-03",
             Groups = [new ZabbixHostGroupRequest { GroupId = 2 }],
             Status = ZabbixHostStatus.Enabled,
         }, TestContext.Current.CancellationToken);
@@ -268,7 +268,7 @@ public sealed class GeneratedApiTests
         ZabbixTemplate? found = await client.Templates.FindAsync(10001UL, TestContext.Current.CancellationToken);
         ZabbixTemplate? missing = await client.Templates.FindAsync(9UL, TestContext.Current.CancellationToken);
 
-        Assert.Equal("Linux", found?.TechnicalName);
+        Assert.Equal("Linux", found?.HostName);
         Assert.Null(missing);
         Assert.All(api.ParamsOf("template.get"), call => Assert.False(call.TryGetProperty("filter", out _)));
         Assert.Equal("""["10001"]""", api.ParamsOf("template.get").First().GetProperty("templateids").GetRawText());
@@ -300,7 +300,7 @@ public sealed class GeneratedApiTests
         await client.Users.UnblockAsync([3], TestContext.Current.CancellationToken);
 
         Assert.Equal("blue-theme", settings.DefaultTheme);
-        Assert.Equal("1m", settings.HaFailoverDelay);
+        Assert.Equal(TimeSpan.FromMinutes(1), settings.HAFailoverDelay?.Length);
         Assert.Equal<ulong>([77], acknowledged);
         Assert.Equal(5, api.ParamsOf("event.acknowledge").Single().GetProperty("action").GetInt32());
         Assert.Equal("3", api.ParamsOf("user.unblock").Single()[0].GetString());
@@ -394,7 +394,7 @@ public sealed class GeneratedApiTests
     {
         var request = new ZabbixHostCreateRequest
         {
-            TechnicalName = "h",
+            HostName = "h",
             Groups = [new ZabbixHostGroupRequest { GroupId = 1 }],
             AdditionalFields = new Dictionary<string, JsonElement> { ["newfield"] = JsonSerializer.SerializeToElement("x") },
         };
@@ -441,7 +441,7 @@ public sealed class GeneratedApiTests
         JsonTypeInfo<ZabbixHostGetParameters> info = ZabbixApiJson.Default.ZabbixHostGetParameters;
 
         Assert.Equal("""{"output":"extend"}""", JsonSerializer.Serialize(new ZabbixHostGetParameters { Output = ZabbixOutput.Extend }, info));
-        Assert.Equal("""{"output":["hostid","host"]}""", JsonSerializer.Serialize(new ZabbixHostGetParameters { Output = [ZabbixHostFields.HostId, ZabbixHostFields.TechnicalName] }, info));
+        Assert.Equal("""{"output":["hostid","host"]}""", JsonSerializer.Serialize(new ZabbixHostGetParameters { Output = [ZabbixHostFields.HostId, ZabbixHostFields.HostName] }, info));
         Assert.Equal("""{"filter":{"status":1,"host":"a","flags":[0,4]}}""", JsonSerializer.Serialize(new ZabbixHostGetParameters { Filter = new() { ["status"] = 1L, ["host"] = "a", ["flags"] = new long[] { 0, 4 } } }, info));
     }
 
@@ -452,7 +452,7 @@ public sealed class GeneratedApiTests
         var parameters = new ZabbixHostGetParameters
         {
             Output = ZabbixOutput.Of(ZabbixHostFields.HostId, ZabbixHostFields.VisibleName),
-            Filter = new ZabbixHostGetFilter { TechnicalName = ["web-01", "web-02"], Status = [ZabbixHostStatus.Disabled], Ip = ["10.0.0.1"] },
+            Filter = new ZabbixHostGetFilter { HostName = ["web-01", "web-02"], Status = [ZabbixHostStatus.Disabled], IP = ["10.0.0.1"] },
             Search = new ZabbixHostGetSearch { VisibleName = "web" },
             Sort = [ZabbixHostFields.VisibleName],
         };
@@ -464,7 +464,7 @@ public sealed class GeneratedApiTests
         {
             Filter = new() { ["host"] = new[] { "web-01", "web-02" }, ["ip"] = new[] { "10.0.0.1" }, ["status"] = new long[] { 1 } },
         });
-        Assert.Equal("host", ZabbixHostFields.TechnicalName.Name);
+        Assert.Equal("host", ZabbixHostFields.HostName.Name);
     }
 
     [Fact]
@@ -574,7 +574,7 @@ public sealed class GeneratedApiTests
     [Fact]
     public void A_read_tag_becomes_the_request_that_sets_it_again()
     {
-        Assert.Equal(new ZabbixTagRequest { Tag = "env", Value = "prod" }, new ZabbixTag { Tag = "env", Value = "prod", Automatic = ZabbixTagOrigin.Manual }.ToRequest());
+        Assert.Equal(new ZabbixTagRequest { Tag = "env", Value = "prod" }, new ZabbixTag { Tag = "env", Value = "prod", Origin = ZabbixTagOrigin.Manual }.ToRequest());
         Assert.Equal(new ZabbixTagRequest { Tag = "env", Value = string.Empty }, new ZabbixTag { Tag = "env" }.ToRequest());
         Assert.Throws<InvalidOperationException>(() => new ZabbixTag { Value = "prod" }.ToRequest());
     }
@@ -600,9 +600,9 @@ public sealed class GeneratedApiTests
         // API_CUIDS): 25-character strings such as "ckr8jg5sa0000k6y5q11vcd2h", which no numeric id type can hold.
         Assert.Equal(typeof(string), typeof(ZabbixAuditLogRecord).GetProperty(nameof(ZabbixAuditLogRecord.AuditId))!.PropertyType);
         Assert.Equal(typeof(string), typeof(ZabbixAuditLogRecord).GetProperty(nameof(ZabbixAuditLogRecord.RecordSetId))!.PropertyType);
-        Assert.Equal(typeof(string), typeof(ZabbixHaNode).GetProperty(nameof(ZabbixHaNode.HaNodeId))!.PropertyType);
+        Assert.Equal(typeof(string), typeof(ZabbixHANode).GetProperty(nameof(ZabbixHANode.HANodeId))!.PropertyType);
         Assert.Equal(typeof(IReadOnlyList<string>), typeof(ZabbixAuditLogGetParameters).GetProperty(nameof(ZabbixAuditLogGetParameters.AuditIds))!.PropertyType);
-        Assert.Equal(typeof(IReadOnlyList<string>), typeof(ZabbixHaNodeGetParameters).GetProperty(nameof(ZabbixHaNodeGetParameters.HaNodeIds))!.PropertyType);
+        Assert.Equal(typeof(IReadOnlyList<string>), typeof(ZabbixHANodeGetParameters).GetProperty(nameof(ZabbixHANodeGetParameters.HANodeIds))!.PropertyType);
     }
 
     // ----- a .get's own required options ------------------------------------------------------------------------
@@ -660,22 +660,22 @@ public sealed class GeneratedApiTests
     [Fact]
     public void The_capability_table_knows_reads_anonymous_methods_and_versions_from_the_source()
     {
-        Assert.True(ZabbixApiMethods.IsRead("host.get"));
-        Assert.True(ZabbixApiMethods.IsRead("apiinfo.version"));
-        Assert.False(ZabbixApiMethods.IsRead("host.create"));
-        Assert.False(ZabbixApiMethods.IsRead("script.execute"));                                 // it talks to the server
-        Assert.False(ZabbixApiMethods.IsRead("history.push"));
-        Assert.True(ZabbixApiMethods.IsIdempotent("user.checkAuthentication"));                  // reviewed: updates lastaccess only
-        Assert.False(ZabbixApiMethods.RequiresAuthentication("apiinfo.version"));
-        Assert.False(ZabbixApiMethods.RequiresAuthentication("user.login"));
-        Assert.False(ZabbixApiMethods.RequiresAuthentication("USER.CHECKAUTHENTICATION"));       // Zabbix lower-cases the method
-        Assert.True(ZabbixApiMethods.RequiresAuthentication("host.get"));
-        Assert.Equal(ZabbixRoleType.SuperAdmin, ZabbixApiMethods.All["connector.get"].MinimumUserType);
-        Assert.True(ZabbixApiMethods.Supports("host.massupdate", new Version(7, 4, 15)));
-        Assert.False(ZabbixApiMethods.Supports("host.massupdate", new Version(8, 0, 0)));
-        Assert.False(ZabbixApiMethods.Supports("discoveryruleprototype.get", new Version(7, 0, 31)));
-        Assert.True(ZabbixApiMethods.Supports("hostdashboard.get", new Version(7, 0, 31)));
-        Assert.True(ZabbixApiMethods.Supports("no.such", new Version(7, 0, 0)));                 // unknown: the server's to judge
+        Assert.True(ZabbixApiMethods.IsRead(ZabbixApiMethod.HostGet));
+        Assert.True(ZabbixApiMethods.IsRead(ZabbixApiMethod.ApiInfoGetVersion));
+        Assert.False(ZabbixApiMethods.IsRead(ZabbixApiMethod.HostCreate));
+        Assert.False(ZabbixApiMethods.IsRead(ZabbixApiMethod.ScriptExecute));                                 // it talks to the server
+        Assert.False(ZabbixApiMethods.IsRead(ZabbixApiMethod.HistoryPush));
+        Assert.True(ZabbixApiMethods.IsIdempotent(ZabbixApiMethod.UserCheckAuthentication));                  // reviewed: updates lastaccess only
+        Assert.False(ZabbixApiMethods.RequiresAuthentication(ZabbixApiMethod.ApiInfoGetVersion));
+        Assert.False(ZabbixApiMethods.RequiresAuthentication(ZabbixApiMethod.UserLogOn));
+        Assert.False(ZabbixApiMethods.RequiresAuthentication(new ZabbixApiMethod("USER.CHECKAUTHENTICATION")));       // Zabbix lower-cases the method
+        Assert.True(ZabbixApiMethods.RequiresAuthentication(ZabbixApiMethod.HostGet));
+        Assert.Equal(ZabbixRoleType.SuperAdmin, ZabbixApiMethods.All[ZabbixApiMethod.ConnectorGet].MinimumUserType);
+        Assert.True(ZabbixApiMethods.Supports(ZabbixApiMethod.HostMassUpdate, new Version(7, 4, 15)));
+        Assert.False(ZabbixApiMethods.Supports(ZabbixApiMethod.HostMassUpdate, new Version(8, 0, 0)));
+        Assert.False(ZabbixApiMethods.Supports(ZabbixApiMethod.DiscoveryRulePrototypeGet, new Version(7, 0, 31)));
+        Assert.True(ZabbixApiMethods.Supports(ZabbixApiMethod.HostDashboardGet, new Version(7, 0, 31)));
+        Assert.True(ZabbixApiMethods.Supports(new ZabbixApiMethod("no.such"), new Version(7, 0, 0)));                 // unknown: the server's to judge
     }
 
     [Fact]
@@ -686,7 +686,7 @@ public sealed class GeneratedApiTests
 
         ZabbixVersionException refused = await Assert.ThrowsAsync<ZabbixVersionException>(() => client.DiscoveryRulePrototypes.GetAsync(cancellationToken: TestContext.Current.CancellationToken));
 
-        Assert.Equal("discoveryruleprototype.get", refused.Method);
+        Assert.Equal(ZabbixApiMethod.DiscoveryRulePrototypeGet, refused.Method);
         Assert.Equal(new Version(7, 4), refused.Since);
         Assert.Empty(api.ParamsOf("discoveryruleprototype.get"));
         Assert.IsAssignableFrom<NotSupportedException>(refused);
@@ -706,24 +706,24 @@ public sealed class GeneratedApiTests
         Version v70 = new(7, 0, 31), v74 = new(7, 4, 15), v80 = new(8, 0, 0);
         foreach (string api in new[] { "apmlog.get", "apmmetric.get", "apmspan.get", "apmtrace.get", "ceprule.get", "serverinfo.get", "device.get" })
         {
-            Assert.False(ZabbixApiMethods.Supports(api, v74), api);
-            Assert.True(ZabbixApiMethods.Supports(api, v80), api);
+            Assert.False(ZabbixApiMethods.Supports(ZabbixApiMethod.Parse(api), v74), api);
+            Assert.True(ZabbixApiMethods.Supports(ZabbixApiMethod.Parse(api), v80), api);
         }
 
-        Assert.True(ZabbixApiMethods.Supports("discoveryrule.copy", v70));
-        Assert.False(ZabbixApiMethods.Supports("discoveryrule.copy", v74));
+        Assert.True(ZabbixApiMethods.Supports(ZabbixApiMethod.DiscoveryRuleCopy, v70));
+        Assert.False(ZabbixApiMethods.Supports(ZabbixApiMethod.DiscoveryRuleCopy, v74));
         foreach (string api in new[] { "host.massupdate", "hostgroup.massupdate", "template.massupdate", "templategroup.massupdate" })
         {
-            Assert.True(ZabbixApiMethods.Supports(api, v74), api);
-            Assert.False(ZabbixApiMethods.Supports(api, v80), api);
+            Assert.True(ZabbixApiMethods.Supports(ZabbixApiMethod.Parse(api), v74), api);
+            Assert.False(ZabbixApiMethods.Supports(ZabbixApiMethod.Parse(api), v80), api);
         }
 
-        Assert.False(ZabbixApiMethods.SupportsField("mediatype.create", "content_type", v74));
-        Assert.False(ZabbixApiMethods.SupportsField("mediatype.create", "exec_params", v74));
-        Assert.False(ZabbixApiMethods.SupportsField("usergroup.create", "rights", v74));
-        Assert.False(ZabbixApiMethods.SupportsField("hostgroup.get", "monitored_hosts", v74));
-        Assert.False(ZabbixApiMethods.SupportsField("hostgroup.get", "real_hosts", v74));
-        Assert.True(ZabbixApiMethods.SupportsField("hostgroup.get", "real_hosts", v70));
+        Assert.False(ZabbixApiMethods.SupportsField(ZabbixApiMethod.MediaTypeCreate, "content_type", v74));
+        Assert.False(ZabbixApiMethods.SupportsField(ZabbixApiMethod.MediaTypeCreate, "exec_params", v74));
+        Assert.False(ZabbixApiMethods.SupportsField(ZabbixApiMethod.UserGroupCreate, "rights", v74));
+        Assert.False(ZabbixApiMethods.SupportsField(ZabbixApiMethod.HostGroupGet, "monitored_hosts", v74));
+        Assert.False(ZabbixApiMethods.SupportsField(ZabbixApiMethod.HostGroupGet, "real_hosts", v74));
+        Assert.True(ZabbixApiMethods.SupportsField(ZabbixApiMethod.HostGroupGet, "real_hosts", v70));
         foreach (Type parameters in new[] { typeof(ZabbixTemplateGetParameters), typeof(ZabbixScriptGetParameters), typeof(ZabbixTriggerGetParameters), typeof(ZabbixGraphGetParameters) })
             Assert.Equal("7.4", parameters.GetProperty("SelectGroups")!.GetCustomAttribute<ZabbixUnsupportedAttribute>()!.Version);
         Assert.Equal("7.4", typeof(ZabbixUserGroupGetParameters).GetProperty("SelectRights")!.GetCustomAttribute<ZabbixUnsupportedAttribute>()!.Version);
@@ -740,7 +740,7 @@ public sealed class GeneratedApiTests
     [Fact]
     public void A_read_record_carries_what_its_get_returns_named_for_what_it_is()
     {
-        foreach (string hostOnly in new[] { "HostId", "ProxyId", "Status", "IpmiAuthType", "MaintenanceStatus", "TlsConnect", "TlsPsk", "MonitoredBy", "Flags" })
+        foreach (string hostOnly in new[] { "HostId", "ProxyId", "Status", "IpmiAuthenticationType", "MaintenanceStatus", "TlsConnect", "TlsPsk", "MonitoredBy", "Flags" })
             Assert.Null(typeof(ZabbixTemplate).GetProperty(hostOnly));
         Assert.Null(typeof(ZabbixHost).GetProperty("TlsPsk"));
         Assert.Null(typeof(ZabbixHost).GetProperty("TlsPskIdentity"));
@@ -758,11 +758,12 @@ public sealed class GeneratedApiTests
         Assert.Null(typeof(ZabbixTrigger).GetProperty("Discover"));
         Assert.Null(typeof(ZabbixTriggerCreateRequest).GetProperty("Discover"));
         Assert.Equal(7, (int)ZabbixTaskType.Data);
-        Assert.Equal([1, 2, 3], System.Enum.GetValues<ZabbixSnmpVersion>().Select(value => (int)value));
+        Assert.Equal([0, 1, 2, 3], System.Enum.GetValues<ZabbixSnmpVersion>().Select(value => (int)value));   // None, then SNMP's own
+        Assert.Equal(ZabbixSnmpVersion.None, default);
         Assert.Equal(typeof(IReadOnlyList<string>), typeof(ZabbixCepRuleWindow).GetProperty(nameof(ZabbixCepRuleWindow.Tags))!.PropertyType);
         Assert.Equal(typeof(IReadOnlyList<ZabbixSlaRecordSchedule>), typeof(ZabbixSlaRecord).GetProperty(nameof(ZabbixSlaRecord.Schedule))!.PropertyType);
         Assert.Equal(typeof(IReadOnlyList<ZabbixUserDirectoryProvisionMedia>), typeof(ZabbixUserDirectory).GetProperty(nameof(ZabbixUserDirectory.ProvisionMedia))!.PropertyType);
-        Assert.Equal(typeof(int?), typeof(ZabbixUserDirectory).GetProperty(nameof(ZabbixUserDirectory.Port))!.PropertyType);
+        Assert.Equal(typeof(ZabbixPort?), typeof(ZabbixUserDirectory).GetProperty(nameof(ZabbixUserDirectory.Port))!.PropertyType);
         Assert.Equal(["AccessUserId", "UserGroupId"], typeof(ZabbixReportUserGroup).GetProperties().Where(p => p.Name.EndsWith("Id", StringComparison.Ordinal)).Select(p => p.Name).Order(StringComparer.Ordinal));
 
         static string WireName(Type record, string member)
@@ -861,7 +862,7 @@ public sealed class GeneratedApiTests
         IReadOnlyList<ulong> ids = await client.HostInterfaces.ReplaceHostInterfacesAsync(new ZabbixHostInterfaceReplaceHostInterfacesRequest
         {
             HostId = 1,
-            Interfaces = [new ZabbixHostInterfaceReplaceHostInterfacesInterfaceRequest { Type = ZabbixInterfaceType.Agent, Main = ZabbixInterfacePriority.Primary, UseIp = ZabbixHostInterfaceUseIp.Ip, Ip = "127.0.0.1", Dns = "", Port = 10050 }],
+            Interfaces = [new ZabbixHostInterfaceReplaceHostInterfacesInterfaceRequest { Type = ZabbixInterfaceType.Agent, Main = ZabbixInterfacePriority.Primary, UseIP = ZabbixHostInterfaceUseIP.IP, IP = "127.0.0.1", Dns = "", Port = 10050 }],
         }, TestContext.Current.CancellationToken);
 
         Assert.Equal<ulong>([30], ids);
@@ -923,8 +924,8 @@ public sealed class GeneratedApiTests
     [Fact]
     public void An_event_s_flags_are_its_origin_from_the_server_s_defines()
     {
-        Assert.Equal(ZabbixEventOrigin.Copied, JsonSerializer.Deserialize("""{"eventid":"1","flags":"1"}""", ZabbixApiJson.Default.ZabbixEvent)!.Flags);
-        Assert.Equal(ZabbixEventOrigin.Normal, JsonSerializer.Deserialize("""{"eventid":"1","flags":"0"}""", ZabbixApiJson.Default.ZabbixProblem)!.Flags);
+        Assert.Equal(ZabbixEventOrigin.Copied, JsonSerializer.Deserialize("""{"eventid":"1","flags":"1"}""", ZabbixApiJson.Default.ZabbixEvent)!.Origin);
+        Assert.Equal(ZabbixEventOrigin.Normal, JsonSerializer.Deserialize("""{"eventid":"1","flags":"0"}""", ZabbixApiJson.Default.ZabbixProblem)!.Origin);
         Assert.Equal(["ZBX_EVENT_NORMAL", "ZBX_EVENT_COPIED"], Enum("EventOrigin").GetProperty("members").EnumerateArray().Select(member => member.GetProperty("define").GetString()));
         Assert.Equal("enum:EventOrigin", Field("Problem", "flags").GetProperty("kind").GetString());
     }
@@ -1010,12 +1011,12 @@ public sealed class GeneratedApiTests
 
         Assert.Equal("hostids", refused.Field);
         Assert.Equal("hosts", refused.Replacement);
-        Assert.Equal("maintenance.create", refused.Method);
+        Assert.Equal(ZabbixApiMethod.MaintenanceCreate, refused.Method);
         Assert.Equal(new Version(7, 4), refused.RemovedIn);
         Assert.Contains("use hosts", refused.Message, StringComparison.Ordinal);
         Assert.Equal("hostids", batch.Field);
         Assert.Empty(api.ParamsOf("maintenance.create"));
-        Assert.False(ZabbixApiMethods.SupportsField("maintenance.update", "groupids", Version.Parse(version)));
+        Assert.False(ZabbixApiMethods.SupportsField(ZabbixApiMethod.MaintenanceUpdate, "groupids", Version.Parse(version)));
         ZabbixUnsupportedAttribute marked = typeof(ZabbixMaintenanceUpdateRequest).GetProperty("GroupIds")!.GetCustomAttribute<ZabbixUnsupportedAttribute>()!;
         Assert.Equal(("7.4", "use groups"), (marked.Version, marked.Message));
     }
@@ -1032,8 +1033,8 @@ public sealed class GeneratedApiTests
         Assert.Equal(9UL, await client.Maintenances.CreateAsync(request, TestContext.Current.CancellationToken));
 
         Assert.Equal(["10"], api.ParamsOf("maintenance.create").Single().GetProperty("hostids").EnumerateArray().Select(e => e.GetString()));
-        Assert.True(ZabbixApiMethods.SupportsField("maintenance.create", "hostids", new Version(7, 0, 31)));
-        Assert.True(ZabbixApiMethods.SupportsField("maintenance.create", "name", new Version(8, 0, 0)));   // not in the table: the server's to judge
+        Assert.True(ZabbixApiMethods.SupportsField(ZabbixApiMethod.MaintenanceCreate, "hostids", new Version(7, 0, 31)));
+        Assert.True(ZabbixApiMethods.SupportsField(ZabbixApiMethod.MaintenanceCreate, "name", new Version(8, 0, 0)));   // not in the table: the server's to judge
     }
 
     [Fact]
@@ -1061,7 +1062,7 @@ public sealed class GeneratedApiTests
     [Fact]
     public void A_member_required_only_for_some_types_or_paths_is_optional_and_a_trapper_item_needs_only_its_five()
     {
-        var trapper = new ZabbixItemCreateRequest { HostId = 10, Name = "n", Type = ZabbixItemType.Trapper, Key = "k", ValueType = ZabbixItemValueType.Text };
+        var trapper = new ZabbixItemCreateRequest { HostId = 10, Name = "n", Type = ZabbixItemType.Trapper, Key = ZabbixItemKey.Parse("k"), ValueType = ZabbixItemValueType.Text };
 
         Assert.Null(trapper.MasterItemId);
         Assert.False(IsRequired(typeof(ZabbixItemCreateRequest), nameof(ZabbixItemCreateRequest.MasterItemId)));
@@ -1140,7 +1141,7 @@ public sealed class GeneratedApiTests
         IReadOnlyList<ZabbixUserMedia> medias = Assert.Single(users!).Medias!;
         Assert.Equal(["a@x", "b@x"], medias[0].SendTo);
         Assert.Equal(["+1555"], medias[1].SendTo);
-        Assert.Equal(ZabbixMediaStatus.Disabled, medias[1].Active);
+        Assert.Equal(ZabbixMediaStatus.Disabled, medias[1].Status);
         Assert.Throws<JsonException>(() => JsonSerializer.Deserialize("""[{"sendto":5}]""", ZabbixApiJson.Default.IReadOnlyListZabbixUserMedia));
     }
 
@@ -1186,9 +1187,9 @@ public sealed class GeneratedApiTests
     {
         string Wire(ZabbixHistoryGetParameters parameters) => JsonSerializer.Serialize(parameters, ZabbixApiJson.Default.ZabbixHistoryGetParameters);
 
-        Assert.DoesNotContain("maxValueSize", Wire(new ZabbixHistoryGetParameters { History = ZabbixItemValueType.Json }), StringComparison.Ordinal);
-        Assert.Contains("\"maxValueSize\":null", Wire(new ZabbixHistoryGetParameters { History = ZabbixItemValueType.Json, MaxValueSize = ZabbixOptional<int>.Null }), StringComparison.Ordinal);
-        Assert.Contains("\"maxValueSize\":1024", Wire(new ZabbixHistoryGetParameters { History = ZabbixItemValueType.Json, MaxValueSize = 1024 }), StringComparison.Ordinal);
+        Assert.DoesNotContain("maxValueSize", Wire(new ZabbixHistoryGetParameters { ValueType = ZabbixItemValueType.Json }), StringComparison.Ordinal);
+        Assert.Contains("\"maxValueSize\":null", Wire(new ZabbixHistoryGetParameters { ValueType = ZabbixItemValueType.Json, MaxValueSize = ZabbixOptional<int>.Null }), StringComparison.Ordinal);
+        Assert.Contains("\"maxValueSize\":1024", Wire(new ZabbixHistoryGetParameters { ValueType = ZabbixItemValueType.Json, MaxValueSize = 1024 }), StringComparison.Ordinal);
         Assert.False(ZabbixOptional<int>.FromNullable(null).IsSent);
         Assert.True(JsonSerializer.Deserialize("""{"maxValueSize":null}""", ZabbixApiJson.Default.ZabbixHistoryGetParameters)!.MaxValueSize.IsNull);
     }
@@ -1213,8 +1214,8 @@ public sealed class GeneratedApiTests
     {
         DesignConformanceTests.AssertNone(AdversarialDesignConformanceTests.UnclassifiedSecrets(typeof(ZabbixHost).Assembly.GetExportedTypes()));
         Assert.NotNull(typeof(ZabbixHostUpdateRequest).GetProperty(nameof(ZabbixHostUpdateRequest.TlsPsk))!.GetCustomAttribute<ZabbixSecretAttribute>());
-        Assert.NotNull(typeof(ZabbixUserDirectoryCreateRequest).GetProperty(nameof(ZabbixUserDirectoryCreateRequest.SpPrivateKey))!.GetCustomAttribute<ZabbixSecretAttribute>());
-        Assert.Null(typeof(ZabbixHost).GetProperty(nameof(ZabbixHost.TechnicalName))!.GetCustomAttribute<ZabbixSecretAttribute>());
+        Assert.NotNull(typeof(ZabbixUserDirectoryCreateRequest).GetProperty(nameof(ZabbixUserDirectoryCreateRequest.SPPrivateKey))!.GetCustomAttribute<ZabbixSecretAttribute>());
+        Assert.Null(typeof(ZabbixHost).GetProperty(nameof(ZabbixHost.HostName))!.GetCustomAttribute<ZabbixSecretAttribute>());
     }
 
     /// <summary>
@@ -1257,7 +1258,7 @@ public sealed class GeneratedApiTests
     {
         ZabbixHost host = JsonSerializer.Deserialize("""{"hostid":"10084","host":"web-01","status":"1","tags":[{"tag":"a","value":"1"},{"tag":"b","value":"2"}],"groups":[{"groupid":"2"}],"brand_new":"x"}""", ZabbixApiJson.Default.ZabbixHost)!;
 
-        Assert.Equal("ZabbixHost { HostId = 10084, TechnicalName = web-01, Status = Disabled, Tags = [2 items], Groups = [1 item], AdditionalFields = [1 item] }", host.ToString());
+        Assert.Equal("ZabbixHost { HostId = 10084, HostName = web-01, Status = Disabled, Tags = [2 items], Groups = [1 item], AdditionalFields = [1 item] }", host.ToString());
         Assert.Equal("ZabbixHostGetParameters { }", new ZabbixHostGetParameters().ToString());
         Assert.Equal("ZabbixHistoryGetParameters { MaxValueSize = 10 }", new ZabbixHistoryGetParameters { MaxValueSize = 10 }.ToString());
     }
@@ -1285,9 +1286,10 @@ public sealed class GeneratedApiTests
     /// <summary>
     /// The generator's output is analysed like hand-written code (<c>.editorconfig</c> scopes
     /// <c>generated_code = false</c> to it), and a design rule the Zabbix model answers is suppressed on the one symbol
-    /// with its reason, never silently: an enum with no zero (CA1008), a single-code enum whose values look like bits
-    /// (CA1027), an enum member named with Zabbix's type word (CA1720), a URL text member (CA1056). A record member
-    /// named exactly a type (the wire field <c>object</c>) is renamed instead (<c>ObjectType</c>), the wire name kept.
+    /// with its reason, never silently: a single-code enum whose values look like bits (CA1027), an enum member named with
+    /// Zabbix's type word (CA1720), a URL text member (CA1056). An enum Zabbix numbers from one has a <c>None</c> zero, so
+    /// CA1008 has nothing to suppress. A record member named exactly a type (the wire field <c>object</c>) is renamed
+    /// instead (<c>ObjectType</c>), the wire name kept.
     /// </summary>
     [Fact]
     public void Generated_code_is_analysed_and_every_suppression_carries_its_reason()
@@ -1299,7 +1301,7 @@ public sealed class GeneratedApiTests
         List<string> code = [.. emitter.Emit(ZabbixApiPart.Models, TestContext.Current.CancellationToken).Files.Concat(emitter.Emit(ZabbixApiPart.Clients, TestContext.Current.CancellationToken).Files).Select(file => file.Code)];
 
         List<string> suppressions = [.. code.SelectMany(text => text.Split('\n')).Where(line => line.Contains("SuppressMessage(", StringComparison.Ordinal))];
-        Assert.Contains(suppressions, line => line.Contains("CA1008", StringComparison.Ordinal));
+        Assert.DoesNotContain(suppressions, line => line.Contains("CA1008", StringComparison.Ordinal));
         Assert.Contains(suppressions, line => line.Contains("CA1027", StringComparison.Ordinal));
         Assert.Contains(suppressions, line => line.Contains("CA1720", StringComparison.Ordinal));
         Assert.Contains(suppressions, line => line.Contains("CA1056", StringComparison.Ordinal));
@@ -1379,7 +1381,7 @@ public sealed class GeneratedApiTests
         Assert.Empty(pluralChoices);
         Assert.Equal(0, (int)ZabbixPasswordCheckRules.None);
         Assert.Equal(0, (int)ZabbixEventActions.None);
-        Assert.DoesNotContain("None", System.Enum.GetNames<ZabbixTlsAcceptModes>());
+        Assert.Equal(0, (int)ZabbixTlsAcceptModes.None);
     }
 
     /// <summary>
@@ -1430,10 +1432,10 @@ public sealed class GeneratedApiTests
     [Fact]
     public void Host_interfaces_are_typed_by_the_interface_enums_and_host_macros_keep_theirs()
     {
-        var request = new ZabbixHostInterfaceRequest { Type = ZabbixInterfaceType.Snmp, UseIp = ZabbixHostInterfaceUseIp.Dns, Main = ZabbixInterfacePriority.Primary };
+        var request = new ZabbixHostInterfaceRequest { Type = ZabbixInterfaceType.Snmp, UseIP = ZabbixHostInterfaceUseIP.Dns, Main = ZabbixInterfacePriority.Primary };
 
         Assert.Equal("""{"type":2,"useip":0,"main":1}""", JsonSerializer.Serialize(request, ZabbixApiJson.Default.ZabbixHostInterfaceRequest));
-        Assert.Equal(ZabbixHostInterfaceUseIp.Ip, JsonSerializer.Deserialize("""{"useip":"Ip"}""", ZabbixApiJson.Default.ZabbixHostInterfaceRequest)!.UseIp);
+        Assert.Equal(ZabbixHostInterfaceUseIP.IP, JsonSerializer.Deserialize("""{"useip":"Ip"}""", ZabbixApiJson.Default.ZabbixHostInterfaceRequest)!.UseIP);
         Assert.Equal(typeof(ZabbixInterfaceType?), typeof(ZabbixHostMassAddInterfaceRequest).GetProperty(nameof(ZabbixHostMassAddInterfaceRequest.Type))!.PropertyType);
         Assert.Equal(typeof(ZabbixInterfacePriority), typeof(ZabbixHostInterfaceCreateRequest).GetProperty(nameof(ZabbixHostInterfaceCreateRequest.Main))!.PropertyType);
         Assert.Equal(typeof(ZabbixMacroType?), typeof(ZabbixHostMacroRequest).GetProperty(nameof(ZabbixHostMacroRequest.Type))!.PropertyType);
@@ -1474,7 +1476,7 @@ public sealed class GeneratedApiTests
         Assert.Equal(ZabbixConditionOperator.MoreEqual, action.Filter.Conditions![0].Operator);
         ZabbixActionReadOperation operation = Assert.Single(action.Operations!);
         Assert.Equal(7UL, Assert.Single(operation.OperationMessageGroup!).UserGroupId);
-        Assert.Equal(typeof(ZabbixLldReadFilter), typeof(ZabbixDiscoveryRule).GetProperty(nameof(ZabbixDiscoveryRule.Filter))!.PropertyType);
+        Assert.Equal(typeof(ZabbixLowLevelDiscoveryReadFilter), typeof(ZabbixDiscoveryRule).GetProperty(nameof(ZabbixDiscoveryRule.Filter))!.PropertyType);
         Assert.Equal(typeof(ZabbixCorrelationReadFilter), typeof(ZabbixCorrelationRecord).GetProperty(nameof(ZabbixCorrelationRecord.Filter))!.PropertyType);
     }
 
@@ -1485,7 +1487,7 @@ public sealed class GeneratedApiTests
 
         IReadOnlyList<ZabbixHost> hosts = await api.Hosts.GetAsync(cancellationToken: TestContext.Current.CancellationToken);
 
-        Assert.Equal("web-01", Assert.Single(hosts).TechnicalName);
+        Assert.Equal("web-01", Assert.Single(hosts).HostName);
         Assert.False(typeof(ZabbixApi).IsSealed);
         Assert.All(typeof(ZabbixApi).GetProperties().Where(p => p.PropertyType.Name.EndsWith("Client", StringComparison.Ordinal)), p => Assert.True(p.GetMethod!.IsVirtual, p.Name));
         Assert.True(typeof(ZabbixApi).GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, System.Type.EmptyTypes)?.IsFamily);
@@ -1496,7 +1498,7 @@ public sealed class GeneratedApiTests
     private sealed class FakeHosts : ZabbixHostClient
     {
         public override Task<IReadOnlyList<ZabbixHost>> GetAsync(ZabbixHostGetParameters parameters, CancellationToken cancellationToken)
-            => Task.FromResult<IReadOnlyList<ZabbixHost>>([new ZabbixHost { HostId = 1, TechnicalName = "web-01" }]);
+            => Task.FromResult<IReadOnlyList<ZabbixHost>>([new ZabbixHost { HostId = 1, HostName = "web-01" }]);
     }
 
     private sealed class FakeApi : ZabbixApi

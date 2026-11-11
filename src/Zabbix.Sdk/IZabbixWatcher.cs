@@ -17,7 +17,7 @@ public interface IZabbixWatcher : IAsyncEnumerable<ZabbixValue>, IAsyncDisposabl
     ZabbixWatchPlan Plan { get; }
 
     /// <summary>The latest value of every item seen so far, by host and key — what a shell shows. A snapshot, replaced once per tick that changed it.</summary>
-    IReadOnlyDictionary<(string Host, ZabbixItemKey Key), ZabbixValue> Current { get; }
+    IReadOnlyDictionary<(string HostName, ZabbixItemKey Key), ZabbixValue> Current { get; }
 
     /// <summary>How many ticks read what they had to read.</summary>
     long SucceededPolls { get; }

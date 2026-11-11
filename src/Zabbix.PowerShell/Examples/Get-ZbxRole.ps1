@@ -1,6 +1,6 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
-$null = New-ZbxUser -Username 'jdoe' -Password (ConvertTo-SecureString 'Chang3-me-at-first-login!' -AsPlainText -Force) -RoleId (Get-ZbxRole -Name 'User role').RoleId -UserGroup 'Operators'
+$null = New-ZbxUser -UserName 'jdoe' -Password (ConvertTo-SecureString 'Chang3-me-at-first-login!' -AsPlainText -Force) -RoleId (Get-ZbxRole -Name 'User role').RoleId -UserGroup 'Operators'
 
 #region List the roles
 # Without parameters every role is returned. Type is the user type the role grants (User, Admin, SuperAdmin);
@@ -15,7 +15,7 @@ Get-ZbxRole | Select-Object RoleId, Name, Type, ReadOnly
 
 #region Show which users have a role
 # -SelectUsers adds the role's users to each role.
-Get-ZbxRole -Name 'User role' -SelectUsers | Select-Object -ExpandProperty Users | Select-Object Username
+Get-ZbxRole -Name 'User role' -SelectUsers | Select-Object -ExpandProperty Users | Select-Object UserName
 #endregion
 
 #region Check whether a role may use the API

@@ -28,7 +28,7 @@ Enable-ZbxHost -InputObject 'web-01'
 ### Example 2: Monitor every host of a group and show the result
 
 ```powershell
-Get-ZbxHost -Group 'Linux servers' | Enable-ZbxHost -PassThru | Select-Object TechnicalName, Status
+Get-ZbxHost -Group 'Linux servers' | Enable-ZbxHost -PassThru | Select-Object HostName, Status
 ```
 
 The piped hosts are enabled in one host.update; -PassThru writes them back with their Status.

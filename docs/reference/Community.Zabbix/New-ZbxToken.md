@@ -8,7 +8,7 @@ Creates an API token.
 ## SYNTAX
 
 ```
-New-ZbxToken [[-Name] <string>] [-Description <string>] [-UserId <ulong>] [-Status <ZabbixAuthToken>] [-ExpiresAt <DateTimeOffset>] [-AdditionalProperty <Hashtable>] [-Generate] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+New-ZbxToken [[-Name] <string>] [-Description <string>] [-UserId <ulong>] [-Status <ZabbixAuthenticationToken>] [-ExpiresAt <DateTimeOffset>] [-AdditionalProperty <Hashtable>] [-Generate] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -89,7 +89,7 @@ Enabled/disabled status. Left out, the server stores ZBX_AUTH_TOKEN_ENABLED (the
 
 | | |
 | --- | --- |
-| Type | `ZabbixAuthToken` |
+| Type | `ZabbixAuthenticationToken` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |
@@ -160,7 +160,7 @@ Creates without a confirmation prompt even where $ConfirmPreference is at or bel
 
 ### -InputObject
 
-A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIp, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
+A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIP, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
 
 | | |
 | --- | --- |
@@ -204,7 +204,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 
 - `string`: Bound to -Name (ByPropertyName), -Description (ByPropertyName). Text.
 - `ulong`: Bound to -UserId (ByPropertyName).
-- `ZabbixAuthToken`: Bound to -Status (ByPropertyName). The auth token values: ZBX_AUTH_TOKEN_* in defines.inc.php.
+- `ZabbixAuthenticationToken`: Bound to -Status (ByPropertyName). The authentication token values: ZBX_AUTH_TOKEN_* in defines.inc.php.
 - `DateTimeOffset`: Bound to -ExpiresAt (ByPropertyName).
 - `PSObject`: Bound to -InputObject (ByValue). Each object as the API answers it.
 

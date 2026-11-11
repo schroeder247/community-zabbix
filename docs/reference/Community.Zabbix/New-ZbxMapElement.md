@@ -8,7 +8,7 @@ Builds a map element for the -Element of New-ZbxMap and Set-ZbxMap.
 ## SYNTAX
 
 ```
-New-ZbxMapElement [-EvalType <ZabbixConditionEvalType>] [-Tag <ZabbixMapElementTagRequest[]>] [-MapElementId <ulong>] [-ShowLabel <ZabbixMapShowElementLabel>] [-ZIndex <int>] [-ElementType <ZabbixMapElementType>] [-IconIdOff <ulong>] [-IconIdOn <ulong>] [-Label <string>] [-LabelLocation <ZabbixMapLabelLocation>] [-X <int>] [-Y <int>] [-IconIdDisabled <ulong>] [-IconIdMaintenance <ulong>] [-ElementSubType <ZabbixMapElementSubType>] [-AreaType <ZabbixMapElementAreaType>] [-Width <int>] [-Height <int>] [-ViewType <int>] [-UseIconMap <bool>] [-Element <ZabbixMapElementElementRequest[]>] [-Url <ZabbixMapElementUrlRequest[]>] [<CommonParameters>]
+New-ZbxMapElement [-EvaluationType <ZabbixConditionEvaluationType>] [-Tag <ZabbixMapElementTagRequest[]>] [-MapElementId <ulong>] [-ShowLabel <ZabbixMapShowElementLabel>] [-ZIndex <int>] [-ElementType <ZabbixMapElementType>] [-IconIdOff <ulong>] [-IconIdOn <ulong>] [-Label <string>] [-LabelLocation <ZabbixMapLabelLocation>] [-X <int>] [-Y <int>] [-IconIdDisabled <ulong>] [-IconIdMaintenance <ulong>] [-ElementSubType <ZabbixMapElementSubType>] [-AreaType <ZabbixMapElementAreaType>] [-Width <int>] [-Height <int>] [-ViewType <int>] [-UseIconMap <bool>] [-Element <ZabbixMapElementElementRequest[]>] [-Url <ZabbixMapElementUrlRequest[]>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -38,13 +38,13 @@ An element with an existing -MapElementId updates that element in place, keeping
 
 ## PARAMETERS
 
-### -EvalType
+### -EvaluationType
 
 How the element's tag filters are combined: and/or, or or.
 
 | | |
 | --- | --- |
-| Type | `ZabbixConditionEvalType` |
+| Type | `ZabbixConditionEvaluationType` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |

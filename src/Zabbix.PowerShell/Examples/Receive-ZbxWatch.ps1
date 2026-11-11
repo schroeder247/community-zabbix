@@ -26,13 +26,13 @@ counts in Dropped. It sends nothing to the server itself; the watch does the rea
 #>
 #region Read the next value of a watched item
 # The reader sees the values that arrive after it starts; Select-Object -First ends it after one.
-Receive-ZbxWatch -Name 'items' | Select-Object -First 1 | Select-Object Host, Key, Value
+Receive-ZbxWatch -Name 'items' | Select-Object -First 1 | Select-Object HostName, Key, Value
 #endregion
 
 #region React to values as they arrive
-# ForEach-Object handles each value as it comes: here it reports the clock of the next three.
+# ForEach-Object handles each value as it comes: here it reports the time of the next three.
 Receive-ZbxWatch -Name 'items' | Select-Object -First 3 |
-    ForEach-Object { '{0} {1} = {2} at {3}' -f $_.Host, $_.Key, $_.Value, $_.Clock }
+    ForEach-Object { '{0} {1} = {2} at {3}' -f $_.HostName, $_.Key, $_.Value, $_.Time }
 #endregion
 
 Stop-ZbxWatch -Name 'items'

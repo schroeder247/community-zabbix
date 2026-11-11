@@ -6,7 +6,7 @@ namespace Community.Zabbix.Proxy;
 
 /// <summary>One row of <c>auto registration</c>: an unknown active-agent host offered for registration (<c>process_auto_registration_contents</c>).</summary>
 /// <param name="Clock">When the agent was seen.</param>
-/// <param name="Host">The host name it announced.</param>
+/// <param name="HostName">The host name it announced.</param>
 /// <param name="Ip">Its address; empty when <paramref name="Flags"/> is DNS-only.</param>
 /// <param name="Dns">Its name, when resolved.</param>
 /// <param name="Port">Its agent port; the default (10050) when omitted.</param>
@@ -15,7 +15,7 @@ namespace Community.Zabbix.Proxy;
 /// <param name="TlsAccepted">The connection type it was seen on: 1 unencrypted, 2 PSK, 4 certificate.</param>
 public sealed record ZabbixProxyAutoregistrationItem(
     [property: JsonPropertyName("clock"), JsonConverter(typeof(ZabbixUnixTimeConverter))] DateTimeOffset Clock,
-    [property: JsonPropertyName("host")] string Host,
+    [property: JsonPropertyName("host")] string HostName,
     [property: JsonPropertyName("ip")] string? Ip,
     [property: JsonPropertyName("dns")] string? Dns,
     [property: JsonPropertyName("port")] int? Port,

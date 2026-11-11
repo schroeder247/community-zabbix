@@ -1,6 +1,5 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Community.Zabbix.Generator;
@@ -65,22 +64,27 @@ internal static class DocSentences
             ? (flags ? "A set of " : "The ") + Words(name) + (flags ? " bits" : " values") + ": <c>" + family + "_*</c> in <c>defines.inc.php</c>."
             : summary!;
 
-    /// <summary><c>PasswordCheckRules</c> → <c>password check rules</c>, <c>HostId</c> → <c>host ID</c>, <c>TlsPsk</c> → <c>TLS PSK</c>.</summary>
+    /// <summary>
+    /// <c>PasswordCheckRules</c> → <c>password check rules</c>, <c>HostId</c> → <c>host ID</c>, <c>TlsPsk</c> → <c>TLS PSK</c>,
+    /// <c>IPRange</c> → <c>IP range</c>: a two-letter acronym in capitals is one word.
+    /// </summary>
     /// <param name="pascal">A C# name.</param>
     public static string Words(string pascal)
     {
+        string name = pascal.TrimStart('@');
         var words = new List<string>();
-        var word = new StringBuilder();
-        foreach (char c in pascal.TrimStart('@'))
+        int start = 0;
+        for (int i = 1; i <= name.Length; i++)
         {
-            if ((char.IsUpper(c) || (char.IsDigit(c) && word.Length > 0 && !char.IsDigit(word[word.Length - 1]))) && word.Length > 0)
-            {
-                words.Add(word.ToString());
-                word.Clear();
-            }
-            word.Append(c);
+            // a word starts at a capital, unless it continues a run of capitals that the next capital ends (IPRange: IP,
+            // Range), and at the first digit after a letter
+            bool starts = i == name.Length
+                || (char.IsUpper(name[i]) && (!char.IsUpper(name[i - 1]) || (i + 1 < name.Length && char.IsLower(name[i + 1]))))
+                || (char.IsDigit(name[i]) && !char.IsDigit(name[i - 1]));
+            if (!starts) continue;
+            words.Add(name.Substring(start, i - start));
+            start = i;
         }
-        if (word.Length > 0) words.Add(word.ToString());
         return string.Join(" ", words.Select(Render));
     }
 
@@ -90,7 +94,9 @@ internal static class DocSentences
     };
 
     private static string Render(string word)
-        => s_acronyms.Contains(word) ? (word == "Ids" ? "IDs" : word.ToUpperInvariant()) : ToLowerAscii(word);
+        => s_acronyms.Contains(word) ? (word == "Ids" ? "IDs" : word.ToUpperInvariant())
+            : word.Length > 1 && word.All(char.IsUpper) ? word
+            : ToLowerAscii(word);
 
     private static string ToLowerAscii(string text) => new([.. text.Select(c => c is >= 'A' and <= 'Z' ? (char)(c + 32) : c)]);
 }

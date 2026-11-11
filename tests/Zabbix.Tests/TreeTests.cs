@@ -80,7 +80,7 @@ public sealed class TreeTests
         List<ZabbixValue> values = await tree.Server.GetLatestAsync(TestContext.Current.CancellationToken).ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(2, values.Count);                                                  // the never-collected item yields nothing
-        Assert.Equal("web-01", values[0].Host);
+        Assert.Equal("web-01", values[0].HostName);
         Assert.Equal(ZabbixItemKey.Parse("system.cpu.load[all,avg1]"), values[0].Key);
         Assert.Equal("0.42", values[0].Value);
         Assert.Equal(new ZabbixClock(1_700_000_000, 501), values[0].Clock);                 // to the nanosecond, not the tick
@@ -96,10 +96,10 @@ public sealed class TreeTests
         List<ZabbixHostNode> hosts = await tree.Server.HostGroups["Linux servers"].Hosts.ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
         List<ZabbixItemNode> items = await tree.Server.Hosts["web-01"].Items.ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
-        Assert.Equal(["web-01", "db-01"], hosts.Select(host => host.Name));
+        Assert.Equal(["web-01", "db-01"], hosts.Select(host => host.HostName));
         Assert.Equal("2", tree.Api.ParamsOf("host.get").Single().GetProperty("groupids")[0].GetString());
         Assert.Equal(3, items.Count);
-        Assert.Equal(["web-01"], items.Select(item => item.Host.Name).Distinct());
+        Assert.Equal(["web-01"], items.Select(item => item.Host.HostName).Distinct());
     }
 
     [Fact]

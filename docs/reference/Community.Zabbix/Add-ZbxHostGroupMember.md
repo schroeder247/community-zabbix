@@ -28,7 +28,7 @@ Add-ZbxHostGroupMember -InputObject 'db-01' -Group 'Web servers'
 ### Example 2: Add every host a search finds, through the pipeline
 
 ```powershell
-Get-ZbxHost -Name 'web-*' | Add-ZbxHostGroupMember -Group 'Linux servers' -PassThru | Select-Object TechnicalName, HostId
+Get-ZbxHost -Name 'web-*' | Add-ZbxHostGroupMember -Group 'Linux servers' -PassThru | Select-Object HostName, HostId
 ```
 
 Get-ZbxHost writes host objects, and the command adds them all in one host.massadd. -PassThru writes the hosts back.

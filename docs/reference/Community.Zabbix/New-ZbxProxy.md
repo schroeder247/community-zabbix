@@ -38,7 +38,7 @@ A passive proxy is polled by the server at -Address/-Port (strings, as the API h
 
 ```powershell
 New-ZbxProxy -Name 'proxy-01' -OperatingMode Active -AllowedAddresses '10.0.0.0/24' -Host 'web-01', 'db-01' | Out-Null
-Get-ZbxHost -Name 'web-01', 'db-01' | Select-Object TechnicalName, MonitoredBy, ProxyId
+Get-ZbxHost -Name 'web-01', 'db-01' | Select-Object HostName, MonitoredBy, ProxyId
 ```
 
 -Host takes host names, ids or objects: those hosts are monitored by this proxy from now on (their MonitoredBy becomes Proxy). -AllowedAddresses limits where an active proxy may connect from.
@@ -523,7 +523,7 @@ Creates without a confirmation prompt even where $ConfirmPreference is at or bel
 
 ### -InputObject
 
-A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIp, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
+A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIP, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
 
 | | |
 | --- | --- |

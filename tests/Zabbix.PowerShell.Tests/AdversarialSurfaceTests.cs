@@ -107,7 +107,7 @@ public sealed class AdversarialSurfaceTests
     }
 
     [Theory]
-    [InlineData("$piped = [Community.Zabbix.ZabbixHost]@{ HostId = '10084'; TechnicalName = 'web-01' }", "hostid=10084")]
+    [InlineData("$piped = [Community.Zabbix.ZabbixHost]@{ HostId = '10084'; HostName = 'web-01' }", "hostid=10084")]
     [InlineData("$piped = '10084'; $kind = @{ Kind = 'Host' }", "hostid=10084")]
     [InlineData("$piped = 10084; $kind = @{ Kind = 'Host' }", "hostid=10084")]
     public async Task Show_ZbxPage_takes_a_record_or_an_id_with_Kind_and_writes_its_address(string arrange, string query)

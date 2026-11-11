@@ -13,7 +13,7 @@ Remove-ZbxTemplateGroup -InputObject 'Templates/Applications' -Confirm:$false
 # the template's groups.
 $group = New-ZbxTemplateGroup -Name 'Templates/Applications'
 Set-ZbxTemplate -InputObject 'Web App' -Group 'Templates/Web', $group | Out-Null
-Get-ZbxTemplate -Group $group | Select-Object TemplateId, TechnicalName
+Get-ZbxTemplate -Group $group | Select-Object TemplateId, HostName
 #endregion
 
 #region Preview the change first

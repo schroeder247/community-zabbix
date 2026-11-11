@@ -21,7 +21,7 @@ The Add-ZbxHostTemplate cmdlet links the template in -Template to the hosts give
 
 ```powershell
 Add-ZbxHostTemplate -InputObject 'db-01' -Template 'Web App'
-Get-ZbxHost -Name 'db-01' -SelectParentTemplates | ForEach-Object { $_.ParentTemplates.TechnicalName }
+Get-ZbxHost -Name 'db-01' -SelectParentTemplates | ForEach-Object { $_.ParentTemplates.HostName }
 ```
 
 -InputObject (position 0) takes the host and -Template (position 1) the template, each by name, id or object.
@@ -29,7 +29,7 @@ Get-ZbxHost -Name 'db-01' -SelectParentTemplates | ForEach-Object { $_.ParentTem
 ### Example 2: Link a template to every host of a group
 
 ```powershell
-Get-ZbxHost -Group 'Web servers' | Add-ZbxHostTemplate -Template 'Web App' -PassThru | Select-Object TechnicalName
+Get-ZbxHost -Group 'Web servers' | Add-ZbxHostTemplate -Template 'Web App' -PassThru | Select-Object HostName
 ```
 
 The hosts piped from Get-ZbxHost are linked in one call; -PassThru writes them back.

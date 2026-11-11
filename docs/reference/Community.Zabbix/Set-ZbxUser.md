@@ -8,7 +8,7 @@ Changes a user.
 ## SYNTAX
 
 ```
-Set-ZbxUser [-InputObject] <ZabbixReference<ZabbixUser>[]> [[-Username] <string>] [-FirstName <string>] [-LastName <string>] [-CurrentPassword <SecureString>] [-Password <SecureString>] [-Url <string>] [-AutoLogin <bool>] [-AutoLogout <string>] [-Language <string>] [-Refresh <string>] [-Theme <string>] [-RowsPerPage <int>] [-Timezone <string>] [-RoleId <ulong>] [-UserGroup <ZabbixReference<ZabbixUserGroup>[]>] [-Media <ZabbixUserUpdateMediaRequest[]>] [-DefaultMaintenancePeriod <string>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Set-ZbxUser [-InputObject] <ZabbixReference<ZabbixUser>[]> [[-UserName] <string>] [-FirstName <string>] [-LastName <string>] [-CurrentPassword <SecureString>] [-Password <SecureString>] [-Url <string>] [-AutoLogin <bool>] [-AutoLogout <string>] [-Language <string>] [-Refresh <string>] [-Theme <string>] [-RowsPerPage <int>] [-Timezone <string>] [-RoleId <ulong>] [-UserGroup <ZabbixReference<ZabbixUserGroup>[]>] [-Media <ZabbixUserUpdateMediaRequest[]>] [-DefaultMaintenancePeriod <string>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -20,7 +20,7 @@ A user is an account that logs in to the frontend or the API, with its role, its
 ### Example 1: Change a user's language and time zone
 
 ```powershell
-Set-ZbxUser -InputObject 'jdoe' -Language 'de_DE' -Timezone 'Europe/Berlin' -PassThru | Select-Object Username, Language, Timezone
+Set-ZbxUser -InputObject 'jdoe' -Language 'de_DE' -Timezone 'Europe/Berlin' -PassThru | Select-Object UserName, Language, Timezone
 ```
 
 -InputObject (position 0) takes the user's name, id or object; a parameter not given keeps its value.
@@ -58,7 +58,7 @@ The user(s) to change or delete: ids, names or objects, from the pipeline or by 
 | Pipeline input | True (ByValue) |
 | Wildcards | False |
 
-### -Username
+### -UserName
 
 Login name of the user; must be unique.
 
@@ -403,7 +403,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 ## INPUTS
 
 - `ZabbixReference<ZabbixUser>[]`: Bound to -InputObject (ByValue). Represents a reference to an API object: a parameter that points at an API object takes its id, its name, or the object itself piped from a Get- cmdlet, and becomes an id before the call — one parameter, three spellings, one resolution.
-- `string`: Bound to -Username (ByPropertyName), -FirstName (ByPropertyName), -LastName (ByPropertyName), -Url (ByPropertyName), -AutoLogout (ByPropertyName), -Language (ByPropertyName), -Refresh (ByPropertyName), -Theme (ByPropertyName), -Timezone (ByPropertyName), -DefaultMaintenancePeriod (ByPropertyName). Text.
+- `string`: Bound to -UserName (ByPropertyName), -FirstName (ByPropertyName), -LastName (ByPropertyName), -Url (ByPropertyName), -AutoLogout (ByPropertyName), -Language (ByPropertyName), -Refresh (ByPropertyName), -Theme (ByPropertyName), -Timezone (ByPropertyName), -DefaultMaintenancePeriod (ByPropertyName). Text.
 - `bool`: Bound to -AutoLogin (ByPropertyName). True or false.
 - `int`: Bound to -RowsPerPage (ByPropertyName). A number.
 - `ulong`: Bound to -RoleId (ByPropertyName).

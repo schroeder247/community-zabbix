@@ -51,8 +51,8 @@ public sealed class NodeTests
         Assert.Equal(groupByName.GetType(), groupById.GetType());
         Assert.Equal(typeof(ZabbixHostClient).GetProperty("Item", [typeof(string)])!.PropertyType, typeof(ZabbixHostClient).GetProperty("Item", [typeof(ulong)])!.PropertyType);
         Assert.Equal(typeof(ZabbixHostGroupClient).GetProperty("Item", [typeof(string)])!.PropertyType, typeof(ZabbixHostGroupClient).GetProperty("Item", [typeof(ulong)])!.PropertyType);
-        Assert.Equal((10084UL, (string?)null), (byId.Id, byId.Name));
-        Assert.Equal(((ulong?)null, "web-01"), (byName.Id, byName.Name));
+        Assert.Equal((10084UL, (string?)null), (byId.Id, byId.HostName));
+        Assert.Equal(((ulong?)null, "web-01"), (byName.Id, byName.HostName));
         Assert.Equal((5UL, (string?)null), (groupById.Id, groupById.Name));
         Assert.Empty(nodes.Api.Calls);                                                             // no call until asked
         string[] verbs = ["GetAsync", "FindAsync", "UpdateAsync", "DeleteAsync", "GetLastAsync", "FindLastAsync", "GetHistoryAsync", "GetItemsAsync", "GetLatestAsync"];
@@ -75,7 +75,7 @@ public sealed class NodeTests
         double load = await host.GetLastAsync(ZabbixItemKeys.Cpu.Load(), TestContext.Current.CancellationToken);
         await host.DeleteAsync(TestContext.Current.CancellationToken);
 
-        Assert.Equal("web-01", read.TechnicalName);
+        Assert.Equal("web-01", read.HostName);
         Assert.Equal(0.42, load);
         Assert.Equal("10084", Assert.Single(nodes.Api.ParamsOf("host.get")).GetProperty("hostids")[0].ToString());   // the read, and no other
         Assert.Equal("10084", Assert.Single(nodes.Api.ParamsOf("host.update")).GetProperty("hostid").ToString());
@@ -115,7 +115,7 @@ public sealed class NodeTests
         await group.UpdateAsync(g => g.Name = "Linux", TestContext.Current.CancellationToken);
         await group.DeleteAsync(TestContext.Current.CancellationToken);
 
-        Assert.Equal((10084UL, "web-01"), (Assert.Single(hosts).Id, hosts[0].Name));
+        Assert.Equal((10084UL, "web-01"), (Assert.Single(hosts).Id, hosts[0].HostName));
         Assert.Equal("5", Assert.Single(nodes.Api.ParamsOf("hostgroup.get")).GetProperty("groupids")[0].ToString());
         Assert.Equal("5", Assert.Single(nodes.Api.ParamsOf("host.get")).GetProperty("groupids")[0].ToString());
         Assert.Equal("5", Assert.Single(nodes.Api.ParamsOf("hostgroup.update")).GetProperty("groupid").ToString());
@@ -152,7 +152,7 @@ public sealed class NodeTests
 
         ZabbixValue value = await nodes.Zabbix.Hosts[10084].Items["agent.ping"].GetLastValueAsync(TestContext.Current.CancellationToken);
 
-        Assert.Equal(("1", "web-01"), (value.Value, value.Host));
+        Assert.Equal(("1", "web-01"), (value.Value, value.HostName));
         Assert.Equal("10084", Assert.Single(nodes.Api.ParamsOf("item.get")).GetProperty("hostids")[0].ToString());
     }
 

@@ -24,10 +24,10 @@ public partial class ZabbixHostInterfaceClient
         var request = new ZabbixHostInterfaceCreateRequest(
             hostId,
             hostInterface.Type ?? throw new ArgumentException("The interface has no type: make it with ZabbixInterface, or set its Type.", nameof(hostInterface)),
-            hostInterface.Ip ?? string.Empty,
+            hostInterface.IP ?? string.Empty,
             hostInterface.Dns ?? string.Empty,
             hostInterface.Port ?? throw new ArgumentException("The interface has no port: make it with ZabbixInterface, or set its Port.", nameof(hostInterface)),
-            hostInterface.UseIp ?? throw new ArgumentException("The interface doesn't say whether it connects by IP address or DNS name: make it with ZabbixInterface, or set its UseIp.", nameof(hostInterface)),
+            hostInterface.UseIP ?? throw new ArgumentException("The interface doesn't say whether it connects by IP address or DNS name: make it with ZabbixInterface, or set its UseIP.", nameof(hostInterface)),
             hostInterface.Main ?? ZabbixInterfacePriority.Primary)
         {
             Details = hostInterface.Details,

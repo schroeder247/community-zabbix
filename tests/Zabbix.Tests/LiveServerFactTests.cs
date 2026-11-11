@@ -152,7 +152,7 @@ public sealed class LiveServerFactTests
 
         IReadOnlyList<ZabbixHistoryRecord> from = await scope.Server.History.GetAsync(new ZabbixHistoryGetParameters
         {
-            History = ZabbixItemValueType.Unsigned,
+            ValueType = ZabbixItemValueType.Unsigned,
             ItemIds = [host["zbxtest.u"].ItemId],
             TimeFrom = DateTimeOffset.FromUnixTimeSeconds(second),
             Sort = [ZabbixHistoryRecordFields.Clock, ZabbixHistoryRecordFields.ClockNanoseconds],

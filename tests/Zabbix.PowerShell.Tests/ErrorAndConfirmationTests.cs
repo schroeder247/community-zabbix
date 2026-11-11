@@ -242,7 +242,7 @@ public sealed class ErrorAndConfirmationTests
               .On("host.delete", """{"hostids":[]}""");
         using Shell shell = Shell.Open();
         shell.Connect(server);
-        var piped = new ZabbixHost { HostId = 10086, TechnicalName = "db01" };
+        var piped = new ZabbixHost { HostId = 10086, HostName = "db01" };
 
         Run run = shell.Invoke(
             "@(10084, '10085', 'web01', 'ghost', $piped) | Remove-ZbxTestHost -Confirm:$false",

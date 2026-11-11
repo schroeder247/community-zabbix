@@ -66,7 +66,7 @@ public sealed class CopyZbxHostCommand : ZabbixServerCmdlet
         string document = await ZabbixClient.Configuration.ExportAsync(
             new ZabbixConfigurationExportRequest { Format = "json", Options = new ZabbixConfigurationExportOptionRequest { Hosts = [id] } },
             cancellationToken).ConfigureAwait(false);
-        string renamed = ZabbixExportRename.Rename(document, "hosts", "host", source.TechnicalName!, NewName!);
+        string renamed = ZabbixExportRename.Rename(document, "hosts", "host", source.HostName!, NewName!);
         var rules = new ZabbixConfigurationImportRuleRequest
         {
             Hosts = new ZabbixConfigurationImportRuleHostRequest { CreateMissing = true, UpdateExisting = Force.IsPresent },

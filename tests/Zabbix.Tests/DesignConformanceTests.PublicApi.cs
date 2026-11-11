@@ -74,7 +74,7 @@ public sealed partial class DesignConformanceTests
     /// the unshipped file holds only what was added since, and may be empty.
     /// </summary>
     /// <summary>
-    /// The API client has one raw door, <see cref="ZabbixClient.SendAsync(string, JsonElement, CancellationToken)"/>:
+    /// The API client has one raw door, <see cref="ZabbixClient.SendAsync(ZabbixApiMethod, JsonElement, CancellationToken)"/>:
     /// no public or protected member of <c>Zabbix.Sdk</c> or <c>Zabbix.Api</c> hands out or takes the transport
     /// underneath it. A test substitutes a client through its protected constructor and virtual calls instead.
     /// </summary>

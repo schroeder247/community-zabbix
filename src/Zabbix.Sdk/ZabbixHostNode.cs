@@ -29,7 +29,7 @@ public class ZabbixHostNode : ZabbixNode
     public virtual ulong? Id => Selection.HostId;
 
     /// <summary>The host's technical name, when the node was reached by it or by enumerating hosts; <see langword="null"/> when it was reached by id.</summary>
-    public virtual string? Name => Selection.Host;
+    public virtual string? HostName => Selection.Host;
 
     /// <summary>
     /// The host's items: reach one by its key, <c>Items["system.uptime"]</c> or <c>Items[key]</c>, or enumerate them. No call

@@ -21,7 +21,9 @@ internal sealed class ZabbixItemKeyReport(ILogger logger)
     public bool TryRead(ZabbixItem item, out ZabbixItemKey key)
     {
         key = default;
-        if (item.Key is not { } text) return false;
+        if (item.Key is not { } read) return false;
+        // a reply's key is kept as the server wrote it; the SDK reads only one its grammar reads
+        string text = read.ToString();
         if (ZabbixItemKey.TryParse(text, out key)) return true;
         bool first;
         lock (_gate) first = _reported.Add(item.ItemId?.ToString(CultureInfo.InvariantCulture) ?? text);

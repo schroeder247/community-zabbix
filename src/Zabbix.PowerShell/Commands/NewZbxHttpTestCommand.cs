@@ -94,7 +94,7 @@ public sealed class NewZbxHttpTestCommand : ZabbixServerCmdlet
 
     /// <summary>The SSL client certificate file (<c>ssl_cert_file</c>), relative to the server's <c>SSLCertLocation</c>.</summary>
     [Parameter]
-    public string? SslCertFile { get; set; }
+    public string? SslCertificateFile { get; set; }
 
     /// <summary>The SSL private key file (<c>ssl_key_file</c>), relative to the server's <c>SSLKeyLocation</c>.</summary>
     [Parameter]
@@ -138,7 +138,7 @@ public sealed class NewZbxHttpTestCommand : ZabbixServerCmdlet
         {
             HostId = hostIds[0],
             Name = Name,
-            Delay = Delay,
+            Delay = Delay is null ? null : ZabbixDuration.Parse(Delay),
             Retries = Retries,
             Agent = Agent,
             HttpProxy = HttpProxy,
@@ -148,7 +148,7 @@ public sealed class NewZbxHttpTestCommand : ZabbixServerCmdlet
             HttpPassword = HttpPassword is null ? null : new System.Net.NetworkCredential(string.Empty, HttpPassword).Password,
             VerifyPeer = VerifyPeer,
             VerifyHost = VerifyHost,
-            SslCertFile = SslCertFile,
+            SslCertificateFile = SslCertificateFile,
             SslKeyFile = SslKeyFile,
             SslKeyPassword = SslKeyPassword is null ? null : new System.Net.NetworkCredential(string.Empty, SslKeyPassword).Password,
             Variables = Variable,

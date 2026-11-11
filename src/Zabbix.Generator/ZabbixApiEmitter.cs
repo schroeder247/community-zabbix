@@ -71,6 +71,7 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
             }
             files.AddRange(EmitFieldGrammar());
             files.Add(new("ZabbixApiMethods.g.cs", EmitCapabilities()));
+            files.Add(new("ZabbixApiMethod.g.cs", EmitMethodNames()));
             files.Add(new("ZabbixApiSuppressions.g.cs", EmitSuppressions()));
         }
         else
@@ -155,6 +156,8 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
                 return "global::Community.Zabbix.ZabbixDuration";
             case ZabbixTypedFields.Port:
                 return "global::Community.Zabbix.ZabbixPort";
+            case ZabbixTypedFields.ItemKey:
+                return "global::Community.Zabbix.ZabbixItemKey";
             case "peer":
                 return "global::Community.Zabbix.ZabbixPeer";
             case "filter":
@@ -197,6 +200,12 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
             string? element = ClrType(kind[4..], record, wire);
             return element is null ? null : "global::System.Collections.Generic.IReadOnlyDictionary<string, " + element + ">";
         }
+        // a reply keyed by the ids its request named: the host's id, the event's id
+        if (kind.StartsWith(ZabbixTypedFields.IdMap, StringComparison.Ordinal))
+        {
+            string? element = ClrType(kind[ZabbixTypedFields.IdMap.Length..], record, wire);
+            return element is null ? null : "global::System.Collections.Generic.IReadOnlyDictionary<ulong, " + element + ">";
+        }
         _problems.Add(new(ZabbixDiagnostics.UnknownKind, $"'{kind}' is not a kind the generator knows", record, wire));
         return null;
     }
@@ -209,7 +218,7 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
             foreach (string qualified in clrType.Split(['<', '>', ',', ' '], StringSplitOptions.RemoveEmptyEntries))
             {
                 string word = qualified[(qualified.LastIndexOf('.') + 1)..];
-                builder.Append(word switch { "string" => "String", "bool" => "Boolean", "int" => "Int32", "long" => "Int64", "double" => "Double", _ => word });
+                builder.Append(word switch { "string" => "String", "bool" => "Boolean", "int" => "Int32", "long" => "Int64", "ulong" => "UInt64", "double" => "Double", _ => word });
             }
             name = builder.ToString();
             _jsonRoots[clrType] = name;
@@ -227,9 +236,8 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         // The generated code is analysed like hand-written code (.editorconfig: generated_code = false), and an
         // .editorconfig severity does not reach a source-generated tree (CA1720 = none in [*.cs] leaves CA1720 errors in
         // this output), so a design rule the Zabbix numbering answers is suppressed here, on the one symbol, with its reason.
+        // Every enum has a zero value by now (ZabbixEnumDefaults), so CA1008 has nothing to report.
         long[] values = [.. e.Members.Select(m => m.Value)];
-        if (!e.Flags && !values.Contains(0))
-            code.Append(Suppress("Design", "CA1008:Enums should have zero value", "Zabbix's own numbering (" + e.Family + "_*) has no zero; a None = 0 member would be a value the API refuses."));
         if (!e.Flags && LooksLikeFlags(values))
             code.Append(Suppress("Design", "CA1027:Mark enums with FlagsAttribute", "One code per object, not bits: the API validates a single " + e.Family + "_* value (its 'in' list), and values that happen to be powers of two do not combine."));
         code.Append("[global::System.Text.Json.Serialization.JsonConverter(typeof(global::Community.Zabbix.ZabbixEnumConverter<").Append(name).Append(">))]\n");
@@ -531,7 +539,7 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         // a request's required field, and a .get's own (hostdashboard.get's hostids): the record cannot be built without it
         bool required = (request || t.Role == "get") && field.Required;
         if (required) members.Required.Add((member, type, field));
-        string setter = Setter(t, required);
+        string setter = Setter(t, field, required);
         if (field.Nanoseconds is not null)
         {
             EmitClockPair(code, field, member, setter, members);
@@ -600,13 +608,15 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
 
     /// <summary>
     /// A member's setter: <c>set</c> where a lambda fills the record, <c>init</c> elsewhere. A get's parameters are filled
-    /// in a lambda, <c>GetAsync(q =&gt; q.Limit = 10)</c>, and so are a request's optional fields,
-    /// <c>CreateAsync("web-02", [groupId], h =&gt; h.Status = …)</c>, as the Azure SDK's options are: a value the request
-    /// requires is set once, by its constructor or an initializer, so a node's <c>UpdateAsync</c> lambda can't change the
-    /// id it updates. A record nested in a request, and what a read returns, are values: <c>with</c> makes a changed copy.
+    /// in a lambda, <c>GetAsync(q =&gt; q.Limit = 10)</c>, and so are a request's fields,
+    /// <c>CreateAsync("web-02", [groupId], h =&gt; h.Status = …)</c>, as the Azure SDK's options are, a required one too, so
+    /// a lambda can change what a short create filled in for it (an item created from a typed key is named after its key
+    /// until the lambda names it). An id the request requires is set once, by its constructor or an initializer, so a
+    /// node's <c>UpdateAsync</c> lambda can't change the id it updates. A record nested in a request, and what a read
+    /// returns, are values: <c>with</c> makes a changed copy.
     /// </summary>
-    private static string Setter(TypeDescription t, bool required)
-        => t.Role == "get" || (t.Role == "request" && !required) ? "set" : "init";
+    private static string Setter(TypeDescription t, FieldDescription field, bool required)
+        => t.Role == "get" || (t.Role == "request" && !(required && field.Kind == "id")) ? "set" : "init";
 
     // The type argument of a generic type's name: ZabbixOutput<ZabbixHost> gives ZabbixHost.
     private static string TypeArgument(string type) => type[(type.IndexOf('<') + 1)..^1];
@@ -881,15 +891,61 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
 
     // ----- the capability table --------------------------------------------------------------------------------
 
+    /// <summary>
+    /// The name of <paramref name="m"/>'s <c>ZabbixApiMethod</c> member: its object's client stem and the method's own name,
+    /// <c>host.get</c> → <c>HostGet</c>, <c>configuration.import</c> → <c>ConfigurationImport</c>, <c>hanode.get</c> →
+    /// <c>HANodeGet</c>. One per wire method: a client's method names are its own (<c>MethodCollision</c> otherwise).
+    /// </summary>
+    internal static string MethodMember(ServiceDescription service, MethodDescription m)
+    {
+        string stem = service.Client.StartsWith("Zabbix", StringComparison.Ordinal) ? service.Client[6..] : service.Client;
+        if (stem.EndsWith("Client", StringComparison.Ordinal)) stem = stem[..^6];
+        string verb = m.Name.EndsWith("Async", StringComparison.Ordinal) ? m.Name[..^5] : m.Name;
+        return stem + verb;
+    }
+
+    // The member that names m, as an expression the clients and the table write.
+    private static string Method(ServiceDescription service, MethodDescription m) => "global::Community.Zabbix.ZabbixApiMethod." + MethodMember(service, m);
+
+    // ZabbixApiMethod's members: one per method of every described version, as HttpMethod.Get and HashAlgorithmName.SHA256
+    // name the values a caller most often wants.
+    private string EmitMethodNames()
+    {
+        var code = new StringBuilder("// Emitted by Zabbix.Generator from the Zabbix " + api.Range + " API description (schema/zabbix-api.json). Do not edit.\n#nullable enable\nnamespace Community.Zabbix;\n\n");
+        code.Append("public readonly partial struct ZabbixApiMethod\n{\n");
+        var named = new HashSet<string>(StringComparer.Ordinal);
+        foreach (ServiceDescription service in api.Services)
+        {
+            foreach (MethodDescription m in service.Methods)
+            {
+                string member = MethodMember(service, m);
+                if (!named.Add(member))
+                {
+                    _problems.Add(new(ZabbixDiagnostics.MethodCollision, $"two methods would both be ZabbixApiMethod.{member}; name one at schema/overlay.json#/methods/{Pointer(m.Api)}/name", service.Object, m.Api));
+                    continue;
+                }
+                string? removed = m.Removed ?? service.Removed;
+                code.Append("    /// <summary>Gets <c>").Append(m.Api).Append("</c>").Append(Traits(m)).Append("</summary>\n");
+                code.Append(Versioning(m.Since ?? service.Since, removed, m.Replacement, "    "));
+                code.Append("    public static global::Community.Zabbix.ZabbixApiMethod ").Append(member).Append(" => new(").Append(Lit(m.Api)).Append(");\n\n");
+            }
+        }
+        while (code.Length > 1 && code[^1] == '\n' && code[^2] == '\n') code.Length--;
+        return code.Append("}\n").ToString();
+    }
+
     private string EmitCapabilities()
     {
         string? userType = api.Enums.FirstOrDefault(e => e.Family == "USER_TYPE")?.Name;
+        const string InfoType = "global::Community.Zabbix.ZabbixApiMethodInfo";
+        const string MethodType = "global::Community.Zabbix.ZabbixApiMethod";
         var code = new StringBuilder(Header(api.Range, "Describes every API method per version: since, removed in, the minimum user type (<c>ACCESS_RULES</c>), whether it reads, whether it needs a session (<c>requiresAuthentication()</c>), all read from the Zabbix source."));
         code.Append("public static partial class ZabbixApiMethods\n{\n");
         code.Append("    /// <summary>The Zabbix versions the table describes, oldest first.</summary>\n");
         code.Append("    public static global::System.Collections.Generic.IReadOnlyList<global::System.Version> DescribedVersions { get; } = global::System.Array.AsReadOnly(new global::System.Version[] { ")
             .Append(string.Join(", ", api.Versions.Select(VersionLiteral))).Append(" });\n\n");
-        code.Append("    private static global::System.Collections.Frozen.FrozenDictionary<string, global::Community.Zabbix.ZabbixApiMethod> Describe() => global::System.Collections.Frozen.FrozenDictionary.ToFrozenDictionary(new global::System.Collections.Generic.Dictionary<string, global::Community.Zabbix.ZabbixApiMethod>(global::System.StringComparer.OrdinalIgnoreCase)\n    {\n");
+        // keyed by the method, whose equality ignores case as Zabbix's routing does
+        code.Append("    private static global::System.Collections.Frozen.FrozenDictionary<").Append(MethodType).Append(", ").Append(InfoType).Append("> Describe() => global::System.Collections.Frozen.FrozenDictionary.ToFrozenDictionary(new global::System.Collections.Generic.Dictionary<").Append(MethodType).Append(", ").Append(InfoType).Append(">\n    {\n");
         foreach (ServiceDescription service in api.Services)
         {
             foreach (MethodDescription m in service.Methods)
@@ -899,7 +955,8 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
                 string min = m.MinUserType is int u
                     ? userType is not null ? "(global::Community.Zabbix." + Prefixed(userType) + ")" + u.ToString(CultureInfo.InvariantCulture) : "(int?)" + u.ToString(CultureInfo.InvariantCulture)
                     : "null";
-                code.Append("        [").Append(Lit(m.Api)).Append("] = new(").Append(Lit(m.Api)).Append(", ")
+                string method = Method(service, m);
+                code.Append("        [").Append(method).Append("] = new(").Append(method).Append(", ")
                     .Append(VersionLiteral(since)).Append(", ").Append(removed is null ? "null" : VersionLiteral(removed)).Append(", ")
                     .Append(min).Append(", ")
                     .Append(m.IsRead ? "true" : "false").Append(", ")
@@ -909,26 +966,28 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
                     .Append(m.Replacement is null ? "null" : Lit(m.Replacement)).Append("),\n");
             }
         }
-        code.Append("    }, global::System.StringComparer.OrdinalIgnoreCase);\n\n");
+        code.Append("    });\n\n");
         // the request fields a version refuses, per method: what the client checks before it sends (EmitFieldGate)
-        code.Append("    private static global::System.Collections.Frozen.FrozenDictionary<string, global::System.Collections.Frozen.FrozenDictionary<string, global::Community.Zabbix.ZabbixApiField>> DescribeFields() => global::System.Collections.Frozen.FrozenDictionary.ToFrozenDictionary(new global::System.Collections.Generic.Dictionary<string, global::System.Collections.Frozen.FrozenDictionary<string, global::Community.Zabbix.ZabbixApiField>>(global::System.StringComparer.OrdinalIgnoreCase)\n    {\n");
+        const string FieldsType = "global::System.Collections.Frozen.FrozenDictionary<string, global::Community.Zabbix.ZabbixApiField>";
+        code.Append("    private static global::System.Collections.Frozen.FrozenDictionary<").Append(MethodType).Append(", ").Append(FieldsType).Append("> DescribeFields() => global::System.Collections.Frozen.FrozenDictionary.ToFrozenDictionary(new global::System.Collections.Generic.Dictionary<").Append(MethodType).Append(", ").Append(FieldsType).Append(">\n    {\n");
         foreach (ServiceDescription service in api.Services)
         {
             foreach (MethodDescription m in service.Methods)
             {
                 ImmutableArray<FieldDescription> refused = RefusedFields(m);
                 if (refused.IsEmpty) continue;
-                code.Append("        [").Append(Lit(m.Api)).Append("] = global::System.Collections.Frozen.FrozenDictionary.ToFrozenDictionary(new global::System.Collections.Generic.Dictionary<string, global::Community.Zabbix.ZabbixApiField>(global::System.StringComparer.Ordinal)\n        {\n");
+                string method = Method(service, m);
+                code.Append("        [").Append(method).Append("] = global::System.Collections.Frozen.FrozenDictionary.ToFrozenDictionary(new global::System.Collections.Generic.Dictionary<string, global::Community.Zabbix.ZabbixApiField>(global::System.StringComparer.Ordinal)\n        {\n");
                 foreach (FieldDescription f in refused)
                 {
-                    code.Append("            [").Append(Lit(f.Wire)).Append("] = new(").Append(Lit(m.Api)).Append(", ").Append(Lit(f.Wire)).Append(", ")
+                    code.Append("            [").Append(Lit(f.Wire)).Append("] = new(").Append(method).Append(", ").Append(Lit(f.Wire)).Append(", ")
                         .Append(VersionLiteral(f.Removed!)).Append(", ")
                         .Append(f.Replacement is null ? "null" : Lit(f.Replacement)).Append("),\n");
                 }
                 code.Append("        }, global::System.StringComparer.Ordinal),\n");
             }
         }
-        code.Append("    }, global::System.StringComparer.OrdinalIgnoreCase);\n}\n");
+        code.Append("    });\n}\n");
         return code.ToString();
     }
 
@@ -953,7 +1012,7 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
     /// The version is only asked for when such a field is set. <paramref name="subject"/> is the expression each check
     /// reads the fields from (one request, or the loop variable over <paramref name="loopOver"/>).
     /// </summary>
-    private static void EmitFieldGate(StringBuilder code, string api, ImmutableArray<FieldDescription> refused, string subject, string? loopOver, string? loopType, bool nullable)
+    private static void EmitFieldGate(StringBuilder code, string method, ImmutableArray<FieldDescription> refused, string subject, string? loopOver, string? loopType, bool nullable)
     {
         if (refused.IsEmpty) return;
         string Read(FieldDescription f) => subject + (nullable ? "?." : ".") + Member(f.Name);
@@ -979,7 +1038,7 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         }
         foreach (FieldDescription f in refused)
         {
-            code.Append(indent).Append("    if (").Append(Read(f)).Append(" is not null) global::Community.Zabbix.ZabbixApiMethods.EnsureFieldSupported(").Append(Lit(api)).Append(", ").Append(Lit(f.Wire))
+            code.Append(indent).Append("    if (").Append(Read(f)).Append(" is not null) global::Community.Zabbix.ZabbixApiMethods.EnsureFieldSupported(").Append(method).Append(", ").Append(Lit(f.Wire))
                 .Append(", fieldServer);\n");
         }
         code.Append(indent).Append("}\n");
@@ -1207,25 +1266,25 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
             string element = parameterType![(parameterType!.IndexOf('<') + 1)..^1];
             code.Append("        global::System.Collections.Generic.List<").Append(element).Append("> all = ").Append(argument).Append(";\n");
             send = send.Replace(argument, "all");
-            EmitFieldGate(code, m.Api, refused, "each", "all", element, nullable: false);
+            EmitFieldGate(code, Method(service, m), refused, "each", "all", element, nullable: false);
         }
         else if (!refused.IsEmpty)
         {
-            EmitFieldGate(code, m.Api, refused, parameterName, null, null, nullable: optional);
+            EmitFieldGate(code, Method(service, m), refused, parameterName, null, null, nullable: optional);
         }
         if (gated)
         {
             code.Append("        global::System.Version server = await ApiVersion(cancellationToken).ConfigureAwait(false);\n");
             if (m.Emulation is not null && !many && parameterType is not null)
             {
-                code.Append("        if (!global::Community.Zabbix.ZabbixApiMethods.Supports(").Append(Lit(m.Api)).Append(", server))\n");
+                code.Append("        if (!global::Community.Zabbix.ZabbixApiMethods.Supports(").Append(Method(service, m)).Append(", server))\n");
                 // The emulation's parameter is never optional (it always has a request to work from); an optional public
                 // parameter defaults it here, the same default the direct call below uses.
                 code.Append("            return await ").Append(m.Emulation).Append('(').Append(parameterName).Append(optional ? " ?? new()" : string.Empty).Append(", server, cancellationToken).ConfigureAwait(false);\n");
             }
             else
             {
-                code.Append("        global::Community.Zabbix.ZabbixApiMethods.EnsureSupported(").Append(Lit(m.Api)).Append(", server);\n");
+                code.Append("        global::Community.Zabbix.ZabbixApiMethods.EnsureSupported(").Append(Method(service, m)).Append(", server);\n");
             }
         }
         code.Append("        ").Append(result.Body(send)).Append("\n    }\n");
@@ -1291,14 +1350,14 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         string? result = ClrType(m.Result, service.Object, m.Api);
         if (parameters is null || result is null) return;
         bool gated = Gated(service, m);
-        string gate = gated ? "        global::Community.Zabbix.ZabbixApiMethods.EnsureSupported(" + Lit(m.Api) + ", await ApiVersion(cancellationToken).ConfigureAwait(false));\n" : string.Empty;
+        string gate = gated ? "        global::Community.Zabbix.ZabbixApiMethods.EnsureSupported(" + Method(service, m) + ", await ApiVersion(cancellationToken).ConfigureAwait(false));\n" : string.Empty;
         ImmutableArray<FieldDescription> refused = RefusedFields(m);
         // a .get with a required option (hostdashboard.get's hostids) has no "everything" call: the parameters are required
         bool required = _types.TryGetValue(record, out TypeDescription? described) && described.Fields.Any(f => f.Required);
         bool one = m.Shape == "get-object";
         string selected = one ? "The object, as the server answered it." : "The objects the parameters select, in the order the server answered them; empty when none matches.";
         var body = new StringBuilder(gate);
-        EmitFieldGate(body, m.Api, refused, "parameters", null, null, nullable: false);
+        EmitFieldGate(body, Method(service, m), refused, "parameters", null, null, nullable: false);
         body.Append("        return await Transport.SendAsync(").Append(Lit(m.Api)).Append(", parameters, ").Append(Root(parameters)).Append(", ").Append(Root(result)).Append(", cancellationToken).ConfigureAwait(false);\n");
         EmitReads(code, new Reads(
             "GetAsync", parameters, "global::System.Threading.Tasks.Task<" + result + ">", required,
@@ -1315,7 +1374,7 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         if (m.Count)
         {
             var count = new StringBuilder(gate);
-            EmitFieldGate(count, m.Api, refused, "parameters", null, null, nullable: false);
+            EmitFieldGate(count, Method(service, m), refused, "parameters", null, null, nullable: false);
             count.Append("        return global::Community.Zabbix.ZabbixApiResults.ReadCount(await Transport.SendAsync(").Append(Lit(m.Api)).Append(", global::Community.Zabbix.ZabbixApiResults.Counting(parameters, ").Append(Root(parameters)).Append("), ")
                 .Append(Root("global::System.Text.Json.Nodes.JsonNode")).Append(", cancellationToken).ConfigureAwait(false), ").Append(Lit(m.Api)).Append(");\n");
             EmitReads(code, new Reads(
@@ -1385,10 +1444,13 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
     // One object by its id, through the list get (a type that overrides that for a test serves this too): the read
     // record's own id, selected by the get's own *ids option (templateids, not filter.templateid, which template.get
     // ignores). Named as DbSet<T>.FindAsync is, for the same answer: the object, or null, where GetAsync answers a list.
+    // Only for a record with an id of its own (HasOwnId): a history or trend row leads with its item's id, which many rows
+    // share, so finding "the one" by it would answer an arbitrary row.
     private void EmitGetById(StringBuilder code, ServiceDescription service, MethodDescription m, string record, string parameters, string result)
     {
         if (!m.Result.StartsWith("list:object:", StringComparison.Ordinal) || !_types.TryGetValue(m.Result[12..], out TypeDescription? read)) return;
-        if (ZabbixCmdletEmitter.EntityIdField(service, read) is not { } id || !_types.TryGetValue(record, out TypeDescription? get)) return;
+        if (!_types.TryGetValue(record, out TypeDescription? get) || !HasOwnId(service, get)) return;
+        if (ZabbixCmdletEmitter.EntityIdField(service, read) is not { } id) return;
         if (get.Fields.FirstOrDefault(f => f.Kind == "list:id" && f.Wire == id.Wire + "s") is not { } ids) return;
         string element = result[(result.IndexOf('<') + 1)..^1];
         code.Append("\n    /// <summary><c>").Append(m.Api).Append("</c> for the one object whose <c>").Append(id.Wire).Append("</c> is <paramref name=\"id\"/>").Append(Traits(m)).Append("</summary>\n");
@@ -1413,6 +1475,15 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         if (update is not null) code.Append(", DeleteAsync, static objectId => new ").Append(update).Append("(objectId), UpdateAsync");
         code.Append(");\n");
     }
+
+    /// <summary>
+    /// Whether the records a get returns have an id of their own: the object names it (<c>idField</c>, a host dashboard's
+    /// <c>dashboardid</c>), or the get takes <c>preservekeys</c>, which keys its reply by each record's own id
+    /// (<c>CApiService</c>). <c>history.get</c> and <c>trend.get</c> take no <c>preservekeys</c>: their rows have no id,
+    /// and the item id they lead with is shared by every row of the item.
+    /// </summary>
+    internal static bool HasOwnId(ServiceDescription service, TypeDescription get)
+        => service.IdField is not null || get.Fields.Any(f => f.Wire == "preservekeys");
 
     // The objects whose nodes are written by hand, a host's and a host group's: one node type whether reached by id or by name.
     private static readonly HashSet<string> s_namedNodes = new(StringComparer.Ordinal) { "host", "hostgroup" };

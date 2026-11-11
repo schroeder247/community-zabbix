@@ -28,7 +28,7 @@ HasLocalHandler is false for an item no built-in key or registered handler answe
 ### Example 2: Read the host as the server holds it
 
 ```powershell
-(Get-ZbxAgentHost -Session 'web-agent').Host | Select-Object TechnicalName, HostId, Status
+(Get-ZbxAgentHost -Session 'web-agent').Host | Select-Object HostName, HostId, Status
 ```
 
 Host is the full ZabbixHost record.

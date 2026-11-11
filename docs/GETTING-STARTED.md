@@ -60,14 +60,19 @@ Add this to the program. It creates a host group, a host in it, and a trapper it
 string hostName = "gs-web-01";
 ulong groupId = await zabbix.HostGroups.CreateAsync("Getting started");
 ulong hostId = await zabbix.Hosts.CreateAsync(hostName, [groupId]);
-await zabbix.Items.CreateAsync(hostId, "Requests", ZabbixItemType.Trapper, "app.requests", ZabbixItemValueType.Unsigned, item =>
-    item.TrapperHosts = [IPNetwork.Parse("0.0.0.0/0"), IPNetwork.Parse("::/0")]);   // who may send to it
+ZabbixItemKey<ulong> requests = new("app.requests");                 // the item's key, and the type of its values
+await zabbix.Items.CreateAsync(hostId, requests, ZabbixItemType.Trapper, item =>
+{
+    item.Name = "Requests";
+    item.TrapperHosts = [IPNetwork.Parse("0.0.0.0/0"), IPNetwork.Parse("::/0")];   // who may send to it
+});
 Console.WriteLine($"created {hostName} ({hostId})");
 ```
 
 - `ZabbixClient` has one client per API object, 68 in all: `zabbix.Hosts`, `zabbix.Items`, and so on.
-- `CreateAsync` takes the fields the API requires, and returns the new id. An item needs more than its required fields here, so a
-  lambda sets the others.
+- `CreateAsync` takes the fields the API requires, and returns the new id. An item's key comes from a `ZabbixItemKey<T>`, declared
+  once with the type of the item's values: its key is the key's text, and a `ulong` makes it a numeric (unsigned) item. The item is
+  named after its key unless the lambda names it, and the lambda sets the other fields.
 - `TrapperHosts` lists who may send to the item: an `IPAddress` or an `IPNetwork` each, or `ZabbixPeer.Parse` for a DNS name. The two
   blocks here accept everyone, so use them only on a lab server. On 8.0, an item created through the API accepts only localhost unless
   you set this.
@@ -80,11 +85,11 @@ the fields that come back.
 ```csharp
 var hosts = await zabbix.Hosts.GetAsync(q =>
 {
-    q.Filter.TechnicalName = [hostName];
-    q.Output = [ZabbixHostFields.HostId, ZabbixHostFields.TechnicalName];
+    q.Filter.HostName = [hostName];
+    q.Output = [ZabbixHostFields.HostId, ZabbixHostFields.HostName];
 });
 foreach (ZabbixHost host in hosts)
-    Console.WriteLine($"host:   {host.HostId} {host.TechnicalName}");
+    Console.WriteLine($"host:   {host.HostId} {host.HostName}");
 
 var items = await zabbix.Items.GetAsync(q => q.HostIds = [hostId]);
 Console.WriteLine($"items:  {string.Join(", ", items.Select(i => i.Key))}");
@@ -96,16 +101,14 @@ Send the item a value over the Zabbix protocol, as `zabbix_sender` does. The ser
 configuration refresh (`CacheUpdateFrequency`), and counts a value sent before then as failed. So the program repeats the send until
 the server processes it.
 
-A `ZabbixItemKey<T>` declares an item's key once, with its type. Passing anything but a `long` here doesn't compile.
+The item's `ZabbixItemKey<T>` sends the value too. Passing anything but a `ulong` here doesn't compile.
 
 ```csharp
-ZabbixItemKey<long> requests = new("app.requests");
-
 using var wire = new ZabbixWireClient(trapper);
 ZabbixSenderResponse sent;
 do
 {
-    sent = await wire.SendAsync(hostName, requests, 42);
+    sent = await wire.SendAsync(hostName, requests, 42UL);
     if (sent.Processed == 0) await Task.Delay(TimeSpan.FromSeconds(5));
 }
 while (sent.Processed == 0);
@@ -114,7 +117,7 @@ Console.WriteLine($"sent:   processed={sent.Processed} failed={sent.Failed}");
 
 ## Read the value
 
-Read it back with the same item. `FindLastAsync` returns the value as a `long` with its time, or `null` when the item has no value yet.
+Read it back with the same item. `FindLastAsync` returns the value as a `ulong` with its time, or `null` when the item has no value yet.
 The server writes history asynchronously, so the program tries for a while.
 
 ```csharp

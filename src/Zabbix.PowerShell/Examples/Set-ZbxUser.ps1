@@ -1,10 +1,10 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
-$null = New-ZbxUser -Username 'jdoe' -Password (ConvertTo-SecureString 'Chang3-me-at-first-login!' -AsPlainText -Force) -RoleId (Get-ZbxRole -Name 'User role').RoleId -UserGroup 'Operators'
+$null = New-ZbxUser -UserName 'jdoe' -Password (ConvertTo-SecureString 'Chang3-me-at-first-login!' -AsPlainText -Force) -RoleId (Get-ZbxRole -Name 'User role').RoleId -UserGroup 'Operators'
 
 #region Change a user's language and time zone
 # -InputObject (position 0) takes the user's name, id or object; a parameter not given keeps its value.
-Set-ZbxUser -InputObject 'jdoe' -Language 'de_DE' -Timezone 'Europe/Berlin' -PassThru | Select-Object Username, Language, Timezone
+Set-ZbxUser -InputObject 'jdoe' -Language 'de_DE' -Timezone 'Europe/Berlin' -PassThru | Select-Object UserName, Language, Timezone
 #endregion
 
 #region Move a user to other user groups

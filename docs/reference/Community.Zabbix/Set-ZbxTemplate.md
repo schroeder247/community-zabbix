@@ -20,7 +20,7 @@ A template is a reusable set of items, triggers, graphs, discovery rules and das
 ### Example 1: Describe a template
 
 ```powershell
-Set-ZbxTemplate -InputObject 'Web App' -Description 'Monitors the web application tier' -PassThru | Select-Object TechnicalName, Description
+Set-ZbxTemplate -InputObject 'Web App' -Description 'Monitors the web application tier' -PassThru | Select-Object HostName, Description
 ```
 
 -InputObject (position 0) takes the template's name, id or object.

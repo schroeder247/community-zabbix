@@ -121,7 +121,7 @@ public sealed partial class ZabbixProxyAdmission
     public bool Knows(ZabbixValue value)
     {
         ArgumentNullException.ThrowIfNull(value);
-        return _config.ItemsByKey.TryGetValue((value.Host, value.Key.ToString()), out ZabbixProxyConfigItem? item)
+        return _config.ItemsByKey.TryGetValue((value.HostName, value.Key.ToString()), out ZabbixProxyConfigItem? item)
                && item.Status == ZabbixItemStatus.Active && _config.Hosts[item.HostId].Status == ZabbixHostStatus.Enabled
                && item.Type is ZabbixItemType.Trapper or ZabbixItemType.HttpAgent or ZabbixItemType.ZabbixActive;
     }
@@ -134,7 +134,7 @@ public sealed partial class ZabbixProxyAdmission
     public string? Refusal(ZabbixValue value, string request, IPAddress? peer)
     {
         ArgumentNullException.ThrowIfNull(value);
-        if (!_config.ItemsByKey.TryGetValue((value.Host, value.Key.ToString()), out ZabbixProxyConfigItem? item)) return "no such host and key in the configuration";
+        if (!_config.ItemsByKey.TryGetValue((value.HostName, value.Key.ToString()), out ZabbixProxyConfigItem? item)) return "no such host and key in the configuration";
         if (_config.Hosts[item.HostId].Status != ZabbixHostStatus.Enabled) return "the host is not monitored";
         if (item.Status != ZabbixItemStatus.Active) return "the item is disabled";
         if (string.Equals(request, "agent data", StringComparison.Ordinal))
@@ -181,7 +181,7 @@ public sealed partial class ZabbixProxyAdmission
     internal static string ResolveMacros(string text, ZabbixProxyConfigHost host, ZabbixProxyConfig config)
         => MacroPattern().Replace(text, match => match.Value switch
         {
-            "{HOST.HOST}" => host.Host,
+            "{HOST.HOST}" => host.HostName,
             "{HOST.NAME}" => host.Name,
             _ => UserMacro(match.Value, host.HostId, config) ?? match.Value,
         });
@@ -293,6 +293,6 @@ internal static class ZabbixProxyAdmissionLogging
             telemetry.Values(proxy, ZabbixProxyTelemetry.Refused, 1);
             if (!logger.IsEnabled(LogLevel.Warning)) return;
             string key = value.Key.ToString();
-            if (telemetry.RefusedValues.ShouldLog((value.Host, key, reason))) ProxyLog.ProxyValueRefused(logger, proxy, value.Host, key, peer, reason);
+            if (telemetry.RefusedValues.ShouldLog((value.HostName, key, reason))) ProxyLog.ProxyValueRefused(logger, proxy, value.HostName, key, peer, reason);
         };
 }

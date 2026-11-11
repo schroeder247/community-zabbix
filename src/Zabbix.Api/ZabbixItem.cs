@@ -12,5 +12,5 @@ public sealed partial record ZabbixItem
     /// (the id is <see cref="HostId"/>, never passed off as a name).
     /// </summary>
     [JsonIgnore]
-    public string? HostName => Hosts is [{ TechnicalName: { } host }, ..] ? host : null;
+    public string? HostName => Hosts is [{ HostName: { } host }, ..] ? host : null;
 }

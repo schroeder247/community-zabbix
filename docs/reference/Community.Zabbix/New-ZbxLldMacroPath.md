@@ -3,37 +3,37 @@
 
 ## SYNOPSIS
 
-Builds an LLD macro path for the -MacroPaths of New-ZbxDiscoveryRule and Set-ZbxDiscoveryRule.
+Builds an LLD macro path for the -LowLevelDiscoveryMacroPath of New-ZbxDiscoveryRule and Set-ZbxDiscoveryRule.
 
 ## SYNTAX
 
 ```
-New-ZbxLldMacroPath -LldMacro <string> -Path <string> [<CommonParameters>]
+New-ZbxLldMacroPath -LowLevelDiscoveryMacro <string> -Path <string> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
 
-A macro path maps a low-level discovery macro to a JSONPath into the discovery data, such as {#FSNAME} to $.fsname. The New-ZbxLldMacroPath cmdlet writes it as a hashtable keyed by the API's field names, which the -MacroPaths of New-ZbxDiscoveryRule and Set-ZbxDiscoveryRule take as it is, alone or in an array. Nothing is sent to the server, so the command needs no connection.
+A macro path maps a low-level discovery macro to a JSONPath into the discovery data, such as {#FSNAME} to $.fsname. The New-ZbxLldMacroPath cmdlet writes it as a hashtable keyed by the API's field names, which the -LowLevelDiscoveryMacroPath of New-ZbxDiscoveryRule and Set-ZbxDiscoveryRule take as it is, alone or in an array. Nothing is sent to the server, so the command needs no connection.
 
 ## EXAMPLES
 
 ### Example 1: Build a macro path
 
 ```powershell
-New-ZbxLldMacroPath -LldMacro FSNAME -Path '$.fsname'
+New-ZbxLldMacroPath -LowLevelDiscoveryMacro FSNAME -Path '$.fsname'
 ```
 
--LldMacro and -Path are both required: the macro the prototypes use, and the JSONPath that reads it from each entry.
+-LowLevelDiscoveryMacro and -Path are both required: the macro the prototypes use, and the JSONPath that reads it from each entry.
 
 ### Example 2: Read discovery data with your own field names
 
 ```powershell
 $paths = @(
-    New-ZbxLldMacroPath -LldMacro FSNAME -Path '$.fsname'
-    New-ZbxLldMacroPath -LldMacro FSTYPE -Path '$.fstype'
+    New-ZbxLldMacroPath -LowLevelDiscoveryMacro FSNAME -Path '$.fsname'
+    New-ZbxLldMacroPath -LowLevelDiscoveryMacro FSTYPE -Path '$.fstype'
 )
 Get-ZbxHost -Name 'web-01' |
-    New-ZbxDiscoveryRule -Name 'Mounted filesystems' -Key 'vfs.fs.get' -Type ZabbixActive -Delay '1h' -LldMacroPath $paths |
+    New-ZbxDiscoveryRule -Name 'Mounted filesystems' -Key 'vfs.fs.get' -Type ZabbixActive -Delay '1h' -LowLevelDiscoveryMacroPath $paths |
     Select-Object Name, Key
 ```
 
@@ -41,7 +41,7 @@ The rule's data has fsname and fstype fields; the macro paths make them {#FSNAME
 
 ## PARAMETERS
 
-### -LldMacro
+### -LowLevelDiscoveryMacro
 
 The low-level discovery macro that receives the extracted value, such as {#NAME}.
 

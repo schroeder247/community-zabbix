@@ -248,7 +248,7 @@ The modules are built on the SDK. A scriptblock goes into the `Items` of the sam
 Import-Module Community.Zabbix
 Connect-ZbxServer -Uri https://zabbix.example/ -ApiToken (Read-Host -AsSecureString 'API token')
 
-Get-ZbxHost -Name 'web-*' | Format-Table TechnicalName, VisibleName, Status
+Get-ZbxHost -Name 'web-*' | Format-Table HostName, VisibleName, Status
 Send-ZbxData -Server zbx-server-01 -HostName web-01 -Key app.requests -Value 42
 
 Import-Module Community.Zabbix.Agent
@@ -268,7 +268,7 @@ a file can't hold. `AddZabbixClient` and `AddZabbixActiveAgent` take the verbs t
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddZabbixClients(builder.Configuration);       // Zabbix:Servers:{name}
 builder.Services.AddZabbixClient("prod")                        // the server the file declares: what code adds
-    .WithTimeout("configuration.import", TimeSpan.FromMinutes(5));
+    .WithTimeout(ZabbixApiMethod.ConfigurationImport, TimeSpan.FromMinutes(5));
 builder.Services.AddZabbixAgents(builder.Configuration);        // Zabbix:ActiveAgents:{name} and the other agents
 builder.Services.AddZabbixActiveAgent("web-01")                 // the agent the file declares: its items
     .AddItem(new ZabbixItemKey<string>("app.version"), () => "2.4.1");

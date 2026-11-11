@@ -25,7 +25,7 @@ public sealed class ProxyConfigTests
         ZabbixProxyConfig merged = Merge(full, ProxyConfigFixtures.Delta80);
 
         Assert.Equal(1795, merged.ConfigRevision);
-        Assert.Equal(["zbx-proxy-h1", "zbx-proxy-h2"], merged.Hosts.Values.Select(host => host.Host).Order(StringComparer.Ordinal));
+        Assert.Equal(["zbx-proxy-h1", "zbx-proxy-h2"], merged.Hosts.Values.Select(host => host.HostName).Order(StringComparer.Ordinal));
         Assert.Equal(71029UL, merged.ItemsByKey[("zbx-proxy-h1", "zbx.trap")].ItemId);            // not in the delta, kept
         Assert.Equal(71042UL, merged.ItemsByKey[("zbx-proxy-h2", "zbx.trap2")].ItemId);
         Assert.Equal(1793, full.ConfigRevision);                                                 // the held revision is not changed
@@ -39,7 +39,7 @@ public sealed class ProxyConfigTests
 
         ZabbixProxyConfig replaced = Merge(held, ProxyConfigFixtures.Full80);
 
-        Assert.Equal(["zbx-proxy-h1"], replaced.Hosts.Values.Select(host => host.Host));
+        Assert.Equal(["zbx-proxy-h1"], replaced.Hosts.Values.Select(host => host.HostName));
         Assert.Single(replaced.Items);
     }
 
@@ -87,7 +87,7 @@ public sealed class ProxyConfigTests
         // ZBX_PROTO_TAG_REMOVED_HOSTIDS, which is "del_hostids" (zbxjson.h 7.0:200, 8.0:204), then the revision.
         ZabbixProxyConfig removed = Merge(held, """{"data":{},"del_hostids":[10828],"config_revision":1796}""");
 
-        Assert.Equal(["zbx-proxy-h2"], removed.Hosts.Values.Select(host => host.Host));
+        Assert.Equal(["zbx-proxy-h2"], removed.Hosts.Values.Select(host => host.HostName));
         Assert.Equal([71042L], removed.Items.Keys);
     }
 

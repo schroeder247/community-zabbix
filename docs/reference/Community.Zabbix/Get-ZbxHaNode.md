@@ -10,7 +10,7 @@ Gets the nodes of the server's high-availability cluster.
 ### All (Default)
 
 ```
-Get-ZbxHaNode [-Name <string>] [-Address <string>] [-Status <ZabbixHaNodeStatus>] [-Connection <ZabbixConnection>] [<CommonParameters>]
+Get-ZbxHaNode [-Name <string>] [-Address <string>] [-Status <ZabbixHANodeStatus>] [-Connection <ZabbixConnection>] [<CommonParameters>]
 ```
 
 ### ById
@@ -94,7 +94,7 @@ The node's status; exact match.
 
 | | |
 | --- | --- |
-| Type | `ZabbixHaNodeStatus` |
+| Type | `ZabbixHANodeStatus` |
 | Parameter sets | All |
 | Aliases | none |
 | Required | False |
@@ -128,7 +128,7 @@ None.
 
 ## OUTPUTS
 
-- `ZabbixHaNode`: The ha node read model, as returned by the Zabbix API.
+- `ZabbixHANode`: The ha node read model, as returned by the Zabbix API.
 
 ## RELATED LINKS
 

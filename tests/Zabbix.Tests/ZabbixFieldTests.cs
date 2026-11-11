@@ -32,7 +32,7 @@ public sealed class ZabbixFieldTests
         var parameters = new ZabbixHostGetParameters
         {
             Output = [ZabbixHostFields.HostId, new ZabbixField<ZabbixHost>("a_new_field")],
-            SelectInterfaces = [ZabbixHostInterfaceFields.InterfaceId, ZabbixHostInterfaceFields.Ip, ZabbixHostInterfaceFields.Port],
+            SelectInterfaces = [ZabbixHostInterfaceFields.InterfaceId, ZabbixHostInterfaceFields.IP, ZabbixHostInterfaceFields.Port],
             SelectTags = ZabbixOutput.Extend,
             SelectItems = [ZabbixItemFields.ItemId],
         };

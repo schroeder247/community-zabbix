@@ -63,6 +63,11 @@ public class ZabbixListenerOptions : IValidatableObject
     /// against it: its first byte says TLS or not (upstream <c>zbx_tcp_accept</c>), and a TLS connection's hello says
     /// pre-shared key or certificate.
     /// </summary>
+    /// <value>
+    /// <see cref="ZabbixTlsAcceptModes.Unencrypted"/> unless set, as Zabbix's own <c>TLSAccept</c> defaults to
+    /// <c>unencrypted</c>. <see cref="ZabbixTlsAcceptModes.None"/>, the empty set, accepts no connection, and validation
+    /// refuses it.
+    /// </value>
     public ZabbixTlsAcceptModes TlsAccept { get; set; } = ZabbixTlsAcceptModes.Unencrypted;
 
     /// <summary>
@@ -113,7 +118,7 @@ public class ZabbixListenerOptions : IValidatableObject
     private IEnumerable<ValidationResult> ValidateAcceptSet()
     {
         const ZabbixTlsAcceptModes known = ZabbixTlsAcceptModes.Unencrypted | ZabbixTlsAcceptModes.Psk | ZabbixTlsAcceptModes.Certificate;
-        if (TlsAccept == 0 || (TlsAccept & ~known) != 0)
+        if (TlsAccept == ZabbixTlsAcceptModes.None || (TlsAccept & ~known) != 0)
             yield return new ValidationResult($"TlsAccept {(int)TlsAccept} is not a set of unencrypted (1), psk (2) and cert (4)", [nameof(TlsAccept)]);
         if (Tls is { Mode: not ZabbixTlsMode.Unencrypted })
             yield return new ValidationResult("Tls.Mode is the connecting side's word; a listener says what it accepts with TlsAccept", [nameof(Tls)]);

@@ -17,5 +17,5 @@ Disable-ZbxHost -InputObject 'db-01'
 #region Stop monitoring the hosts a search finds
 # -WhatIf names each host the command would disable; -PassThru writes the hosts back with their Status.
 Get-ZbxHost -Name 'web-*' | Disable-ZbxHost -WhatIf
-Get-ZbxHost -Name 'web-*' | Disable-ZbxHost -PassThru | Select-Object TechnicalName, Status
+Get-ZbxHost -Name 'web-*' | Disable-ZbxHost -PassThru | Select-Object HostName, Status
 #endregion

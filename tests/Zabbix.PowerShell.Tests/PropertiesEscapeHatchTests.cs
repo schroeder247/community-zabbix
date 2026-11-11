@@ -6,11 +6,11 @@ namespace Community.Zabbix.PowerShell.Tests;
 
 /// <summary>
 /// <c>-AdditionalProperty</c> supplying a raw wire field name for a field that also has a
-/// friendlier named parameter (e.g. <c>ipmi_username</c> for <c>-IpmiUsername</c>), without using that named
+/// friendlier named parameter (e.g. <c>ipmi_username</c> for <c>-IpmiUserName</c>), without using that named
 /// parameter this call, must reach the wire on the modelled property — not be refused just because
 /// <c>ZabbixHostCreateRequest</c> happens to model that wire field somewhere. <c>ZabbixPropertyOverrides.Apply</c>
 /// matches a <c>-AdditionalProperty</c> key against a property by its wire name (<c>[JsonPropertyName]</c>), not only by
-/// its C# name, so a snake_case key like <c>ipmi_username</c> maps onto <c>IpmiUsername</c> directly instead of
+/// its C# name, so a snake_case key like <c>ipmi_username</c> maps onto <c>IpmiUserName</c> directly instead of
 /// falling through to the <c>AdditionalFields</c> bag <see cref="ZabbixExtensionDataGuard"/> would then refuse.
 /// </summary>
 public sealed class PropertiesEscapeHatchTests
@@ -67,11 +67,11 @@ public sealed class PropertiesEscapeHatchTests
     [Fact]
     public void Apply_maps_a_snake_case_Properties_key_onto_the_matching_wire_property_directly()
     {
-        var request = new ZabbixHostCreateRequest { TechnicalName = "web-01", Groups = [] };
+        var request = new ZabbixHostCreateRequest { HostName = "web-01", Groups = [] };
 
         ZabbixHostCreateRequest result = ZabbixPropertyOverrides.Apply(request, new System.Collections.Hashtable { ["ipmi_username"] = "root" });
 
-        Assert.Equal("root", result.IpmiUsername);
+        Assert.Equal("root", result.IpmiUserName);
         Assert.Null(result.AdditionalFields);
     }
 
@@ -97,7 +97,7 @@ public sealed class PropertiesEscapeHatchTests
         ZabbixMaintenanceCreateRequest result = ZabbixPropertyOverrides.Apply(request, properties);
 
         ZabbixMaintenanceTimePeriodRequest period = Assert.Single(result.TimePeriods);
-        Assert.Equal("3600", period.Period);
+        Assert.Equal(ZabbixDuration.Parse("3600"), period.Period);
         Assert.Equal(ZabbixTimePeriodType.OneTime, period.TimePeriodType);
         Assert.Null(result.AdditionalFields);
     }
@@ -118,7 +118,7 @@ public sealed class PropertiesEscapeHatchTests
 
         Assert.Equal("scalar-field-check", result.Description);
         Assert.Equal(7UL, Assert.Single(result.Groups!).GroupId);
-        Assert.Equal("3600", Assert.Single(result.TimePeriods).Period);
+        Assert.Equal(ZabbixDuration.Parse("3600"), Assert.Single(result.TimePeriods).Period);
         ZabbixMaintenanceTagRequest tag = Assert.Single(result.Tags!);
         Assert.Equal("env", tag.Tag);
         Assert.Equal("staging", tag.Value);
@@ -261,11 +261,11 @@ public sealed class PropertiesEscapeHatchTests
     [Fact]
     public void Apply_refuses_two_Properties_keys_that_resolve_to_the_same_wire_field_with_different_values()
     {
-        var request = new ZabbixHostCreateRequest { TechnicalName = "web-01", Groups = [] };
+        var request = new ZabbixHostCreateRequest { HostName = "web-01", Groups = [] };
         var properties = new System.Collections.Hashtable
         {
             ["ipmi_username"] = "root",
-            ["IpmiUsername"] = "someone-else",
+            ["IpmiUserName"] = "someone-else",
         };
 
         ArgumentException failure = Assert.Throws<ArgumentException>(() => ZabbixPropertyOverrides.Apply(request, properties));
@@ -275,15 +275,15 @@ public sealed class PropertiesEscapeHatchTests
     [Fact]
     public void Apply_allows_two_Properties_keys_that_resolve_to_the_same_wire_field_with_the_same_value()
     {
-        var request = new ZabbixHostCreateRequest { TechnicalName = "web-01", Groups = [] };
+        var request = new ZabbixHostCreateRequest { HostName = "web-01", Groups = [] };
         var properties = new System.Collections.Hashtable
         {
             ["ipmi_username"] = "root",
-            ["IpmiUsername"] = "root",
+            ["IpmiUserName"] = "root",
         };
 
         ZabbixHostCreateRequest result = ZabbixPropertyOverrides.Apply(request, properties);
 
-        Assert.Equal("root", result.IpmiUsername);
+        Assert.Equal("root", result.IpmiUserName);
     }
 }

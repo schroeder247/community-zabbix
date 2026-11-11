@@ -11,7 +11,7 @@ settings.
 #>
 #region Read the work period and the default theme
 # WorkPeriod is the days and hours graphs shade as working time.
-Get-ZbxSetting | Select-Object WorkPeriod, DefaultTheme, DefaultLang
+Get-ZbxSetting | Select-Object WorkPeriod, DefaultTheme, DefaultLanguage
 #endregion
 
 #region List the severity names

@@ -121,7 +121,7 @@ public sealed class HostLifecycleCommandsTests
         PSDataCollection<PSObject> output = await call.Running.WaitAsync(Failsafe, TestContext.Current.CancellationToken);
         Assert.Empty(call.Streams.Error);
         Assert.Equal(3, Volatile.Read(ref calls));
-        Assert.Equal("web-042", ((dynamic)Assert.Single(output).BaseObject).TechnicalName);
+        Assert.Equal("web-042", ((dynamic)Assert.Single(output).BaseObject).HostName);
     }
 
     [Fact]

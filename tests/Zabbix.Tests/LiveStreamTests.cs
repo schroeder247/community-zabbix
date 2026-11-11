@@ -78,7 +78,7 @@ public sealed class LiveStreamTests
         Assert.NotEmpty(streamed);
         Assert.All(streamed, v =>
         {
-            Assert.Equal(host.Host, v.Host?.Host);
+            Assert.Equal(host.Host, v.Host?.HostName);
             Assert.Contains(stored, r => r.Clock == v.Clock && double.Parse(r.Value!, CultureInfo.InvariantCulture) == v.Value.GetDouble());
             Assert.Contains(v.ItemTags ?? [], t => t.Tag == "zbx-run" && t.Value == scope.Run);
         });
@@ -215,7 +215,7 @@ public sealed class LiveStreamTests
             {
                 ZabbixValue value = reader.Current;
                 if (value.Clock.Seconds < second) continue;                                       // the fixture's probe value
-                await buffer.WriteAsync(value with { Host = target.Host, Key = dst }, Cancel);
+                await buffer.WriteAsync(value with { HostName = target.Host, Key = dst }, Cancel);
                 Interlocked.Increment(ref taken);
             }
             buffer.Complete();

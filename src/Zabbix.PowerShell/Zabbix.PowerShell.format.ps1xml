@@ -21,10 +21,10 @@
         <ListItem><PropertyName>SnmpCommunity</PropertyName></ListItem>
         <ListItem><PropertyName>Snmpv3SecurityName</PropertyName></ListItem>
         <ListItem><PropertyName>Snmpv3SecurityLevel</PropertyName></ListItem>
-        <ListItem><Label>Snmpv3AuthPassphrase</Label><ScriptBlock>if ($null -ne $_.Snmpv3AuthPassphrase) { '********' }</ScriptBlock></ListItem>
-        <ListItem><PropertyName>Snmpv3AuthProtocol</PropertyName></ListItem>
-        <ListItem><Label>Snmpv3PrivPassphrase</Label><ScriptBlock>if ($null -ne $_.Snmpv3PrivPassphrase) { '********' }</ScriptBlock></ListItem>
-        <ListItem><PropertyName>Snmpv3PrivProtocol</PropertyName></ListItem>
+        <ListItem><Label>Snmpv3AuthenticationPassphrase</Label><ScriptBlock>if ($null -ne $_.Snmpv3AuthenticationPassphrase) { '********' }</ScriptBlock></ListItem>
+        <ListItem><PropertyName>Snmpv3AuthenticationProtocol</PropertyName></ListItem>
+        <ListItem><Label>Snmpv3PrivacyPassphrase</Label><ScriptBlock>if ($null -ne $_.Snmpv3PrivacyPassphrase) { '********' }</ScriptBlock></ListItem>
+        <ListItem><PropertyName>Snmpv3PrivacyProtocol</PropertyName></ListItem>
         <ListItem><PropertyName>Snmpv3ContextName</PropertyName></ListItem>
       </ListItems></ListEntry></ListEntries></ListControl>
     </View>

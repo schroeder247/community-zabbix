@@ -8,7 +8,7 @@ Creates a user macro.
 ## SYNTAX
 
 ```
-New-ZbxUserMacro [[-Macro] <string>] [[-Value] <string>] [-HostId <ulong>] [-Type <ZabbixMacroType>] [-Description <string>] [-Config <ZabbixUserMacroConfigRequest>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+New-ZbxUserMacro [[-Macro] <string>] [[-Value] <string>] [-HostId <ulong>] [-Type <ZabbixMacroType>] [-Description <string>] [-Configuration <ZabbixUserMacroConfigurationRequest>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -132,13 +132,13 @@ A free-form description of the macro.
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -Config
+### -Configuration
 
 How the macro is presented as an input field in the host wizard.
 
 | | |
 | --- | --- |
-| Type | `ZabbixUserMacroConfigRequest` |
+| Type | `ZabbixUserMacroConfigurationRequest` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |
@@ -179,7 +179,7 @@ Creates without a confirmation prompt even where $ConfirmPreference is at or bel
 
 ### -InputObject
 
-A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIp, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
+A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIP, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
 
 | | |
 | --- | --- |
@@ -224,7 +224,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 - `ulong`: Bound to -HostId (ByPropertyName).
 - `string`: Bound to -Macro (ByPropertyName), -Value (ByPropertyName), -Description (ByPropertyName). Text.
 - `ZabbixMacroType`: Bound to -Type (ByPropertyName). The macro type values: ZBX_MACRO_TYPE_* in defines.inc.php.
-- `ZabbixUserMacroConfigRequest`: Bound to -Config (ByPropertyName). config of a ZabbixUserMacroCreateRequest.
+- `ZabbixUserMacroConfigurationRequest`: Bound to -Configuration (ByPropertyName). config of a ZabbixUserMacroCreateRequest.
 - `PSObject`: Bound to -InputObject (ByValue). Each object as the API answers it.
 
 ## OUTPUTS

@@ -8,7 +8,7 @@ Creates a host.
 ## SYNTAX
 
 ```
-New-ZbxHost [[-Name] <string>] [-MonitoredBy <ZabbixMonitoredBy>] [-ProxyId <ulong>] [-ProxyGroupId <ulong>] [-TlsConnect <ZabbixTlsConnectMode>] [-TlsAccept <ZabbixTlsAcceptModes>] [-TlsPskIdentity <string>] [-TlsPsk <SecureString>] [-TlsIssuer <string>] [-TlsSubject <string>] [-Group <ZabbixReference<ZabbixHostGroup>[]>] [-Template <ZabbixReference<ZabbixTemplate>[]>] [-Tag <ZabbixTagRequest[]>] [-Macro <ZabbixHostMacroRequest[]>] [-Status <ZabbixHostStatus>] [-InventoryMode <ZabbixHostInventoryMode>] [-IpmiAuthType <ZabbixIpmiAuthType>] [-IpmiPrivilege <ZabbixIpmiPrivilege>] [-IpmiUsername <string>] [-IpmiPassword <SecureString>] [-DisplayName <string>] [-Description <string>] [-Interface <ZabbixHostInterfaceRequest[]>] [-AdditionalProperty <Hashtable>] [-InterfaceType <ZabbixInterfaceType>] [-InterfaceIp <string>] [-InterfaceDns <string>] [-InterfacePort <string>] [-UseIp] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+New-ZbxHost [[-Name] <string>] [-MonitoredBy <ZabbixMonitoredBy>] [-ProxyId <ulong>] [-ProxyGroupId <ulong>] [-TlsConnect <ZabbixTlsConnectMode>] [-TlsAccept <ZabbixTlsAcceptModes>] [-TlsPskIdentity <string>] [-TlsPsk <SecureString>] [-TlsIssuer <string>] [-TlsSubject <string>] [-Group <ZabbixReference<ZabbixHostGroup>[]>] [-Template <ZabbixReference<ZabbixTemplate>[]>] [-Tag <ZabbixTagRequest[]>] [-Macro <ZabbixHostMacroRequest[]>] [-Status <ZabbixHostStatus>] [-InventoryMode <ZabbixHostInventoryMode>] [-IpmiAuthenticationType <ZabbixIpmiAuthenticationType>] [-IpmiPrivilege <ZabbixIpmiPrivilege>] [-IpmiUserName <string>] [-IpmiPassword <SecureString>] [-DisplayName <string>] [-Description <string>] [-Interface <ZabbixHostInterfaceRequest[]>] [-AdditionalProperty <Hashtable>] [-InterfaceType <ZabbixInterfaceType>] [-InterfaceIP <string>] [-InterfaceDns <string>] [-InterfacePort <string>] [-UseIP] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -20,21 +20,21 @@ A host is a monitored device, server or application: a name, the groups it is in
 ### Example 1: Create a host in a group with an agent interface
 
 ```powershell
-New-ZbxHost -Host 'web-02' -Group 'Web servers' -InterfaceType Agent -InterfaceIp '10.0.0.12' |
-    Select-Object HostId, TechnicalName, Status
+New-ZbxHost -Host 'web-02' -Group 'Web servers' -InterfaceType Agent -InterfaceIP '10.0.0.12' |
+    Select-Object HostId, HostName, Status
 ```
 
--Group takes host group names, ids or objects. -InterfaceType/-InterfaceIp describe one main interface (port 10050 for an agent unless -InterfacePort says otherwise). The created host is read back and written.
+-Group takes host group names, ids or objects. -InterfaceType/-InterfaceIP describe one main interface (port 10050 for an agent unless -InterfacePort says otherwise). The created host is read back and written.
 
 ### Example 2: Create a host that is reached by DNS name
 
 ```powershell
-New-ZbxHost -Host 'web-03' -Group 'Web servers' -InterfaceType Agent -InterfaceDns 'web-03.example.com' -UseIp:$false |
-    Select-Object HostId, TechnicalName
-Get-ZbxHost -Name 'web-03' -SelectInterfaces | ForEach-Object Interfaces | Select-Object Type, UseIp, Dns, Port
+New-ZbxHost -Host 'web-03' -Group 'Web servers' -InterfaceType Agent -InterfaceDns 'web-03.example.com' -UseIP:$false |
+    Select-Object HostId, HostName
+Get-ZbxHost -Name 'web-03' -SelectInterfaces | ForEach-Object Interfaces | Select-Object Type, UseIP, Dns, Port
 ```
 
--UseIp:$false makes the shorthand interface connect by -InterfaceDns instead of an IP address.
+-UseIP:$false makes the shorthand interface connect by -InterfaceDns instead of an IP address.
 
 ### Example 3: Create a host with a template, tags and a macro
 
@@ -42,9 +42,9 @@ Get-ZbxHost -Name 'web-03' -SelectInterfaces | ForEach-Object Interfaces | Selec
 New-ZbxHost -Host 'web-02' -Group 'Web servers', 'Linux servers' -Template 'Web App' `
     -Tag @{ tag = 'env'; value = 'test' }, @{ tag = 'team'; value = 'shop' } `
     -Macro @{ macro = '{$APP.PORT}'; value = '9090' } `
-    -InterfaceType Agent -InterfaceIp '10.0.0.12' | Out-Null
+    -InterfaceType Agent -InterfaceIP '10.0.0.12' | Out-Null
 Get-ZbxHost -Name 'web-02' -SelectParentTemplates -SelectTags -SelectMacros |
-    Select-Object TechnicalName, @{ n = 'Templates'; e = { $_.ParentTemplates.TechnicalName } },
+    Select-Object HostName, @{ n = 'Templates'; e = { $_.ParentTemplates.HostName } },
         @{ n = 'Tags'; e = { ($_.Tags | ForEach-Object { '{0}={1}' -f $_.Tag, $_.Value }) -join ', ' } },
         @{ n = 'Macros'; e = { ($_.Macros | ForEach-Object { '{0}={1}' -f $_.Macro, $_.Value }) -join ', ' } }
 ```
@@ -55,12 +55,12 @@ Get-ZbxHost -Name 'web-02' -SelectParentTemplates -SelectTags -SelectMacros |
 
 ```powershell
 $servers = @(
-    [pscustomobject]@{ Name = 'web-02'; Ip = '10.0.0.12' }
-    [pscustomobject]@{ Name = 'web-03'; Ip = '10.0.0.13' }
+    [pscustomobject]@{ Name = 'web-02'; IP = '10.0.0.12' }
+    [pscustomobject]@{ Name = 'web-03'; IP = '10.0.0.13' }
 )
 $servers | ForEach-Object {
-    New-ZbxHost -Host $_.Name -Group 'Web servers' -InterfaceType Agent -InterfaceIp $_.Ip
-} | Select-Object HostId, TechnicalName
+    New-ZbxHost -Host $_.Name -Group 'Web servers' -InterfaceType Agent -InterfaceIP $_.IP
+} | Select-Object HostId, HostName
 ```
 
 A realistic script: one New-ZbxHost per record. -WhatIf would list the hosts without creating them.
@@ -307,13 +307,13 @@ Technical name of the host, unique among hosts and templates; an active agent's 
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -IpmiAuthType
+### -IpmiAuthenticationType
 
 IPMI authentication algorithm. Defaults to the interface default.
 
 | | |
 | --- | --- |
-| Type | `ZabbixIpmiAuthType` |
+| Type | `ZabbixIpmiAuthenticationType` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |
@@ -337,7 +337,7 @@ IPMI privilege level. Defaults to user.
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -IpmiUsername
+### -IpmiUserName
 
 User name for IPMI checks on the host.
 
@@ -429,7 +429,7 @@ Extra fields merged onto the request last, winning over every parameter: keys ar
 
 ### -InterfaceType
 
-The type of the one interface this shorthand adds to -Interface. Default Agent when any of -InterfaceIp/-InterfaceDns/-InterfacePort/-UseIp is bound but -InterfaceType is not.
+The type of the one interface this shorthand adds to -Interface. Default Agent when any of -InterfaceIP/-InterfaceDns/-InterfacePort/-UseIP is bound but -InterfaceType is not.
 
 | | |
 | --- | --- |
@@ -442,7 +442,7 @@ The type of the one interface this shorthand adds to -Interface. Default Agent w
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -InterfaceIp
+### -InterfaceIP
 
 The shorthand interface's IP address. Default 127.0.0.1.
 
@@ -487,7 +487,7 @@ The shorthand interface's port. Default 10050 (161 for -InterfaceType Snmp).
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -UseIp
+### -UseIP
 
 Connect by IP instead of DNS for the shorthand interface. Default: by IP, or by DNS when only -InterfaceDns is given.
 
@@ -519,7 +519,7 @@ Creates without a confirmation prompt even where $ConfirmPreference is at or bel
 
 ### -InputObject
 
-A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIp, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
+A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIP, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
 
 | | |
 | --- | --- |
@@ -565,18 +565,18 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 - `ulong`: Bound to -ProxyId (ByPropertyName), -ProxyGroupId (ByPropertyName).
 - `ZabbixTlsConnectMode`: Bound to -TlsConnect (ByPropertyName). The TLS connect mode values: HOST_ENCRYPTION_* in defines.inc.php.
 - `ZabbixTlsAcceptModes`: Bound to -TlsAccept (ByPropertyName). The connections a host or proxy accepts: a set of HOST_ENCRYPTION_* bits.
-- `string`: Bound to -TlsPskIdentity (ByPropertyName), -TlsIssuer (ByPropertyName), -TlsSubject (ByPropertyName), -Name (ByPropertyName), -IpmiUsername (ByPropertyName), -DisplayName (ByPropertyName), -Description (ByPropertyName), -InterfaceIp (ByPropertyName), -InterfaceDns (ByPropertyName), -InterfacePort (ByPropertyName). Text.
+- `string`: Bound to -TlsPskIdentity (ByPropertyName), -TlsIssuer (ByPropertyName), -TlsSubject (ByPropertyName), -Name (ByPropertyName), -IpmiUserName (ByPropertyName), -DisplayName (ByPropertyName), -Description (ByPropertyName), -InterfaceIP (ByPropertyName), -InterfaceDns (ByPropertyName), -InterfacePort (ByPropertyName). Text.
 - `ZabbixReference<ZabbixHostGroup>[]`: Bound to -Group (ByPropertyName). Represents a reference to an API object: a parameter that points at an API object takes its id, its name, or the object itself piped from a Get- cmdlet, and becomes an id before the call — one parameter, three spellings, one resolution.
 - `ZabbixReference<ZabbixTemplate>[]`: Bound to -Template (ByPropertyName). Represents a reference to an API object: a parameter that points at an API object takes its id, its name, or the object itself piped from a Get- cmdlet, and becomes an id before the call — one parameter, three spellings, one resolution.
 - `ZabbixTagRequest[]`: Bound to -Tag (ByPropertyName). A tag to set on an object: a name with an optional value, such as env=prod.
 - `ZabbixHostMacroRequest[]`: Bound to -Macro (ByPropertyName). macros of a ZabbixHostCreateRequest.
 - `ZabbixHostStatus`: Bound to -Status (ByPropertyName). The host status values: HOST_STATUS_* in defines.inc.php.
 - `ZabbixHostInventoryMode`: Bound to -InventoryMode (ByPropertyName). The host inventory mode values: HOST_INVENTORY_* in defines.inc.php.
-- `ZabbixIpmiAuthType`: Bound to -IpmiAuthType (ByPropertyName). The IPMI auth type values: IPMI_AUTHTYPE_* in defines.inc.php.
+- `ZabbixIpmiAuthenticationType`: Bound to -IpmiAuthenticationType (ByPropertyName). The IPMI authentication type values: IPMI_AUTHTYPE_* in defines.inc.php.
 - `ZabbixIpmiPrivilege`: Bound to -IpmiPrivilege (ByPropertyName). The IPMI privilege values: IPMI_PRIVILEGE_* in defines.inc.php.
 - `ZabbixHostInterfaceRequest[]`: Bound to -Interface (ByPropertyName). interfaces of a ZabbixHostCreateRequest.
 - `ZabbixInterfaceType`: Bound to -InterfaceType (ByPropertyName). The interface type values: INTERFACE_TYPE_* in defines.inc.php.
-- `SwitchParameter`: Bound to -UseIp (ByPropertyName). A switch.
+- `SwitchParameter`: Bound to -UseIP (ByPropertyName). A switch.
 - `PSObject`: Bound to -InputObject (ByValue). Each object as the API answers it.
 
 ## OUTPUTS

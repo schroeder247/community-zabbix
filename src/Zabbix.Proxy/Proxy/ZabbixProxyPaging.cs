@@ -100,7 +100,7 @@ internal static class ZabbixProxyPaging
             host = null;
             key = default;
             return config.Items.TryGetValue(itemId, out ZabbixProxyConfigItem? item) && config.Hosts.TryGetValue(item.HostId, out ZabbixProxyConfigHost? owner)
-                   && ZabbixItemKey.TryParse(item.Key, out key) && (host = owner.Host) is not null;
+                   && ZabbixItemKey.TryParse(item.Key, out key) && (host = owner.HostName) is not null;
         }
 
         public ZabbixAgentSession? Session(ulong hostId, string session) => sessions.Get(hostId, session);
@@ -163,7 +163,7 @@ internal static class ZabbixProxyPaging
         foreach (ZabbixStoreEntry<ZabbixValue> entry in page)
         {
             ZabbixValue value = entry.Record;
-            if (config.ItemsByKey.TryGetValue((value.Host, value.Key.ToString()), out ZabbixProxyConfigItem? item))
+            if (config.ItemsByKey.TryGetValue((value.HostName, value.Key.ToString()), out ZabbixProxyConfigItem? item))
                 history.Add(new ZabbixProxyHistoryItem(entry.Sequence, item.ItemId, value.Clock, value.Value, value.IsSupported ? null : 1));
             else
                 unmapped++;

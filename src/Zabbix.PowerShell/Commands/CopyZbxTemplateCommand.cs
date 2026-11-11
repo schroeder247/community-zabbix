@@ -66,7 +66,7 @@ public sealed class CopyZbxTemplateCommand : ZabbixServerCmdlet
         string document = await ZabbixClient.Configuration.ExportAsync(
             new ZabbixConfigurationExportRequest { Format = "json", Options = new ZabbixConfigurationExportOptionRequest { Templates = [id] } },
             cancellationToken).ConfigureAwait(false);
-        string renamed = ZabbixExportRename.Rename(document, "templates", "template", source.TechnicalName!, NewName!);
+        string renamed = ZabbixExportRename.Rename(document, "templates", "template", source.HostName!, NewName!);
         var rules = new ZabbixConfigurationImportRuleRequest
         {
             Templates = new ZabbixConfigurationImportRuleTemplateRequest { CreateMissing = true, UpdateExisting = Force.IsPresent },

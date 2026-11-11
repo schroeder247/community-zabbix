@@ -69,9 +69,9 @@ Describe 'Community.Zabbix module against <_.Label> (<_.Url>)' -ForEach $servers
 
         It 'selects a host by name, by wildcard and by id' {
             $byName = Get-ZbxHost 'Zabbix server'
-            $byName.TechnicalName | Should -Be 'Zabbix server'
-            (Get-ZbxHost 'Zabbix*' | Select-Object -First 1).TechnicalName | Should -BeLike 'Zabbix*'
-            (Get-ZbxHost -Id $byName.HostId).TechnicalName | Should -Be 'Zabbix server'
+            $byName.HostName | Should -Be 'Zabbix server'
+            (Get-ZbxHost 'Zabbix*' | Select-Object -First 1).HostName | Should -BeLike 'Zabbix*'
+            (Get-ZbxHost -Id $byName.HostId).HostName | Should -Be 'Zabbix server'
         }
 
         It 'takes the typed get parameters' {

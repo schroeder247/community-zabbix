@@ -45,13 +45,13 @@ public sealed class ZabbixProxyConfig
         var byHost = new Dictionary<ulong, List<ZabbixProxyConfigItem>>(hosts.Count);
         foreach (ZabbixProxyConfigItem item in items.Values)
         {
-            if (hosts.TryGetValue(item.HostId, out ZabbixProxyConfigHost? host)) byKey[(host.Host, item.Key)] = item;
+            if (hosts.TryGetValue(item.HostId, out ZabbixProxyConfigHost? host)) byKey[(host.HostName, item.Key)] = item;
             if (!byHost.TryGetValue(item.HostId, out List<ZabbixProxyConfigItem>? held)) byHost[item.HostId] = held = [];
             held.Add(item);
         }
         ItemsByKey = byKey.ToFrozenDictionary();
         ItemsByHost = byHost.ToFrozenDictionary(pair => pair.Key, pair => (IReadOnlyList<ZabbixProxyConfigItem>)[.. pair.Value]);
-        HostsByName = hosts.Values.ToFrozenDictionary(host => host.Host, StringComparer.Ordinal);
+        HostsByName = hosts.Values.ToFrozenDictionary(host => host.HostName, StringComparer.Ordinal);
     }
 
     /// <summary>Nothing held: revision 0, which asks the server for a full sync.</summary>
@@ -236,8 +236,8 @@ public sealed class ZabbixProxyConfig
         {
             var named = new Dictionary<string, ulong>(Hosts.Count, StringComparer.Ordinal);
             foreach (ZabbixProxyConfigHost host in Hosts.Values)
-                if (!named.TryAdd(host.Host, host.HostId))
-                    throw new JsonException($"Hosts {named[host.Host]} and {host.HostId} have one technical name, \"{host.Host}\".");
+                if (!named.TryAdd(host.HostName, host.HostId))
+                    throw new JsonException($"Hosts {named[host.HostName]} and {host.HostId} have one technical name, \"{host.HostName}\".");
         }
 
         private void ForgetMacrosOf(ulong hostId)

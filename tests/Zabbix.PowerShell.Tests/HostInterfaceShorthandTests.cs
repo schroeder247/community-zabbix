@@ -6,8 +6,8 @@ namespace Community.Zabbix.PowerShell.Tests;
 
 /// <summary>
 /// <c>New-ZbxHost</c> builds exactly one
-/// <c>HostInterfaceCreateRequest</c> inline from <c>-InterfaceType</c>/<c>-InterfaceIp</c>/<c>-InterfaceDns</c>/
-/// <c>-InterfacePort</c>/<c>-UseIp</c>, the shorthand for a host with a single interface. The generator
+/// <c>HostInterfaceCreateRequest</c> inline from <c>-InterfaceType</c>/<c>-InterfaceIP</c>/<c>-InterfaceDns</c>/
+/// <c>-InterfacePort</c>/<c>-UseIP</c>, the shorthand for a host with a single interface. The generator
 /// (<c>ZabbixCmdletEmitter</c>) emits these
 /// five shorthand parameters on <c>New-ZbxHost</c> and merges the interface they build into <c>-Interface</c>.
 /// </summary>
@@ -23,7 +23,7 @@ public sealed class HostInterfaceShorthandTests
         shell.Connect(server);
 
         // The single-interface shorthand as a script writes it.
-        Run run = shell.Invoke("New-ZbxHost -Host web-01 -Group @('7') -InterfaceType Agent -InterfaceIp '127.0.0.1' -InterfacePort '10050' -Confirm:$false");
+        Run run = shell.Invoke("New-ZbxHost -Host web-01 -Group @('7') -InterfaceType Agent -InterfaceIP '127.0.0.1' -InterfacePort '10050' -Confirm:$false");
 
         Assert.Empty(run.Errors);
         JsonElement request = Assert.Single(server.ParamsOf("host.create"));
@@ -44,7 +44,7 @@ public sealed class HostInterfaceShorthandTests
         using Shell shell = Shell.Open();
         shell.Connect(server);
 
-        Run run = shell.Invoke("New-ZbxHost -Host web-01 -Group @('7') -InterfaceType Agent -InterfaceIp '10.0.0.1' -Confirm:$false");
+        Run run = shell.Invoke("New-ZbxHost -Host web-01 -Group @('7') -InterfaceType Agent -InterfaceIP '10.0.0.1' -Confirm:$false");
 
         Assert.Empty(run.Errors);
         JsonElement request = Assert.Single(server.ParamsOf("host.create"));
@@ -63,7 +63,7 @@ public sealed class HostInterfaceShorthandTests
         using Shell shell = Shell.Open();
         shell.Connect(server);
 
-        Run run = shell.Invoke("New-ZbxHost -Host web-01 -Group @('7') -InterfaceType Agent -InterfaceDns 'web-01.example' -UseIp:$false -Confirm:$false");
+        Run run = shell.Invoke("New-ZbxHost -Host web-01 -Group @('7') -InterfaceType Agent -InterfaceDns 'web-01.example' -UseIP:$false -Confirm:$false");
 
         Assert.Empty(run.Errors);
         JsonElement request = Assert.Single(server.ParamsOf("host.create"));
@@ -75,7 +75,7 @@ public sealed class HostInterfaceShorthandTests
     [Fact]
     public async Task New_ZbxHost_InterfaceDns_alone_connects_by_DNS()
     {
-        // -InterfaceDns alone connects by DNS, with no -UseIp:$false: otherwise the server creates the interface with
+        // -InterfaceDns alone connects by DNS, with no -UseIP:$false: otherwise the server creates the interface with
         // useip=1 on 127.0.0.1 (on 7.0.31 and 8.0.0).
         await using FakeZabbix server = await FakeZabbix.StartAsync();
         server.On("host.create", """{"hostids":["10084"]}""");
@@ -101,7 +101,7 @@ public sealed class HostInterfaceShorthandTests
         using Shell shell = Shell.Open();
         shell.Connect(server);
 
-        Run run = shell.Invoke("New-ZbxHost -Host web-01 -Group @('7') -InterfaceType Snmp -InterfaceIp '10.0.0.1' -Confirm:$false");
+        Run run = shell.Invoke("New-ZbxHost -Host web-01 -Group @('7') -InterfaceType Snmp -InterfaceIP '10.0.0.1' -Confirm:$false");
 
         Assert.Empty(run.Errors);
         JsonElement request = Assert.Single(server.ParamsOf("host.create"));
@@ -121,7 +121,7 @@ public sealed class HostInterfaceShorthandTests
 
         Run run = shell.Invoke("""
             $existing = [Community.Zabbix.ZabbixHostInterfaceRequest]@{ Type = 4; Ip = '10.0.0.2'; Port = '12345'; Useip = 1; Main = 1 }
-            New-ZbxHost -Host web-01 -Group @('7') -Interface @($existing) -InterfaceType Agent -InterfaceIp '127.0.0.1' -InterfacePort '10050' -Confirm:$false
+            New-ZbxHost -Host web-01 -Group @('7') -Interface @($existing) -InterfaceType Agent -InterfaceIP '127.0.0.1' -InterfacePort '10050' -Confirm:$false
             """);
 
         Assert.Empty(run.Errors);
@@ -146,11 +146,11 @@ public sealed class HostInterfaceShorthandTests
     }
 
     [Theory]
-    [InlineData("New-ZbxHostInterface 10084 -Type Agent -UseIp Ip -Ip 10.0.0.1 -Port 10050 -Main 1 -Confirm:$false", "ip", "10.0.0.1", "dns")]
-    [InlineData("New-ZbxHostInterface 10084 -Type Agent -UseIp Dns -Dns web.example -Port 10050 -Main 1 -Confirm:$false", "dns", "web.example", "ip")]
+    [InlineData("New-ZbxHostInterface 10084 -Type Agent -UseIP IP -IP 10.0.0.1 -Port 10050 -Main 1 -Confirm:$false", "ip", "10.0.0.1", "dns")]
+    [InlineData("New-ZbxHostInterface 10084 -Type Agent -UseIP Dns -Dns web.example -Port 10050 -Main 1 -Confirm:$false", "dns", "web.example", "ip")]
     public async Task New_ZbxHostInterface_needs_only_the_address_it_connects_by(string script, string given, string value, string empty)
     {
-        // An IP interface needs no -Dns '' and a DNS one no -Ip '' (both required by the server, on 7.0.31 and
+        // An IP interface needs no -Dns '' and a DNS one no -IP '' (both required by the server, on 7.0.31 and
         // 8.0.0, so the cmdlet fills the empty one).
         await using FakeZabbix server = await FakeZabbix.StartAsync();
         server.On("hostinterface.create", """{"interfaceids":["5"]}""").On("hostinterface.get", """[{"interfaceid":"5","hostid":"10084"}]""");

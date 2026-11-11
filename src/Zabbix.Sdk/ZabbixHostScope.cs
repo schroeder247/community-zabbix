@@ -9,7 +9,7 @@ namespace Community.Zabbix;
 /// </summary>
 public class ZabbixHostScope : ZabbixNode, IAsyncEnumerable<ZabbixHostNode>
 {
-    private static readonly ZabbixOutput<ZabbixHost> s_hostFields = [ZabbixHostFields.HostId, ZabbixHostFields.TechnicalName];
+    private static readonly ZabbixOutput<ZabbixHost> s_hostFields = [ZabbixHostFields.HostId, ZabbixHostFields.HostName];
 
     /// <summary>Initializes a scope for mocking; every member of a scope built this way is to be overridden.</summary>
     protected ZabbixHostScope()
@@ -24,16 +24,16 @@ public class ZabbixHostScope : ZabbixNode, IAsyncEnumerable<ZabbixHostNode>
     /// Gets one host of this set, by technical name: <c>Hosts["web-01"]</c>. A group's host is read only while it's in the group.
     /// No call is made until it's asked.
     /// </summary>
-    /// <param name="host">The host's technical name.</param>
+    /// <param name="hostName">The host's technical name.</param>
     /// <returns>The host's node.</returns>
-    /// <exception cref="ArgumentException"><paramref name="host"/> is empty.</exception>
-    public virtual ZabbixHostNode this[string host]
+    /// <exception cref="ArgumentException"><paramref name="hostName"/> is empty.</exception>
+    public virtual ZabbixHostNode this[string hostName]
     {
         get
         {
-            ArgumentException.ThrowIfNullOrWhiteSpace(host);
+            ArgumentException.ThrowIfNullOrWhiteSpace(hostName);
             Client.ThrowIfDisposed();
-            return new ZabbixHostNode(Client, Selection with { Host = host });
+            return new ZabbixHostNode(Client, Selection with { Host = hostName });
         }
     }
 
@@ -49,7 +49,7 @@ public class ZabbixHostScope : ZabbixNode, IAsyncEnumerable<ZabbixHostNode>
         }
         foreach (ZabbixHost host in await Client.Hosts.GetAsync(new ZabbixHostGetParameters { Output = s_hostFields, GroupIds = groups }, cancellationToken).ConfigureAwait(false))
         {
-            if (host.TechnicalName is { } name) yield return new ZabbixHostNode(Client, Selection with { Host = name, HostId = host.HostId });
+            if (host.HostName is { } name) yield return new ZabbixHostNode(Client, Selection with { Host = name, HostId = host.HostId });
         }
     }
 }

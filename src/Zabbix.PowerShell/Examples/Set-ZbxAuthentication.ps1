@@ -18,7 +18,7 @@ Set-ZbxAuthentication -PasswordMinLength 12 -PassThru | Select-Object PasswordMi
 
 #region Preview turning on LDAP authentication
 # -WhatIf shows the change and makes none; LDAP also needs a user directory (New-ZbxUserDirectory).
-Set-ZbxAuthentication -LdapAuthEnabled $true -WhatIf
+Set-ZbxAuthentication -LdapAuthenticationEnabled $true -WhatIf
 #endregion
 
 Set-ZbxAuthentication -PasswordMinLength $before.PasswordMinLength

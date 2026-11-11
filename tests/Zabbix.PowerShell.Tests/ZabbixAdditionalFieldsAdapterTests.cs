@@ -69,7 +69,7 @@ public sealed class ZabbixAdditionalFieldsAdapterTests
         Assert.Empty(run.Errors);
         string[] names = [.. run.Output.Select(o => (string)o.BaseObject)];
         Assert.Contains("HostId", names);
-        Assert.Contains("TechnicalName", names);
+        Assert.Contains("HostName", names);
         Assert.Contains("Status", names);
         Assert.Contains("Newfield", names);
     }

@@ -1,4 +1,29 @@
 #nullable enable
+abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.CountAsync(Community.Zabbix.ZabbixClient! client, TParameters parameters, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<long>!
+abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.Filter.get -> TParameters?
+abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.Filter.set -> void
+abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.Id.get -> ulong[]?
+abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.Id.set -> void
+abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.Limit.get -> int?
+abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.Limit.set -> void
+abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.Name.get -> string![]?
+abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.Name.set -> void
+abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.Query(Community.Zabbix.ZabbixClient! client, TParameters parameters) -> void
+abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.SortField.get -> string![]?
+abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.SortField.set -> void
+abstract Community.Zabbix.PowerShell.ZabbixNewCmdlet<TEntity>.CreateAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<ulong>!>!
+abstract Community.Zabbix.PowerShell.ZabbixRemoveCmdlet<TEntity>.DeleteAsync(Community.Zabbix.ZabbixClient! client, System.Collections.Generic.IReadOnlyList<ulong>! ids, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+abstract Community.Zabbix.PowerShell.ZabbixRemoveCmdlet<TEntity>.InputObject.get -> Community.Zabbix.PowerShell.ZabbixReference<TEntity>![]?
+abstract Community.Zabbix.PowerShell.ZabbixRemoveCmdlet<TEntity>.InputObject.set -> void
+abstract Community.Zabbix.PowerShell.ZabbixSetCmdlet<TEntity, TRequest>.BuildRequest(ulong id) -> TRequest
+abstract Community.Zabbix.PowerShell.ZabbixSetCmdlet<TEntity, TRequest>.InputObject.get -> Community.Zabbix.PowerShell.ZabbixReference<TEntity>![]?
+abstract Community.Zabbix.PowerShell.ZabbixSetCmdlet<TEntity, TRequest>.InputObject.set -> void
+abstract Community.Zabbix.PowerShell.ZabbixSetCmdlet<TEntity, TRequest>.UpdateAsync(Community.Zabbix.ZabbixClient! client, System.Collections.Generic.IReadOnlyList<TRequest>! requests, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<ulong>!>!
+abstract Community.Zabbix.PowerShell.ZabbixSingletonGetCmdlet<TEntity>.GetAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<TEntity>!
+abstract Community.Zabbix.PowerShell.ZabbixSingletonSetCmdlet<TRequest>.BuildRequest() -> TRequest
+abstract Community.Zabbix.PowerShell.ZabbixSingletonSetCmdlet<TRequest>.GetAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<object?>!
+abstract Community.Zabbix.PowerShell.ZabbixSingletonSetCmdlet<TRequest>.Subject.get -> string!
+abstract Community.Zabbix.PowerShell.ZabbixSingletonSetCmdlet<TRequest>.UpdateAsync(Community.Zabbix.ZabbixClient! client, TRequest request, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<object?>!
 Community.Zabbix.PowerShell.Commands.AddZbxHostGroupMemberCommand
 Community.Zabbix.PowerShell.Commands.AddZbxHostGroupMemberCommand.AddZbxHostGroupMemberCommand() -> void
 Community.Zabbix.PowerShell.Commands.AddZbxHostGroupMemberCommand.Force.get -> System.Management.Automation.SwitchParameter
@@ -341,8 +366,8 @@ Community.Zabbix.PowerShell.Commands.Generated.GetDiscoveryRuleCommand.SelectHos
 Community.Zabbix.PowerShell.Commands.Generated.GetDiscoveryRuleCommand.SelectHosts.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.GetDiscoveryRuleCommand.SelectItems.get -> System.Management.Automation.SwitchParameter
 Community.Zabbix.PowerShell.Commands.Generated.GetDiscoveryRuleCommand.SelectItems.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.GetDiscoveryRuleCommand.SelectLldMacroPaths.get -> System.Management.Automation.SwitchParameter
-Community.Zabbix.PowerShell.Commands.Generated.GetDiscoveryRuleCommand.SelectLldMacroPaths.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.GetDiscoveryRuleCommand.SelectLowLevelDiscoveryMacroPaths.get -> System.Management.Automation.SwitchParameter
+Community.Zabbix.PowerShell.Commands.Generated.GetDiscoveryRuleCommand.SelectLowLevelDiscoveryMacroPaths.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.GetDiscoveryRuleCommand.SelectOverrides.get -> System.Management.Automation.SwitchParameter
 Community.Zabbix.PowerShell.Commands.Generated.GetDiscoveryRuleCommand.SelectOverrides.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.GetDiscoveryRuleCommand.SelectPreprocessing.get -> System.Management.Automation.SwitchParameter
@@ -381,8 +406,8 @@ Community.Zabbix.PowerShell.Commands.Generated.GetDiscoveryRulePrototypeCommand.
 Community.Zabbix.PowerShell.Commands.Generated.GetDiscoveryRulePrototypeCommand.SelectHosts.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.GetDiscoveryRulePrototypeCommand.SelectItems.get -> System.Management.Automation.SwitchParameter
 Community.Zabbix.PowerShell.Commands.Generated.GetDiscoveryRulePrototypeCommand.SelectItems.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.GetDiscoveryRulePrototypeCommand.SelectLldMacroPaths.get -> System.Management.Automation.SwitchParameter
-Community.Zabbix.PowerShell.Commands.Generated.GetDiscoveryRulePrototypeCommand.SelectLldMacroPaths.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.GetDiscoveryRulePrototypeCommand.SelectLowLevelDiscoveryMacroPaths.get -> System.Management.Automation.SwitchParameter
+Community.Zabbix.PowerShell.Commands.Generated.GetDiscoveryRulePrototypeCommand.SelectLowLevelDiscoveryMacroPaths.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.GetDiscoveryRulePrototypeCommand.SelectOverrides.get -> System.Management.Automation.SwitchParameter
 Community.Zabbix.PowerShell.Commands.Generated.GetDiscoveryRulePrototypeCommand.SelectOverrides.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.GetDiscoveryRulePrototypeCommand.SelectPreprocessing.get -> System.Management.Automation.SwitchParameter
@@ -1154,8 +1179,8 @@ Community.Zabbix.PowerShell.Commands.Generated.NewActionOperationCommand.Escalat
 Community.Zabbix.PowerShell.Commands.Generated.NewActionOperationCommand.EscalationStepFrom.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewActionOperationCommand.EscalationStepTo.get -> int?
 Community.Zabbix.PowerShell.Commands.Generated.NewActionOperationCommand.EscalationStepTo.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewActionOperationCommand.EvalType.get -> Community.Zabbix.ZabbixConditionEvalType?
-Community.Zabbix.PowerShell.Commands.Generated.NewActionOperationCommand.EvalType.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewActionOperationCommand.EvaluationType.get -> Community.Zabbix.ZabbixConditionEvaluationType?
+Community.Zabbix.PowerShell.Commands.Generated.NewActionOperationCommand.EvaluationType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewActionOperationCommand.NewActionOperationCommand() -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewActionOperationCommand.OperationCommand.get -> Community.Zabbix.ZabbixActionOperationCommandRequest?
 Community.Zabbix.PowerShell.Commands.Generated.NewActionOperationCommand.OperationCommand.set -> void
@@ -1208,8 +1233,8 @@ Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.AdditionalPro
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.AdditionalProperty.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.AttemptInterval.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.AttemptInterval.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.AuthType.get -> Community.Zabbix.ZabbixHttpAuthentication?
-Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.AuthType.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.AuthenticationType.get -> Community.Zabbix.ZabbixHttpAuthentication?
+Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.AuthenticationType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.DataType.get -> Community.Zabbix.ZabbixConnectorDataType?
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.DataType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.Description.get -> string?
@@ -1231,8 +1256,8 @@ Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.Password.get 
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.Password.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.Protocol.get -> Community.Zabbix.ZabbixConnectorProtocol?
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.Protocol.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.SslCertFile.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.SslCertFile.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.SslCertificateFile.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.SslCertificateFile.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.SslKeyFile.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.SslKeyFile.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.SslKeyPassword.get -> System.Security.SecureString?
@@ -1241,16 +1266,16 @@ Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.Status.get ->
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.Status.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.Tag.get -> Community.Zabbix.ZabbixConnectorTagRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.Tag.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.TagsEvalType.get -> Community.Zabbix.ZabbixConditionEvalType?
-Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.TagsEvalType.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.TagsEvaluationType.get -> Community.Zabbix.ZabbixConditionEvaluationType?
+Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.TagsEvaluationType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.Timeout.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.Timeout.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.Token.get -> System.Security.SecureString?
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.Token.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.Url.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.Url.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.Username.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.Username.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.UserName.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.UserName.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.VerifyHost.get -> bool?
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.VerifyHost.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewConnectorCommand.VerifyPeer.get -> bool?
@@ -1342,15 +1367,15 @@ Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Additiona
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.AdditionalProperty.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.AllowTraps.get -> bool?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.AllowTraps.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.AuthType.get -> int?
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.AuthType.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.AuthenticationType.get -> int?
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.AuthenticationType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Delay.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Delay.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Description.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Description.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.EnabledLifetime.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.EnabledLifetime.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.EnabledLifetimeType.get -> Community.Zabbix.ZabbixLldEnabledLifetimeType?
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.EnabledLifetimeType.get -> Community.Zabbix.ZabbixLowLevelDiscoveryEnabledLifetimeType?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.EnabledLifetimeType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Filter.get -> Community.Zabbix.ZabbixDiscoveryRuleFilterRequest?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Filter.set -> void
@@ -1372,10 +1397,10 @@ Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Key.get -
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Key.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Lifetime.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Lifetime.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.LifetimeType.get -> Community.Zabbix.ZabbixLldLifetimeType?
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.LifetimeType.get -> Community.Zabbix.ZabbixLowLevelDiscoveryLifetimeType?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.LifetimeType.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.LldMacroPath.get -> Community.Zabbix.ZabbixDiscoveryRuleLldMacroPathRequest![]?
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.LldMacroPath.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.LowLevelDiscoveryMacroPath.get -> Community.Zabbix.ZabbixDiscoveryRuleLowLevelDiscoveryMacroPathRequest![]?
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.LowLevelDiscoveryMacroPath.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.MasterItemId.get -> ulong?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.MasterItemId.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Name.get -> string?
@@ -1387,14 +1412,12 @@ Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Override.
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Override.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Parameter.get -> Community.Zabbix.ZabbixDiscoveryRuleParameterRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Parameter.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Params.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Params.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Password.get -> System.Security.SecureString?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Password.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.PostType.get -> Community.Zabbix.ZabbixItemPostType?
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.PostType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Posts.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Posts.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.PostType.get -> Community.Zabbix.ZabbixItemPostType?
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.PostType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Preprocessing.get -> Community.Zabbix.ZabbixPreprocessingStepRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Preprocessing.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.PrivateKey.get -> string?
@@ -1409,8 +1432,8 @@ Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.RetrieveM
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.RetrieveMode.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.SnmpOid.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.SnmpOid.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.SslCertFile.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.SslCertFile.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.SslCertificateFile.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.SslCertificateFile.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.SslKeyFile.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.SslKeyFile.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.SslKeyPassword.get -> System.Security.SecureString?
@@ -1425,10 +1448,12 @@ Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.TrapperHo
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.TrapperHosts.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Type.get -> Community.Zabbix.ZabbixItemType?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Type.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.TypeParameters.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.TypeParameters.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Url.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Url.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Username.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Username.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.UserName.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.UserName.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Uuid.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.Uuid.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRuleCommand.VerifyHost.get -> bool?
@@ -1440,8 +1465,8 @@ Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.AdditionalProperty.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.AllowTraps.get -> bool?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.AllowTraps.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.AuthType.get -> int?
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.AuthType.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.AuthenticationType.get -> int?
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.AuthenticationType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Delay.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Delay.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Description.get -> string?
@@ -1450,7 +1475,7 @@ Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Discover.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.EnabledLifetime.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.EnabledLifetime.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.EnabledLifetimeType.get -> Community.Zabbix.ZabbixLldEnabledLifetimeType?
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.EnabledLifetimeType.get -> Community.Zabbix.ZabbixLowLevelDiscoveryEnabledLifetimeType?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.EnabledLifetimeType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Filter.get -> Community.Zabbix.ZabbixDiscoveryRulePrototypeFilterRequest?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Filter.set -> void
@@ -1472,10 +1497,10 @@ Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Key.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Lifetime.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Lifetime.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.LifetimeType.get -> Community.Zabbix.ZabbixLldLifetimeType?
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.LifetimeType.get -> Community.Zabbix.ZabbixLowLevelDiscoveryLifetimeType?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.LifetimeType.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.LldMacroPath.get -> Community.Zabbix.ZabbixDiscoveryRulePrototypeLldMacroPathRequest![]?
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.LldMacroPath.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.LowLevelDiscoveryMacroPath.get -> Community.Zabbix.ZabbixDiscoveryRulePrototypeLowLevelDiscoveryMacroPathRequest![]?
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.LowLevelDiscoveryMacroPath.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.MasterItemId.get -> ulong?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.MasterItemId.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Name.get -> string?
@@ -1487,14 +1512,12 @@ Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Override.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Parameter.get -> Community.Zabbix.ZabbixDiscoveryRulePrototypeParameterRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Parameter.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Params.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Params.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Password.get -> System.Security.SecureString?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Password.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.PostType.get -> Community.Zabbix.ZabbixItemPostType?
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.PostType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Posts.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Posts.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.PostType.get -> Community.Zabbix.ZabbixItemPostType?
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.PostType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Preprocessing.get -> Community.Zabbix.ZabbixPreprocessingStepRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Preprocessing.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.PrivateKey.get -> string?
@@ -1511,8 +1534,8 @@ Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.RuleId.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.SnmpOid.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.SnmpOid.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.SslCertFile.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.SslCertFile.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.SslCertificateFile.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.SslCertificateFile.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.SslKeyFile.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.SslKeyFile.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.SslKeyPassword.get -> System.Security.SecureString?
@@ -1527,10 +1550,12 @@ Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.TrapperHosts.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Type.get -> Community.Zabbix.ZabbixItemType?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Type.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.TypeParameters.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.TypeParameters.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Url.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Url.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Username.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Username.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.UserName.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.UserName.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Uuid.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.Uuid.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewDiscoveryRulePrototypeCommand.VerifyHost.get -> bool?
@@ -1632,22 +1657,22 @@ Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.Interface.get -> C
 Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.Interface.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.InterfaceDns.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.InterfaceDns.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.InterfaceIp.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.InterfaceIp.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.InterfaceIP.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.InterfaceIP.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.InterfacePort.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.InterfacePort.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.InterfaceType.get -> Community.Zabbix.ZabbixInterfaceType?
 Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.InterfaceType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.InventoryMode.get -> Community.Zabbix.ZabbixHostInventoryMode?
 Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.InventoryMode.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.IpmiAuthType.get -> Community.Zabbix.ZabbixIpmiAuthType?
-Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.IpmiAuthType.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.IpmiAuthenticationType.get -> Community.Zabbix.ZabbixIpmiAuthenticationType?
+Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.IpmiAuthenticationType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.IpmiPassword.get -> System.Security.SecureString?
 Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.IpmiPassword.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.IpmiPrivilege.get -> Community.Zabbix.ZabbixIpmiPrivilege?
 Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.IpmiPrivilege.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.IpmiUsername.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.IpmiUsername.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.IpmiUserName.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.IpmiUserName.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.Macro.get -> Community.Zabbix.ZabbixHostMacroRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.Macro.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.MonitoredBy.get -> Community.Zabbix.ZabbixMonitoredBy?
@@ -1677,8 +1702,8 @@ Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.TlsPskIdentity.get
 Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.TlsPskIdentity.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.TlsSubject.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.TlsSubject.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.UseIp.get -> System.Management.Automation.SwitchParameter
-Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.UseIp.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.UseIP.get -> System.Management.Automation.SwitchParameter
+Community.Zabbix.PowerShell.Commands.Generated.NewHostCommand.UseIP.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewHostGroupCommand
 Community.Zabbix.PowerShell.Commands.Generated.NewHostGroupCommand.AdditionalProperty.get -> System.Collections.Hashtable?
 Community.Zabbix.PowerShell.Commands.Generated.NewHostGroupCommand.AdditionalProperty.set -> void
@@ -1698,8 +1723,8 @@ Community.Zabbix.PowerShell.Commands.Generated.NewHostInterfaceCommand.HostId.ge
 Community.Zabbix.PowerShell.Commands.Generated.NewHostInterfaceCommand.HostId.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewHostInterfaceCommand.InterfaceId.get -> ulong?
 Community.Zabbix.PowerShell.Commands.Generated.NewHostInterfaceCommand.InterfaceId.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewHostInterfaceCommand.Ip.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewHostInterfaceCommand.Ip.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewHostInterfaceCommand.IP.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewHostInterfaceCommand.IP.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewHostInterfaceCommand.Main.get -> Community.Zabbix.ZabbixInterfacePriority?
 Community.Zabbix.PowerShell.Commands.Generated.NewHostInterfaceCommand.Main.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewHostInterfaceCommand.NewHostInterfaceCommand() -> void
@@ -1707,8 +1732,8 @@ Community.Zabbix.PowerShell.Commands.Generated.NewHostInterfaceCommand.Port.get 
 Community.Zabbix.PowerShell.Commands.Generated.NewHostInterfaceCommand.Port.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewHostInterfaceCommand.Type.get -> Community.Zabbix.ZabbixInterfaceType?
 Community.Zabbix.PowerShell.Commands.Generated.NewHostInterfaceCommand.Type.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewHostInterfaceCommand.UseIp.get -> Community.Zabbix.ZabbixHostInterfaceUseIp?
-Community.Zabbix.PowerShell.Commands.Generated.NewHostInterfaceCommand.UseIp.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewHostInterfaceCommand.UseIP.get -> Community.Zabbix.ZabbixHostInterfaceUseIP?
+Community.Zabbix.PowerShell.Commands.Generated.NewHostInterfaceCommand.UseIP.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewHostPrototypeCommand
 Community.Zabbix.PowerShell.Commands.Generated.NewHostPrototypeCommand.AdditionalProperty.get -> System.Collections.Hashtable?
 Community.Zabbix.PowerShell.Commands.Generated.NewHostPrototypeCommand.AdditionalProperty.set -> void
@@ -1792,8 +1817,8 @@ Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.AdditionalProperty
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.AdditionalProperty.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.AllowTraps.get -> bool?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.AllowTraps.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.AuthType.get -> int?
-Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.AuthType.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.AuthenticationType.get -> int?
+Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.AuthenticationType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Delay.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Delay.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Description.get -> string?
@@ -1820,8 +1845,8 @@ Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.JmxEndpoint.get ->
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.JmxEndpoint.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Key.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Key.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.LogTimeFmt.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.LogTimeFmt.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.LogTimeFormat.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.LogTimeFormat.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.LookbackLimit.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.LookbackLimit.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.MasterItemId.get -> ulong?
@@ -1833,14 +1858,12 @@ Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.OutputFormat.get -
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.OutputFormat.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Parameter.get -> Community.Zabbix.ZabbixItemParameterRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Parameter.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Params.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Params.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Password.get -> System.Security.SecureString?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Password.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.PostType.get -> Community.Zabbix.ZabbixItemPostType?
-Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.PostType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Posts.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Posts.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.PostType.get -> Community.Zabbix.ZabbixItemPostType?
+Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.PostType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Preprocessing.get -> Community.Zabbix.ZabbixPreprocessingStepRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Preprocessing.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.PrivateKey.get -> string?
@@ -1857,8 +1880,8 @@ Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.RetrieveMode.get -
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.RetrieveMode.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.SnmpOid.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.SnmpOid.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.SslCertFile.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.SslCertFile.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.SslCertificateFile.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.SslCertificateFile.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.SslKeyFile.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.SslKeyFile.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.SslKeyPassword.get -> System.Security.SecureString?
@@ -1869,22 +1892,24 @@ Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.StatusCodes.get ->
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.StatusCodes.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Tag.get -> Community.Zabbix.ZabbixTagRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Tag.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.TimeShift.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.TimeShift.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Timeout.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Timeout.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.TimeShift.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.TimeShift.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.TrapperHosts.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.TrapperHosts.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Trends.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Trends.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Type.get -> Community.Zabbix.ZabbixItemType?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Type.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.TypeParameters.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.TypeParameters.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Units.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Units.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Url.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Url.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Username.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Username.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.UserName.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.UserName.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Uuid.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.Uuid.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemCommand.ValueMapId.get -> ulong?
@@ -1900,8 +1925,8 @@ Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Additiona
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.AdditionalProperty.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.AllowTraps.get -> bool?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.AllowTraps.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.AuthType.get -> int?
-Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.AuthType.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.AuthenticationType.get -> int?
+Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.AuthenticationType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Delay.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Delay.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Description.get -> string?
@@ -1928,8 +1953,8 @@ Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.JmxEndpoi
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.JmxEndpoint.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Key.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Key.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.LogTimeFmt.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.LogTimeFmt.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.LogTimeFormat.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.LogTimeFormat.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.LookbackLimit.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.LookbackLimit.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.MasterItemId.get -> ulong?
@@ -1941,14 +1966,12 @@ Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.OutputFor
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.OutputFormat.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Parameter.get -> Community.Zabbix.ZabbixItemPrototypeParameterRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Parameter.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Params.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Params.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Password.get -> System.Security.SecureString?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Password.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.PostType.get -> Community.Zabbix.ZabbixItemPostType?
-Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.PostType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Posts.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Posts.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.PostType.get -> Community.Zabbix.ZabbixItemPostType?
+Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.PostType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Preprocessing.get -> Community.Zabbix.ZabbixPreprocessingStepRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Preprocessing.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.PrivateKey.get -> string?
@@ -1967,8 +1990,8 @@ Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.RuleId.ge
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.RuleId.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.SnmpOid.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.SnmpOid.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.SslCertFile.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.SslCertFile.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.SslCertificateFile.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.SslCertificateFile.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.SslKeyFile.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.SslKeyFile.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.SslKeyPassword.get -> System.Security.SecureString?
@@ -1979,22 +2002,24 @@ Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.StatusCod
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.StatusCodes.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Tag.get -> Community.Zabbix.ZabbixTagRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Tag.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.TimeShift.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.TimeShift.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Timeout.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Timeout.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.TimeShift.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.TimeShift.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.TrapperHosts.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.TrapperHosts.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Trends.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Trends.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Type.get -> Community.Zabbix.ZabbixItemType?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Type.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.TypeParameters.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.TypeParameters.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Units.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Units.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Url.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Url.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Username.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Username.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.UserName.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.UserName.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Uuid.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.Uuid.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewItemPrototypeCommand.ValueMapId.get -> ulong?
@@ -2016,8 +2041,8 @@ Community.Zabbix.PowerShell.Commands.Generated.NewLldFilterConditionCommand.Oper
 Community.Zabbix.PowerShell.Commands.Generated.NewLldFilterConditionCommand.Value.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewLldFilterConditionCommand.Value.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewLldMacroPathCommand
-Community.Zabbix.PowerShell.Commands.Generated.NewLldMacroPathCommand.LldMacro.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewLldMacroPathCommand.LldMacro.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewLldMacroPathCommand.LowLevelDiscoveryMacro.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewLldMacroPathCommand.LowLevelDiscoveryMacro.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewLldMacroPathCommand.NewLldMacroPathCommand() -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewLldMacroPathCommand.Path.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewLldMacroPathCommand.Path.set -> void
@@ -2043,8 +2068,8 @@ Community.Zabbix.PowerShell.Commands.Generated.NewMaintenanceCommand.Name.set ->
 Community.Zabbix.PowerShell.Commands.Generated.NewMaintenanceCommand.NewMaintenanceCommand() -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewMaintenanceCommand.Tag.get -> Community.Zabbix.ZabbixMaintenanceTagRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.NewMaintenanceCommand.Tag.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewMaintenanceCommand.TagsEvalType.get -> Community.Zabbix.ZabbixEvalType?
-Community.Zabbix.PowerShell.Commands.Generated.NewMaintenanceCommand.TagsEvalType.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewMaintenanceCommand.TagsEvaluationType.get -> Community.Zabbix.ZabbixEvaluationType?
+Community.Zabbix.PowerShell.Commands.Generated.NewMaintenanceCommand.TagsEvaluationType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewMaintenanceCommand.TimePeriod.get -> Community.Zabbix.ZabbixMaintenanceTimePeriodRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.NewMaintenanceCommand.TimePeriod.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewMaintenanceCommand.Trigger.get -> Community.Zabbix.PowerShell.ZabbixReference<Community.Zabbix.ZabbixTrigger!>![]?
@@ -2160,8 +2185,8 @@ Community.Zabbix.PowerShell.Commands.Generated.NewMapElementCommand.ElementSubTy
 Community.Zabbix.PowerShell.Commands.Generated.NewMapElementCommand.ElementSubType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewMapElementCommand.ElementType.get -> Community.Zabbix.ZabbixMapElementType?
 Community.Zabbix.PowerShell.Commands.Generated.NewMapElementCommand.ElementType.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewMapElementCommand.EvalType.get -> Community.Zabbix.ZabbixConditionEvalType?
-Community.Zabbix.PowerShell.Commands.Generated.NewMapElementCommand.EvalType.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewMapElementCommand.EvaluationType.get -> Community.Zabbix.ZabbixConditionEvaluationType?
+Community.Zabbix.PowerShell.Commands.Generated.NewMapElementCommand.EvaluationType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewMapElementCommand.Height.get -> int?
 Community.Zabbix.PowerShell.Commands.Generated.NewMapElementCommand.Height.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewMapElementCommand.IconIdDisabled.get -> ulong?
@@ -2306,10 +2331,6 @@ Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.EventMenuName
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.EventMenuName.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.EventMenuUrl.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.EventMenuUrl.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.ExecParams.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.ExecParams.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.ExecPath.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.ExecPath.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.GsmModem.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.GsmModem.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.MaxAttempts.get -> int?
@@ -2337,6 +2358,10 @@ Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.RefreshToken.
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.RefreshToken.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.Script.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.Script.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.ScriptName.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.ScriptName.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.ScriptParameters.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.ScriptParameters.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.ShowEventMenu.get -> Community.Zabbix.ZabbixEventMenu?
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.ShowEventMenu.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.SmtpAuthentication.get -> Community.Zabbix.ZabbixSmtpAuthentication?
@@ -2345,7 +2370,7 @@ Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.SmtpEmail.get
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.SmtpEmail.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.SmtpHelo.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.SmtpHelo.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.SmtpPort.get -> int?
+Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.SmtpPort.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.SmtpPort.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.SmtpSecurity.get -> Community.Zabbix.ZabbixSmtpSecurity?
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.SmtpSecurity.set -> void
@@ -2359,14 +2384,14 @@ Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.Status.get ->
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.Status.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.Timeout.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.Timeout.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.TokenUrl.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.TokenUrl.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.TokensStatus.get -> int?
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.TokensStatus.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.TokenUrl.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.TokenUrl.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.Type.get -> Community.Zabbix.ZabbixMediaTypeKind?
 Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.Type.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.Username.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.Username.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.UserName.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewMediaTypeCommand.UserName.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewMfaCommand
 Community.Zabbix.PowerShell.Commands.Generated.NewMfaCommand.AdditionalProperty.get -> System.Collections.Hashtable?
 Community.Zabbix.PowerShell.Commands.Generated.NewMfaCommand.AdditionalProperty.set -> void
@@ -2388,8 +2413,8 @@ Community.Zabbix.PowerShell.Commands.Generated.NewMfaCommand.Type.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewModuleCommand
 Community.Zabbix.PowerShell.Commands.Generated.NewModuleCommand.AdditionalProperty.get -> System.Collections.Hashtable?
 Community.Zabbix.PowerShell.Commands.Generated.NewModuleCommand.AdditionalProperty.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewModuleCommand.Config.get -> System.Text.Json.JsonElement?
-Community.Zabbix.PowerShell.Commands.Generated.NewModuleCommand.Config.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewModuleCommand.Configuration.get -> System.Text.Json.JsonElement?
+Community.Zabbix.PowerShell.Commands.Generated.NewModuleCommand.Configuration.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewModuleCommand.ModuleIdentifier.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewModuleCommand.ModuleIdentifier.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewModuleCommand.NewModuleCommand() -> void
@@ -2406,8 +2431,8 @@ Community.Zabbix.PowerShell.Commands.Generated.NewNetworkDiscoveryRuleCommand.Co
 Community.Zabbix.PowerShell.Commands.Generated.NewNetworkDiscoveryRuleCommand.ConcurrencyMax.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewNetworkDiscoveryRuleCommand.Delay.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewNetworkDiscoveryRuleCommand.Delay.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewNetworkDiscoveryRuleCommand.IpRange.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewNetworkDiscoveryRuleCommand.IpRange.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewNetworkDiscoveryRuleCommand.IPRange.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewNetworkDiscoveryRuleCommand.IPRange.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewNetworkDiscoveryRuleCommand.Name.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewNetworkDiscoveryRuleCommand.Name.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewNetworkDiscoveryRuleCommand.NewNetworkDiscoveryRuleCommand() -> void
@@ -2548,8 +2573,8 @@ Community.Zabbix.PowerShell.Commands.Generated.NewRoleCommand.Type.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewScriptCommand
 Community.Zabbix.PowerShell.Commands.Generated.NewScriptCommand.AdditionalProperty.get -> System.Collections.Hashtable?
 Community.Zabbix.PowerShell.Commands.Generated.NewScriptCommand.AdditionalProperty.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewScriptCommand.AuthType.get -> Community.Zabbix.ZabbixItemAuthType?
-Community.Zabbix.PowerShell.Commands.Generated.NewScriptCommand.AuthType.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewScriptCommand.AuthenticationType.get -> Community.Zabbix.ZabbixItemAuthenticationType?
+Community.Zabbix.PowerShell.Commands.Generated.NewScriptCommand.AuthenticationType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewScriptCommand.Command.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewScriptCommand.Command.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewScriptCommand.Confirmation.get -> string?
@@ -2599,12 +2624,12 @@ Community.Zabbix.PowerShell.Commands.Generated.NewScriptCommand.Url.get -> strin
 Community.Zabbix.PowerShell.Commands.Generated.NewScriptCommand.Url.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewScriptCommand.UserGroupId.get -> ulong?
 Community.Zabbix.PowerShell.Commands.Generated.NewScriptCommand.UserGroupId.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewScriptCommand.Username.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewScriptCommand.Username.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewScriptCommand.UserName.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewScriptCommand.UserName.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewServiceCommand
 Community.Zabbix.PowerShell.Commands.Generated.NewServiceCommand.AdditionalProperty.get -> System.Collections.Hashtable?
 Community.Zabbix.PowerShell.Commands.Generated.NewServiceCommand.AdditionalProperty.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewServiceCommand.Algorithm.get -> Community.Zabbix.ZabbixServiceStatusCalc?
+Community.Zabbix.PowerShell.Commands.Generated.NewServiceCommand.Algorithm.get -> Community.Zabbix.ZabbixServiceStatusCalculation?
 Community.Zabbix.PowerShell.Commands.Generated.NewServiceCommand.Algorithm.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewServiceCommand.Child.get -> Community.Zabbix.PowerShell.ZabbixReference<Community.Zabbix.ZabbixServiceRecord!>![]?
 Community.Zabbix.PowerShell.Commands.Generated.NewServiceCommand.Child.set -> void
@@ -2743,7 +2768,7 @@ Community.Zabbix.PowerShell.Commands.Generated.NewTokenCommand.Generate.set -> v
 Community.Zabbix.PowerShell.Commands.Generated.NewTokenCommand.Name.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewTokenCommand.Name.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewTokenCommand.NewTokenCommand() -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewTokenCommand.Status.get -> Community.Zabbix.ZabbixAuthToken?
+Community.Zabbix.PowerShell.Commands.Generated.NewTokenCommand.Status.get -> Community.Zabbix.ZabbixAuthenticationToken?
 Community.Zabbix.PowerShell.Commands.Generated.NewTokenCommand.Status.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewTokenCommand.UserId.get -> ulong?
 Community.Zabbix.PowerShell.Commands.Generated.NewTokenCommand.UserId.set -> void
@@ -2769,12 +2794,12 @@ Community.Zabbix.PowerShell.Commands.Generated.NewTriggerCommand.Name.set -> voi
 Community.Zabbix.PowerShell.Commands.Generated.NewTriggerCommand.NewTriggerCommand() -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewTriggerCommand.OperationalData.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewTriggerCommand.OperationalData.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewTriggerCommand.Priority.get -> Community.Zabbix.ZabbixSeverity?
-Community.Zabbix.PowerShell.Commands.Generated.NewTriggerCommand.Priority.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewTriggerCommand.RecoveryExpression.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewTriggerCommand.RecoveryExpression.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewTriggerCommand.RecoveryMode.get -> Community.Zabbix.ZabbixRecoveryMode?
 Community.Zabbix.PowerShell.Commands.Generated.NewTriggerCommand.RecoveryMode.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewTriggerCommand.Severity.get -> Community.Zabbix.ZabbixSeverity?
+Community.Zabbix.PowerShell.Commands.Generated.NewTriggerCommand.Severity.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewTriggerCommand.Status.get -> Community.Zabbix.ZabbixTriggerStatus?
 Community.Zabbix.PowerShell.Commands.Generated.NewTriggerCommand.Status.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewTriggerCommand.Tag.get -> Community.Zabbix.ZabbixTagRequest![]?
@@ -2811,12 +2836,12 @@ Community.Zabbix.PowerShell.Commands.Generated.NewTriggerPrototypeCommand.Name.s
 Community.Zabbix.PowerShell.Commands.Generated.NewTriggerPrototypeCommand.NewTriggerPrototypeCommand() -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewTriggerPrototypeCommand.OperationalData.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewTriggerPrototypeCommand.OperationalData.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewTriggerPrototypeCommand.Priority.get -> Community.Zabbix.ZabbixSeverity?
-Community.Zabbix.PowerShell.Commands.Generated.NewTriggerPrototypeCommand.Priority.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewTriggerPrototypeCommand.RecoveryExpression.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewTriggerPrototypeCommand.RecoveryExpression.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewTriggerPrototypeCommand.RecoveryMode.get -> Community.Zabbix.ZabbixRecoveryMode?
 Community.Zabbix.PowerShell.Commands.Generated.NewTriggerPrototypeCommand.RecoveryMode.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewTriggerPrototypeCommand.Severity.get -> Community.Zabbix.ZabbixSeverity?
+Community.Zabbix.PowerShell.Commands.Generated.NewTriggerPrototypeCommand.Severity.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewTriggerPrototypeCommand.Status.get -> Community.Zabbix.ZabbixTriggerStatus?
 Community.Zabbix.PowerShell.Commands.Generated.NewTriggerPrototypeCommand.Status.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewTriggerPrototypeCommand.Tag.get -> Community.Zabbix.ZabbixTagRequest![]?
@@ -2863,15 +2888,15 @@ Community.Zabbix.PowerShell.Commands.Generated.NewUserCommand.Url.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewUserCommand.Url.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewUserCommand.UserGroup.get -> Community.Zabbix.PowerShell.ZabbixReference<Community.Zabbix.ZabbixUserGroup!>![]?
 Community.Zabbix.PowerShell.Commands.Generated.NewUserCommand.UserGroup.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewUserCommand.Username.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewUserCommand.Username.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewUserCommand.UserName.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewUserCommand.UserName.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand
 Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.AdditionalProperty.get -> System.Collections.Hashtable?
 Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.AdditionalProperty.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.BaseDn.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.BaseDn.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.BindDn.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.BindDn.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.BaseDN.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.BaseDN.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.BindDN.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.BindDN.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.BindPassword.get -> System.Security.SecureString?
 Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.BindPassword.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.Description.get -> string?
@@ -2880,8 +2905,8 @@ Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.EncryptAs
 Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.EncryptAssertions.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.EncryptNameId.get -> bool?
 Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.EncryptNameId.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.GroupBaseDn.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.GroupBaseDn.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.GroupBaseDN.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.GroupBaseDN.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.GroupFilter.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.GroupFilter.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.GroupMember.get -> string?
@@ -2929,24 +2954,24 @@ Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.SignMessa
 Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.SignMessages.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.SloUrl.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.SloUrl.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.SpCertificate.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.SpCertificate.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.SpEntityId.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.SpEntityId.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.SpPrivateKey.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.SpPrivateKey.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.SPCertificate.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.SPCertificate.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.SPEntityId.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.SPEntityId.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.SPPrivateKey.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.SPPrivateKey.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.SsoUrl.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.SsoUrl.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.StartTls.get -> bool?
 Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.StartTls.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.UserLastName.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.UserLastName.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.UserNameAttribute.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.UserNameAttribute.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.UserReferenceAttribute.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.UserReferenceAttribute.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.UserUsername.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.UserUsername.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.UsernameAttribute.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.UsernameAttribute.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.UserUserName.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.NewUserDirectoryCommand.UserUserName.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewUserGroupCommand
 Community.Zabbix.PowerShell.Commands.Generated.NewUserGroupCommand.AdditionalProperty.get -> System.Collections.Hashtable?
 Community.Zabbix.PowerShell.Commands.Generated.NewUserGroupCommand.AdditionalProperty.set -> void
@@ -2986,8 +3011,8 @@ Community.Zabbix.PowerShell.Commands.Generated.NewUserGroupCommand.UsersStatus.s
 Community.Zabbix.PowerShell.Commands.Generated.NewUserMacroCommand
 Community.Zabbix.PowerShell.Commands.Generated.NewUserMacroCommand.AdditionalProperty.get -> System.Collections.Hashtable?
 Community.Zabbix.PowerShell.Commands.Generated.NewUserMacroCommand.AdditionalProperty.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.NewUserMacroCommand.Config.get -> Community.Zabbix.ZabbixUserMacroConfigRequest?
-Community.Zabbix.PowerShell.Commands.Generated.NewUserMacroCommand.Config.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.NewUserMacroCommand.Configuration.get -> Community.Zabbix.ZabbixUserMacroConfigurationRequest?
+Community.Zabbix.PowerShell.Commands.Generated.NewUserMacroCommand.Configuration.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewUserMacroCommand.Description.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.NewUserMacroCommand.Description.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.NewUserMacroCommand.HostId.get -> ulong?
@@ -3148,8 +3173,8 @@ Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.AdditionalPro
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.AdditionalProperty.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.AttemptInterval.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.AttemptInterval.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.AuthType.get -> Community.Zabbix.ZabbixHttpAuthentication?
-Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.AuthType.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.AuthenticationType.get -> Community.Zabbix.ZabbixHttpAuthentication?
+Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.AuthenticationType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.DataType.get -> Community.Zabbix.ZabbixConnectorDataType?
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.DataType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.Description.get -> string?
@@ -3171,8 +3196,8 @@ Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.Password.set 
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.Protocol.get -> Community.Zabbix.ZabbixConnectorProtocol?
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.Protocol.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.SetConnectorCommand() -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.SslCertFile.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.SslCertFile.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.SslCertificateFile.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.SslCertificateFile.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.SslKeyFile.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.SslKeyFile.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.SslKeyPassword.get -> System.Security.SecureString?
@@ -3181,16 +3206,16 @@ Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.Status.get ->
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.Status.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.Tag.get -> Community.Zabbix.ZabbixConnectorTagRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.Tag.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.TagsEvalType.get -> Community.Zabbix.ZabbixConditionEvalType?
-Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.TagsEvalType.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.TagsEvaluationType.get -> Community.Zabbix.ZabbixConditionEvaluationType?
+Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.TagsEvaluationType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.Timeout.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.Timeout.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.Token.get -> System.Security.SecureString?
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.Token.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.Url.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.Url.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.Username.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.Username.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.UserName.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.UserName.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.VerifyHost.get -> bool?
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.VerifyHost.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetConnectorCommand.VerifyPeer.get -> bool?
@@ -3234,15 +3259,15 @@ Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Additiona
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.AdditionalProperty.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.AllowTraps.get -> bool?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.AllowTraps.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.AuthType.get -> int?
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.AuthType.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.AuthenticationType.get -> int?
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.AuthenticationType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Delay.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Delay.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Description.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Description.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.EnabledLifetime.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.EnabledLifetime.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.EnabledLifetimeType.get -> Community.Zabbix.ZabbixLldEnabledLifetimeType?
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.EnabledLifetimeType.get -> Community.Zabbix.ZabbixLowLevelDiscoveryEnabledLifetimeType?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.EnabledLifetimeType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Filter.get -> Community.Zabbix.ZabbixDiscoveryRuleFilterRequest?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Filter.set -> void
@@ -3262,10 +3287,10 @@ Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Key.get -
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Key.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Lifetime.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Lifetime.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.LifetimeType.get -> Community.Zabbix.ZabbixLldLifetimeType?
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.LifetimeType.get -> Community.Zabbix.ZabbixLowLevelDiscoveryLifetimeType?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.LifetimeType.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.LldMacroPath.get -> Community.Zabbix.ZabbixDiscoveryRuleLldMacroPathRequest![]?
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.LldMacroPath.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.LowLevelDiscoveryMacroPath.get -> Community.Zabbix.ZabbixDiscoveryRuleLowLevelDiscoveryMacroPathRequest![]?
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.LowLevelDiscoveryMacroPath.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.MasterItemId.get -> ulong?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.MasterItemId.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Name.get -> string?
@@ -3276,14 +3301,12 @@ Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Override.
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Override.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Parameter.get -> Community.Zabbix.ZabbixDiscoveryRuleParameterRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Parameter.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Params.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Params.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Password.get -> System.Security.SecureString?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Password.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.PostType.get -> Community.Zabbix.ZabbixItemPostType?
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.PostType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Posts.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Posts.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.PostType.get -> Community.Zabbix.ZabbixItemPostType?
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.PostType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Preprocessing.get -> Community.Zabbix.ZabbixPreprocessingStepRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Preprocessing.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.PrivateKey.get -> string?
@@ -3299,8 +3322,8 @@ Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.RetrieveM
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.SetDiscoveryRuleCommand() -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.SnmpOid.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.SnmpOid.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.SslCertFile.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.SslCertFile.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.SslCertificateFile.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.SslCertificateFile.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.SslKeyFile.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.SslKeyFile.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.SslKeyPassword.get -> System.Security.SecureString?
@@ -3315,10 +3338,12 @@ Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.TrapperHo
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.TrapperHosts.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Type.get -> Community.Zabbix.ZabbixItemType?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Type.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.TypeParameters.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.TypeParameters.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Url.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Url.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Username.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Username.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.UserName.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.UserName.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Uuid.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.Uuid.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRuleCommand.VerifyHost.get -> bool?
@@ -3330,8 +3355,8 @@ Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.AdditionalProperty.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.AllowTraps.get -> bool?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.AllowTraps.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.AuthType.get -> int?
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.AuthType.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.AuthenticationType.get -> int?
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.AuthenticationType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Delay.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Delay.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Description.get -> string?
@@ -3340,7 +3365,7 @@ Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Discover.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.EnabledLifetime.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.EnabledLifetime.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.EnabledLifetimeType.get -> Community.Zabbix.ZabbixLldEnabledLifetimeType?
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.EnabledLifetimeType.get -> Community.Zabbix.ZabbixLowLevelDiscoveryEnabledLifetimeType?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.EnabledLifetimeType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Filter.get -> Community.Zabbix.ZabbixDiscoveryRulePrototypeFilterRequest?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Filter.set -> void
@@ -3360,10 +3385,10 @@ Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Key.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Lifetime.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Lifetime.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.LifetimeType.get -> Community.Zabbix.ZabbixLldLifetimeType?
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.LifetimeType.get -> Community.Zabbix.ZabbixLowLevelDiscoveryLifetimeType?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.LifetimeType.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.LldMacroPath.get -> Community.Zabbix.ZabbixDiscoveryRulePrototypeLldMacroPathRequest![]?
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.LldMacroPath.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.LowLevelDiscoveryMacroPath.get -> Community.Zabbix.ZabbixDiscoveryRulePrototypeLowLevelDiscoveryMacroPathRequest![]?
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.LowLevelDiscoveryMacroPath.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.MasterItemId.get -> ulong?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.MasterItemId.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Name.get -> string?
@@ -3374,14 +3399,12 @@ Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Override.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Parameter.get -> Community.Zabbix.ZabbixDiscoveryRulePrototypeParameterRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Parameter.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Params.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Params.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Password.get -> System.Security.SecureString?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Password.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.PostType.get -> Community.Zabbix.ZabbixItemPostType?
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.PostType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Posts.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Posts.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.PostType.get -> Community.Zabbix.ZabbixItemPostType?
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.PostType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Preprocessing.get -> Community.Zabbix.ZabbixPreprocessingStepRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Preprocessing.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.PrivateKey.get -> string?
@@ -3397,8 +3420,8 @@ Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.SetDiscoveryRulePrototypeCommand() -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.SnmpOid.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.SnmpOid.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.SslCertFile.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.SslCertFile.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.SslCertificateFile.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.SslCertificateFile.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.SslKeyFile.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.SslKeyFile.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.SslKeyPassword.get -> System.Security.SecureString?
@@ -3413,10 +3436,12 @@ Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.TrapperHosts.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Type.get -> Community.Zabbix.ZabbixItemType?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Type.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.TypeParameters.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.TypeParameters.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Url.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Url.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Username.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Username.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.UserName.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.UserName.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Uuid.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.Uuid.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetDiscoveryRulePrototypeCommand.VerifyHost.get -> bool?
@@ -3518,14 +3543,14 @@ Community.Zabbix.PowerShell.Commands.Generated.SetHostCommand.Interface.get -> C
 Community.Zabbix.PowerShell.Commands.Generated.SetHostCommand.Interface.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetHostCommand.InventoryMode.get -> Community.Zabbix.ZabbixHostInventoryMode?
 Community.Zabbix.PowerShell.Commands.Generated.SetHostCommand.InventoryMode.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetHostCommand.IpmiAuthType.get -> Community.Zabbix.ZabbixIpmiAuthType?
-Community.Zabbix.PowerShell.Commands.Generated.SetHostCommand.IpmiAuthType.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetHostCommand.IpmiAuthenticationType.get -> Community.Zabbix.ZabbixIpmiAuthenticationType?
+Community.Zabbix.PowerShell.Commands.Generated.SetHostCommand.IpmiAuthenticationType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetHostCommand.IpmiPassword.get -> System.Security.SecureString?
 Community.Zabbix.PowerShell.Commands.Generated.SetHostCommand.IpmiPassword.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetHostCommand.IpmiPrivilege.get -> Community.Zabbix.ZabbixIpmiPrivilege?
 Community.Zabbix.PowerShell.Commands.Generated.SetHostCommand.IpmiPrivilege.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetHostCommand.IpmiUsername.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetHostCommand.IpmiUsername.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetHostCommand.IpmiUserName.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetHostCommand.IpmiUserName.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetHostCommand.Macro.get -> Community.Zabbix.ZabbixHostUpdateMacroRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.SetHostCommand.Macro.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetHostCommand.MonitoredBy.get -> Community.Zabbix.ZabbixMonitoredBy?
@@ -3574,8 +3599,8 @@ Community.Zabbix.PowerShell.Commands.Generated.SetHostInterfaceCommand.Dns.get -
 Community.Zabbix.PowerShell.Commands.Generated.SetHostInterfaceCommand.Dns.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetHostInterfaceCommand.HostId.get -> ulong?
 Community.Zabbix.PowerShell.Commands.Generated.SetHostInterfaceCommand.HostId.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetHostInterfaceCommand.Ip.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetHostInterfaceCommand.Ip.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetHostInterfaceCommand.IP.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetHostInterfaceCommand.IP.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetHostInterfaceCommand.Main.get -> Community.Zabbix.ZabbixInterfacePriority?
 Community.Zabbix.PowerShell.Commands.Generated.SetHostInterfaceCommand.Main.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetHostInterfaceCommand.Port.get -> string?
@@ -3583,8 +3608,8 @@ Community.Zabbix.PowerShell.Commands.Generated.SetHostInterfaceCommand.Port.set 
 Community.Zabbix.PowerShell.Commands.Generated.SetHostInterfaceCommand.SetHostInterfaceCommand() -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetHostInterfaceCommand.Type.get -> Community.Zabbix.ZabbixInterfaceType?
 Community.Zabbix.PowerShell.Commands.Generated.SetHostInterfaceCommand.Type.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetHostInterfaceCommand.UseIp.get -> Community.Zabbix.ZabbixHostInterfaceUseIp?
-Community.Zabbix.PowerShell.Commands.Generated.SetHostInterfaceCommand.UseIp.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetHostInterfaceCommand.UseIP.get -> Community.Zabbix.ZabbixHostInterfaceUseIP?
+Community.Zabbix.PowerShell.Commands.Generated.SetHostInterfaceCommand.UseIP.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetHostPrototypeCommand
 Community.Zabbix.PowerShell.Commands.Generated.SetHostPrototypeCommand.AdditionalProperty.get -> System.Collections.Hashtable?
 Community.Zabbix.PowerShell.Commands.Generated.SetHostPrototypeCommand.AdditionalProperty.set -> void
@@ -3638,8 +3663,8 @@ Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.AdditionalProperty
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.AdditionalProperty.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.AllowTraps.get -> bool?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.AllowTraps.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.AuthType.get -> int?
-Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.AuthType.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.AuthenticationType.get -> int?
+Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.AuthenticationType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Delay.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Delay.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Description.get -> string?
@@ -3664,8 +3689,8 @@ Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.JmxEndpoint.get ->
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.JmxEndpoint.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Key.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Key.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.LogTimeFmt.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.LogTimeFmt.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.LogTimeFormat.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.LogTimeFormat.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.LookbackLimit.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.LookbackLimit.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.MasterItemId.get -> ulong?
@@ -3676,14 +3701,12 @@ Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.OutputFormat.get -
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.OutputFormat.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Parameter.get -> Community.Zabbix.ZabbixItemParameterRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Parameter.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Params.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Params.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Password.get -> System.Security.SecureString?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Password.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.PostType.get -> Community.Zabbix.ZabbixItemPostType?
-Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.PostType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Posts.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Posts.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.PostType.get -> Community.Zabbix.ZabbixItemPostType?
+Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.PostType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Preprocessing.get -> Community.Zabbix.ZabbixPreprocessingStepRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Preprocessing.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.PrivateKey.get -> string?
@@ -3701,8 +3724,8 @@ Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.RetrieveMode.set -
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.SetItemCommand() -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.SnmpOid.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.SnmpOid.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.SslCertFile.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.SslCertFile.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.SslCertificateFile.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.SslCertificateFile.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.SslKeyFile.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.SslKeyFile.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.SslKeyPassword.get -> System.Security.SecureString?
@@ -3713,22 +3736,24 @@ Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.StatusCodes.get ->
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.StatusCodes.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Tag.get -> Community.Zabbix.ZabbixTagRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Tag.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.TimeShift.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.TimeShift.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Timeout.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Timeout.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.TimeShift.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.TimeShift.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.TrapperHosts.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.TrapperHosts.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Trends.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Trends.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Type.get -> Community.Zabbix.ZabbixItemType?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Type.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.TypeParameters.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.TypeParameters.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Units.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Units.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Url.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Url.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Username.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Username.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.UserName.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.UserName.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Uuid.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.Uuid.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemCommand.ValueMapId.get -> ulong?
@@ -3744,8 +3769,8 @@ Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Additiona
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.AdditionalProperty.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.AllowTraps.get -> bool?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.AllowTraps.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.AuthType.get -> int?
-Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.AuthType.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.AuthenticationType.get -> int?
+Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.AuthenticationType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Delay.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Delay.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Description.get -> string?
@@ -3770,8 +3795,8 @@ Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.JmxEndpoi
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.JmxEndpoint.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Key.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Key.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.LogTimeFmt.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.LogTimeFmt.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.LogTimeFormat.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.LogTimeFormat.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.LookbackLimit.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.LookbackLimit.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.MasterItemId.get -> ulong?
@@ -3782,14 +3807,12 @@ Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.OutputFor
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.OutputFormat.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Parameter.get -> Community.Zabbix.ZabbixItemPrototypeParameterRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Parameter.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Params.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Params.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Password.get -> System.Security.SecureString?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Password.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.PostType.get -> Community.Zabbix.ZabbixItemPostType?
-Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.PostType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Posts.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Posts.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.PostType.get -> Community.Zabbix.ZabbixItemPostType?
+Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.PostType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Preprocessing.get -> Community.Zabbix.ZabbixPreprocessingStepRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Preprocessing.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.PrivateKey.get -> string?
@@ -3807,8 +3830,8 @@ Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.RetrieveM
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.SetItemPrototypeCommand() -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.SnmpOid.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.SnmpOid.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.SslCertFile.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.SslCertFile.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.SslCertificateFile.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.SslCertificateFile.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.SslKeyFile.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.SslKeyFile.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.SslKeyPassword.get -> System.Security.SecureString?
@@ -3819,22 +3842,24 @@ Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.StatusCod
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.StatusCodes.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Tag.get -> Community.Zabbix.ZabbixTagRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Tag.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.TimeShift.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.TimeShift.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Timeout.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Timeout.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.TimeShift.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.TimeShift.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.TrapperHosts.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.TrapperHosts.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Trends.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Trends.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Type.get -> Community.Zabbix.ZabbixItemType?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Type.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.TypeParameters.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.TypeParameters.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Units.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Units.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Url.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Url.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Username.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Username.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.UserName.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.UserName.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Uuid.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.Uuid.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetItemPrototypeCommand.ValueMapId.get -> ulong?
@@ -3867,8 +3892,8 @@ Community.Zabbix.PowerShell.Commands.Generated.SetMaintenanceCommand.Name.set ->
 Community.Zabbix.PowerShell.Commands.Generated.SetMaintenanceCommand.SetMaintenanceCommand() -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetMaintenanceCommand.Tag.get -> Community.Zabbix.ZabbixMaintenanceTagRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.SetMaintenanceCommand.Tag.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetMaintenanceCommand.TagsEvalType.get -> Community.Zabbix.ZabbixEvalType?
-Community.Zabbix.PowerShell.Commands.Generated.SetMaintenanceCommand.TagsEvalType.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetMaintenanceCommand.TagsEvaluationType.get -> Community.Zabbix.ZabbixEvaluationType?
+Community.Zabbix.PowerShell.Commands.Generated.SetMaintenanceCommand.TagsEvaluationType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetMaintenanceCommand.TimePeriod.get -> Community.Zabbix.ZabbixMaintenanceTimePeriodRequest![]?
 Community.Zabbix.PowerShell.Commands.Generated.SetMaintenanceCommand.TimePeriod.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetMaintenanceCommand.Trigger.get -> Community.Zabbix.PowerShell.ZabbixReference<Community.Zabbix.ZabbixTrigger!>![]?
@@ -3982,10 +4007,6 @@ Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.EventMenuName
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.EventMenuName.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.EventMenuUrl.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.EventMenuUrl.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.ExecParams.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.ExecParams.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.ExecPath.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.ExecPath.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.GsmModem.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.GsmModem.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.MaxAttempts.get -> int?
@@ -4012,6 +4033,10 @@ Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.RefreshToken.
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.RefreshToken.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.Script.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.Script.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.ScriptName.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.ScriptName.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.ScriptParameters.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.ScriptParameters.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.SetMediaTypeCommand() -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.ShowEventMenu.get -> Community.Zabbix.ZabbixEventMenu?
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.ShowEventMenu.set -> void
@@ -4021,7 +4046,7 @@ Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.SmtpEmail.get
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.SmtpEmail.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.SmtpHelo.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.SmtpHelo.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.SmtpPort.get -> int?
+Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.SmtpPort.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.SmtpPort.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.SmtpSecurity.get -> Community.Zabbix.ZabbixSmtpSecurity?
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.SmtpSecurity.set -> void
@@ -4035,14 +4060,14 @@ Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.Status.get ->
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.Status.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.Timeout.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.Timeout.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.TokenUrl.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.TokenUrl.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.TokensStatus.get -> int?
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.TokensStatus.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.TokenUrl.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.TokenUrl.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.Type.get -> Community.Zabbix.ZabbixMediaTypeKind?
 Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.Type.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.Username.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.Username.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.UserName.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetMediaTypeCommand.UserName.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetMfaCommand
 Community.Zabbix.PowerShell.Commands.Generated.SetMfaCommand.AdditionalProperty.get -> System.Collections.Hashtable?
 Community.Zabbix.PowerShell.Commands.Generated.SetMfaCommand.AdditionalProperty.set -> void
@@ -4064,8 +4089,8 @@ Community.Zabbix.PowerShell.Commands.Generated.SetMfaCommand.Type.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetModuleCommand
 Community.Zabbix.PowerShell.Commands.Generated.SetModuleCommand.AdditionalProperty.get -> System.Collections.Hashtable?
 Community.Zabbix.PowerShell.Commands.Generated.SetModuleCommand.AdditionalProperty.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetModuleCommand.Config.get -> System.Text.Json.JsonElement?
-Community.Zabbix.PowerShell.Commands.Generated.SetModuleCommand.Config.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetModuleCommand.Configuration.get -> System.Text.Json.JsonElement?
+Community.Zabbix.PowerShell.Commands.Generated.SetModuleCommand.Configuration.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetModuleCommand.SetModuleCommand() -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetModuleCommand.Status.get -> Community.Zabbix.ZabbixModuleStatus?
 Community.Zabbix.PowerShell.Commands.Generated.SetModuleCommand.Status.set -> void
@@ -4078,8 +4103,8 @@ Community.Zabbix.PowerShell.Commands.Generated.SetNetworkDiscoveryRuleCommand.Co
 Community.Zabbix.PowerShell.Commands.Generated.SetNetworkDiscoveryRuleCommand.ConcurrencyMax.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetNetworkDiscoveryRuleCommand.Delay.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetNetworkDiscoveryRuleCommand.Delay.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetNetworkDiscoveryRuleCommand.IpRange.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetNetworkDiscoveryRuleCommand.IpRange.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetNetworkDiscoveryRuleCommand.IPRange.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetNetworkDiscoveryRuleCommand.IPRange.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetNetworkDiscoveryRuleCommand.Name.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetNetworkDiscoveryRuleCommand.Name.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetNetworkDiscoveryRuleCommand.ProxyId.get -> ulong?
@@ -4220,8 +4245,8 @@ Community.Zabbix.PowerShell.Commands.Generated.SetRoleCommand.Type.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetScriptCommand
 Community.Zabbix.PowerShell.Commands.Generated.SetScriptCommand.AdditionalProperty.get -> System.Collections.Hashtable?
 Community.Zabbix.PowerShell.Commands.Generated.SetScriptCommand.AdditionalProperty.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetScriptCommand.AuthType.get -> Community.Zabbix.ZabbixItemAuthType?
-Community.Zabbix.PowerShell.Commands.Generated.SetScriptCommand.AuthType.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetScriptCommand.AuthenticationType.get -> Community.Zabbix.ZabbixItemAuthenticationType?
+Community.Zabbix.PowerShell.Commands.Generated.SetScriptCommand.AuthenticationType.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetScriptCommand.Command.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetScriptCommand.Command.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetScriptCommand.Confirmation.get -> string?
@@ -4271,12 +4296,12 @@ Community.Zabbix.PowerShell.Commands.Generated.SetScriptCommand.Url.get -> strin
 Community.Zabbix.PowerShell.Commands.Generated.SetScriptCommand.Url.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetScriptCommand.UserGroupId.get -> ulong?
 Community.Zabbix.PowerShell.Commands.Generated.SetScriptCommand.UserGroupId.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetScriptCommand.Username.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetScriptCommand.Username.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetScriptCommand.UserName.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetScriptCommand.UserName.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetServiceCommand
 Community.Zabbix.PowerShell.Commands.Generated.SetServiceCommand.AdditionalProperty.get -> System.Collections.Hashtable?
 Community.Zabbix.PowerShell.Commands.Generated.SetServiceCommand.AdditionalProperty.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetServiceCommand.Algorithm.get -> Community.Zabbix.ZabbixServiceStatusCalc?
+Community.Zabbix.PowerShell.Commands.Generated.SetServiceCommand.Algorithm.get -> Community.Zabbix.ZabbixServiceStatusCalculation?
 Community.Zabbix.PowerShell.Commands.Generated.SetServiceCommand.Algorithm.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetServiceCommand.Child.get -> Community.Zabbix.PowerShell.ZabbixReference<Community.Zabbix.ZabbixServiceRecord!>![]?
 Community.Zabbix.PowerShell.Commands.Generated.SetServiceCommand.Child.set -> void
@@ -4389,7 +4414,7 @@ Community.Zabbix.PowerShell.Commands.Generated.SetTokenCommand.ExpiresAt.set -> 
 Community.Zabbix.PowerShell.Commands.Generated.SetTokenCommand.Name.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetTokenCommand.Name.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetTokenCommand.SetTokenCommand() -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetTokenCommand.Status.get -> Community.Zabbix.ZabbixAuthToken?
+Community.Zabbix.PowerShell.Commands.Generated.SetTokenCommand.Status.get -> Community.Zabbix.ZabbixAuthenticationToken?
 Community.Zabbix.PowerShell.Commands.Generated.SetTokenCommand.Status.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerCommand
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerCommand.AdditionalProperty.get -> System.Collections.Hashtable?
@@ -4412,13 +4437,13 @@ Community.Zabbix.PowerShell.Commands.Generated.SetTriggerCommand.Name.get -> str
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerCommand.Name.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerCommand.OperationalData.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerCommand.OperationalData.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetTriggerCommand.Priority.get -> Community.Zabbix.ZabbixSeverity?
-Community.Zabbix.PowerShell.Commands.Generated.SetTriggerCommand.Priority.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerCommand.RecoveryExpression.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerCommand.RecoveryExpression.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerCommand.RecoveryMode.get -> Community.Zabbix.ZabbixRecoveryMode?
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerCommand.RecoveryMode.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerCommand.SetTriggerCommand() -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetTriggerCommand.Severity.get -> Community.Zabbix.ZabbixSeverity?
+Community.Zabbix.PowerShell.Commands.Generated.SetTriggerCommand.Severity.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerCommand.Status.get -> Community.Zabbix.ZabbixTriggerStatus?
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerCommand.Status.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerCommand.Tag.get -> Community.Zabbix.ZabbixTagRequest![]?
@@ -4454,13 +4479,13 @@ Community.Zabbix.PowerShell.Commands.Generated.SetTriggerPrototypeCommand.Name.g
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerPrototypeCommand.Name.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerPrototypeCommand.OperationalData.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerPrototypeCommand.OperationalData.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetTriggerPrototypeCommand.Priority.get -> Community.Zabbix.ZabbixSeverity?
-Community.Zabbix.PowerShell.Commands.Generated.SetTriggerPrototypeCommand.Priority.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerPrototypeCommand.RecoveryExpression.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerPrototypeCommand.RecoveryExpression.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerPrototypeCommand.RecoveryMode.get -> Community.Zabbix.ZabbixRecoveryMode?
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerPrototypeCommand.RecoveryMode.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerPrototypeCommand.SetTriggerPrototypeCommand() -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetTriggerPrototypeCommand.Severity.get -> Community.Zabbix.ZabbixSeverity?
+Community.Zabbix.PowerShell.Commands.Generated.SetTriggerPrototypeCommand.Severity.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerPrototypeCommand.Status.get -> Community.Zabbix.ZabbixTriggerStatus?
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerPrototypeCommand.Status.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetTriggerPrototypeCommand.Tag.get -> Community.Zabbix.ZabbixTagRequest![]?
@@ -4509,15 +4534,15 @@ Community.Zabbix.PowerShell.Commands.Generated.SetUserCommand.Url.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetUserCommand.Url.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetUserCommand.UserGroup.get -> Community.Zabbix.PowerShell.ZabbixReference<Community.Zabbix.ZabbixUserGroup!>![]?
 Community.Zabbix.PowerShell.Commands.Generated.SetUserCommand.UserGroup.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetUserCommand.Username.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetUserCommand.Username.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetUserCommand.UserName.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetUserCommand.UserName.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand
 Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.AdditionalProperty.get -> System.Collections.Hashtable?
 Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.AdditionalProperty.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.BaseDn.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.BaseDn.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.BindDn.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.BindDn.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.BaseDN.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.BaseDN.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.BindDN.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.BindDN.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.BindPassword.get -> System.Security.SecureString?
 Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.BindPassword.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.Description.get -> string?
@@ -4526,8 +4551,8 @@ Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.EncryptAs
 Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.EncryptAssertions.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.EncryptNameId.get -> bool?
 Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.EncryptNameId.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.GroupBaseDn.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.GroupBaseDn.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.GroupBaseDN.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.GroupBaseDN.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.GroupFilter.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.GroupFilter.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.GroupMember.get -> string?
@@ -4575,24 +4600,24 @@ Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.SignMessa
 Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.SignMessages.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.SloUrl.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.SloUrl.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.SpCertificate.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.SpCertificate.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.SpEntityId.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.SpEntityId.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.SpPrivateKey.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.SpPrivateKey.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.SPCertificate.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.SPCertificate.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.SPEntityId.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.SPEntityId.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.SPPrivateKey.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.SPPrivateKey.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.SsoUrl.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.SsoUrl.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.StartTls.get -> bool?
 Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.StartTls.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.UserLastName.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.UserLastName.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.UserNameAttribute.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.UserNameAttribute.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.UserReferenceAttribute.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.UserReferenceAttribute.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.UserUsername.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.UserUsername.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.UsernameAttribute.get -> string?
-Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.UsernameAttribute.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.UserUserName.get -> string?
+Community.Zabbix.PowerShell.Commands.Generated.SetUserDirectoryCommand.UserUserName.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetUserGroupCommand
 Community.Zabbix.PowerShell.Commands.Generated.SetUserGroupCommand.AdditionalProperty.get -> System.Collections.Hashtable?
 Community.Zabbix.PowerShell.Commands.Generated.SetUserGroupCommand.AdditionalProperty.set -> void
@@ -4632,14 +4657,14 @@ Community.Zabbix.PowerShell.Commands.Generated.SetUserGroupCommand.UsersStatus.s
 Community.Zabbix.PowerShell.Commands.Generated.SetUserMacroCommand
 Community.Zabbix.PowerShell.Commands.Generated.SetUserMacroCommand.AdditionalProperty.get -> System.Collections.Hashtable?
 Community.Zabbix.PowerShell.Commands.Generated.SetUserMacroCommand.AdditionalProperty.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetUserMacroCommand.Automatic.get -> Community.Zabbix.ZabbixMacroOrigin?
-Community.Zabbix.PowerShell.Commands.Generated.SetUserMacroCommand.Automatic.set -> void
-Community.Zabbix.PowerShell.Commands.Generated.SetUserMacroCommand.Config.get -> Community.Zabbix.ZabbixUserMacroConfigRequest?
-Community.Zabbix.PowerShell.Commands.Generated.SetUserMacroCommand.Config.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetUserMacroCommand.Configuration.get -> Community.Zabbix.ZabbixUserMacroConfigurationRequest?
+Community.Zabbix.PowerShell.Commands.Generated.SetUserMacroCommand.Configuration.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetUserMacroCommand.Description.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetUserMacroCommand.Description.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetUserMacroCommand.Macro.get -> string?
 Community.Zabbix.PowerShell.Commands.Generated.SetUserMacroCommand.Macro.set -> void
+Community.Zabbix.PowerShell.Commands.Generated.SetUserMacroCommand.Origin.get -> Community.Zabbix.ZabbixMacroOrigin?
+Community.Zabbix.PowerShell.Commands.Generated.SetUserMacroCommand.Origin.set -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetUserMacroCommand.SetUserMacroCommand() -> void
 Community.Zabbix.PowerShell.Commands.Generated.SetUserMacroCommand.Type.get -> Community.Zabbix.ZabbixMacroType?
 Community.Zabbix.PowerShell.Commands.Generated.SetUserMacroCommand.Type.set -> void
@@ -4697,7 +4722,7 @@ Community.Zabbix.PowerShell.Commands.GetZbxHaNodeCommand.Id.get -> string![]?
 Community.Zabbix.PowerShell.Commands.GetZbxHaNodeCommand.Id.set -> void
 Community.Zabbix.PowerShell.Commands.GetZbxHaNodeCommand.Name.get -> string?
 Community.Zabbix.PowerShell.Commands.GetZbxHaNodeCommand.Name.set -> void
-Community.Zabbix.PowerShell.Commands.GetZbxHaNodeCommand.Status.get -> Community.Zabbix.ZabbixHaNodeStatus?
+Community.Zabbix.PowerShell.Commands.GetZbxHaNodeCommand.Status.get -> Community.Zabbix.ZabbixHANodeStatus?
 Community.Zabbix.PowerShell.Commands.GetZbxHaNodeCommand.Status.set -> void
 Community.Zabbix.PowerShell.Commands.GetZbxHostCommand
 Community.Zabbix.PowerShell.Commands.GetZbxHostCommand.Editable.get -> System.Management.Automation.SwitchParameter
@@ -4771,10 +4796,10 @@ Community.Zabbix.PowerShell.Commands.GetZbxSliCommand
 Community.Zabbix.PowerShell.Commands.GetZbxSliCommand.GetZbxSliCommand() -> void
 Community.Zabbix.PowerShell.Commands.GetZbxSliCommand.PeriodFrom.get -> System.DateTimeOffset?
 Community.Zabbix.PowerShell.Commands.GetZbxSliCommand.PeriodFrom.set -> void
-Community.Zabbix.PowerShell.Commands.GetZbxSliCommand.PeriodTo.get -> System.DateTimeOffset?
-Community.Zabbix.PowerShell.Commands.GetZbxSliCommand.PeriodTo.set -> void
 Community.Zabbix.PowerShell.Commands.GetZbxSliCommand.Periods.get -> int?
 Community.Zabbix.PowerShell.Commands.GetZbxSliCommand.Periods.set -> void
+Community.Zabbix.PowerShell.Commands.GetZbxSliCommand.PeriodTo.get -> System.DateTimeOffset?
+Community.Zabbix.PowerShell.Commands.GetZbxSliCommand.PeriodTo.set -> void
 Community.Zabbix.PowerShell.Commands.GetZbxSliCommand.ServiceId.get -> ulong[]?
 Community.Zabbix.PowerShell.Commands.GetZbxSliCommand.ServiceId.set -> void
 Community.Zabbix.PowerShell.Commands.GetZbxSliCommand.Sla.get -> Community.Zabbix.PowerShell.ZabbixReference<Community.Zabbix.ZabbixSlaRecord!>?
@@ -4881,8 +4906,8 @@ Community.Zabbix.PowerShell.Commands.NewZbxHttpTestCommand.Name.set -> void
 Community.Zabbix.PowerShell.Commands.NewZbxHttpTestCommand.NewZbxHttpTestCommand() -> void
 Community.Zabbix.PowerShell.Commands.NewZbxHttpTestCommand.Retries.get -> int?
 Community.Zabbix.PowerShell.Commands.NewZbxHttpTestCommand.Retries.set -> void
-Community.Zabbix.PowerShell.Commands.NewZbxHttpTestCommand.SslCertFile.get -> string?
-Community.Zabbix.PowerShell.Commands.NewZbxHttpTestCommand.SslCertFile.set -> void
+Community.Zabbix.PowerShell.Commands.NewZbxHttpTestCommand.SslCertificateFile.get -> string?
+Community.Zabbix.PowerShell.Commands.NewZbxHttpTestCommand.SslCertificateFile.set -> void
 Community.Zabbix.PowerShell.Commands.NewZbxHttpTestCommand.SslKeyFile.get -> string?
 Community.Zabbix.PowerShell.Commands.NewZbxHttpTestCommand.SslKeyFile.set -> void
 Community.Zabbix.PowerShell.Commands.NewZbxHttpTestCommand.SslKeyPassword.get -> System.Security.SecureString?
@@ -4909,20 +4934,20 @@ Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.Port.get
 Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.Port.set -> void
 Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.Ports.get -> string?
 Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.Ports.set -> void
-Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpAuthPassphrase.get -> System.Security.SecureString?
-Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpAuthPassphrase.set -> void
-Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpAuthProtocol.get -> Community.Zabbix.ZabbixSnmpAuthProtocol?
-Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpAuthProtocol.set -> void
+Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpAuthenticationPassphrase.get -> System.Security.SecureString?
+Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpAuthenticationPassphrase.set -> void
+Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpAuthenticationProtocol.get -> Community.Zabbix.ZabbixSnmpAuthenticationProtocol?
+Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpAuthenticationProtocol.set -> void
 Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpCommunity.get -> string?
 Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpCommunity.set -> void
 Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpContextName.get -> string?
 Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpContextName.set -> void
 Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpOid.get -> string?
 Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpOid.set -> void
-Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpPrivPassphrase.get -> System.Security.SecureString?
-Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpPrivPassphrase.set -> void
-Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpPrivProtocol.get -> Community.Zabbix.ZabbixSnmpPrivProtocol?
-Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpPrivProtocol.set -> void
+Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpPrivacyPassphrase.get -> System.Security.SecureString?
+Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpPrivacyPassphrase.set -> void
+Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpPrivacyProtocol.get -> Community.Zabbix.ZabbixSnmpPrivacyProtocol?
+Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpPrivacyProtocol.set -> void
 Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpSecurityLevel.get -> Community.Zabbix.ZabbixSnmpSecurityLevel?
 Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpSecurityLevel.set -> void
 Community.Zabbix.PowerShell.Commands.NewZbxNetworkDiscoveryCheckCommand.SnmpSecurityName.get -> string?
@@ -5024,9 +5049,9 @@ Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.AuthenticationT
 Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.AuthenticationType.set -> void
 Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.DisabledUserGroupId.get -> ulong?
 Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.DisabledUserGroupId.set -> void
-Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.HttpAuthEnabled.get -> bool?
-Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.HttpAuthEnabled.set -> void
-Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.HttpCaseSensitive.get -> Community.Zabbix.ZabbixAuthCase?
+Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.HttpAuthenticationEnabled.get -> bool?
+Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.HttpAuthenticationEnabled.set -> void
+Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.HttpCaseSensitive.get -> Community.Zabbix.ZabbixAuthenticationCase?
 Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.HttpCaseSensitive.set -> void
 Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.HttpLoginForm.get -> Community.Zabbix.ZabbixHttpLoginForm?
 Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.HttpLoginForm.set -> void
@@ -5034,9 +5059,9 @@ Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.HttpStripDomain
 Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.HttpStripDomains.set -> void
 Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.JitProvisionInterval.get -> string?
 Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.JitProvisionInterval.set -> void
-Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.LdapAuthEnabled.get -> bool?
-Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.LdapAuthEnabled.set -> void
-Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.LdapCaseSensitive.get -> Community.Zabbix.ZabbixAuthCase?
+Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.LdapAuthenticationEnabled.get -> bool?
+Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.LdapAuthenticationEnabled.set -> void
+Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.LdapCaseSensitive.get -> Community.Zabbix.ZabbixAuthenticationCase?
 Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.LdapCaseSensitive.set -> void
 Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.LdapJitStatus.get -> bool?
 Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.LdapJitStatus.set -> void
@@ -5050,9 +5075,9 @@ Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.PasswordCheckRu
 Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.PasswordCheckRules.set -> void
 Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.PasswordMinLength.get -> int?
 Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.PasswordMinLength.set -> void
-Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.SamlAuthEnabled.get -> bool?
-Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.SamlAuthEnabled.set -> void
-Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.SamlCaseSensitive.get -> Community.Zabbix.ZabbixAuthCase?
+Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.SamlAuthenticationEnabled.get -> bool?
+Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.SamlAuthenticationEnabled.set -> void
+Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.SamlCaseSensitive.get -> Community.Zabbix.ZabbixAuthenticationCase?
 Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.SamlCaseSensitive.set -> void
 Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.SamlJitStatus.get -> bool?
 Community.Zabbix.PowerShell.Commands.SetZbxAuthenticationCommand.SamlJitStatus.set -> void
@@ -5066,10 +5091,10 @@ Community.Zabbix.PowerShell.Commands.SetZbxAutoregistrationCommand.TlsPsk.set ->
 Community.Zabbix.PowerShell.Commands.SetZbxAutoregistrationCommand.TlsPskIdentity.get -> string?
 Community.Zabbix.PowerShell.Commands.SetZbxAutoregistrationCommand.TlsPskIdentity.set -> void
 Community.Zabbix.PowerShell.Commands.SetZbxHousekeepingCommand
-Community.Zabbix.PowerShell.Commands.SetZbxHousekeepingCommand.CompressOlder.get -> string?
-Community.Zabbix.PowerShell.Commands.SetZbxHousekeepingCommand.CompressOlder.set -> void
 Community.Zabbix.PowerShell.Commands.SetZbxHousekeepingCommand.CompressionStatus.get -> bool?
 Community.Zabbix.PowerShell.Commands.SetZbxHousekeepingCommand.CompressionStatus.set -> void
+Community.Zabbix.PowerShell.Commands.SetZbxHousekeepingCommand.CompressOlder.get -> string?
+Community.Zabbix.PowerShell.Commands.SetZbxHousekeepingCommand.CompressOlder.set -> void
 Community.Zabbix.PowerShell.Commands.SetZbxHousekeepingCommand.HousekeepingAudit.get -> string?
 Community.Zabbix.PowerShell.Commands.SetZbxHousekeepingCommand.HousekeepingAudit.set -> void
 Community.Zabbix.PowerShell.Commands.SetZbxHousekeepingCommand.HousekeepingAuditMode.get -> bool?
@@ -5135,8 +5160,8 @@ Community.Zabbix.PowerShell.Commands.SetZbxHttpTestCommand.PassThru.set -> void
 Community.Zabbix.PowerShell.Commands.SetZbxHttpTestCommand.Retries.get -> int?
 Community.Zabbix.PowerShell.Commands.SetZbxHttpTestCommand.Retries.set -> void
 Community.Zabbix.PowerShell.Commands.SetZbxHttpTestCommand.SetZbxHttpTestCommand() -> void
-Community.Zabbix.PowerShell.Commands.SetZbxHttpTestCommand.SslCertFile.get -> string?
-Community.Zabbix.PowerShell.Commands.SetZbxHttpTestCommand.SslCertFile.set -> void
+Community.Zabbix.PowerShell.Commands.SetZbxHttpTestCommand.SslCertificateFile.get -> string?
+Community.Zabbix.PowerShell.Commands.SetZbxHttpTestCommand.SslCertificateFile.set -> void
 Community.Zabbix.PowerShell.Commands.SetZbxHttpTestCommand.SslKeyFile.get -> string?
 Community.Zabbix.PowerShell.Commands.SetZbxHttpTestCommand.SslKeyFile.set -> void
 Community.Zabbix.PowerShell.Commands.SetZbxHttpTestCommand.SslKeyPassword.get -> System.Security.SecureString?
@@ -5273,10 +5298,10 @@ Community.Zabbix.PowerShell.Commands.ZabbixConfigurationFormat.Yaml = 2 -> Commu
 Community.Zabbix.PowerShell.Commands.ZabbixConfigurationTestResult
 Community.Zabbix.PowerShell.Commands.ZabbixConfigurationTestResult.Format.get -> string?
 Community.Zabbix.PowerShell.Commands.ZabbixConfigurationTestResult.Format.init -> void
-Community.Zabbix.PowerShell.Commands.ZabbixConfigurationTestResult.IsValid.get -> bool
-Community.Zabbix.PowerShell.Commands.ZabbixConfigurationTestResult.IsValid.init -> void
 Community.Zabbix.PowerShell.Commands.ZabbixConfigurationTestResult.Issues.get -> System.Collections.Generic.IReadOnlyList<string!>!
 Community.Zabbix.PowerShell.Commands.ZabbixConfigurationTestResult.Issues.init -> void
+Community.Zabbix.PowerShell.Commands.ZabbixConfigurationTestResult.IsValid.get -> bool
+Community.Zabbix.PowerShell.Commands.ZabbixConfigurationTestResult.IsValid.init -> void
 Community.Zabbix.PowerShell.Commands.ZabbixConfigurationTestResult.PlaintextSecretCount.get -> int
 Community.Zabbix.PowerShell.Commands.ZabbixConfigurationTestResult.PlaintextSecretCount.init -> void
 Community.Zabbix.PowerShell.Commands.ZabbixConfigurationTestResult.Source.get -> string?
@@ -5303,7 +5328,7 @@ Community.Zabbix.PowerShell.Commands.ZabbixTagCommand.Value.get -> string?
 Community.Zabbix.PowerShell.Commands.ZabbixTagCommand.Value.set -> void
 Community.Zabbix.PowerShell.Commands.ZabbixTagCommand.ZabbixTagCommand() -> void
 Community.Zabbix.PowerShell.Commands.ZabbixWatch
-Community.Zabbix.PowerShell.Commands.ZabbixWatch.Current.get -> System.Collections.Generic.IReadOnlyDictionary<(string! Host, Community.Zabbix.ZabbixItemKey Key), Community.Zabbix.ZabbixValue!>!
+Community.Zabbix.PowerShell.Commands.ZabbixWatch.Current.get -> System.Collections.Generic.IReadOnlyDictionary<(string! HostName, Community.Zabbix.ZabbixItemKey Key), Community.Zabbix.ZabbixValue!>!
 Community.Zabbix.PowerShell.Commands.ZabbixWatch.DisposeAsync() -> System.Threading.Tasks.ValueTask
 Community.Zabbix.PowerShell.Commands.ZabbixWatch.Dropped.get -> long
 Community.Zabbix.PowerShell.Commands.ZabbixWatch.FailedPolls.get -> long
@@ -5387,6 +5412,7 @@ Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.SearchWildcard
 Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.Selection() -> TParameters
 Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.SortOrder.get -> Community.Zabbix.PowerShell.ZabbixSortOrder[]?
 Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.SortOrder.set -> void
+Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.SortWire(System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixSort<TEntity>>? current) -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixSort<TEntity>>?
 Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.StartSearch.get -> System.Management.Automation.SwitchParameter
 Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.StartSearch.set -> void
 Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.ZabbixGetCmdlet() -> void
@@ -5488,31 +5514,6 @@ Community.Zabbix.PowerShell.ZabbixWireCmdlet
 Community.Zabbix.PowerShell.ZabbixWireCmdlet.Tls.get -> Community.Zabbix.ZabbixTlsMode?
 Community.Zabbix.PowerShell.ZabbixWireCmdlet.Tls.set -> void
 Community.Zabbix.PowerShell.ZabbixWireCmdlet.ZabbixWireCmdlet() -> void
-abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.CountAsync(Community.Zabbix.ZabbixClient! client, TParameters parameters, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<long>!
-abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.Filter.get -> TParameters?
-abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.Filter.set -> void
-abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.Id.get -> ulong[]?
-abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.Id.set -> void
-abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.Limit.get -> int?
-abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.Limit.set -> void
-abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.Name.get -> string![]?
-abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.Name.set -> void
-abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.Query(Community.Zabbix.ZabbixClient! client, TParameters parameters) -> void
-abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.SortField.get -> string![]?
-abstract Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.SortField.set -> void
-abstract Community.Zabbix.PowerShell.ZabbixNewCmdlet<TEntity>.CreateAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<ulong>!>!
-abstract Community.Zabbix.PowerShell.ZabbixRemoveCmdlet<TEntity>.DeleteAsync(Community.Zabbix.ZabbixClient! client, System.Collections.Generic.IReadOnlyList<ulong>! ids, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
-abstract Community.Zabbix.PowerShell.ZabbixRemoveCmdlet<TEntity>.InputObject.get -> Community.Zabbix.PowerShell.ZabbixReference<TEntity>![]?
-abstract Community.Zabbix.PowerShell.ZabbixRemoveCmdlet<TEntity>.InputObject.set -> void
-abstract Community.Zabbix.PowerShell.ZabbixSetCmdlet<TEntity, TRequest>.BuildRequest(ulong id) -> TRequest
-abstract Community.Zabbix.PowerShell.ZabbixSetCmdlet<TEntity, TRequest>.InputObject.get -> Community.Zabbix.PowerShell.ZabbixReference<TEntity>![]?
-abstract Community.Zabbix.PowerShell.ZabbixSetCmdlet<TEntity, TRequest>.InputObject.set -> void
-abstract Community.Zabbix.PowerShell.ZabbixSetCmdlet<TEntity, TRequest>.UpdateAsync(Community.Zabbix.ZabbixClient! client, System.Collections.Generic.IReadOnlyList<TRequest>! requests, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<ulong>!>!
-abstract Community.Zabbix.PowerShell.ZabbixSingletonGetCmdlet<TEntity>.GetAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<TEntity>!
-abstract Community.Zabbix.PowerShell.ZabbixSingletonSetCmdlet<TRequest>.BuildRequest() -> TRequest
-abstract Community.Zabbix.PowerShell.ZabbixSingletonSetCmdlet<TRequest>.GetAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<object?>!
-abstract Community.Zabbix.PowerShell.ZabbixSingletonSetCmdlet<TRequest>.Subject.get -> string!
-abstract Community.Zabbix.PowerShell.ZabbixSingletonSetCmdlet<TRequest>.UpdateAsync(Community.Zabbix.ZabbixClient! client, TRequest request, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<object?>!
 const Community.Zabbix.PowerShell.Commands.ZabbixTagCommand.ByName = "ByName" -> string!
 const Community.Zabbix.PowerShell.Commands.ZabbixTagCommand.ByTag = "ByTag" -> string!
 override Community.Zabbix.PowerShell.Commands.Generated.GetActionCommand.Filter.get -> Community.Zabbix.ZabbixActionGetParameters?
@@ -6254,9 +6255,9 @@ static Community.Zabbix.PowerShell.ZabbixCmdlet.ZabbixContext.get -> Community.Z
 static Community.Zabbix.PowerShell.ZabbixReference<TEntity>.ById(ulong id) -> Community.Zabbix.PowerShell.ZabbixReference<TEntity>!
 static Community.Zabbix.PowerShell.ZabbixReference<TEntity>.ByName(string! name) -> Community.Zabbix.PowerShell.ZabbixReference<TEntity>!
 static Community.Zabbix.PowerShell.ZabbixReference<TEntity>.Of(TEntity entity) -> Community.Zabbix.PowerShell.ZabbixReference<TEntity>!
-static Community.Zabbix.PowerShell.ZabbixReference<TEntity>.TryFrom(object? value, out Community.Zabbix.PowerShell.ZabbixReference<TEntity>? reference) -> bool
 static Community.Zabbix.PowerShell.ZabbixReference<TEntity>.operator !=(Community.Zabbix.PowerShell.ZabbixReference<TEntity>? left, Community.Zabbix.PowerShell.ZabbixReference<TEntity>? right) -> bool
 static Community.Zabbix.PowerShell.ZabbixReference<TEntity>.operator ==(Community.Zabbix.PowerShell.ZabbixReference<TEntity>? left, Community.Zabbix.PowerShell.ZabbixReference<TEntity>? right) -> bool
+static Community.Zabbix.PowerShell.ZabbixReference<TEntity>.TryFrom(object? value, out Community.Zabbix.PowerShell.ZabbixReference<TEntity>? reference) -> bool
 static Community.Zabbix.PowerShell.ZabbixServerCmdlet.ListAsync<T>(System.Collections.Generic.IAsyncEnumerable<T>! source, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<T>!>!
 static Community.Zabbix.PowerShell.ZabbixServerCmdlet.ListAsync<T>(System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<T>!>! source, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<T>!>!
 static Community.Zabbix.PowerShell.ZabbixTimeMembers.LastTime(System.Management.Automation.PSObject! instance) -> System.DateTime?
@@ -6267,4 +6268,3 @@ virtual Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.ApplyR
 virtual Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.HasReferenceFilters.get -> bool
 virtual Community.Zabbix.PowerShell.ZabbixNewCmdlet<TEntity>.CreatedName.get -> string?
 virtual Community.Zabbix.PowerShell.ZabbixSetCmdlet<TEntity, TRequest>.PrepareRequestAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
-Community.Zabbix.PowerShell.ZabbixGetCmdlet<TEntity, TParameters>.SortWire(System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixSort<TEntity>>? current) -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixSort<TEntity>>?

@@ -7,7 +7,7 @@
 $null = Get-ZbxItem -Host 'web-01' | Where-Object Key -EQ 'app.requests' | Set-ZbxItem -TrapperHosts '0.0.0.0/0,::/0'
 $mediaType = New-ZbxMediaType -Type Webhook -Name 'Service status' -Status Active -Script 'return "OK";'
 $disabled = New-ZbxMediaType -Type Webhook -Name 'Mail relay' -Status Disabled -Script 'return "OK";'
-$user = New-ZbxUser -Username 'jdoe' -Password (ConvertTo-SecureString 'Chang3-me-at-first-login!' -AsPlainText -Force) -RoleId (Get-ZbxRole -Name 'Super admin role').RoleId -UserGroup 'Operators' -Media @{ mediatypeid = $mediaType.MediaTypeId; sendto = @('ops') }, @{ mediatypeid = $disabled.MediaTypeId; sendto = @('relay') }
+$user = New-ZbxUser -UserName 'jdoe' -Password (ConvertTo-SecureString 'Chang3-me-at-first-login!' -AsPlainText -Force) -RoleId (Get-ZbxRole -Name 'Super admin role').RoleId -UserGroup 'Operators' -Media @{ mediatypeid = $mediaType.MediaTypeId; sendto = @('ops') }, @{ mediatypeid = $disabled.MediaTypeId; sendto = @('relay') }
 $condition = New-ZbxActionCondition -ConditionType Trigger -Operator Equal -Value (Get-ZbxTrigger -Name 'Too many requests on web-01').TriggerId
 $notify = New-ZbxActionOperation -OperationType Message -OperationMessageUser $user -OperationMessage @{ default_msg = 0; subject = 'Problem: {EVENT.NAME}'; message = 'Host {HOST.NAME}: {EVENT.NAME}' }
 $null = New-ZbxAction -Name 'Notify on disaster' -EventSource Triggers -Filter @{ evaltype = 'AndOr'; conditions = @($condition) } -Operation $notify

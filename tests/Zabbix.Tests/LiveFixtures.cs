@@ -28,7 +28,7 @@ internal static class LiveFixtures
         IReadOnlyList<ulong> groups = await scope.Server.HostGroups.CreateAsync([new ZabbixHostGroupCreateRequest { Name = scope.Name(what + "-group") }], cancel);
         scope.Delete("hostgroup", groups);
         string host = scope.Name(what);
-        var request = new ZabbixHostCreateRequest { TechnicalName = host, Groups = [new ZabbixHostGroupRequest { GroupId = groups[0] }] };
+        var request = new ZabbixHostCreateRequest { HostName = host, Groups = [new ZabbixHostGroupRequest { GroupId = groups[0] }] };
         IReadOnlyList<ulong> hosts = [await scope.Server.Hosts.CreateAsync(shape is null ? request : shape(request), cancel)];
         scope.Delete("host", hosts);
         var created = new List<LiveItem>();
@@ -69,7 +69,7 @@ internal static class LiveFixtures
         => LiveApi.EventuallyAsync(async () =>
         {
             await SendWhenKnownAsync(sender, [new ZabbixValue(host.Host, probe.Key, "1", DateTimeOffset.UtcNow)]);
-            IReadOnlyList<ZabbixHistoryRecord> rows = await scope.Server.History.GetAsync(new ZabbixHistoryGetParameters { History = probe.Type, ItemIds = [probe.ItemId], Output = ZabbixOutput.Extend }, TestContext.Current.CancellationToken);
+            IReadOnlyList<ZabbixHistoryRecord> rows = await scope.Server.History.GetAsync(new ZabbixHistoryGetParameters { ValueType = probe.Type, ItemIds = [probe.ItemId], Output = ZabbixOutput.Extend }, TestContext.Current.CancellationToken);
             return rows.Count > 0 ? rows : null;
         }, "the server to store a probe value through the proxy");
 
@@ -85,7 +85,7 @@ internal static class LiveFixtures
     public static async Task<ZabbixSenderResponse> SendWhenKnownAsync(ZabbixSender sender, IReadOnlyCollection<ZabbixValue> values)
     {
         ZabbixValue[] all = [.. values];
-        int[] probes = [.. all.Select((value, index) => (Item: (value.Host, Key: value.Key.ToString()), Index: index))
+        int[] probes = [.. all.Select((value, index) => (Item: (value.HostName, Key: value.Key.ToString()), Index: index))
             .GroupBy(entry => entry.Item).Select(group => group.First().Index)];
         List<ZabbixSenderResponse> answers = [];
         foreach (int probe in probes) answers.Add(await ProbeAsync(sender, all[probe]));
@@ -111,7 +111,7 @@ internal static class LiveFixtures
                     last = refused;
                     return null;
                 }
-            }, $"the trapper to know {value.Host} {value.Key}", TimeSpan.FromSeconds(30));
+            }, $"the trapper to know {value.HostName} {value.Key}", TimeSpan.FromSeconds(30));
         }
         catch (Xunit.Sdk.FailException) when (last is not null)
         {
@@ -125,7 +125,7 @@ internal static class LiveFixtures
         {
             IReadOnlyList<ZabbixHistoryRecord> rows = await client.History.GetAsync(new ZabbixHistoryGetParameters
             {
-                History = item.Type,
+                ValueType = item.Type,
                 ItemIds = [item.ItemId],
                 Output = ZabbixOutput.Extend,
                 Sort = [ZabbixHistoryRecordFields.Clock, ZabbixHistoryRecordFields.ClockNanoseconds],

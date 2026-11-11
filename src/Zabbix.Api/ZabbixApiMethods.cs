@@ -11,65 +11,76 @@ namespace Community.Zabbix;
 /// </summary>
 public static partial class ZabbixApiMethods
 {
-    private static readonly FrozenDictionary<string, ZabbixApiMethod> s_all = Describe();
+    private static readonly FrozenDictionary<ZabbixApiMethod, ZabbixApiMethodInfo> s_all = Describe();
 
-    /// <summary>Gets every described method, by name, ignoring case as Zabbix does.</summary>
+    /// <summary>Gets every described method, ignoring case as Zabbix does.</summary>
     /// <value>A read-only table; frozen, so a lookup costs no more than a hash.</value>
-    public static IReadOnlyDictionary<string, ZabbixApiMethod> All => s_all;
+    public static IReadOnlyDictionary<ZabbixApiMethod, ZabbixApiMethodInfo> All => s_all;
 
     /// <summary>What the table says about <paramref name="method"/>.</summary>
     /// <param name="method">The API method.</param>
-    /// <param name="capability">The entry, when there is one.</param>
+    /// <param name="info">The entry, when there is one.</param>
     /// <returns><see langword="true"/> when the model knows the method; otherwise <see langword="false"/>.</returns>
-    public static bool TryGet(string method, [NotNullWhen(true)] out ZabbixApiMethod? capability) => s_all.TryGetValue(method, out capability);
+    public static bool TryGet(ZabbixApiMethod method, [NotNullWhen(true)] out ZabbixApiMethodInfo? info) => s_all.TryGetValue(method, out info);
 
     /// <summary>Whether <paramref name="method"/> only reads.</summary>
     /// <param name="method">The API method.</param>
     /// <returns><see langword="true"/> when the method only reads.</returns>
-    public static bool IsRead(string method) => s_all.TryGetValue(method, out ZabbixApiMethod? m) && m.IsRead;
+    public static bool IsRead(ZabbixApiMethod method) => s_all.TryGetValue(method, out ZabbixApiMethodInfo? m) && m.IsRead;
 
-    /// <summary>Whether <paramref name="method"/> may be sent again after a failure the caller cannot see the end of.</summary>
+    /// <summary>
+    /// Whether <paramref name="method"/> may be sent again after a failure the caller cannot see the end of. Every method is
+    /// a POST, so the HTTP verb says nothing about safety; the JSON-RPC method does, and a method the table doesn't know is
+    /// never sent twice.
+    /// </summary>
     /// <param name="method">The API method.</param>
     /// <returns><see langword="true"/> when sending the method twice has the effect of sending it once.</returns>
-    public static bool IsIdempotent(string method) => s_all.TryGetValue(method, out ZabbixApiMethod? m) && m.IsIdempotent;
+    public static bool IsIdempotent(ZabbixApiMethod method) => s_all.TryGetValue(method, out ZabbixApiMethodInfo? m) && m.IsIdempotent;
 
     /// <summary>Whether <paramref name="method"/> needs a session; a method the table does not know does.</summary>
     /// <param name="method">The API method.</param>
     /// <returns><see langword="true"/> when the method needs a session or a token.</returns>
-    public static bool RequiresAuthentication(string method) => !s_all.TryGetValue(method, out ZabbixApiMethod? m) || m.RequiresAuthentication;
+    public static bool RequiresAuthentication(ZabbixApiMethod method) => !s_all.TryGetValue(method, out ZabbixApiMethodInfo? m) || m.RequiresAuthentication;
 
     /// <summary>Whether a server of <paramref name="serverVersion"/> has <paramref name="method"/> (the Tester-Doer of <see cref="EnsureSupported"/>).</summary>
     /// <param name="method">The API method.</param>
     /// <param name="serverVersion">The server's version (<c>apiinfo.version</c>).</param>
     /// <returns><see langword="true"/> when the version has the method.</returns>
-    public static bool Supports(string method, Version serverVersion)
+    /// <exception cref="ArgumentException"><paramref name="method"/> is the default value.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="serverVersion"/> is <see langword="null"/>.</exception>
+    public static bool Supports(ZabbixApiMethod method, Version serverVersion)
     {
+        ZabbixApiMethod.ThrowIfDefault(method);
         ArgumentNullException.ThrowIfNull(serverVersion);
-        if (!s_all.TryGetValue(method, out ZabbixApiMethod? m)) return true;
+        if (!s_all.TryGetValue(method, out ZabbixApiMethodInfo? m)) return true;
         return AtLeast(serverVersion, m.Since) && (m.RemovedIn is null || !AtLeast(serverVersion, m.RemovedIn));
     }
 
     /// <summary>Throws <see cref="ZabbixVersionException"/> when a server of <paramref name="serverVersion"/> does not have <paramref name="method"/>.</summary>
     /// <param name="method">The API method.</param>
     /// <param name="serverVersion">The server's version.</param>
+    /// <exception cref="ArgumentException"><paramref name="method"/> is the default value.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="serverVersion"/> is <see langword="null"/>.</exception>
     /// <exception cref="ZabbixVersionException">It does not.</exception>
-    public static void EnsureSupported(string method, Version serverVersion)
+    public static void EnsureSupported(ZabbixApiMethod method, Version serverVersion)
     {
-        if (!Supports(method, serverVersion)) throw new ZabbixVersionException(method, serverVersion, All[method]);
+        if (!Supports(method, serverVersion)) throw new ZabbixVersionException(method, serverVersion, s_all[method]);
     }
 
     // method (ignoring case, as Zabbix routes it) → wire field (exact, as the validator reads it) → what refuses it
-    private static readonly FrozenDictionary<string, FrozenDictionary<string, ZabbixApiField>> s_fields = DescribeFields();
+    private static readonly FrozenDictionary<ZabbixApiMethod, FrozenDictionary<string, ZabbixApiField>> s_fields = DescribeFields();
 
     /// <summary>What the table says about <paramref name="field"/> of <paramref name="method"/>'s request, when some version refuses it.</summary>
     /// <param name="method">The API method.</param>
     /// <param name="field">The wire field.</param>
-    /// <param name="capability">The entry, when there is one.</param>
+    /// <param name="info">The entry, when there is one.</param>
     /// <returns><see langword="true"/> when the model knows the field; otherwise <see langword="false"/>.</returns>
-    public static bool TryGetField(string method, string field, [NotNullWhen(true)] out ZabbixApiField? capability)
+    /// <exception cref="ArgumentNullException"><paramref name="field"/> is <see langword="null"/>.</exception>
+    public static bool TryGetField(ZabbixApiMethod method, string field, [NotNullWhen(true)] out ZabbixApiField? info)
     {
-        capability = null;
-        return s_fields.TryGetValue(method, out FrozenDictionary<string, ZabbixApiField>? fields) && fields.TryGetValue(field, out capability);
+        ArgumentNullException.ThrowIfNull(field);
+        info = null;
+        return s_fields.TryGetValue(method, out FrozenDictionary<string, ZabbixApiField>? fields) && fields.TryGetValue(field, out info);
     }
 
     /// <summary>Whether a server of <paramref name="serverVersion"/> accepts <paramref name="field"/> in <paramref name="method"/>'s request (the Tester-Doer of <see cref="EnsureFieldSupported"/>); a field the table does not know is the server's to judge.</summary>
@@ -77,8 +88,11 @@ public static partial class ZabbixApiMethods
     /// <param name="field">The wire field.</param>
     /// <param name="serverVersion">The server's version (<c>apiinfo.version</c>).</param>
     /// <returns><see langword="true"/> when the version takes the field in the method's request.</returns>
-    public static bool SupportsField(string method, string field, Version serverVersion)
+    /// <exception cref="ArgumentException"><paramref name="method"/> is the default value.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="field"/> or <paramref name="serverVersion"/> is <see langword="null"/>.</exception>
+    public static bool SupportsField(ZabbixApiMethod method, string field, Version serverVersion)
     {
+        ZabbixApiMethod.ThrowIfDefault(method);
         ArgumentNullException.ThrowIfNull(serverVersion);
         return !TryGetField(method, field, out ZabbixApiField? f) || !AtLeast(serverVersion, f.RemovedIn);
     }
@@ -87,8 +101,10 @@ public static partial class ZabbixApiMethods
     /// <param name="method">The API method.</param>
     /// <param name="field">The wire field.</param>
     /// <param name="serverVersion">The server's version.</param>
+    /// <exception cref="ArgumentException"><paramref name="method"/> is the default value.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="field"/> or <paramref name="serverVersion"/> is <see langword="null"/>.</exception>
     /// <exception cref="ZabbixVersionException">It does; the message names the field to send instead.</exception>
-    public static void EnsureFieldSupported(string method, string field, Version serverVersion)
+    public static void EnsureFieldSupported(ZabbixApiMethod method, string field, Version serverVersion)
     {
         if (!SupportsField(method, field, serverVersion)) throw new ZabbixVersionException(serverVersion, s_fields[method][field]);
     }

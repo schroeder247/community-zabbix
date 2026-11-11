@@ -231,13 +231,13 @@ public static class ZabbixInterface
     private static ZabbixHostInterfaceRequest At(ZabbixInterfaceType type, IPAddress address, int port)
     {
         ArgumentNullException.ThrowIfNull(address);
-        return new() { Type = type, UseIp = ZabbixHostInterfaceUseIp.Ip, Ip = address.ToString(), Dns = string.Empty, Port = Port(port) };
+        return new() { Type = type, UseIP = ZabbixHostInterfaceUseIP.IP, IP = address.ToString(), Dns = string.Empty, Port = Port(port) };
     }
 
     private static ZabbixHostInterfaceRequest At(ZabbixInterfaceType type, string dnsName, int port)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(dnsName);
-        return new() { Type = type, UseIp = ZabbixHostInterfaceUseIp.Dns, Ip = string.Empty, Dns = dnsName, Port = Port(port) };
+        return new() { Type = type, UseIP = ZabbixHostInterfaceUseIP.Dns, IP = string.Empty, Dns = dnsName, Port = Port(port) };
     }
 
     // The port, checked here so the exception names the factory's own parameter.

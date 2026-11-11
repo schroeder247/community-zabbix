@@ -63,7 +63,7 @@ $credential is a PSCredential (Get-Credential). Connect-ZbxServer logs in (user.
 
 ```powershell
 $staging = Connect-ZbxServer -Uri 'https://zabbix.example/api_jsonrpc.php' -ApiToken $token -Name 'staging' -NoDefault -PassThru
-Get-ZbxHost -Name 'web-01' -Connection $staging | Select-Object HostId, TechnicalName
+Get-ZbxHost -Name 'web-01' -Connection $staging | Select-Object HostId, HostName
 Get-ZbxContext | Select-Object -ExpandProperty Servers
 Disconnect-ZbxServer -Name 'staging'
 ```

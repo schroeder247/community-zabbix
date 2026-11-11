@@ -19,7 +19,7 @@ public sealed class AdversarialPipelineTests
         server.On("host.get", FakeZabbix.Hosts(("10087", "web-01"))).On("host.delete", """{"hostids":[]}""");
         using Shell shell = Shell.Open();
         shell.Connect(server);
-        var entity = new ZabbixHost { HostId = 10086, TechnicalName = "db-01" };
+        var entity = new ZabbixHost { HostId = 10086, HostName = "db-01" };
 
         Run run = shell.Invoke("@($entity, @{ hostid = '3' }, '4', 5, 'web-01', $null, [ulong]6) | Remove-ZbxHost -Confirm:$false",
             new Dictionary<string, object?> { ["entity"] = entity });

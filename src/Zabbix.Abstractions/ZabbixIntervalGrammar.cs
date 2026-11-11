@@ -41,6 +41,12 @@ internal static class ZabbixIntervalGrammar
     /// <summary>Seconds in a week.</summary>
     public const long Week = 7 * Day;
 
+    /// <summary>Seconds in a month, as Zabbix counts one where a length takes it (<c>SEC_PER_MONTH</c>).</summary>
+    public const long Month = 30 * Day;
+
+    /// <summary>Seconds in a year, as Zabbix counts one where a length takes it (<c>SEC_PER_YEAR</c>).</summary>
+    public const long Year = 365 * Day;
+
     /// <summary>The finest unit a scheduling interval filters by.</summary>
     internal enum Level
     {
@@ -62,9 +68,20 @@ internal static class ZabbixIntervalGrammar
     /// <summary>The length at the start of <paramref name="s"/>: seconds, or <see langword="null"/> for a macro; 0 characters read when it has none.</summary>
     /// <param name="s">The text to read, from its first character.</param>
     /// <param name="length">How many characters the length takes; 0 when <paramref name="s"/> doesn't start with one.</param>
-    public static long? Length(ReadOnlySpan<char> s, out int length)
+    public static long? Length(ReadOnlySpan<char> s, out int length) => Length(s, withYear: false, out length);
+
+    /// <summary>
+    /// The length at the start of <paramref name="s"/>, where a field also takes a month (<c>M</c>, 30 days) and a year
+    /// (<c>y</c>, 365 days), as the settings' <c>max_period</c> does (<c>API_TIME_UNIT_WITH_YEAR</c>,
+    /// <c>ZBX_TIME_SUFFIXES_WITH_YEAR</c> in <c>defines.inc.php</c> 7.0): seconds, or <see langword="null"/> for a macro.
+    /// </summary>
+    /// <param name="s">The text to read, from its first character.</param>
+    /// <param name="length">How many characters the length takes; 0 when <paramref name="s"/> doesn't start with one.</param>
+    public static long? LengthWithYear(ReadOnlySpan<char> s, out int length) => Length(s, withYear: true, out length);
+
+    private static long? Length(ReadOnlySpan<char> s, bool withYear, out int length)
     {
-        if (Seconds(s, out length) is { } seconds) return seconds;
+        if (Seconds(s, withYear, out length) is { } seconds) return seconds;
         length = ZabbixMacroGrammar.UserOrLldMacro(s);
         return null;
     }
@@ -123,7 +140,7 @@ internal static class ZabbixIntervalGrammar
     }
 
     // A whole number of seconds, bare or with a suffix, within int.MaxValue seconds.
-    private static long? Seconds(ReadOnlySpan<char> s, out int length)
+    private static long? Seconds(ReadOnlySpan<char> s, bool withYear, out int length)
     {
         length = 0;
         int p = 0;
@@ -134,7 +151,7 @@ internal static class ZabbixIntervalGrammar
             if (value > int.MaxValue) return null;
         }
         if (p == 0) return null;
-        long factor = p < s.Length ? s[p] switch { 's' => 1, 'm' => Minute, 'h' => Hour, 'd' => Day, 'w' => Week, _ => 0 } : 0;
+        long factor = p < s.Length ? s[p] switch { 's' => 1, 'm' => Minute, 'h' => Hour, 'd' => Day, 'w' => Week, 'M' when withYear => Month, 'y' when withYear => Year, _ => 0 } : 0;
         if (factor > 0) p++;
         long seconds = value * Math.Max(factor, 1);
         if (seconds > int.MaxValue) return null;

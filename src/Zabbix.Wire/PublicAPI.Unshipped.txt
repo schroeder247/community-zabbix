@@ -88,9 +88,6 @@ Community.Zabbix.ZabbixQueueDetails.Items.init -> void
 Community.Zabbix.ZabbixQueueDetails.Total.get -> long
 Community.Zabbix.ZabbixQueueDetails.Total.init -> void
 Community.Zabbix.ZabbixQueueDetails.ZabbixQueueDetails(System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixQueuedItem!>! Items, long Total) -> void
-Community.Zabbix.ZabbixQueueOverview
-Community.Zabbix.ZabbixQueueOverview.ByItemType = 0 -> Community.Zabbix.ZabbixQueueOverview
-Community.Zabbix.ZabbixQueueOverview.ByProxy = 1 -> Community.Zabbix.ZabbixQueueOverview
 Community.Zabbix.ZabbixQueuedItem
 Community.Zabbix.ZabbixQueuedItem.<Clone>$() -> Community.Zabbix.ZabbixQueuedItem!
 Community.Zabbix.ZabbixQueuedItem.Deconstruct(out ulong ItemId, out System.DateTimeOffset NextCheck) -> void
@@ -100,9 +97,12 @@ Community.Zabbix.ZabbixQueuedItem.ItemId.init -> void
 Community.Zabbix.ZabbixQueuedItem.NextCheck.get -> System.DateTimeOffset
 Community.Zabbix.ZabbixQueuedItem.NextCheck.init -> void
 Community.Zabbix.ZabbixQueuedItem.ZabbixQueuedItem(ulong ItemId, System.DateTimeOffset NextCheck) -> void
+Community.Zabbix.ZabbixQueueOverview
+Community.Zabbix.ZabbixQueueOverview.ByItemType = 0 -> Community.Zabbix.ZabbixQueueOverview
+Community.Zabbix.ZabbixQueueOverview.ByProxy = 1 -> Community.Zabbix.ZabbixQueueOverview
 Community.Zabbix.ZabbixSendBatch
-Community.Zabbix.ZabbixSendBatch.Add<T>(string! host, Community.Zabbix.ZabbixItemKey<T> item, T value) -> Community.Zabbix.ZabbixSendBatch!
-Community.Zabbix.ZabbixSendBatch.Add<T>(string! host, Community.Zabbix.ZabbixItemKey<T> item, T value, System.DateTimeOffset time) -> Community.Zabbix.ZabbixSendBatch!
+Community.Zabbix.ZabbixSendBatch.Add<T>(string! hostName, Community.Zabbix.ZabbixItemKey<T> key, T value) -> Community.Zabbix.ZabbixSendBatch!
+Community.Zabbix.ZabbixSendBatch.Add<T>(string! hostName, Community.Zabbix.ZabbixItemKey<T> key, T value, System.DateTimeOffset time) -> Community.Zabbix.ZabbixSendBatch!
 Community.Zabbix.ZabbixSendBatch.Count.get -> int
 Community.Zabbix.ZabbixSenderCanceledException
 Community.Zabbix.ZabbixSenderCanceledException.Delivered.get -> Community.Zabbix.ZabbixSenderResponse?
@@ -192,12 +192,13 @@ Community.Zabbix.ZabbixTrapperRefusedException.ZabbixTrapperRefusedException(str
 Community.Zabbix.ZabbixWireClient
 Community.Zabbix.ZabbixWireClient.Dispose() -> void
 Community.Zabbix.ZabbixWireClient.DisposeAsync() -> System.Threading.Tasks.ValueTask
+Community.Zabbix.ZabbixWireClient.GetAgentItemAsync(string! agent, string! key, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixAgentAnswer!>!
 Community.Zabbix.ZabbixWireClient.ZabbixWireClient() -> void
 Community.Zabbix.ZabbixWireClient.ZabbixWireClient(Community.Zabbix.ZabbixWireClientOptions! options) -> void
 Community.Zabbix.ZabbixWireClient.ZabbixWireClient(Community.Zabbix.ZabbixWireClientOptions! options, Microsoft.Extensions.Logging.ILoggerFactory? loggers, System.TimeProvider? time) -> void
+Community.Zabbix.ZabbixWireClient.ZabbixWireClient(string! server) -> void
 Community.Zabbix.ZabbixWireClient.ZabbixWireClient(System.Func<System.ReadOnlyMemory<byte>, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<System.ReadOnlyMemory<byte>>>! exchange) -> void
 Community.Zabbix.ZabbixWireClient.ZabbixWireClient(System.Func<System.ReadOnlyMemory<byte>, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<System.ReadOnlyMemory<byte>>>! exchange, Community.Zabbix.ZabbixWireClientOptions! options, Microsoft.Extensions.Logging.ILoggerFactory? loggers, System.TimeProvider? time) -> void
-Community.Zabbix.ZabbixWireClient.ZabbixWireClient(string! server) -> void
 Community.Zabbix.ZabbixWireClientBuilder
 Community.Zabbix.ZabbixWireClientBuilder.Build() -> Community.Zabbix.ZabbixWireClient!
 Community.Zabbix.ZabbixWireClientBuilder.Name.get -> string!
@@ -207,9 +208,17 @@ Community.Zabbix.ZabbixWireClientBuilder.UseTimeProvider(System.TimeProvider! ti
 Community.Zabbix.ZabbixWireClientBuilder.ZabbixWireClientBuilder() -> void
 Community.Zabbix.ZabbixWireClientBuilderExtensions
 Community.Zabbix.ZabbixWireClientBuilderExtensions.extension<TBuilder>(TBuilder)
+Community.Zabbix.ZabbixWireClientBuilderExtensions.extension<TBuilder>(TBuilder).Bind(Microsoft.Extensions.Configuration.IConfiguration! section) -> TBuilder
+Community.Zabbix.ZabbixWireClientBuilderExtensions.extension<TBuilder>(TBuilder).Configure(System.Action<Community.Zabbix.ZabbixWireClientOptions!>! configure) -> TBuilder
+Community.Zabbix.ZabbixWireClientBuilderExtensions.extension<TBuilder>(TBuilder).WithBatchSize(int batchSize) -> TBuilder
+Community.Zabbix.ZabbixWireClientBuilderExtensions.extension<TBuilder>(TBuilder).WithCertificate(string! certificateFile, string! keyFile, string! caFile) -> TBuilder
+Community.Zabbix.ZabbixWireClientBuilderExtensions.extension<TBuilder>(TBuilder).WithCheckTimeout(System.TimeSpan timeout) -> TBuilder
+Community.Zabbix.ZabbixWireClientBuilderExtensions.extension<TBuilder>(TBuilder).WithCompression(bool enabled = true) -> TBuilder
+Community.Zabbix.ZabbixWireClientBuilderExtensions.extension<TBuilder>(TBuilder).WithPsk(string! identity, System.ReadOnlySpan<byte> key) -> TBuilder
 Community.Zabbix.ZabbixWireClientBuilderExtensions.extension<TBuilder>(TBuilder).WithServer(params System.ReadOnlySpan<System.Net.DnsEndPoint!> nodes) -> TBuilder
 Community.Zabbix.ZabbixWireClientBuilderExtensions.extension<TBuilder>(TBuilder).WithServer(string! server) -> TBuilder
-Community.Zabbix.ZabbixWireClientServiceCollectionExtensions
+Community.Zabbix.ZabbixWireClientBuilderExtensions.extension<TBuilder>(TBuilder).WithTimeout(System.TimeSpan timeout) -> TBuilder
+Community.Zabbix.ZabbixWireClientBuilderExtensions.extension<TBuilder>(TBuilder).WithToken(string! token) -> TBuilder
 Community.Zabbix.ZabbixWireClientOptions
 Community.Zabbix.ZabbixWireClientOptions.BatchSize.get -> int
 Community.Zabbix.ZabbixWireClientOptions.BatchSize.set -> void
@@ -224,6 +233,7 @@ Community.Zabbix.ZabbixWireClientOptions.Server.set -> void
 Community.Zabbix.ZabbixWireClientOptions.SessionId.get -> string?
 Community.Zabbix.ZabbixWireClientOptions.SessionId.set -> void
 Community.Zabbix.ZabbixWireClientOptions.ZabbixWireClientOptions() -> void
+Community.Zabbix.ZabbixWireClientServiceCollectionExtensions
 const Community.Zabbix.ZabbixConnectionOptions.DefaultMaxPayloadBytes = 16777216 -> long
 const Community.Zabbix.ZabbixWireClient.DefaultAgentPort = 10050 -> int
 const Community.Zabbix.ZabbixWireClient.DefaultServerPort = 10051 -> int
@@ -267,13 +277,24 @@ static Community.Zabbix.ZabbixSenderResponse.operator ==(Community.Zabbix.Zabbix
 static Community.Zabbix.ZabbixServerReply.operator !=(Community.Zabbix.ZabbixServerReply? left, Community.Zabbix.ZabbixServerReply? right) -> bool
 static Community.Zabbix.ZabbixServerReply.operator ==(Community.Zabbix.ZabbixServerReply? left, Community.Zabbix.ZabbixServerReply? right) -> bool
 static Community.Zabbix.ZabbixWireClient.CreateBuilder() -> Community.Zabbix.ZabbixWireClientBuilder!
+static Community.Zabbix.ZabbixWireClientBuilderExtensions.Bind<TBuilder>(this TBuilder builder, Microsoft.Extensions.Configuration.IConfiguration! section) -> TBuilder
+static Community.Zabbix.ZabbixWireClientBuilderExtensions.Configure<TBuilder>(this TBuilder builder, System.Action<Community.Zabbix.ZabbixWireClientOptions!>! configure) -> TBuilder
+static Community.Zabbix.ZabbixWireClientBuilderExtensions.WithBatchSize<TBuilder>(this TBuilder builder, int batchSize) -> TBuilder
+static Community.Zabbix.ZabbixWireClientBuilderExtensions.WithCertificate<TBuilder>(this TBuilder builder, string! certificateFile, string! keyFile, string! caFile) -> TBuilder
+static Community.Zabbix.ZabbixWireClientBuilderExtensions.WithCheckTimeout<TBuilder>(this TBuilder builder, System.TimeSpan timeout) -> TBuilder
+static Community.Zabbix.ZabbixWireClientBuilderExtensions.WithCompression<TBuilder>(this TBuilder builder, bool enabled = true) -> TBuilder
+static Community.Zabbix.ZabbixWireClientBuilderExtensions.WithPsk<TBuilder>(this TBuilder builder, string! identity, System.ReadOnlySpan<byte> key) -> TBuilder
 static Community.Zabbix.ZabbixWireClientBuilderExtensions.WithServer<TBuilder>(this TBuilder builder, params System.ReadOnlySpan<System.Net.DnsEndPoint!> nodes) -> TBuilder
 static Community.Zabbix.ZabbixWireClientBuilderExtensions.WithServer<TBuilder>(this TBuilder builder, string! server) -> TBuilder
+static Community.Zabbix.ZabbixWireClientBuilderExtensions.WithTimeout<TBuilder>(this TBuilder builder, System.TimeSpan timeout) -> TBuilder
+static Community.Zabbix.ZabbixWireClientBuilderExtensions.WithToken<TBuilder>(this TBuilder builder, string! token) -> TBuilder
 static Community.Zabbix.ZabbixWireClientServiceCollectionExtensions.AddZabbixWireClient(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Community.Zabbix.IZabbixWireClientBuilder!
 static Community.Zabbix.ZabbixWireClientServiceCollectionExtensions.AddZabbixWireClient(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string! name) -> Community.Zabbix.IZabbixWireClientBuilder!
 virtual Community.Zabbix.ZabbixWireClient.Dispose(bool disposing) -> void
 virtual Community.Zabbix.ZabbixWireClient.DisposeAsyncCore() -> System.Threading.Tasks.ValueTask
 virtual Community.Zabbix.ZabbixWireClient.EvaluateExpressionsAsync(System.Collections.Generic.IEnumerable<string!>! expressions, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixExpressionResult!>!>!
+virtual Community.Zabbix.ZabbixWireClient.GetAgentItemAsync(string! agent, Community.Zabbix.ZabbixItemKey key, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixAgentAnswer!>!
+virtual Community.Zabbix.ZabbixWireClient.GetAgentItemAsync<T>(string! agent, Community.Zabbix.ZabbixItemKey<T> key, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<T>!
 virtual Community.Zabbix.ZabbixWireClient.GetQueueAsync(Community.Zabbix.ZabbixQueueOverview overview = Community.Zabbix.ZabbixQueueOverview.ByItemType, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixQueueDelays!>!>!
 virtual Community.Zabbix.ZabbixWireClient.GetQueueDetailsAsync(int limit, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixQueueDetails!>!
 virtual Community.Zabbix.ZabbixWireClient.GetQueueSizeAsync(System.TimeSpan? fromDelay = null, System.TimeSpan? toDelay = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<long>!
@@ -282,29 +303,8 @@ virtual Community.Zabbix.ZabbixWireClient.GetStatusAsync(System.Threading.Cancel
 virtual Community.Zabbix.ZabbixWireClient.PingAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 virtual Community.Zabbix.ZabbixWireClient.RequestAsync(string! request, System.Text.Json.JsonElement data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixServerReply!>!
 virtual Community.Zabbix.ZabbixWireClient.SendAlertAsync(ulong mediaTypeId, string! sendTo, string! subject, string! message, Community.Zabbix.ZabbixAlertParameters? parameters = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixServerReply!>!
-virtual Community.Zabbix.ZabbixWireClient.TestItemAsync(System.Text.Json.JsonElement data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixServerReply!>!
-virtual Community.Zabbix.ZabbixWireClient.TestReportAsync(System.Text.Json.JsonElement data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixServerReply!>!
-Community.Zabbix.ZabbixWireClientBuilderExtensions.extension<TBuilder>(TBuilder).Bind(Microsoft.Extensions.Configuration.IConfiguration! section) -> TBuilder
-Community.Zabbix.ZabbixWireClientBuilderExtensions.extension<TBuilder>(TBuilder).Configure(System.Action<Community.Zabbix.ZabbixWireClientOptions!>! configure) -> TBuilder
-Community.Zabbix.ZabbixWireClientBuilderExtensions.extension<TBuilder>(TBuilder).WithBatchSize(int batchSize) -> TBuilder
-Community.Zabbix.ZabbixWireClientBuilderExtensions.extension<TBuilder>(TBuilder).WithCertificate(string! certificateFile, string! keyFile, string! caFile) -> TBuilder
-Community.Zabbix.ZabbixWireClientBuilderExtensions.extension<TBuilder>(TBuilder).WithCheckTimeout(System.TimeSpan timeout) -> TBuilder
-Community.Zabbix.ZabbixWireClientBuilderExtensions.extension<TBuilder>(TBuilder).WithCompression(bool enabled = true) -> TBuilder
-Community.Zabbix.ZabbixWireClientBuilderExtensions.extension<TBuilder>(TBuilder).WithPsk(string! identity, System.ReadOnlySpan<byte> key) -> TBuilder
-Community.Zabbix.ZabbixWireClientBuilderExtensions.extension<TBuilder>(TBuilder).WithTimeout(System.TimeSpan timeout) -> TBuilder
-Community.Zabbix.ZabbixWireClientBuilderExtensions.extension<TBuilder>(TBuilder).WithToken(string! token) -> TBuilder
-static Community.Zabbix.ZabbixWireClientBuilderExtensions.Bind<TBuilder>(this TBuilder builder, Microsoft.Extensions.Configuration.IConfiguration! section) -> TBuilder
-static Community.Zabbix.ZabbixWireClientBuilderExtensions.Configure<TBuilder>(this TBuilder builder, System.Action<Community.Zabbix.ZabbixWireClientOptions!>! configure) -> TBuilder
-static Community.Zabbix.ZabbixWireClientBuilderExtensions.WithBatchSize<TBuilder>(this TBuilder builder, int batchSize) -> TBuilder
-static Community.Zabbix.ZabbixWireClientBuilderExtensions.WithCertificate<TBuilder>(this TBuilder builder, string! certificateFile, string! keyFile, string! caFile) -> TBuilder
-static Community.Zabbix.ZabbixWireClientBuilderExtensions.WithCheckTimeout<TBuilder>(this TBuilder builder, System.TimeSpan timeout) -> TBuilder
-static Community.Zabbix.ZabbixWireClientBuilderExtensions.WithCompression<TBuilder>(this TBuilder builder, bool enabled = true) -> TBuilder
-static Community.Zabbix.ZabbixWireClientBuilderExtensions.WithPsk<TBuilder>(this TBuilder builder, string! identity, System.ReadOnlySpan<byte> key) -> TBuilder
-static Community.Zabbix.ZabbixWireClientBuilderExtensions.WithTimeout<TBuilder>(this TBuilder builder, System.TimeSpan timeout) -> TBuilder
-static Community.Zabbix.ZabbixWireClientBuilderExtensions.WithToken<TBuilder>(this TBuilder builder, string! token) -> TBuilder
-Community.Zabbix.ZabbixWireClient.GetAgentItemAsync(string! agent, string! key, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixAgentAnswer!>!
-virtual Community.Zabbix.ZabbixWireClient.GetAgentItemAsync(string! agent, Community.Zabbix.ZabbixItemKey key, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixAgentAnswer!>!
-virtual Community.Zabbix.ZabbixWireClient.GetAgentItemAsync<T>(string! agent, Community.Zabbix.ZabbixItemKey<T> item, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<T>!
 virtual Community.Zabbix.ZabbixWireClient.SendAsync(System.Action<Community.Zabbix.ZabbixSendBatch!>! build, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixSenderResponse!>!
 virtual Community.Zabbix.ZabbixWireClient.SendAsync(System.Collections.Generic.IReadOnlyCollection<Community.Zabbix.ZabbixValue!>! values, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixSenderResponse!>!
-virtual Community.Zabbix.ZabbixWireClient.SendAsync<T>(string! host, Community.Zabbix.ZabbixItemKey<T> item, T value, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixSenderResponse!>!
+virtual Community.Zabbix.ZabbixWireClient.SendAsync<T>(string! hostName, Community.Zabbix.ZabbixItemKey<T> key, T value, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixSenderResponse!>!
+virtual Community.Zabbix.ZabbixWireClient.TestItemAsync(System.Text.Json.JsonElement data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixServerReply!>!
+virtual Community.Zabbix.ZabbixWireClient.TestReportAsync(System.Text.Json.JsonElement data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixServerReply!>!

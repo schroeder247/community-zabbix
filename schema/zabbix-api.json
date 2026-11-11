@@ -54448,7 +54448,7 @@
     "noun": "network discovery rule",
     "role": "that scan IP ranges for hosts and services",
     "sample": "Local network",
-    "create": "-IpRange '10.0.0.1-254' -Check (New-ZbxNetworkDiscoveryCheck -Type Icmp)",
+    "create": "-IPRange '10.0.0.1-254' -Check (New-ZbxNetworkDiscoveryCheck -Type Icmp)",
     "change": "-Delay '30m'",
     "changeNote": "Makes {target} scan every 30 minutes."
    },
@@ -54815,7 +54815,7 @@
     "noun": "host",
     "role": "that Zabbix monitors",
     "sample": "web-01",
-    "create": "-Group 'Linux servers' -InterfaceType Agent -InterfaceIp '10.0.0.5'",
+    "create": "-Group 'Linux servers' -InterfaceType Agent -InterfaceIP '10.0.0.5'",
     "change": "-Status Disabled",
     "changeNote": "Disables {target}, so Zabbix stops monitoring it."
    },
@@ -55075,7 +55075,7 @@
    "help": {
     "noun": "host interface",
     "role": "that hosts are polled on",
-    "create": "-Type Agent -Ip '10.0.0.6' -Dns '' -Port '10050' -UseIp Ip -Main Secondary",
+    "create": "-Type Agent -IP '10.0.0.6' -Dns '' -Port '10050' -UseIP IP -Main Secondary",
     "change": "-Port '10051'",
     "changeNote": "Moves {target} to port 10051.",
     "find": "Get-ZbxHostInterface -Host 'web-01' | Where-Object Port -EQ '10050'",
@@ -56356,7 +56356,7 @@
     "noun": "script",
     "role": "that users and actions run",
     "sample": "Reboot host",
-    "create": "-Scope ManualHost -Type Ssh -Command 'sudo systemctl reboot' -Username 'zabbix' -Port '22'",
+    "create": "-Scope ManualHost -Type Ssh -Command 'sudo systemctl reboot' -UserName 'zabbix' -Port '22'",
     "change": "-Confirmation 'Reboot {HOST.NAME} now?'",
     "changeNote": "Makes {target} ask for confirmation before it runs."
    },
@@ -57108,8 +57108,8 @@
     "noun": "trigger",
     "role": "that turn item values into problems",
     "sample": "High CPU utilization on web-01",
-    "create": "-Expression 'avg(/web-01/system.cpu.util,5m)>90' -Priority High",
-    "change": "-Priority Disaster",
+    "create": "-Expression 'avg(/web-01/system.cpu.util,5m)>90' -Severity High",
+    "change": "-Severity Disaster",
     "changeNote": "Raises the severity of {target} to Disaster."
    },
    "model": "Trigger",
@@ -57176,8 +57176,8 @@
     "noun": "trigger prototype",
     "role": "that discovery rules turn into triggers",
     "sample": "Free space is low on {#FSNAME}",
-    "create": "-Expression \"last(/web-01/$key)>90\" -Priority Warning",
-    "change": "-Priority High",
+    "create": "-Expression \"last(/web-01/$key)>90\" -Severity Warning",
+    "change": "-Severity High",
     "changeNote": "Makes the triggers made from {target} raise high-severity problems.",
     "createSetup": "$key = (Get-ZbxItemPrototype -Host 'web-01' -Name 'Used space on {#FSNAME}').Key"
    },
@@ -57246,7 +57246,7 @@
     "role": "that log in to Zabbix",
     "sample": "jdoe",
     "create": "-RoleId (Get-ZbxRole -Name 'User role').RoleId -UserGroup 'Operators' -Password (Read-Host -AsSecureString 'Password')",
-    "change": "-Lang 'de_DE'",
+    "change": "-Language 'de_DE'",
     "changeNote": "Shows the frontend to {target} in German."
    },
    "model": "User",
@@ -57386,7 +57386,7 @@
     "plural": "user directories",
     "role": "that users authenticate against",
     "sample": "Corporate LDAP",
-    "create": "-IdpType Ldap -LdapHost 'ldap.example.com' -Port '389' -BaseDn 'ou=people,dc=example,dc=com' -SearchAttribute 'uid'",
+    "create": "-IdpType Ldap -LdapHost 'ldap.example.com' -Port '389' -BaseDN 'ou=people,dc=example,dc=com' -SearchAttribute 'uid'",
     "change": "-Port '636'",
     "changeNote": "Moves {target} to port 636."
    },
@@ -57928,7 +57928,7 @@
     "record": "DiscoveryRuleLldMacroPathRequest",
     "positional": [],
     "noun": "LLD macro path",
-    "use": "the -MacroPaths of New-ZbxDiscoveryRule and Set-ZbxDiscoveryRule",
+    "use": "the -LowLevelDiscoveryMacroPath of New-ZbxDiscoveryRule and Set-ZbxDiscoveryRule",
     "what": "A macro path maps a low-level discovery macro to a JSONPath into the discovery data, such as {#FSNAME} to $.fsname.",
     "valueForms": {
      "lld_macro": [

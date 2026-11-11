@@ -40,7 +40,7 @@ Get-ZbxProxy writes proxy objects; Remove-ZbxProxy binds each one and deletes th
 $proxy = Get-ZbxProxy -Name 'proxy-01' -SelectHosts
 if ($proxy.Hosts) { Set-ZbxHost -InputObject $proxy.Hosts.HostId -MonitoredBy Server | Out-Null }
 Remove-ZbxProxy -InputObject $proxy -Confirm:$false
-Get-ZbxHost -Name 'web-01' | Select-Object TechnicalName, MonitoredBy
+Get-ZbxHost -Name 'web-01' | Select-Object HostName, MonitoredBy
 ```
 
 The API refuses to delete a proxy that monitors hosts, so hand them back to the server first.

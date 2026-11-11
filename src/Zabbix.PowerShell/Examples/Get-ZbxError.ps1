@@ -15,7 +15,7 @@ Get-ZbxError -Last 2 | Select-Object FullyQualifiedErrorId, @{ n = 'Message'; e 
 # script can react to one kind without parsing messages. Here web-01 already exists, so the server refuses it.
 'web-02', 'web-01' | ForEach-Object {
     New-ZbxHost -Host $_ -Group 'Web servers' -ErrorAction SilentlyContinue
-} | Select-Object TechnicalName
+} | Select-Object HostName
 Get-ZbxError -Last 1 | ForEach-Object {
     if ($_.FullyQualifiedErrorId -like 'ZabbixApi.*') { 'The server refused: ' + $_.Exception.Message }
     else { 'Other failure: ' + $_.Exception.Message }

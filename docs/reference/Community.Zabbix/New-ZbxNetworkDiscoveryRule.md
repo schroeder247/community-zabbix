@@ -8,24 +8,24 @@ Creates a network discovery rule.
 ## SYNTAX
 
 ```
-New-ZbxNetworkDiscoveryRule [[-Name] <string>] [[-IpRange] <string>] [-ProxyId <ulong>] [-Delay <string>] [-Status <ZabbixNetworkDiscoveryRuleStatus>] [-ConcurrencyMax <int>] [-Check <ZabbixNetworkDiscoveryCheckRequest[]>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+New-ZbxNetworkDiscoveryRule [[-Name] <string>] [[-IPRange] <string>] [-ProxyId <ulong>] [-Delay <string>] [-Status <ZabbixNetworkDiscoveryRuleStatus>] [-ConcurrencyMax <int>] [-Check <ZabbixNetworkDiscoveryCheckRequest[]>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
 
-A network discovery rule scans IP ranges on a schedule with its checks and reports the hosts and services it finds, for discovery actions to act on. The New-ZbxNetworkDiscoveryRule cmdlet sends drule.create with one request field per parameter, then reads the new network discovery rule back with drule.get and writes it. The server requires -Name and -IpRange; -AdditionalProperty sets any other field by its API name and wins over a parameter. -WhatIf shows what would be created, and the command needs a connection made with Connect-ZbxServer.
+A network discovery rule scans IP ranges on a schedule with its checks and reports the hosts and services it finds, for discovery actions to act on. The New-ZbxNetworkDiscoveryRule cmdlet sends drule.create with one request field per parameter, then reads the new network discovery rule back with drule.get and writes it. The server requires -Name and -IPRange; -AdditionalProperty sets any other field by its API name and wins over a parameter. -WhatIf shows what would be created, and the command needs a connection made with Connect-ZbxServer.
 
 ## EXAMPLES
 
 ### Example 1: Create a discovery rule that pings a range
 
 ```powershell
-New-ZbxNetworkDiscoveryRule -Name 'Local network' -IpRange '192.0.2.1-254' -Delay '1h' -Status Disabled `
+New-ZbxNetworkDiscoveryRule -Name 'Local network' -IPRange '192.0.2.1-254' -Delay '1h' -Status Disabled `
     -Check (New-ZbxNetworkDiscoveryCheck -Type Icmp) |
-    Select-Object NetworkDiscoveryRuleId, Name, IpRange, Delay, Status
+    Select-Object NetworkDiscoveryRuleId, Name, IPRange, Delay, Status
 ```
 
--IpRange takes ranges, CIDR blocks and lists; -Delay is how often the server scans (1h by default). The rule is created disabled so nothing is scanned yet; the created rule is read back and written.
+-IPRange takes ranges, CIDR blocks and lists; -Delay is how often the server scans (1h by default). The rule is created disabled so nothing is scanned yet; the created rule is read back and written.
 
 ### Example 2: Create a rule with several checks
 
@@ -35,7 +35,7 @@ $checks = @(
     New-ZbxNetworkDiscoveryCheck -Type ZabbixAgent -Key 'system.hostname' -Port 10050 -Unique
     New-ZbxNetworkDiscoveryCheck -Type Tcp -Ports '22,443'
 )
-New-ZbxNetworkDiscoveryRule -Name 'Local network' -IpRange '192.0.2.0/24' -Check $checks -ConcurrencyMax 10 -Status Disabled |
+New-ZbxNetworkDiscoveryRule -Name 'Local network' -IPRange '192.0.2.0/24' -Check $checks -ConcurrencyMax 10 -Status Disabled |
     Out-Null
 Get-ZbxNetworkDiscoveryRule -Name 'Local network' -SelectNetworkDiscoveryChecks |
     ForEach-Object Checks | Select-Object Type, Key, Ports, Unique
@@ -47,9 +47,9 @@ Each check is one kind of probe; -Unique on one of them decides when two devices
 
 ```powershell
 $proxy = New-ZbxProxy -Name 'proxy-01' -OperatingMode Active
-New-ZbxNetworkDiscoveryRule -Name 'Office printers' -IpRange '192.0.2.100-120' -ProxyId $proxy.ProxyId -Status Disabled `
+New-ZbxNetworkDiscoveryRule -Name 'Office printers' -IPRange '192.0.2.100-120' -ProxyId $proxy.ProxyId -Status Disabled `
     -Check (New-ZbxNetworkDiscoveryCheck -Type SnmpV2c -SnmpOid '1.3.6.1.2.1.1.1.0' -SnmpCommunity '{$SNMP_COMMUNITY}' -Port 161) |
-    Select-Object Name, IpRange, ProxyId
+    Select-Object Name, IPRange, ProxyId
 ```
 
 -ProxyId takes the proxy's id: the proxy scans its own network and reports what it finds to the server.
@@ -86,7 +86,7 @@ Unique name for the network discovery rule. Required.
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -IpRange
+### -IPRange
 
 Addresses to scan, as a comma-separated list of single IP addresses, ranges such as 192.168.1.1-255, and CIDR subnets; each range may cover at most 65536 addresses. Required.
 
@@ -193,7 +193,7 @@ Creates without a confirmation prompt even where $ConfirmPreference is at or bel
 
 ### -InputObject
 
-A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIp, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
+A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIP, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
 
 | | |
 | --- | --- |
@@ -236,7 +236,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 ## INPUTS
 
 - `ulong`: Bound to -ProxyId (ByPropertyName).
-- `string`: Bound to -Name (ByPropertyName), -IpRange (ByPropertyName), -Delay (ByPropertyName). Text.
+- `string`: Bound to -Name (ByPropertyName), -IPRange (ByPropertyName), -Delay (ByPropertyName). Text.
 - `ZabbixNetworkDiscoveryRuleStatus`: Bound to -Status (ByPropertyName). The network discovery rule status values: DRULE_STATUS_* in defines.inc.php.
 - `int`: Bound to -ConcurrencyMax (ByPropertyName). A number.
 - `ZabbixNetworkDiscoveryCheckRequest[]`: Bound to -Check (ByPropertyName). Network discovery check request class.

@@ -17,11 +17,11 @@ public sealed class InvokeZbxDiagnosticCommand : ZabbixServerCmdlet
     // means its default stats, "extend".
     private static readonly ZabbixTaskRequest s_everySection = new()
     {
-        HistoryCache = new() { Stats = ZabbixOutput.Extend },
-        ValueCache = new() { Stats = ZabbixOutput.Extend },
-        Preprocessing = new() { Stats = ZabbixOutput.Extend },
-        Alerting = new() { Stats = ZabbixOutput.Extend },
-        Lld = new() { Stats = ZabbixOutput.Extend },
+        HistoryCache = new() { Statistics = ZabbixOutput.Extend },
+        ValueCache = new() { Statistics = ZabbixOutput.Extend },
+        Preprocessing = new() { Statistics = ZabbixOutput.Extend },
+        Alerting = new() { Statistics = ZabbixOutput.Extend },
+        LowLevelDiscovery = new() { Statistics = ZabbixOutput.Extend },
     };
 
     /// <summary>What to report; every section when omitted.</summary>

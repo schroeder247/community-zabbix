@@ -8,7 +8,7 @@ Changes a frontend module.
 ## SYNTAX
 
 ```
-Set-ZbxModule [-InputObject] <ZabbixReference<ZabbixModule>[]> [-Status <ZabbixModuleStatus>] [-Config <JsonElement>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Set-ZbxModule [-InputObject] <ZabbixReference<ZabbixModule>[]> [-Status <ZabbixModuleStatus>] [-Configuration <JsonElement>] [-AdditionalProperty <Hashtable>] [-Force] [-PassThru] [-PipedRecord <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -65,7 +65,7 @@ Whether the module is enabled.
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -Config
+### -Configuration
 
 The configuration of the module as a free-form object. Takes a hashtable, an ordered dictionary, a [pscustomobject] or an array of them, JSON text, or a JsonElement.
 
@@ -171,7 +171,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 
 - `ZabbixReference<ZabbixModule>[]`: Bound to -InputObject (ByValue). Represents a reference to an API object: a parameter that points at an API object takes its id, its name, or the object itself piped from a Get- cmdlet, and becomes an id before the call — one parameter, three spellings, one resolution.
 - `ZabbixModuleStatus`: Bound to -Status (ByPropertyName). The module status values: MODULE_STATUS_* in defines.inc.php.
-- `JsonElement`: Bound to -Config (ByPropertyName).
+- `JsonElement`: Bound to -Configuration (ByPropertyName).
 - `PSObject`: Bound to -PipedRecord (ByValue). Each object as the API answers it.
 
 ## OUTPUTS

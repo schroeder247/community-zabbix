@@ -21,11 +21,16 @@ internal sealed partial class ZabbixApiEmitter
         "Count", "Keys", "Values", "Item", "ContainsKey", "TryGetValue", "GetEnumerator", "Entries",
     };
 
-    // A member's value as a local: its name in camel case, escaped (@status), so no keyword or member is hidden.
+    // A member's value as a local: its name in camel case, escaped (@status), so no keyword or member is hidden. A leading
+    // acronym is lower case whole (IP: ip), and before a word all but the word's capital (IPRange: ipRange, HANodeId:
+    // haNodeId), as the capitalization conventions write ioStream.
     private static string Local(string member)
     {
         string bare = member.TrimStart('@');
-        return "@" + char.ToLowerInvariant(bare[0]) + bare[1..];
+        int capitals = 0;
+        while (capitals < bare.Length && char.IsUpper(bare[capitals])) capitals++;
+        int lower = capitals <= 1 ? 1 : capitals == bare.Length ? capitals : capitals - 1;
+        return "@" + new string([.. bare[..lower].Select(char.ToLowerInvariant)]) + bare[lower..];
     }
 
     // The read record a get's parameters return, through the object's client.
@@ -68,10 +73,12 @@ internal sealed partial class ZabbixApiEmitter
             "ulong" => ("ulong", Entries + ".Of(" + local + ", static value => value.ToString(global::System.Globalization.CultureInfo.InvariantCulture))"),
             "double" => ("double", Entries + ".Of(" + local + ", static value => value.ToString(\"R\", global::System.Globalization.CultureInfo.InvariantCulture))"),
             "bool" or "apibool" => ("bool", Entries + ".Of(" + local + ", static value => value ? 1L : 0L)"),
-            // an interval or a port as the record types it, sent as Zabbix spells it; the hosts a trapper allows, as text
+            // an interval, a length, a port or an item key as the record types it, sent as Zabbix spells it; the hosts a
+            // trapper allows, as text
             ZabbixTypedFields.Interval => ("global::Community.Zabbix.ZabbixInterval", Entries + ".Of(" + local + ", static value => value.ToString())"),
             ZabbixTypedFields.Port => ("global::Community.Zabbix.ZabbixPort", Entries + ".Of(" + local + ", static value => value.ToString())"),
             ZabbixTypedFields.Duration => ("global::Community.Zabbix.ZabbixDuration", Entries + ".Of(" + local + ", static value => value.ToString())"),
+            ZabbixTypedFields.ItemKey => ("global::Community.Zabbix.ZabbixItemKey", Entries + ".Of(" + local + ", static value => value.ToString())"),
             ZabbixTypedFields.Peers => ("string", Entries + ".Of(" + local + ")"),
             _ when kind.StartsWith("enum:", StringComparison.Ordinal) && _enums.ContainsKey(kind[5..])
                 => ("global::Community.Zabbix." + Prefixed(kind[5..]), Entries + ".Of(" + local + ", static value => (long)value)"),
@@ -154,8 +161,9 @@ internal sealed partial class ZabbixApiEmitter
             if (s_dictionaryMembers.Contains(member)) member += "Value";
             if (search)
             {
-                // a search is a substring of the field's text, the text of an interval, a port and a trapper's hosts too
-                if (field.Kind is not ("string" or ZabbixTypedFields.Interval or ZabbixTypedFields.Duration or ZabbixTypedFields.Port or ZabbixTypedFields.Peers) || !seen.Add(member)) continue;
+                // a search is a substring of the field's text, the text of an interval, a length, a port, an item key and a
+                // trapper's hosts too
+                if (field.Kind is not ("string" or ZabbixTypedFields.Interval or ZabbixTypedFields.Duration or ZabbixTypedFields.Port or ZabbixTypedFields.ItemKey or ZabbixTypedFields.Peers) || !seen.Add(member)) continue;
                 members.Add((member, wire, "string", "global::Community.Zabbix.ZabbixFieldValue.FromString(" + Local(member) + ")", field, Prefixed(owner.Name) + "." + Member(field.Name).TrimStart('@')));
             }
             else if (FilterShape(field.Kind, member) is { } shape && seen.Add(member))

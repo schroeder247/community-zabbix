@@ -2,7 +2,7 @@
 # License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
 #region Raise a trigger's severity
 # -InputObject (position 0) takes the trigger's name, id or object.
-Set-ZbxTrigger -InputObject 'Too many requests on web-01' -Priority Disaster
+Set-ZbxTrigger -InputObject 'Too many requests on web-01' -Severity Disaster
 #endregion
 
 #region Change the triggers of a host through the pipeline

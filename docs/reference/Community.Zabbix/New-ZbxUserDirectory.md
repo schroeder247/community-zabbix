@@ -8,7 +8,7 @@ Creates a user directory.
 ## SYNTAX
 
 ```
-New-ZbxUserDirectory [[-Name] <string>] [[-IdpType] <ZabbixIdpType>] [-ProvisionStatus <bool>] [-Description <string>] [-LdapHost <string>] [-Port <string>] [-BaseDn <string>] [-BindDn <string>] [-BindPassword <SecureString>] [-SearchAttribute <string>] [-StartTls <bool>] [-SearchFilter <string>] [-GroupBaseDn <string>] [-UserReferenceAttribute <string>] [-GroupName <string>] [-UserUsername <string>] [-UserLastName <string>] [-GroupMember <string>] [-GroupFilter <string>] [-GroupMembership <string>] [-IdpEntityId <string>] [-SsoUrl <string>] [-SloUrl <string>] [-SpEntityId <string>] [-NameIdFormat <string>] [-UsernameAttribute <string>] [-SignMessages <bool>] [-SignAssertions <bool>] [-SignAuthnRequests <bool>] [-SignLogoutRequests <bool>] [-SignLogoutResponses <bool>] [-EncryptNameId <bool>] [-EncryptAssertions <bool>] [-ScimStatus <bool>] [-ProvisionGroup <ZabbixUserDirectoryProvisionGroupRequest[]>] [-ProvisionMedia <ZabbixUserDirectoryProvisionMediaRequest[]>] [-IdpCertificate <string>] [-SpCertificate <string>] [-SpPrivateKey <string>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+New-ZbxUserDirectory [[-Name] <string>] [[-IdpType] <ZabbixIdpType>] [-ProvisionStatus <bool>] [-Description <string>] [-LdapHost <string>] [-Port <string>] [-BaseDN <string>] [-BindDN <string>] [-BindPassword <SecureString>] [-SearchAttribute <string>] [-StartTls <bool>] [-SearchFilter <string>] [-GroupBaseDN <string>] [-UserReferenceAttribute <string>] [-GroupName <string>] [-UserUserName <string>] [-UserLastName <string>] [-GroupMember <string>] [-GroupFilter <string>] [-GroupMembership <string>] [-IdpEntityId <string>] [-SsoUrl <string>] [-SloUrl <string>] [-SPEntityId <string>] [-NameIdFormat <string>] [-UserNameAttribute <string>] [-SignMessages <bool>] [-SignAssertions <bool>] [-SignAuthnRequests <bool>] [-SignLogoutRequests <bool>] [-SignLogoutResponses <bool>] [-EncryptNameId <bool>] [-EncryptAssertions <bool>] [-ScimStatus <bool>] [-ProvisionGroup <ZabbixUserDirectoryProvisionGroupRequest[]>] [-ProvisionMedia <ZabbixUserDirectoryProvisionMediaRequest[]>] [-IdpCertificate <string>] [-SPCertificate <string>] [-SPPrivateKey <string>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -20,7 +20,7 @@ A user directory is an LDAP server or a SAML identity provider that users authen
 ### Example 1: Create a user directory
 
 ```powershell
-New-ZbxUserDirectory -Name 'Corporate LDAP' -IdpType Ldap -LdapHost 'ldap.example.com' -Port '389' -BaseDn 'ou=people,dc=example,dc=com' -SearchAttribute 'uid'
+New-ZbxUserDirectory -Name 'Corporate LDAP' -IdpType Ldap -LdapHost 'ldap.example.com' -Port '389' -BaseDN 'ou=people,dc=example,dc=com' -SearchAttribute 'uid'
 ```
 
 Creates a user directory named Corporate LDAP. The command writes the new user directory, read back from the server.
@@ -117,7 +117,7 @@ The TCP port of the LDAP server.
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -BaseDn
+### -BaseDN
 
 The LDAP base path under which user accounts are searched, for example ou=Users,dc=example,dc=org; for direct user binding it contains the %{user} placeholder.
 
@@ -132,7 +132,7 @@ The LDAP base path under which user accounts are searched, for example ou=Users,
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -BindDn
+### -BindDN
 
 The distinguished name of the LDAP account used to bind and search the server; empty for anonymous binding and for direct user binding.
 
@@ -207,7 +207,7 @@ A custom LDAP filter used to locate the user account at login, with the %{attr} 
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -GroupBaseDn
+### -GroupBaseDN
 
 The LDAP base path under which groups are searched for the group membership check; ignored during provisioning when a group membership attribute is set.
 
@@ -252,7 +252,7 @@ The directory attribute that holds the group name used to map directory groups t
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -UserUsername
+### -UserUserName
 
 The directory attribute (also the SCIM attribute when SCIM provisioning is on) whose value becomes the name of a provisioned user, for example givenName or displayName.
 
@@ -372,7 +372,7 @@ The URL of the identity provider's SAML single logout service, to which logout r
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -SpEntityId
+### -SPEntityId
 
 The identifier of Zabbix as the SAML service provider, a URL or any string.
 
@@ -402,7 +402,7 @@ The SAML name ID format requested from the identity provider, for example urn:oa
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -UsernameAttribute
+### -UserNameAttribute
 
 The SAML attribute (also the SCIM attribute when SCIM provisioning is on) whose value is compared with the Zabbix username at login.
 
@@ -582,7 +582,7 @@ The PEM content of the identity provider certificate; accepted only when SAML ce
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -SpCertificate
+### -SPCertificate
 
 The PEM content of the service provider certificate; accepted only when SAML certificates are kept in the database, and never returned by the API.
 
@@ -597,7 +597,7 @@ The PEM content of the service provider certificate; accepted only when SAML cer
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -SpPrivateKey
+### -SPPrivateKey
 
 The PEM content of the service provider private key; accepted only when SAML certificates are kept in the database, and never returned by the API.
 
@@ -644,7 +644,7 @@ Creates without a confirmation prompt even where $ConfirmPreference is at or bel
 
 ### -InputObject
 
-A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIp, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
+A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIP, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
 
 | | |
 | --- | --- |
@@ -687,7 +687,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 ## INPUTS
 
 - `ZabbixIdpType`: Bound to -IdpType (ByPropertyName). The idp type values: IDP_TYPE_* in defines.inc.php.
-- `string`: Bound to -Name (ByPropertyName), -Description (ByPropertyName), -LdapHost (ByPropertyName), -Port (ByPropertyName), -BaseDn (ByPropertyName), -BindDn (ByPropertyName), -SearchAttribute (ByPropertyName), -SearchFilter (ByPropertyName), -GroupBaseDn (ByPropertyName), -UserReferenceAttribute (ByPropertyName), -GroupName (ByPropertyName), -UserUsername (ByPropertyName), -UserLastName (ByPropertyName), -GroupMember (ByPropertyName), -GroupFilter (ByPropertyName), -GroupMembership (ByPropertyName), -IdpEntityId (ByPropertyName), -SsoUrl (ByPropertyName), -SloUrl (ByPropertyName), -SpEntityId (ByPropertyName), -NameIdFormat (ByPropertyName), -UsernameAttribute (ByPropertyName), -IdpCertificate (ByPropertyName), -SpCertificate (ByPropertyName), -SpPrivateKey (ByPropertyName). Text.
+- `string`: Bound to -Name (ByPropertyName), -Description (ByPropertyName), -LdapHost (ByPropertyName), -Port (ByPropertyName), -BaseDN (ByPropertyName), -BindDN (ByPropertyName), -SearchAttribute (ByPropertyName), -SearchFilter (ByPropertyName), -GroupBaseDN (ByPropertyName), -UserReferenceAttribute (ByPropertyName), -GroupName (ByPropertyName), -UserUserName (ByPropertyName), -UserLastName (ByPropertyName), -GroupMember (ByPropertyName), -GroupFilter (ByPropertyName), -GroupMembership (ByPropertyName), -IdpEntityId (ByPropertyName), -SsoUrl (ByPropertyName), -SloUrl (ByPropertyName), -SPEntityId (ByPropertyName), -NameIdFormat (ByPropertyName), -UserNameAttribute (ByPropertyName), -IdpCertificate (ByPropertyName), -SPCertificate (ByPropertyName), -SPPrivateKey (ByPropertyName). Text.
 - `bool`: Bound to -ProvisionStatus (ByPropertyName), -StartTls (ByPropertyName), -SignMessages (ByPropertyName), -SignAssertions (ByPropertyName), -SignAuthnRequests (ByPropertyName), -SignLogoutRequests (ByPropertyName), -SignLogoutResponses (ByPropertyName), -EncryptNameId (ByPropertyName), -EncryptAssertions (ByPropertyName), -ScimStatus (ByPropertyName). True or false.
 - `ZabbixUserDirectoryProvisionGroupRequest[]`: Bound to -ProvisionGroup (ByPropertyName). provision_groups of a ZabbixUserDirectoryCreateRequest.
 - `ZabbixUserDirectoryProvisionMediaRequest[]`: Bound to -ProvisionMedia (ByPropertyName). provision_media of a ZabbixUserDirectoryCreateRequest.

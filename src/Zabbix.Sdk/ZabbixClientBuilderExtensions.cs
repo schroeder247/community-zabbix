@@ -182,18 +182,18 @@ public static class ZabbixClientBuilderExtensions
 
         /// <summary>
         /// Sets how long a call to <paramref name="method"/> may take, in place of the attempt and total timeouts: for a call the
-        /// others don't fit, such as <c>configuration.import</c> of a large template (<see cref="ZabbixClientOptions.Timeouts"/>).
+        /// others don't fit, such as <see cref="ZabbixApiMethod.ConfigurationImport"/> of a large template
+        /// (<see cref="ZabbixClientOptions.Timeouts"/>, which keeps the method's name).
         /// </summary>
-        /// <param name="method">The API method, such as <c>history.get</c>, matched without regard to case.</param>
+        /// <param name="method">The API method, such as <see cref="ZabbixApiMethod.HistoryGet"/>.</param>
         /// <param name="timeout">The longest a call to the method may take.</param>
         /// <returns>The builder.</returns>
-        /// <exception cref="ArgumentException"><paramref name="method"/> is empty.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="method"/> is <see langword="null"/>.</exception>
-        public TBuilder WithTimeout(string method, TimeSpan timeout)
+        /// <exception cref="ArgumentException"><paramref name="method"/> is the default value.</exception>
+        public TBuilder WithTimeout(ZabbixApiMethod method, TimeSpan timeout)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            ArgumentException.ThrowIfNullOrWhiteSpace(method);
-            builder.Services.Configure<ZabbixClientOptions>(builder.Name, options => options.Timeouts[method] = timeout);
+            ZabbixApiMethod.ThrowIfDefault(method);
+            builder.Services.Configure<ZabbixClientOptions>(builder.Name, options => options.Timeouts[method.Name] = timeout);
             return builder;
         }
 

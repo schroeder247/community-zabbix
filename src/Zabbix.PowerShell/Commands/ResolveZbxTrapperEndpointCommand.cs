@@ -1,6 +1,5 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
-using System.Globalization;
 using System.Management.Automation;
 using System.Net;
 
@@ -47,14 +46,14 @@ public sealed class ResolveZbxTrapperEndpointCommand : ZabbixServerCmdlet
                         _proxies[proxyId] = proxy = found.Count > 0 ? found[0] : null;
                     }
                     if (proxy is { Address.Length: > 0 })
-                        return (IReadOnlyList<DnsEndPoint>)[new DnsEndPoint(proxy.Address!, int.TryParse(proxy.Port, NumberStyles.Integer, CultureInfo.InvariantCulture, out int port) ? port : ZabbixWireClient.DefaultServerPort)];
+                        return (IReadOnlyList<DnsEndPoint>)[new DnsEndPoint(proxy.Address!, proxy.Port?.Number ?? ZabbixWireClient.DefaultServerPort)];
                 }
                 return await ResolveTrapperAsync(null, cancellationToken).ConfigureAwait(false);
             }, out IReadOnlyList<DnsEndPoint>? nodes, Connected.Name))
         {
             DnsEndPoint node = nodes[0];
             var result = new PSObject();
-            result.Properties.Add(new PSNoteProperty("HostName", host.TechnicalName));
+            result.Properties.Add(new PSNoteProperty("HostName", host.HostName));
             result.Properties.Add(new PSNoteProperty("HostId", host.HostId));
             result.Properties.Add(new PSNoteProperty("Server", node.Host));
             result.Properties.Add(new PSNoteProperty("Address", node.Host));

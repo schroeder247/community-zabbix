@@ -10,7 +10,7 @@ public sealed class ApiJsonContractTests
     [Fact]
     public void The_public_options_write_a_record_as_the_api_takes_it_and_read_it_back()
     {
-        var host = new ZabbixHost { HostId = 10084, TechnicalName = "web-01", Status = ZabbixHostStatus.Disabled };
+        var host = new ZabbixHost { HostId = 10084, HostName = "web-01", Status = ZabbixHostStatus.Disabled };
 
         string json = JsonSerializer.Serialize(host, ZabbixJson.Options);
         ZabbixHost? back = JsonSerializer.Deserialize<ZabbixHost>(json, ZabbixJson.Options);

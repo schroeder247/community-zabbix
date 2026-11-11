@@ -20,7 +20,7 @@ The Copy-ZbxHost cmdlet exports the host in -InputObject with configuration.expo
 ### Example 1: Copy a host
 
 ```powershell
-Get-ZbxHost -Name 'web-01' | Copy-ZbxHost -NewName 'web-02' -PassThru | Select-Object TechnicalName, HostId
+Get-ZbxHost -Name 'web-01' | Copy-ZbxHost -NewName 'web-02' -PassThru | Select-Object HostName, HostId
 ```
 
 The copy takes web-01's groups, interfaces, items and triggers under the name web-02.

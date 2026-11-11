@@ -4,7 +4,10 @@ using System.Text.Json;
 
 namespace Community.Zabbix.Generator;
 
-/// <summary>An API object and its methods.</summary>
+/// <summary>
+/// An API object and its methods. <see cref="CmdletNoun"/> is the noun its commands are named with where its client was
+/// respelled (<see cref="ZabbixRespellings"/>): the modules keep their commands.
+/// </summary>
 internal sealed record ServiceDescription(
     string Object,
     string Client,
@@ -16,7 +19,8 @@ internal sealed record ServiceDescription(
     EquatableArray<MethodDescription> Methods,
     ServiceHelp? Help = null,
     string? IdField = null,
-    EquatableArray<WireNote> RequiredWhen = default)
+    EquatableArray<WireNote> RequiredWhen = default,
+    string? CmdletNoun = null)
 {
     public static ServiceDescription Read(JsonElement element) => new(
         element.GetProperty("object").GetString()!,

@@ -33,6 +33,9 @@ public sealed class RequestCompileTests
         ulong itemId = 7;
         ZabbixHostGetParameters parameters = new() { Limit = 10 };
         CancellationToken cancellationToken = default;
+        ZabbixItemKey<ulong> pending = new("orders.pending");
+        ZabbixItemKey<long> balance = new("account.balance");
+        ZabbixItemKey<string> line = new("app.log");
 
         """;
 
@@ -53,7 +56,7 @@ public sealed class RequestCompileTests
     [Fact]
     public void A_request_initializer_that_leaves_out_a_required_field_does_not_compile()
     {
-        Diagnostic missing = Assert.Single(Errors("""var request = new ZabbixHostCreateRequest { TechnicalName = "web-02" };"""));
+        Diagnostic missing = Assert.Single(Errors("""var request = new ZabbixHostCreateRequest { HostName = "web-02" };"""));
 
         Assert.Equal("CS9035", missing.Id);
         Assert.Contains("ZabbixHostCreateRequest.Groups", missing.GetMessage(CultureInfo.InvariantCulture), StringComparison.Ordinal);
@@ -67,6 +70,14 @@ public sealed class RequestCompileTests
             ZabbixTagRequest tag = ("env", "prod");
             ZabbixHostMacroRequest macro = ("{$SNMP_COMMUNITY}", "public");
             """));
+
+    [Fact]
+    public void An_item_s_key_is_a_ZabbixItemKey_and_text_is_no_typed_key()
+    {
+        Assert.NotEmpty(Errors("""await zabbix.Items.CreateAsync(1UL, "Requests", ZabbixItemType.Trapper, "app.requests", ZabbixItemValueType.Unsigned);"""));
+        Assert.NotEmpty(Errors("""await zabbix.Items.CreateAsync(1UL, "app.requests", ZabbixItemType.Trapper);"""));
+        Assert.Empty(Errors("""var item = new ZabbixItemCreateRequest(1UL, "Requests", ZabbixItemType.Trapper, ZabbixItemKey.Parse("app.requests"), ZabbixItemValueType.Unsigned) { Name = "Pending orders" };"""));
+    }
 
     [Fact]
     public void A_node_s_lambda_cannot_change_the_id_it_updates()
@@ -88,7 +99,7 @@ public sealed class RequestCompileTests
                 Sort = [ZabbixHostFields.VisibleName.Descending(), ZabbixHostFields.HostId],
             };
             NewestFirst(hosts, ZabbixHostFields.HostId);
-            await zabbix.Items.CreateAsync(1UL, "Requests", ZabbixItemType.Trapper, "app.requests", ZabbixItemValueType.Unsigned, i =>
+            await zabbix.Items.CreateAsync(1UL, "Requests", ZabbixItemType.Trapper, ZabbixItemKey.Parse("app.requests"), ZabbixItemValueType.Unsigned, i =>
             {
                 i.TrapperHosts = [IPNetwork.Parse("10.0.0.0/8"), IPAddress.IPv6Loopback, ZabbixPeer.Parse("{HOST.CONN}")];
                 i.History = TimeSpan.FromDays(90);
@@ -153,7 +164,14 @@ public sealed class RequestCompileTests
         { """await zabbix.HostGroups.CreateAsync(new("Linux servers") { Uuid = "6f1ed29f0b1a4b4e8c3a8c4b2e5d7a90" });""", "ZabbixHostGroupClient.CreateAsync(ZabbixHostGroupCreateRequest, CancellationToken)" },
         { """await zabbix.HostGroups.CreateAsync("Linux servers");""", "ZabbixHostGroupClient.CreateAsync(string, CancellationToken)" },
         { """await zabbix.HostGroups.CreateAsync("Linux servers", g => g.Uuid = "6f1ed29f0b1a4b4e8c3a8c4b2e5d7a90");""", "ZabbixHostGroupClient.CreateAsync(string, Action<ZabbixHostGroupCreateRequest>, CancellationToken)" },
-        { """await zabbix.Items.CreateAsync(1UL, "Requests", ZabbixItemType.Trapper, "app.requests", ZabbixItemValueType.Unsigned, i => { i.TrapperHosts = [IPNetwork.Parse("10.0.0.0/8"), IPAddress.IPv6Loopback]; i.Delay = TimeSpan.Zero; });""", "ZabbixItemClient.CreateAsync(ulong, string, ZabbixItemType, string, ZabbixItemValueType, Action<ZabbixItemCreateRequest>, CancellationToken)" },
+        { """await zabbix.Items.CreateAsync(1UL, "Requests", ZabbixItemType.Trapper, ZabbixItemKey.Parse("app.requests"), ZabbixItemValueType.Unsigned, i => { i.TrapperHosts = [IPNetwork.Parse("10.0.0.0/8"), IPAddress.IPv6Loopback]; i.Delay = TimeSpan.Zero; });""", "ZabbixItemClient.CreateAsync(ulong, string, ZabbixItemType, ZabbixItemKey, ZabbixItemValueType, Action<ZabbixItemCreateRequest>, CancellationToken)" },
+        { """await zabbix.Items.CreateAsync(1UL, "Requests", ZabbixItemType.Trapper, ZabbixItemKey.Parse("app.requests"), ZabbixItemValueType.Unsigned);""", "ZabbixItemClient.CreateAsync(ulong, string, ZabbixItemType, ZabbixItemKey, ZabbixItemValueType, CancellationToken)" },
+        // the typed key's create beside the short create: its value type from the key, its name the key's until the lambda names it
+        { """await zabbix.Items.CreateAsync(1UL, pending, ZabbixItemType.Trapper);""", "ZabbixItemClient.CreateAsync<ulong>(ulong, ZabbixItemKey<ulong>, ZabbixItemType, CancellationToken)" },
+        { """await zabbix.Items.CreateAsync(1UL, pending, ZabbixItemType.Trapper, cancellationToken);""", "ZabbixItemClient.CreateAsync<ulong>(ulong, ZabbixItemKey<ulong>, ZabbixItemType, CancellationToken)" },
+        { """await zabbix.Items.CreateAsync(1UL, pending, ZabbixItemType.Trapper, i => i.Name = "Pending orders");""", "ZabbixItemClient.CreateAsync<ulong>(ulong, ZabbixItemKey<ulong>, ZabbixItemType, Action<ZabbixItemCreateRequest>, CancellationToken)" },
+        { """await zabbix.Items.CreateAsync(1UL, balance, ZabbixItemType.Trapper, ZabbixItemValueType.Float);""", "ZabbixItemClient.CreateAsync<long>(ulong, ZabbixItemKey<long>, ZabbixItemType, ZabbixItemValueType, CancellationToken)" },
+        { """await zabbix.Items.CreateAsync(1UL, line, ZabbixItemType.Trapper, ZabbixItemValueType.Log, i => i.LogTimeFormat = "yyyy-MM-dd hh:mm:ss", cancellationToken);""", "ZabbixItemClient.CreateAsync<string>(ulong, ZabbixItemKey<string>, ZabbixItemType, ZabbixItemValueType, Action<ZabbixItemCreateRequest>, CancellationToken)" },
         { """await zabbix.Hosts.UpdateAsync(new(10084) { Status = ZabbixHostStatus.Disabled });""", "ZabbixHostClient.UpdateAsync(ZabbixHostUpdateRequest, CancellationToken)" },
         { """await zabbix.Hosts["web-02"].UpdateAsync(h => h.Status = ZabbixHostStatus.Disabled);""", "ZabbixHostNode.UpdateAsync(Action<ZabbixHostUpdateRequest>, CancellationToken)" },
         { """await zabbix.Hosts[10084].UpdateAsync(h => { h.Status = ZabbixHostStatus.Disabled; h.Tags = [("env", "prod")]; });""", "ZabbixHostNode.UpdateAsync(Action<ZabbixHostUpdateRequest>, CancellationToken)" },

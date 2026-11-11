@@ -50,7 +50,7 @@ public sealed class NestedBuilderWireFormTests
         using Shell shell = Shell.Open();
         using var powershell = System.Management.Automation.PowerShell.Create(shell.Runspace);
         powershell.AddCommand(cmdlet.VerbName + "-" + cmdlet.NounName);
-        foreach (PropertyInfo parameter in parameters) powershell.AddParameter(parameter.Name, Sample(parameter.PropertyType));
+        foreach (PropertyInfo parameter in parameters) powershell.AddParameter(parameter.Name, Sample(parameter.PropertyType, Member(contract, parameter.Name)));
 
         var table = Assert.IsType<Hashtable>(Assert.Single(Shell.Invoke(powershell, builder)).BaseObject);
 
@@ -132,7 +132,7 @@ public sealed class NestedBuilderWireFormTests
         // An LLD macro name is written in its braced form (NAME -> {#NAME}).
         using Shell shell = Shell.Open();
 
-        Run run = shell.Invoke($"(New-ZbxLldFilterCondition -Macro '{given}' -Value x).macro; (New-ZbxLldMacroPath -LldMacro '{given}' -Path '$.x').lld_macro");
+        Run run = shell.Invoke($"(New-ZbxLldFilterCondition -Macro '{given}' -Value x).macro; (New-ZbxLldMacroPath -LowLevelDiscoveryMacro '{given}' -Path '$.x').lld_macro");
 
         Assert.Empty(run.Errors);
         Assert.Equal(["{#IFNAME}", "{#IFNAME}"], run.Output.Select(o => o.ToString()));
@@ -209,13 +209,19 @@ public sealed class NestedBuilderWireFormTests
         }
     }
 
+    // The type of the record member a parameter writes, when the builder names it alike.
+    private static Type? Member(JsonTypeInfo contract, string parameter)
+        => contract.Properties.FirstOrDefault(p => p.AttributeProvider is MemberInfo m && m.Name == parameter)?.PropertyType is { } type
+            ? Nullable.GetUnderlyingType(type) ?? type
+            : null;
+
     // A value for one builder parameter: "AABBCC" for a string passes the color check, stays itself as a widget type and
-    // becomes {#AABBCC} as an LLD macro; an enum's second member (non-zero where there is one); a nested record built
-    // from its own contract.
-    private static object? Sample(Type type)
+    // becomes {#AABBCC} as an LLD macro, and "1h" for a string that writes a length of time; an enum's second member
+    // (non-zero where there is one); a nested record built from its own contract.
+    private static object? Sample(Type type, Type? member)
     {
         Type bare = Nullable.GetUnderlyingType(type) ?? type;
-        if (bare == typeof(string)) return "AABBCC";
+        if (bare == typeof(string)) return member == typeof(ZabbixDuration) || member == typeof(ZabbixInterval) ? "1h" : "AABBCC";
         if (bare == typeof(int) || bare == typeof(long) || bare == typeof(ulong) || bare == typeof(double)) return 3;
         if (bare == typeof(bool)) return true;
         if (bare == typeof(ulong)) return "5";

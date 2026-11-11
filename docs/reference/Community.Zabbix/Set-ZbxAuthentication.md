@@ -8,7 +8,7 @@ Changes the server's authentication settings.
 ## SYNTAX
 
 ```
-Set-ZbxAuthentication [-AuthenticationType <ZabbixAuthenticationType>] [-LdapAuthEnabled <bool>] [-LdapCaseSensitive <ZabbixAuthCase>] [-LdapUserDirectoryId <ulong>] [-SamlAuthEnabled <bool>] [-SamlCaseSensitive <ZabbixAuthCase>] [-PasswordMinLength <int>] [-PasswordCheckRules <ZabbixPasswordCheckRules>] [-DisabledUserGroupId <ulong>] [-JitProvisionInterval <string>] [-SamlJitStatus <bool>] [-LdapJitStatus <bool>] [-MfaStatus <bool>] [-MfaId <ulong>] [-HttpAuthEnabled <bool>] [-HttpLoginForm <ZabbixHttpLoginForm>] [-HttpStripDomains <string>] [-HttpCaseSensitive <ZabbixAuthCase>] [-Force] [-PassThru] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+Set-ZbxAuthentication [-AuthenticationType <ZabbixAuthenticationType>] [-LdapAuthenticationEnabled <bool>] [-LdapCaseSensitive <ZabbixAuthenticationCase>] [-LdapUserDirectoryId <ulong>] [-SamlAuthenticationEnabled <bool>] [-SamlCaseSensitive <ZabbixAuthenticationCase>] [-PasswordMinLength <int>] [-PasswordCheckRules <ZabbixPasswordCheckRules>] [-DisabledUserGroupId <ulong>] [-JitProvisionInterval <string>] [-SamlJitStatus <bool>] [-LdapJitStatus <bool>] [-MfaStatus <bool>] [-MfaId <ulong>] [-HttpAuthenticationEnabled <bool>] [-HttpLoginForm <ZabbixHttpLoginForm>] [-HttpStripDomains <string>] [-HttpCaseSensitive <ZabbixAuthenticationCase>] [-Force] [-PassThru] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -28,7 +28,7 @@ Applies to passwords set from now on; existing passwords keep working.
 ### Example 2: Preview turning on LDAP authentication
 
 ```powershell
-Set-ZbxAuthentication -LdapAuthEnabled $true -WhatIf
+Set-ZbxAuthentication -LdapAuthenticationEnabled $true -WhatIf
 ```
 
 -WhatIf shows the change and makes none; LDAP also needs a user directory (New-ZbxUserDirectory).
@@ -50,7 +50,7 @@ Which authentication method is default (authentication_type).
 | Pipeline input | False |
 | Wildcards | False |
 
-### -LdapAuthEnabled
+### -LdapAuthenticationEnabled
 
 Whether LDAP authentication is enabled (ldap_auth_enabled).
 
@@ -71,7 +71,7 @@ Whether LDAP logins are case-sensitive (ldap_case_sensitive).
 
 | | |
 | --- | --- |
-| Type | `ZabbixAuthCase` |
+| Type | `ZabbixAuthenticationCase` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |
@@ -95,7 +95,7 @@ The default LDAP user directory (ldap_userdirectoryid).
 | Pipeline input | False |
 | Wildcards | False |
 
-### -SamlAuthEnabled
+### -SamlAuthenticationEnabled
 
 Whether SAML authentication is enabled (saml_auth_enabled).
 
@@ -116,7 +116,7 @@ Whether SAML logins are case-sensitive (saml_case_sensitive).
 
 | | |
 | --- | --- |
-| Type | `ZabbixAuthCase` |
+| Type | `ZabbixAuthenticationCase` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |
@@ -245,7 +245,7 @@ The default MFA method (mfaid).
 | Pipeline input | False |
 | Wildcards | False |
 
-### -HttpAuthEnabled
+### -HttpAuthenticationEnabled
 
 Whether HTTP authentication is enabled (http_auth_enabled).
 
@@ -296,7 +296,7 @@ Whether HTTP logins are case-sensitive (http_case_sensitive).
 
 | | |
 | --- | --- |
-| Type | `ZabbixAuthCase` |
+| Type | `ZabbixAuthenticationCase` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |

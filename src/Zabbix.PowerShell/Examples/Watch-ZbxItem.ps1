@@ -28,7 +28,7 @@ with -PassThru.
 # -Interval takes Zabbix's time suffixes ('2s', '1m'), seconds or a time span; the watch reads every two seconds and
 # Receive-ZbxWatch writes each new value until Select-Object -First ends it.
 Watch-ZbxItem -Name 'items' -HostName 'web-01' -Key 'zabbix[host,,items]' -Interval '2s'
-Receive-ZbxWatch -Name 'items' | Select-Object -First 1 | Select-Object Host, Key, Value
+Receive-ZbxWatch -Name 'items' | Select-Object -First 1 | Select-Object HostName, Key, Value
 Stop-ZbxWatch -Name 'items'
 #endregion
 

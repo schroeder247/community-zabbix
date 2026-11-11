@@ -19,7 +19,7 @@ Remove-ZbxProxy -InputObject 'proxy-01', 'proxy-02' -Confirm:$false
 # -Host takes host names, ids or objects: those hosts are monitored by this proxy from now on (their MonitoredBy
 # becomes Proxy). -AllowedAddresses limits where an active proxy may connect from.
 New-ZbxProxy -Name 'proxy-01' -OperatingMode Active -AllowedAddresses '10.0.0.0/24' -Host 'web-01', 'db-01' | Out-Null
-Get-ZbxHost -Name 'web-01', 'db-01' | Select-Object TechnicalName, MonitoredBy, ProxyId
+Get-ZbxHost -Name 'web-01', 'db-01' | Select-Object HostName, MonitoredBy, ProxyId
 #endregion
 
 Set-ZbxHost -InputObject 'web-01', 'db-01' -MonitoredBy Server | Out-Null

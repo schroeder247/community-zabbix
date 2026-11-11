@@ -48,7 +48,7 @@ public sealed class LiveProxyTests
                 sent = await LiveFixtures.SendWhenKnownAsync(sender, [new ZabbixValue(host.Host, "zbxtest.trap", "2.5", DateTimeOffset.UtcNow)]);
                 IReadOnlyList<ZabbixHistoryRecord> rows = await scope.Server.History.GetAsync(new ZabbixHistoryGetParameters
                 {
-                    History = host["zbxtest.trap"].Type,
+                    ValueType = host["zbxtest.trap"].Type,
                     ItemIds = [host["zbxtest.trap"].ItemId],
                     Output = ZabbixOutput.Extend,
                 }, TestContext.Current.CancellationToken);

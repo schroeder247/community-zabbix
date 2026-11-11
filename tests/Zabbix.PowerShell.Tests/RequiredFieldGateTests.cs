@@ -127,13 +127,13 @@ public sealed class RequiredFieldGateTests
     }
 
     [Theory]
-    [InlineData("DRule", 18)]
-    [InlineData("DCheck", 19)]
+    [InlineData("NetworkDiscoveryRule", 18)]
+    [InlineData("NetworkDiscoveryCheck", 19)]
     [InlineData("Proxy", 20)]
     [InlineData("HostName", 22)]
     [InlineData("EventType", 23)]
     [InlineData("HostMetadata", 24)]
-    [InlineData("DHostIp", 7)]
+    [InlineData("DiscoveredHostIP", 7)]
     [InlineData("ServiceName", 28)]
     public void ZabbixActionConditionType_carries_every_event_sources_condition_types(string name, int value)
     {

@@ -8,7 +8,7 @@ Creates a connector.
 ## SYNTAX
 
 ```
-New-ZbxConnector [[-Name] <string>] [[-Url] <string>] [-Protocol <ZabbixConnectorProtocol>] [-DataType <ZabbixConnectorDataType>] [-ItemValueType <int>] [-AuthType <ZabbixHttpAuthentication>] [-Username <string>] [-Password <SecureString>] [-Token <SecureString>] [-MaxRecords <int>] [-MaxSenders <int>] [-MaxAttempts <int>] [-AttemptInterval <string>] [-Timeout <string>] [-HttpProxy <string>] [-VerifyPeer <bool>] [-VerifyHost <bool>] [-SslCertFile <string>] [-SslKeyFile <string>] [-SslKeyPassword <SecureString>] [-Description <string>] [-Status <ZabbixConnectorStatus>] [-TagsEvalType <ZabbixConditionEvalType>] [-Tag <ZabbixConnectorTagRequest[]>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
+New-ZbxConnector [[-Name] <string>] [[-Url] <string>] [-Protocol <ZabbixConnectorProtocol>] [-DataType <ZabbixConnectorDataType>] [-ItemValueType <int>] [-AuthenticationType <ZabbixHttpAuthentication>] [-UserName <string>] [-Password <SecureString>] [-Token <SecureString>] [-MaxRecords <int>] [-MaxSenders <int>] [-MaxAttempts <int>] [-AttemptInterval <string>] [-Timeout <string>] [-HttpProxy <string>] [-VerifyPeer <bool>] [-VerifyHost <bool>] [-SslCertificateFile <string>] [-SslKeyFile <string>] [-SslKeyPassword <SecureString>] [-Description <string>] [-Status <ZabbixConnectorStatus>] [-TagsEvaluationType <ZabbixConditionEvaluationType>] [-Tag <ZabbixConnectorTagRequest[]>] [-AdditionalProperty <Hashtable>] [-Force] [-InputObject <PSObject>] [-Connection <ZabbixConnection>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -102,7 +102,7 @@ A bitmask of the item value types the connector streams when it sends item value
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -AuthType
+### -AuthenticationType
 
 How the connector authenticates to the receiver: none, basic, NTLM, Kerberos, digest or bearer token. The default is none.
 
@@ -117,7 +117,7 @@ How the connector authenticates to the receiver: none, basic, NTLM, Kerberos, di
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -Username
+### -UserName
 
 The user name for basic, NTLM, Kerberos or digest authentication.
 
@@ -282,7 +282,7 @@ Whether the connector checks that the host name in the URL matches the receiver 
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -SslCertFile
+### -SslCertificateFile
 
 The path of the public SSL certificate file that the connector presents to the receiver.
 
@@ -357,13 +357,13 @@ Enabled/disabled status. Left out, the server stores ZBX_CONNECTOR_STATUS_ENABLE
 | Pipeline input | True (ByPropertyName) |
 | Wildcards | False |
 
-### -TagsEvalType
+### -TagsEvaluationType
 
 How the tag conditions combine: And/Or requires every tag name to match while conditions on the same tag name combine with OR; Or requires any condition to match. The default is And/Or.
 
 | | |
 | --- | --- |
-| Type | `ZabbixConditionEvalType` |
+| Type | `ZabbixConditionEvaluationType` |
 | Parameter sets | (All) |
 | Aliases | none |
 | Required | False |
@@ -419,7 +419,7 @@ Creates without a confirmation prompt even where $ConfirmPreference is at or bel
 
 ### -InputObject
 
-A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIp, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
+A piped object, whose properties bind the command's parameters by name: an Import-Csv row or a [pscustomobject] with Name, InterfaceIP, … columns creates one object per row. A piped Zabbix record binds only what is its own (ZabbixPipedRecord: Get-ZbxHost | New-ZbxItem takes the host's id, never its name or description), and an object that binds nothing is refused.
 
 | | |
 | --- | --- |
@@ -461,14 +461,14 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 
 ## INPUTS
 
-- `string`: Bound to -Name (ByPropertyName), -Url (ByPropertyName), -Username (ByPropertyName), -AttemptInterval (ByPropertyName), -Timeout (ByPropertyName), -HttpProxy (ByPropertyName), -SslCertFile (ByPropertyName), -SslKeyFile (ByPropertyName), -Description (ByPropertyName). Text.
+- `string`: Bound to -Name (ByPropertyName), -Url (ByPropertyName), -UserName (ByPropertyName), -AttemptInterval (ByPropertyName), -Timeout (ByPropertyName), -HttpProxy (ByPropertyName), -SslCertificateFile (ByPropertyName), -SslKeyFile (ByPropertyName), -Description (ByPropertyName). Text.
 - `ZabbixConnectorProtocol`: Bound to -Protocol (ByPropertyName). The connector protocol values: ZBX_STREAMING_PROTOCOL_* in defines.inc.php.
 - `ZabbixConnectorDataType`: Bound to -DataType (ByPropertyName). The connector data type values: ZBX_CONNECTOR_DATA_TYPE_* in defines.inc.php.
 - `int`: Bound to -ItemValueType (ByPropertyName), -MaxRecords (ByPropertyName), -MaxSenders (ByPropertyName), -MaxAttempts (ByPropertyName). A number.
-- `ZabbixHttpAuthentication`: Bound to -AuthType (ByPropertyName). The HTTP authentication values: ZBX_HTTP_AUTH_* in defines.inc.php.
+- `ZabbixHttpAuthentication`: Bound to -AuthenticationType (ByPropertyName). The HTTP authentication values: ZBX_HTTP_AUTH_* in defines.inc.php.
 - `bool`: Bound to -VerifyPeer (ByPropertyName), -VerifyHost (ByPropertyName). True or false.
 - `ZabbixConnectorStatus`: Bound to -Status (ByPropertyName). The connector status values: ZBX_CONNECTOR_STATUS_* in defines.inc.php.
-- `ZabbixConditionEvalType`: Bound to -TagsEvalType (ByPropertyName). The condition eval type values: CONDITION_EVAL_TYPE_* in defines.inc.php.
+- `ZabbixConditionEvaluationType`: Bound to -TagsEvaluationType (ByPropertyName). The condition evaluation type values: CONDITION_EVAL_TYPE_* in defines.inc.php.
 - `ZabbixConnectorTagRequest[]`: Bound to -Tag (ByPropertyName). tags of a ZabbixConnectorCreateRequest.
 - `PSObject`: Bound to -InputObject (ByValue). Each object as the API answers it.
 

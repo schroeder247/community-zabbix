@@ -160,7 +160,7 @@ public sealed class HttpTestAndTaskCommandsTests
 
         Run run = shell.Invoke("""
             New-ZbxHttpTest -Name login -Host web-01 -Step @(@{ name = 'Home'; url = 'http://localhost/'; no = 1 }) `
-                -SslCertFile cert.pem -SslKeyFile key.pem -SslKeyPassword (ConvertTo-SecureString 'k3y' -AsPlainText -Force) `
+                -SslCertificateFile cert.pem -SslKeyFile key.pem -SslKeyPassword (ConvertTo-SecureString 'k3y' -AsPlainText -Force) `
                 -Variable @{ '{user}' = 'admin' } -Header ([ordered]@{ Accept = 'text/html'; 'X-Trace' = '1' }) -Tag @{ env = 'lab' } `
                 -Confirm:$false | Out-Null
             """);

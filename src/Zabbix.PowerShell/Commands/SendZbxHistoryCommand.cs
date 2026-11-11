@@ -42,7 +42,7 @@ public sealed class SendZbxHistoryCommand : ZabbixServerCmdlet
 
     /// <inheritdoc/>
     protected override void ProcessRecord()
-        => _values.Add(new ZabbixHistoryPushRequest { Host = HostName, Key = Key, Value = ZabbixJsonShape.FromValue(Value), Clock = Ns is { } ns ? ZabbixClockAttribute.WithNanoseconds(Clock, ns) : Clock });
+        => _values.Add(new ZabbixHistoryPushRequest { HostName = HostName, Key = Key is null ? null : ZabbixItemKey.Parse(Key), Value = ZabbixJsonShape.FromValue(Value), Clock = Ns is { } ns ? ZabbixClockAttribute.WithNanoseconds(Clock, ns) : Clock });
 
     /// <inheritdoc/>
     protected override void EndProcessing()

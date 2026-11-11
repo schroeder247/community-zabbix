@@ -7,13 +7,15 @@ using Community.Zabbix.Tests.Conformance;
 namespace Community.Zabbix.Tests;
 
 /// <summary>
-/// Typed where Zabbix's grammar is known (ADR 0013): every public member that carries an update interval
-/// (<c>delay</c>) is a <see cref="ZabbixInterval"/>, a length of an item's history, trends or timeout a
-/// <see cref="ZabbixDuration"/>, an interface's <c>port</c> a <see cref="ZabbixPort"/>, the allowed hosts
-/// (<c>trapper_hosts</c>) a list of <see cref="ZabbixPeer"/>; a get's <c>output</c> and every <c>select</c> option a
-/// <see cref="ZabbixOutput{TRecord}"/>, and its sort one list of <see cref="ZabbixSort{TRecord}"/>, of the record the get
-/// returns, with no public <c>sortorder</c> beside it. The members the table below names carry another grammar, and say
-/// which.
+/// Typed where Zabbix's grammar is known (ADR 0013, section 5): every public member that carries an update interval
+/// (<c>delay</c>) is a <see cref="ZabbixInterval"/>, every length of time (an item's history, trends and timeout, a
+/// discovery rule's lifetimes, an action's escalation period, the proxies' and the settings' timeouts, the housekeeper's
+/// periods and the rest of the API's time units) a <see cref="ZabbixDuration"/>, every port a <see cref="ZabbixPort"/>,
+/// every item key (<c>key_</c>) a <see cref="ZabbixItemKey"/>, the allowed hosts (<c>trapper_hosts</c>) a list of
+/// <see cref="ZabbixPeer"/>; a get's <c>output</c> and every <c>select</c> option a <see cref="ZabbixOutput{TRecord}"/>,
+/// and its sort one list of <see cref="ZabbixSort{TRecord}"/>, of the record the get returns, with no public
+/// <c>sortorder</c> beside it. A request and the record it reads back agree, since the rule holds both. The members the
+/// table below names carry another grammar, and say which.
 /// </summary>
 public sealed partial class DesignConformanceTests
 {
@@ -26,12 +28,18 @@ public sealed partial class DesignConformanceTests
         => Assert.Equal(
             [
                 "TypedFormProbe.Delay (delay): String",
+                "TypedFormProbe.EscalationPeriod (esc_period): String",
                 "TypedFormProbe.History (history): String",
+                "TypedFormProbe.HousekeepingHistory (hk_history): String",
+                "TypedFormProbe.Key (key_): String",
                 "TypedFormProbe.Output (output): String",
                 "TypedFormProbe.Port (port): Int32",
+                "TypedFormProbe.ScriptTimeout (script_timeout): String",
                 "TypedFormProbe.SelectHosts (selectHosts): String",
+                "TypedFormProbe.SmtpPort (smtp_port): String",
                 "TypedFormProbe.SortField (sortfield): IReadOnlyList`1",
                 "TypedFormProbe.SortOrder (sortorder): a public sortorder beside the sort",
+                "TypedFormProbe.TimeoutZabbixAgent (timeout_zabbix_agent): String",
                 "TypedFormProbe.TrapperHosts (trapper_hosts): String",
             ],
             UntypedGrammarMembers([typeof(TypedFormProbe)]).Order(StringComparer.Ordinal));
@@ -54,10 +62,7 @@ public sealed partial class DesignConformanceTests
                 if (OtherGrammar(type.Name, wire) is not null) continue;
                 bool typed = wire switch
                 {
-                    "delay" => bare == typeof(ZabbixInterval),
-                    "history" or "trends" or "timeout" => bare == typeof(ZabbixDuration),
-                    "port" => bare == typeof(ZabbixPort),
-                    "trapper_hosts" => bare == typeof(IReadOnlyList<ZabbixPeer>),
+                    _ when TypedForm(type.Name, wire) is { } form => bare == form,
                     "output" => IsOutput(bare, queried),
                     "sortfield" => bare.IsGenericType && bare.GetGenericTypeDefinition() == typeof(IReadOnlyList<>)
                         && bare.GetGenericArguments()[0] is { IsGenericType: true } sort && sort.GetGenericTypeDefinition() == typeof(ZabbixSort<>)
@@ -71,6 +76,30 @@ public sealed partial class DesignConformanceTests
         }
     }
 
+    // The type a member of this wire name has, where the name says its grammar: a web scenario's and a network discovery
+    // rule's interval is a length, with no flexible or scheduling part (CHttpTest.php, CDRule.php).
+    private static Type? TypedForm(string type, string wire) => wire switch
+    {
+        "delay" when type.StartsWith("ZabbixHttpTest", StringComparison.Ordinal) || type.StartsWith("ZabbixNetworkDiscoveryRule", StringComparison.Ordinal) => typeof(ZabbixDuration),
+        "delay" => typeof(ZabbixInterval),
+        "port" or "local_port" or "smtp_port" => typeof(ZabbixPort),
+        "key_" => typeof(ZabbixItemKey),
+        "trapper_hosts" => typeof(IReadOnlyList<ZabbixPeer>),
+        _ when IsLength(wire) => typeof(ZabbixDuration),
+        _ => null,
+    };
+
+    // The wire names of the API's lengths of time (API_TIME_UNIT): the named ones, every timeout_* and *_timeout, and the
+    // housekeeper's hk_* periods beside their *_mode and *_global switches.
+    private static bool IsLength(string wire)
+        => wire is "history" or "trends" or "timeout" or "lifetime" or "enabled_lifetime" or "esc_period" or "attempt_interval"
+            or "failover_delay" or "ha_failover_delay" or "autologout" or "refresh" or "jit_provision_interval" or "compress_older"
+            or "granularity" or "lookback_limit" or "time_shift" or "duration" or "suppress_duration" or "default_maintenance_period"
+            or "blink_period" or "history_period" or "max_period" or "ok_period" or "period_default" or "login_block"
+            || wire.StartsWith("timeout_", StringComparison.Ordinal)
+            || wire.EndsWith("_timeout", StringComparison.Ordinal)
+            || (wire.StartsWith("hk_", StringComparison.Ordinal) && !wire.EndsWith("_mode", StringComparison.Ordinal) && !wire.EndsWith("_global", StringComparison.Ordinal));
+
     // ZabbixOutput<TRecord>, of the record the get returns when the get says which.
     private static bool IsOutput(Type type, Type? queried)
         => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ZabbixOutput<>) && (queried is null || type.GetGenericArguments()[0] == queried);
@@ -78,18 +107,9 @@ public sealed partial class DesignConformanceTests
     // The members whose wire name is one of the typed grammars' but whose value is another's: what it is instead.
     private static string? OtherGrammar(string type, string wire) => (type, wire) switch
     {
-        ("ZabbixHttpTest" or "ZabbixHttpTestCreateRequest" or "ZabbixHttpTestUpdateRequest", "delay") => "a web scenario's interval: a length (time unit or user macro), no flexible or scheduling part",
-        ("ZabbixNetworkDiscoveryRule" or "ZabbixNetworkDiscoveryRuleCreateRequest" or "ZabbixNetworkDiscoveryRuleUpdateRequest", "delay") => "a network discovery rule's interval: a length, no flexible or scheduling part",
         ("ZabbixHistoryGetParameters", "history") => "the value type history.get reads, not a length",
-        ("ZabbixConnector" or "ZabbixConnectorCreateRequest" or "ZabbixConnectorUpdateRequest", "timeout") => "a connector's timeout: a length with its own range, outside the item fields this step types",
-        ("ZabbixHttpTestStep" or "ZabbixHttpTestStepRequest" or "ZabbixHttpTestUpdateStepRequest", "timeout") => "a web scenario step's timeout: a length outside the item fields this step types",
-        ("ZabbixMediaType" or "ZabbixMediaTypeCreateRequest" or "ZabbixMediaTypeUpdateRequest", "timeout") => "a webhook's timeout: a length outside the item fields this step types",
-        ("ZabbixScript" or "ZabbixScriptCreateRequest" or "ZabbixScriptUpdateRequest", "timeout") => "a script's timeout: a length outside the item fields this step types",
-        ("ZabbixProxy" or "ZabbixProxyCreateRequest" or "ZabbixProxyUpdateRequest", "port") => "a proxy's own port, not an interface's",
-        ("ZabbixScript" or "ZabbixScriptCreateRequest" or "ZabbixScriptUpdateRequest", "port") => "an SSH or Telnet script's port, not an interface's",
-        ("ZabbixUserDirectory" or "ZabbixUserDirectoryCreateRequest" or "ZabbixUserDirectoryUpdateRequest" or "ZabbixUserDirectoryTestRequest", "port") => "an LDAP server's port, not an interface's",
-        ("ZabbixDiscoveredService", "port") => "the port discovery found a service on: a number the server writes",
-        ("ZabbixHaNode", "port") => "a server node's port: a number the server writes",
+        ("ZabbixApmSpan" or "ZabbixApmTrace", "duration") => "a span's measured length: a number of nanoseconds the server writes",
+        ("ZabbixNetworkDiscoveryCheck" or "ZabbixNetworkDiscoveryCheckRequest", "key_") => "a check's key: an agent item key, or the OID an SNMP check reads",
         ("ZabbixProxyAutoregistrationItem" or "ZabbixProxyDiscoveryItem" or "ZabbixProxyTask", "port") => "the proxy protocol's port: a number a proxy writes",
         ("ZabbixServiceGetParameters", "selectStatusTimeline") => "a list of periods to report on, not an output",
         _ => null,
@@ -123,5 +143,26 @@ public sealed partial class DesignConformanceTests
 
         [JsonPropertyName("delay_flex")]
         public string? DelayFlex { get; init; }
+
+        [JsonPropertyName("esc_period")]
+        public string? EscalationPeriod { get; init; }
+
+        [JsonPropertyName("hk_history")]
+        public string? HousekeepingHistory { get; init; }
+
+        [JsonPropertyName("hk_history_mode")]
+        public bool? HousekeepingHistoryMode { get; init; }
+
+        [JsonPropertyName("key_")]
+        public string? Key { get; init; }
+
+        [JsonPropertyName("script_timeout")]
+        public string? ScriptTimeout { get; init; }
+
+        [JsonPropertyName("smtp_port")]
+        public string? SmtpPort { get; init; }
+
+        [JsonPropertyName("timeout_zabbix_agent")]
+        public string? TimeoutZabbixAgent { get; init; }
     }
 }

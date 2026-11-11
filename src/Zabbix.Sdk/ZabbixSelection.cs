@@ -21,7 +21,7 @@ internal sealed record ZabbixSelection(string? Group = null, string? Host = null
         ZabbixItemFields.LastValue, ZabbixItemFields.LastClock, ZabbixItemFields.LastClockNanoseconds,
     ];
 
-    private static readonly ZabbixOutput<ZabbixHost> s_hostFields = [ZabbixHostFields.HostId, ZabbixHostFields.TechnicalName];
+    private static readonly ZabbixOutput<ZabbixHost> s_hostFields = [ZabbixHostFields.HostId, ZabbixHostFields.HostName];
 
     /// <summary>Whether this selection is about one host.</summary>
     public bool HasHost => Host is not null || HostId is not null;
@@ -52,7 +52,7 @@ internal sealed record ZabbixSelection(string? Group = null, string? Host = null
     public ZabbixItemGetParameters ToItemGet() => new()
     {
         Output = s_itemFields,
-        Host = Host,
+        HostName = Host,
         HostIds = HostId is { } hostId ? [hostId] : null,
         Group = Group,
         GroupIds = GroupId is { } groupId ? [groupId] : null,
