@@ -520,9 +520,17 @@ public sealed class PlatformItemsTests : IDisposable
         using Process self = Process.GetCurrentProcess();
         using var processes = new ZabbixProcessItems();
         string image = self.ProcessName + ".exe";
-        double sum = Percent(await ValueAsync(processes, $"proc_info[{image},{attribute},sum]"));
+        // The test's own process counts its I/O and memory while it runs, so max and sum come from two moments. Reading max
+        // first keeps max <= sum for a counter that only grows; a retry covers one that can shrink between the reads (memory).
+        double max = 0, sum = 0;
+        for (int attempt = 0; attempt < 5; attempt++)
+        {
+            max = Percent(await ValueAsync(processes, $"proc_info[{image},{attribute},max]"));
+            sum = Percent(await ValueAsync(processes, $"proc_info[{image},{attribute},sum]"));
+            if (max <= sum) break;
+        }
         Assert.True(sum >= 0);
-        Assert.True(Percent(await ValueAsync(processes, $"proc_info[{image},{attribute},max]")) <= sum);
+        Assert.True(max <= sum, $"max {max} is more than sum {sum}");
         if (attribute is "vmsize" or "wkset" or "pf") Assert.True(sum > 0);
     }
 }
