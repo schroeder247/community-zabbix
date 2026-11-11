@@ -30,5 +30,5 @@ Invoke-ZbxScript -Script 'Ping' -Host 'web-01'
 
 #region Run a script against the hosts a search finds
 # A host piped from Get-ZbxHost binds -HostReference by its HostId; the script runs once per host.
-Get-ZbxHost -Name 'web-*' | Invoke-ZbxScript -Script 'Ping' | Select-Object response, value
+Get-ZbxHost -Name 'web-*' | Invoke-ZbxScript -Script 'Ping' | Select-Object Response, Value
 #endregion

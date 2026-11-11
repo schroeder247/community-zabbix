@@ -85,12 +85,12 @@ public sealed class ZabbixServerWireTests
         var trapper = new FakeTrapper();
         using var wire = new ZabbixServerWire(trapper.Exchange, "sid-123");
 
-        JsonElement status = await wire.GetStatusAsync(TestContext.Current.CancellationToken);
+        ZabbixServerStatus status = await wire.GetStatusAsync(TestContext.Current.CancellationToken);
         await wire.PingAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal("full", trapper.Sent[0].GetProperty("type").GetString());
         Assert.Equal("ping", trapper.Sent[1].GetProperty("type").GetString());
-        Assert.Equal("7.0.31", status.GetProperty("server stats").GetProperty("version").GetString());
+        Assert.Equal(new Version(7, 0, 31), status.Version);
     }
 
     [Fact]
@@ -99,10 +99,10 @@ public sealed class ZabbixServerWireTests
         var trapper = new FakeTrapper();
         using var wire = new ZabbixServerWire(trapper.Exchange, "sid-123");
 
-        JsonElement stats = await wire.GetStatsAsync(TestContext.Current.CancellationToken);
+        ZabbixServerStatistics stats = await wire.GetStatisticsAsync(TestContext.Current.CancellationToken);
         long queue = await wire.GetQueueSizeAsync(TimeSpan.FromMinutes(10), cancellationToken: TestContext.Current.CancellationToken);
 
-        Assert.Equal(42, stats.GetProperty("uptime").GetInt32());
+        Assert.Equal(TimeSpan.FromSeconds(42), stats.Uptime);
         Assert.False(trapper.Sent[0].TryGetProperty("sid", out _));
         Assert.Equal("queue", trapper.Sent[1].GetProperty("type").GetString());
         Assert.Equal("600", trapper.Sent[1].GetProperty("params").GetProperty("from").GetString());
@@ -125,18 +125,18 @@ public sealed class ZabbixServerWireTests
     [Fact]
     public async Task A_report_test_carries_its_data_and_the_session_and_answers_the_server_s_reply()
     {
-        // CZabbixServer::testReport: {"request":"report.test","sid":…,"data":{…}}; the reply's data is the server's.
-        var trapper = new FakeTrapper { Answer = _ => """{"response":"success","data":{"sent":1}}""" };
+        // CZabbixServer::testReport: {"request":"report.test","sid":…,"data":{…}}; zbx_report_test answers the recipients.
+        var trapper = new FakeTrapper { Answer = _ => """{"response":"success","data":{"recipients":[{"status":1,"recipient":"Admin"},{"status":0,"recipient":"ops","info":"No media."}]}}""" };
         using var wire = new ZabbixServerWire(trapper.Exchange, "sid-123");
-        using JsonDocument data = JsonDocument.Parse("""{"name":"weekly","dashboardid":"1","userid":"1","period":0,"now":1700000000,"params":{"subject":"s"}}""");
+        var request = new ZabbixReportTestRequest("weekly", 1, 1) { Period = 1, Now = DateTimeOffset.FromUnixTimeSeconds(1_700_000_000), Parameters = new Dictionary<string, string> { ["subject"] = "s" } };
 
-        ZabbixServerReply reply = await wire.TestReportAsync(data.RootElement, TestContext.Current.CancellationToken);
+        ZabbixReportTestResult result = await wire.TestReportAsync(request, TestContext.Current.CancellationToken);
 
         Assert.Equal("report.test", trapper.Sent[0].GetProperty("request").GetString());
         Assert.Equal("sid-123", trapper.Sent[0].GetProperty("sid").GetString());
-        Assert.Equal("weekly", trapper.Sent[0].GetProperty("data").GetProperty("name").GetString());
-        Assert.Equal("success", reply.Response);
-        Assert.Equal(1, reply.Data!.Value.GetProperty("sent").GetInt32());
+        Assert.Equal("""{"name":"weekly","dashboardid":1,"userid":1,"period":1,"now":1700000000,"params":{"subject":"s"}}""", trapper.Sent[0].GetProperty("data").GetRawText());
+        Assert.Equal([1, 0], result.Recipients!.Select(recipient => recipient.Status!.Value));
+        Assert.Equal("No media.", result.Recipients![1].Info);
     }
 
     [Fact]
@@ -144,9 +144,8 @@ public sealed class ZabbixServerWireTests
     {
         var trapper = new FakeTrapper { Answer = _ => """{"response":"failed","info":"Cannot send report: no media."}""" };
         using var wire = new ZabbixServerWire(trapper.Exchange, "sid-123");
-        using JsonDocument data = JsonDocument.Parse("""{"name":"weekly"}""");
 
-        ZabbixServerRefusedException refused = await Assert.ThrowsAsync<ZabbixServerRefusedException>(() => wire.TestReportAsync(data.RootElement, TestContext.Current.CancellationToken));
+        ZabbixServerRefusedException refused = await Assert.ThrowsAsync<ZabbixServerRefusedException>(() => wire.TestReportAsync(new ZabbixReportTestRequest("weekly", 1, 1), TestContext.Current.CancellationToken));
 
         Assert.Contains("Cannot send report: no media.", refused.Message, StringComparison.Ordinal);
     }
@@ -158,13 +157,14 @@ public sealed class ZabbixServerWireTests
         var trapper = new FakeTrapper { Answer = _ => """{"response":"success","data":"{}"}""" };
         using var wire = new ZabbixServerWire(trapper.Exchange, "sid-123");
 
-        await wire.SendAlertAsync(7, "ops", "s", "m", ZabbixAlertParameters.Webhook([new("URL", "https://x"), new("To", "{ALERT.SENDTO}")]), TestContext.Current.CancellationToken);
+        ZabbixAlertSendResult sent = await wire.SendAlertAsync(7, "ops", "s", "m", ZabbixAlertParameters.Webhook([new("URL", "https://x"), new("To", "{ALERT.SENDTO}")]), TestContext.Current.CancellationToken);
         await wire.SendAlertAsync(8, "ops", "s", "m", ZabbixAlertParameters.Script(["{ALERT.SENDTO}", "b"]), TestContext.Current.CancellationToken);
         await wire.SendAlertAsync(9, "ops", "s", "m", cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal("""{"URL":"https://x","To":"{ALERT.SENDTO}"}""", trapper.Sent[0].GetProperty("data").GetProperty("parameters").GetRawText());
         Assert.Equal("""["{ALERT.SENDTO}","b"]""", trapper.Sent[1].GetProperty("data").GetProperty("parameters").GetRawText());
         Assert.False(trapper.Sent[2].GetProperty("data").TryGetProperty("parameters", out _));
+        Assert.Equal("{}", sent.Value);
     }
 
     [Fact]
@@ -200,7 +200,7 @@ public sealed class ZabbixServerWireTests
         var trapper = new FakeTrapper { Answer = _ => """{"response":"success"}""" };
         using var wire = new ZabbixServerWire(trapper.Exchange, "sid");
 
-        await Assert.ThrowsAsync<InvalidDataException>(() => wire.GetStatsAsync(TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<InvalidDataException>(() => wire.GetStatisticsAsync(TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -264,7 +264,7 @@ public sealed class ZabbixServerWireTests
         var wire = new ZabbixServerWire(trapper.Exchange, "sid");
         wire.Dispose();
 
-        Task<JsonElement>? pending = null;
+        Task<ZabbixServerStatus>? pending = null;
         ObjectDisposedException disposed = Assert.Throws<ObjectDisposedException>(() => { pending = wire.GetStatusAsync(TestContext.Current.CancellationToken); });
 
         Assert.Null(pending);
@@ -281,7 +281,7 @@ public sealed class ZabbixServerWireTests
         using var wire = new ZabbixServerWire(trapper.Exchange, "bad", logger: null, telemetry: telemetry, node: null);
 
         await wire.PingAsync(TestContext.Current.CancellationToken);
-        await Assert.ThrowsAsync<ZabbixServerRefusedException>(() => wire.TestItemAsync(JsonDocument.Parse("{}").RootElement, TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ZabbixServerRefusedException>(() => wire.TestItemAsync(new ZabbixItemTestRequest(new ZabbixItemTestItem()), TestContext.Current.CancellationToken));
 
         Assert.Equal(["status.get", "item.test"], capture.Spans.Select(span => span.DisplayName));
         Assert.Equal(ActivityStatusCode.Ok, capture.Spans[0].Status);

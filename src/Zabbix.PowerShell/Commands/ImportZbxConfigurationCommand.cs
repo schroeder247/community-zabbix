@@ -1,7 +1,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
 using System.Management.Automation;
-using System.Text.Json;
 
 namespace Community.Zabbix.PowerShell.Commands;
 
@@ -59,8 +58,8 @@ public sealed class ImportZbxConfigurationCommand : ZabbixServerCmdlet
 
     /// <inheritdoc/>
     /// <remarks>
-    /// A sink, as a changing cmdlet is (Learn, "Support the PassThru Parameter"): <c>configuration.import</c> answers only
-    /// <c>true</c>, which would otherwise print as a raw <c>JsonElement</c> (<c>ValueKind : True</c>). One
+    /// A sink, as a changing cmdlet is (Learn, "Support the PassThru Parameter"): <c>configuration.import</c> answers
+    /// nothing a script reads unless it asks for the missing objects, which the cmdlet doesn't. One
     /// confirmation per document (<c>ConfirmImpact.High</c>: an import rewrites objects wholesale), the second question
     /// (<c>ShouldContinue</c>) only when a rule deletes what the document does not name (<c>deleteMissing</c>), so an
     /// ordinary import asks once.
@@ -92,6 +91,6 @@ public sealed class ImportZbxConfigurationCommand : ZabbixServerCmdlet
         }
 
         TryRun(cancellationToken => ZabbixClient.Configuration.ImportAsync(
-            new ZabbixConfigurationImportRequest { Format = format?.ToWire() ?? TestZbxConfigurationCommand.DetectFormat(text), Source = text, Rules = Rules! }, cancellationToken), out JsonElement _, target);
+            new ZabbixConfigurationImportRequest { Format = format?.ToWire() ?? TestZbxConfigurationCommand.DetectFormat(text), Source = text, Rules = Rules! }, cancellationToken), out ZabbixConfigurationImportResult? _, target);
     }
 }

@@ -207,7 +207,7 @@ internal sealed partial class ZabbixSender : IDisposable
             for (int i = 0; i < all.Length; i++)
             {
                 if (i > 0) buffer.Write(","u8);
-                JsonSerializer.Serialize(json, all[i], ZabbixWireJson.Default.ZabbixSenderItem);
+                JsonSerializer.Serialize(json, all[i], ZabbixSenderJson.Default.ZabbixSenderItem);
                 json.Flush();
                 json.Reset();                                                             // the next item is a value of its own, not a sibling
                 ends[i] = buffer.WrittenCount;
@@ -273,7 +273,7 @@ internal sealed partial class ZabbixSender : IDisposable
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         ZabbixSenderItem[] items = [.. values.Select(ZabbixSenderItem.From)];
-        byte[] payload = JsonSerializer.SerializeToUtf8Bytes(new SenderRequest("sender data", items), ZabbixWireJson.Default.SenderRequest);
+        byte[] payload = JsonSerializer.SerializeToUtf8Bytes(new SenderRequest("sender data", items), ZabbixSenderJson.Default.SenderRequest);
         return SendFrameAsync(payload, items.Length, cancellationToken);
     }
 
@@ -353,7 +353,7 @@ internal sealed partial class ZabbixSender : IDisposable
         if (ZabbixRedirect.TryParse(payload, out ZabbixRedirect? unfollowed)) throw ZabbixRedirectException.Unfollowed(unfollowed);
 
         RawSenderResponse raw;
-        try { raw = JsonSerializer.Deserialize(payload, ZabbixWireJson.Default.RawSenderResponse) ?? throw new InvalidDataException("The trapper answered with no object."); }
+        try { raw = JsonSerializer.Deserialize(payload, ZabbixSenderJson.Default.RawSenderResponse) ?? throw new InvalidDataException("The trapper answered with no object."); }
         catch (JsonException invalid) { throw new InvalidDataException("The trapper's reply is not JSON: " + invalid.Message, invalid); }
 
         if (!string.Equals(raw.Response, "success", StringComparison.Ordinal)) throw new ZabbixTrapperRefusedException(raw.Response, raw.Info);

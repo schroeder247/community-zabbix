@@ -120,7 +120,7 @@ public sealed class ZabbixClockModelTests
         var sent = new ZabbixSenderItem("h", "k", "v", new ZabbixClock(1_700_000_000, 456));
 
         Assert.Contains("\"clock\":1700000000,\"ns\":123", JsonSerializer.Serialize(row, ZabbixProxyJson.Default.ZabbixProxyHistoryItem), StringComparison.Ordinal);
-        Assert.Contains("\"clock\":1700000000,\"ns\":456", JsonSerializer.Serialize(sent, ZabbixWireJson.Default.ZabbixSenderItem), StringComparison.Ordinal);
+        Assert.Contains("\"clock\":1700000000,\"ns\":456", JsonSerializer.Serialize(sent, ZabbixSenderJson.Default.ZabbixSenderItem), StringComparison.Ordinal);
     }
 
     [Fact]

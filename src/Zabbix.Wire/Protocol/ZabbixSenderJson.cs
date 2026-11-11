@@ -4,11 +4,11 @@ using System.Text.Json.Serialization;
 
 namespace Community.Zabbix.Protocol;
 
-/// <summary>The trapper wire's JSON contract, generated: what the sender writes and reads, trim- and AOT-safe.</summary>
+/// <summary>The sender's JSON contract, generated: what it writes to a trapper and reads back, trim- and AOT-safe.</summary>
 [JsonSourceGenerationOptions(DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
 [JsonSerializable(typeof(SenderRequest))]
 [JsonSerializable(typeof(ZabbixSenderItem))]
 [JsonSerializable(typeof(RawSenderResponse))]
-internal sealed partial class ZabbixWireJson : JsonSerializerContext
+internal sealed partial class ZabbixSenderJson : JsonSerializerContext
 {
 }

@@ -70,9 +70,9 @@ public sealed partial class LiveFrontendTests
         };
         // The stock host's own trigger events, when the lab has raised one (the one trigger no test deletes).
         if ((await api.Events.GetAsync(new ZabbixEventGetParameters { HostIds = [server.Id], Source = ZabbixEventSource.Triggers, ObjectType = ZabbixEventObject.Trigger, Limit = 1 }, Cancel)) is [ZabbixEvent @event, ..])
-            pages.Add(("event", @event, ZabbixPageView.Default));
+            pages.Add(("event", ((IZabbixFrontendPage)@event).ToPageTarget(), ZabbixPageView.Default));
         if ((await api.Problems.GetAsync(new ZabbixProblemGetParameters { HostIds = [server.Id], Source = ZabbixEventSource.Triggers, ObjectType = ZabbixEventObject.Trigger, Limit = 1 }, Cancel)) is [ZabbixProblem problem, ..])
-            pages.Add(("problem", problem, ZabbixPageView.Default));
+            pages.Add(("problem", ((IZabbixFrontendPage)problem).ToPageTarget(), ZabbixPageView.Default));
 
         var refused = new List<string>();
         foreach ((string what, ZabbixPageTarget target, ZabbixPageView view) in pages)
@@ -100,8 +100,9 @@ public sealed partial class LiveFrontendTests
     }
 
     private static ZabbixPageTarget First<T>(IReadOnlyList<T> found)
-        => found is [var first, ..] && ZabbixPageTarget.TryFrom(first, out ZabbixPageTarget? target)
-            ? target
+        where T : IZabbixFrontendPage
+        => found is [var first, ..]
+            ? first.ToPageTarget()
             : throw new InvalidOperationException($"the lab has no {typeof(T).Name}");
 
 

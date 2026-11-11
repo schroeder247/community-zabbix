@@ -615,7 +615,7 @@ public sealed partial class ZabbixNetworkItems : ZabbixItemProvider
             }
             else
             {
-                data = (await wire.GetStatsAsync(cancellationToken).ConfigureAwait(false)).GetRawText();
+                data = (await wire.GetStatisticsDocumentAsync(cancellationToken).ConfigureAwait(false)).GetRawText();
             }
             return $$"""{"response":"success","data":{{data}}}""";
         }

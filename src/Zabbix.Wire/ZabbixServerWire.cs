@@ -13,6 +13,13 @@ namespace Community.Zabbix;
 /// <summary>The server wire's JSON context.</summary>
 [JsonSourceGenerationOptions(DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, NumberHandling = JsonNumberHandling.AllowReadingFromString)]
 [JsonSerializable(typeof(ZabbixServerReply))]
+[JsonSerializable(typeof(ZabbixServerStatistics))]
+[JsonSerializable(typeof(ZabbixStatusSections))]
+[JsonSerializable(typeof(ZabbixItemTestRequest))]
+[JsonSerializable(typeof(ZabbixItemTestResult))]
+[JsonSerializable(typeof(ZabbixReportTestRequest))]
+[JsonSerializable(typeof(ZabbixReportTestResult))]
+[JsonSerializable(typeof(ZabbixAlertSendResult))]
 [JsonSerializable(typeof(IReadOnlyList<ZabbixExpressionResult>))]
 [JsonSerializable(typeof(IReadOnlyList<ZabbixQueueDelays>))]
 [JsonSerializable(typeof(IReadOnlyList<ZabbixQueuedItem>))]
@@ -151,7 +158,15 @@ internal sealed class ZabbixServerWire : IDisposable
     internal ZabbixNodeLink? Link => _link;
 
     /// <summary><c>zabbix.stats</c>: the server's internal statistics (<c>StatsAllowedIP</c> must admit this address).</summary>
-    public Task<JsonElement> GetStatsAsync(CancellationToken cancellationToken = default)
+    public Task<ZabbixServerStatistics> GetStatisticsAsync(CancellationToken cancellationToken = default)
+        => ExchangeAsync("zabbix.stats", static writer => { }, session: false,
+            static (reply, _) => Required(reply.Data, "zabbix.stats", "data").Deserialize(ZabbixServerWireJson.Default.ZabbixServerStatistics) ?? throw Invalid("zabbix.stats", "the data is null."), cancellationToken);
+
+    /// <summary>
+    /// <c>zabbix.stats</c> as the server sent it: what the agent's <c>zabbix.stats[...]</c> item answers, which hands the
+    /// reply on as text.
+    /// </summary>
+    public Task<JsonElement> GetStatisticsDocumentAsync(CancellationToken cancellationToken = default)
         => ExchangeAsync("zabbix.stats", static writer => { }, session: false, static (reply, _) => Required(reply.Data, "zabbix.stats", "data"), cancellationToken);
 
     /// <summary>
@@ -201,22 +216,31 @@ internal sealed class ZabbixServerWire : IDisposable
     }
 
     /// <summary><c>status.get</c> with <c>type: full</c>: the "System information" statistics (empty for a non-super-admin session).</summary>
-    public Task<JsonElement> GetStatusAsync(CancellationToken cancellationToken = default)
-        => ExchangeAsync("status.get", static writer => writer.WriteString("type", "full"), session: true, static (reply, _) => Required(reply.Data, "status.get", "data"), cancellationToken);
+    public Task<ZabbixServerStatus> GetStatusAsync(CancellationToken cancellationToken = default)
+        => ExchangeAsync("status.get", static writer => writer.WriteString("type", "full"), session: true,
+            static (reply, _) => ZabbixServerStatus.From(Required(reply.Data, "status.get", "data").Deserialize(ZabbixServerWireJson.Default.ZabbixStatusSections) ?? throw Invalid("status.get", "the data is null.")), cancellationToken);
 
     /// <summary><c>status.get</c> with <c>type: ping</c>: whether the server is running and takes this session (the frontend's <c>isRunning</c>).</summary>
     public Task PingAsync(CancellationToken cancellationToken = default)
         => ExchangeAsync("status.get", static writer => writer.WriteString("type", "ping"), session: true, static (reply, _) => reply, cancellationToken);
 
     /// <summary><c>item.test</c>: the server runs one item's collection and preprocessing as the frontend's "Test" does.</summary>
-    public Task<ZabbixServerReply> TestItemAsync(JsonElement data, CancellationToken cancellationToken = default) => RequestAsync("item.test", data, cancellationToken);
+    public Task<ZabbixItemTestResult> TestItemAsync(ZabbixItemTestRequest request, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return ExchangeAsync("item.test", writer =>
+        {
+            writer.WritePropertyName("data");
+            JsonSerializer.Serialize(writer, request, ZabbixServerWireJson.Default.ZabbixItemTestRequest);
+        }, session: true, static (reply, _) => Required(reply.Data, "item.test", "data").Deserialize(ZabbixServerWireJson.Default.ZabbixItemTestResult) ?? throw Invalid("item.test", "the data is null."), cancellationToken);
+    }
 
     /// <summary>
     /// <c>alert.send</c>: a test message through a media type, as the frontend's "Test" sends it
     /// (<c>CControllerMediatypeTestSend</c>): a script media type's parameters as a list of values, a webhook's as an object
     /// of name to value (the server reads <c>parameters</c> as the brackets they are, <c>trapper_process_alert_send</c>).
     /// </summary>
-    public Task<ZabbixServerReply> SendAlertAsync(ulong mediaTypeId, string sendTo, string subject, string message, ZabbixAlertParameters? parameters = null, CancellationToken cancellationToken = default)
+    public Task<ZabbixAlertSendResult> SendAlertAsync(ulong mediaTypeId, string sendTo, string subject, string message, ZabbixAlertParameters? parameters = null, CancellationToken cancellationToken = default)
     {
         return ExchangeAsync("alert.send", writer =>
         {
@@ -227,11 +251,19 @@ internal sealed class ZabbixServerWire : IDisposable
             writer.WriteString("message", message);
             parameters?.WriteTo(writer);
             writer.WriteEndObject();
-        }, session: true, static (reply, _) => reply, cancellationToken);
+        }, session: true, static (_, root) => root.Deserialize(ZabbixServerWireJson.Default.ZabbixAlertSendResult) ?? throw Invalid("alert.send", "the reply is null."), cancellationToken);
     }
 
     /// <summary><c>report.test</c>: a scheduled report generated and sent now.</summary>
-    public Task<ZabbixServerReply> TestReportAsync(JsonElement data, CancellationToken cancellationToken = default) => RequestAsync("report.test", data, cancellationToken);
+    public Task<ZabbixReportTestResult> TestReportAsync(ZabbixReportTestRequest request, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return ExchangeAsync("report.test", writer =>
+        {
+            writer.WritePropertyName("data");
+            JsonSerializer.Serialize(writer, request, ZabbixServerWireJson.Default.ZabbixReportTestRequest);
+        }, session: true, static (reply, _) => Required(reply.Data, "report.test", "data").Deserialize(ZabbixServerWireJson.Default.ZabbixReportTestResult) ?? throw Invalid("report.test", "the data is null."), cancellationToken);
+    }
 
     /// <summary><c>expressions.evaluate</c>: trigger expressions evaluated by the server.</summary>
     public Task<IReadOnlyList<ZabbixExpressionResult>> EvaluateExpressionsAsync(IEnumerable<string> expressions, CancellationToken cancellationToken = default)
@@ -248,7 +280,7 @@ internal sealed class ZabbixServerWire : IDisposable
     }
 
     /// <summary>Any request whose handler reads a <c>data</c> object, in the server's own form, with the session id.</summary>
-    public Task<ZabbixServerReply> RequestAsync(string request, JsonElement data, CancellationToken cancellationToken = default)
+    public Task<ZabbixServerReply> SendRequestAsync(string request, JsonElement data, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(request);
         return ExchangeAsync(request, writer =>

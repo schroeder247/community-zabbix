@@ -49,8 +49,10 @@ What each package and module does. To choose one, see [Key concepts](../README.m
 - `SendAsync` sends values to trapper items, as `zabbix_sender` does: `wire.SendAsync("web-01", requests, 42)`. It follows HA
   nodes and the server's redirects, and reports how many values the server did not accept.
 - `GetAgentItemAsync` reads an item from an agent, as `zabbix_get` does.
-- `GetStatusAsync`, `GetStatsAsync` and `GetQueueAsync` ask a server for its status, statistics and queue, as the web
-  frontend does.
+- `GetStatusAsync`, `GetStatisticsAsync` and `GetQueueAsync` ask a server for its status, statistics and queue, as the
+  web frontend does, and answer them as records: `ZabbixServerStatus`, `ZabbixServerStatistics`, `ZabbixQueueDelays`.
+- `TestItemAsync`, `TestReportAsync` and `SendAlertAsync` run the frontend's tests of an item, a report and a media type,
+  and answer what each did.
 - It names a peer as `host` or `host:port`, as Zabbix's own configuration spells one.
 - `new ZabbixWireClient("zbx-server-01")` takes a server. `ZabbixWireClient.CreateBuilder()` sets more, such as the one
   server or HA cluster (`WithServer`), a token, TLS and logging, and checks it all when it builds. `AddZabbixWireClient("prod")`

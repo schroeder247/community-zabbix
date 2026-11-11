@@ -227,8 +227,8 @@ Configuration binds the same keys, with `AddZabbixAgents(builder.Configuration)`
 Keep the key out of the file. An environment variable or the user-secrets store binds to the same key,
 `Zabbix:PushAgents:edge-01:Connection:Tls:Psk`.
 
-`Psk` is classified `[ZabbixSecret]`, so `AddZabbixRedaction`, in `Community.Zabbix.Sdk`, erases it from logs. Without that package, register
-the policy yourself. See [Redact logs](telemetry.md#redact-logs).
+`Psk` is classified `[ZabbixSecret]`, so the SDK's redactors erase it from logs once you set them with `SetZabbixRedactors`. See
+[Redact logs](telemetry.md#redact-logs).
 
 ## Use it from PowerShell
 

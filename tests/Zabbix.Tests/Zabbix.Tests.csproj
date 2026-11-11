@@ -7,9 +7,9 @@ License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2
     <!-- The cases this project executes today on each system, skipped ones not counted: Linux counts the PostgreSQL tests
          CI runs there, and each system skips the platform calls of the others. A run that executes fewer fails: a deleted
          or silently undiscovered test is a deliberate edit here, never a quiet shrink. -->
-    <TestingPlatformCommandLineArguments Condition="$([MSBuild]::IsOSPlatform('Linux'))">$(TestingPlatformCommandLineArguments) --minimum-expected-tests 3298</TestingPlatformCommandLineArguments>
-    <TestingPlatformCommandLineArguments Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(TestingPlatformCommandLineArguments) --minimum-expected-tests 3287</TestingPlatformCommandLineArguments>
-    <TestingPlatformCommandLineArguments Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TestingPlatformCommandLineArguments) --minimum-expected-tests 3285</TestingPlatformCommandLineArguments>
+    <TestingPlatformCommandLineArguments Condition="$([MSBuild]::IsOSPlatform('Linux'))">$(TestingPlatformCommandLineArguments) --minimum-expected-tests 3384</TestingPlatformCommandLineArguments>
+    <TestingPlatformCommandLineArguments Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(TestingPlatformCommandLineArguments) --minimum-expected-tests 3373</TestingPlatformCommandLineArguments>
+    <TestingPlatformCommandLineArguments Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TestingPlatformCommandLineArguments) --minimum-expected-tests 3371</TestingPlatformCommandLineArguments>
     <!-- The run's own deadline, as the PowerShell suite has: after 10 minutes without a test finishing (a normal run is
          under a minute) the platform writes a dump, names the tests still running, and fails. -->
     <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --hangdump --hangdump-timeout 10m --hangdump-type Mini</TestingPlatformCommandLineArguments>

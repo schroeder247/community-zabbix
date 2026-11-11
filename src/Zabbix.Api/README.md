@@ -3,6 +3,7 @@
 The Zabbix JSON-RPC API's vocabulary as records: every enum, object, parameter set and request of Zabbix 7.0, 7.4 and
 8.0, generated at build time from the API description extracted from the Zabbix source. Each member carries the
 versions that have it. `Community.Zabbix.Sdk` sends and receives these records; reference this package alone to share the model.
+A record with a page in the web frontend implements `IZabbixFrontendPage`, which the SDK's `ZabbixFrontend.UriFor` takes.
 
 ```shell
 dotnet add package Community.Zabbix.Api

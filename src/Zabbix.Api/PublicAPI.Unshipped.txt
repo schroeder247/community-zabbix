@@ -1,4 +1,6 @@
 #nullable enable
+Community.Zabbix.IZabbixFrontendPage
+Community.Zabbix.IZabbixFrontendPage.ToPageTarget() -> Community.Zabbix.ZabbixPageTarget!
 Community.Zabbix.ZabbixAction
 Community.Zabbix.ZabbixAction.<Clone>$() -> Community.Zabbix.ZabbixAction!
 Community.Zabbix.ZabbixAction.ActionId.get -> ulong?
@@ -1747,6 +1749,66 @@ Community.Zabbix.ZabbixAuditResource.UserDirectory = 49 -> Community.Zabbix.Zabb
 Community.Zabbix.ZabbixAuditResource.UserGroup = 11 -> Community.Zabbix.ZabbixAuditResource
 Community.Zabbix.ZabbixAuditResource.UserRole = 44 -> Community.Zabbix.ZabbixAuditResource
 Community.Zabbix.ZabbixAuditResource.ValueMap = 17 -> Community.Zabbix.ZabbixAuditResource
+Community.Zabbix.ZabbixAuthenticatedUser
+Community.Zabbix.ZabbixAuthenticatedUser.<Clone>$() -> Community.Zabbix.ZabbixAuthenticatedUser!
+Community.Zabbix.ZabbixAuthenticatedUser.AttemptClock.get -> System.DateTimeOffset?
+Community.Zabbix.ZabbixAuthenticatedUser.AttemptClock.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.AttemptFailed.get -> int?
+Community.Zabbix.ZabbixAuthenticatedUser.AttemptFailed.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.AttemptIP.get -> string?
+Community.Zabbix.ZabbixAuthenticatedUser.AttemptIP.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.AuthenticationType.get -> Community.Zabbix.ZabbixAuthenticationType?
+Community.Zabbix.ZabbixAuthenticatedUser.AuthenticationType.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.AutoLogin.get -> bool?
+Community.Zabbix.ZabbixAuthenticatedUser.AutoLogin.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.AutoLogout.get -> Community.Zabbix.ZabbixDuration?
+Community.Zabbix.ZabbixAuthenticatedUser.AutoLogout.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.DebugMode.get -> bool?
+Community.Zabbix.ZabbixAuthenticatedUser.DebugMode.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.DefaultMaintenancePeriod.get -> Community.Zabbix.ZabbixDuration?
+Community.Zabbix.ZabbixAuthenticatedUser.DefaultMaintenancePeriod.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.Deprovisioned.get -> bool?
+Community.Zabbix.ZabbixAuthenticatedUser.Deprovisioned.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.Equals(Community.Zabbix.ZabbixAuthenticatedUser? other) -> bool
+Community.Zabbix.ZabbixAuthenticatedUser.FirstName.get -> string?
+Community.Zabbix.ZabbixAuthenticatedUser.FirstName.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.GuiAccess.get -> Community.Zabbix.ZabbixGuiAccess?
+Community.Zabbix.ZabbixAuthenticatedUser.GuiAccess.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.Language.get -> string?
+Community.Zabbix.ZabbixAuthenticatedUser.Language.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.LastName.get -> string?
+Community.Zabbix.ZabbixAuthenticatedUser.LastName.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.MfaId.get -> ulong?
+Community.Zabbix.ZabbixAuthenticatedUser.MfaId.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.ProvisionedTime.get -> System.DateTimeOffset?
+Community.Zabbix.ZabbixAuthenticatedUser.ProvisionedTime.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.Refresh.get -> Community.Zabbix.ZabbixDuration?
+Community.Zabbix.ZabbixAuthenticatedUser.Refresh.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.RoleId.get -> ulong?
+Community.Zabbix.ZabbixAuthenticatedUser.RoleId.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.RowsPerPage.get -> int?
+Community.Zabbix.ZabbixAuthenticatedUser.RowsPerPage.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.Secret.get -> string?
+Community.Zabbix.ZabbixAuthenticatedUser.Secret.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.SessionId.get -> string?
+Community.Zabbix.ZabbixAuthenticatedUser.SessionId.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.Theme.get -> string?
+Community.Zabbix.ZabbixAuthenticatedUser.Theme.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.Timezone.get -> string?
+Community.Zabbix.ZabbixAuthenticatedUser.Timezone.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.Type.get -> Community.Zabbix.ZabbixRoleType?
+Community.Zabbix.ZabbixAuthenticatedUser.Type.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.Url.get -> string?
+Community.Zabbix.ZabbixAuthenticatedUser.Url.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.UserDirectoryId.get -> ulong?
+Community.Zabbix.ZabbixAuthenticatedUser.UserDirectoryId.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.UserId.get -> ulong?
+Community.Zabbix.ZabbixAuthenticatedUser.UserId.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.UserIP.get -> string?
+Community.Zabbix.ZabbixAuthenticatedUser.UserIP.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.UserName.get -> string?
+Community.Zabbix.ZabbixAuthenticatedUser.UserName.init -> void
+Community.Zabbix.ZabbixAuthenticatedUser.ZabbixAuthenticatedUser() -> void
 Community.Zabbix.ZabbixAuthenticationCase
 Community.Zabbix.ZabbixAuthenticationCase.Insensitive = 0 -> Community.Zabbix.ZabbixAuthenticationCase
 Community.Zabbix.ZabbixAuthenticationCase.Sensitive = 1 -> Community.Zabbix.ZabbixAuthenticationCase
@@ -2137,6 +2199,12 @@ Community.Zabbix.ZabbixCepRuleResetTimeWindowsRequest.CepRuleId.init -> void
 Community.Zabbix.ZabbixCepRuleResetTimeWindowsRequest.Equals(Community.Zabbix.ZabbixCepRuleResetTimeWindowsRequest? other) -> bool
 Community.Zabbix.ZabbixCepRuleResetTimeWindowsRequest.ZabbixCepRuleResetTimeWindowsRequest() -> void
 Community.Zabbix.ZabbixCepRuleResetTimeWindowsRequest.ZabbixCepRuleResetTimeWindowsRequest(ulong cepRuleId) -> void
+Community.Zabbix.ZabbixCepRuleResetTimeWindowsResult
+Community.Zabbix.ZabbixCepRuleResetTimeWindowsResult.<Clone>$() -> Community.Zabbix.ZabbixCepRuleResetTimeWindowsResult!
+Community.Zabbix.ZabbixCepRuleResetTimeWindowsResult.CepRuleId.get -> ulong?
+Community.Zabbix.ZabbixCepRuleResetTimeWindowsResult.CepRuleId.init -> void
+Community.Zabbix.ZabbixCepRuleResetTimeWindowsResult.Equals(Community.Zabbix.ZabbixCepRuleResetTimeWindowsResult? other) -> bool
+Community.Zabbix.ZabbixCepRuleResetTimeWindowsResult.ZabbixCepRuleResetTimeWindowsResult() -> void
 Community.Zabbix.ZabbixCepRuleStatus
 Community.Zabbix.ZabbixCepRuleStatus.Disabled = 1 -> Community.Zabbix.ZabbixCepRuleStatus
 Community.Zabbix.ZabbixCepRuleStatus.Enabled = 0 -> Community.Zabbix.ZabbixCepRuleStatus
@@ -2234,6 +2302,66 @@ Community.Zabbix.ZabbixConditionOperator.NotLike = 3 -> Community.Zabbix.ZabbixC
 Community.Zabbix.ZabbixConditionOperator.NotRegExp = 9 -> Community.Zabbix.ZabbixConditionOperator
 Community.Zabbix.ZabbixConditionOperator.RegExp = 8 -> Community.Zabbix.ZabbixConditionOperator
 Community.Zabbix.ZabbixConditionOperator.Yes = 10 -> Community.Zabbix.ZabbixConditionOperator
+Community.Zabbix.ZabbixConfigurationChange
+Community.Zabbix.ZabbixConfigurationChange.<Clone>$() -> Community.Zabbix.ZabbixConfigurationChange!
+Community.Zabbix.ZabbixConfigurationChange.After.get -> System.Text.Json.JsonElement?
+Community.Zabbix.ZabbixConfigurationChange.After.init -> void
+Community.Zabbix.ZabbixConfigurationChange.Before.get -> System.Text.Json.JsonElement?
+Community.Zabbix.ZabbixConfigurationChange.Before.init -> void
+Community.Zabbix.ZabbixConfigurationChange.Dashboards.get -> Community.Zabbix.ZabbixConfigurationChanges?
+Community.Zabbix.ZabbixConfigurationChange.Dashboards.init -> void
+Community.Zabbix.ZabbixConfigurationChange.DiscoveryRules.get -> Community.Zabbix.ZabbixConfigurationChanges?
+Community.Zabbix.ZabbixConfigurationChange.DiscoveryRules.init -> void
+Community.Zabbix.ZabbixConfigurationChange.Equals(Community.Zabbix.ZabbixConfigurationChange? other) -> bool
+Community.Zabbix.ZabbixConfigurationChange.GraphPrototypes.get -> Community.Zabbix.ZabbixConfigurationChanges?
+Community.Zabbix.ZabbixConfigurationChange.GraphPrototypes.init -> void
+Community.Zabbix.ZabbixConfigurationChange.HostPrototypes.get -> Community.Zabbix.ZabbixConfigurationChanges?
+Community.Zabbix.ZabbixConfigurationChange.HostPrototypes.init -> void
+Community.Zabbix.ZabbixConfigurationChange.HttpTests.get -> Community.Zabbix.ZabbixConfigurationChanges?
+Community.Zabbix.ZabbixConfigurationChange.HttpTests.init -> void
+Community.Zabbix.ZabbixConfigurationChange.ItemPrototypes.get -> Community.Zabbix.ZabbixConfigurationChanges?
+Community.Zabbix.ZabbixConfigurationChange.ItemPrototypes.init -> void
+Community.Zabbix.ZabbixConfigurationChange.Items.get -> Community.Zabbix.ZabbixConfigurationChanges?
+Community.Zabbix.ZabbixConfigurationChange.Items.init -> void
+Community.Zabbix.ZabbixConfigurationChange.Pages.get -> Community.Zabbix.ZabbixConfigurationChanges?
+Community.Zabbix.ZabbixConfigurationChange.Pages.init -> void
+Community.Zabbix.ZabbixConfigurationChange.TriggerPrototypes.get -> Community.Zabbix.ZabbixConfigurationChanges?
+Community.Zabbix.ZabbixConfigurationChange.TriggerPrototypes.init -> void
+Community.Zabbix.ZabbixConfigurationChange.Triggers.get -> Community.Zabbix.ZabbixConfigurationChanges?
+Community.Zabbix.ZabbixConfigurationChange.Triggers.init -> void
+Community.Zabbix.ZabbixConfigurationChange.ValueMaps.get -> Community.Zabbix.ZabbixConfigurationChanges?
+Community.Zabbix.ZabbixConfigurationChange.ValueMaps.init -> void
+Community.Zabbix.ZabbixConfigurationChange.Widgets.get -> Community.Zabbix.ZabbixConfigurationChanges?
+Community.Zabbix.ZabbixConfigurationChange.Widgets.init -> void
+Community.Zabbix.ZabbixConfigurationChange.ZabbixConfigurationChange() -> void
+Community.Zabbix.ZabbixConfigurationChanges
+Community.Zabbix.ZabbixConfigurationChanges.<Clone>$() -> Community.Zabbix.ZabbixConfigurationChanges!
+Community.Zabbix.ZabbixConfigurationChanges.Added.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixConfigurationChange!>?
+Community.Zabbix.ZabbixConfigurationChanges.Added.init -> void
+Community.Zabbix.ZabbixConfigurationChanges.Equals(Community.Zabbix.ZabbixConfigurationChanges? other) -> bool
+Community.Zabbix.ZabbixConfigurationChanges.Removed.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixConfigurationChange!>?
+Community.Zabbix.ZabbixConfigurationChanges.Removed.init -> void
+Community.Zabbix.ZabbixConfigurationChanges.Updated.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixConfigurationChange!>?
+Community.Zabbix.ZabbixConfigurationChanges.Updated.init -> void
+Community.Zabbix.ZabbixConfigurationChanges.ZabbixConfigurationChanges() -> void
+Community.Zabbix.ZabbixConfigurationComparison
+Community.Zabbix.ZabbixConfigurationComparison.<Clone>$() -> Community.Zabbix.ZabbixConfigurationComparison!
+Community.Zabbix.ZabbixConfigurationComparison.Dashboards.get -> Community.Zabbix.ZabbixConfigurationChanges?
+Community.Zabbix.ZabbixConfigurationComparison.Dashboards.init -> void
+Community.Zabbix.ZabbixConfigurationComparison.Equals(Community.Zabbix.ZabbixConfigurationComparison? other) -> bool
+Community.Zabbix.ZabbixConfigurationComparison.Graphs.get -> Community.Zabbix.ZabbixConfigurationChanges?
+Community.Zabbix.ZabbixConfigurationComparison.Graphs.init -> void
+Community.Zabbix.ZabbixConfigurationComparison.HostGroups.get -> Community.Zabbix.ZabbixConfigurationChanges?
+Community.Zabbix.ZabbixConfigurationComparison.HostGroups.init -> void
+Community.Zabbix.ZabbixConfigurationComparison.MissingObjects.get -> Community.Zabbix.ZabbixConfigurationMissingObjects?
+Community.Zabbix.ZabbixConfigurationComparison.MissingObjects.init -> void
+Community.Zabbix.ZabbixConfigurationComparison.TemplateGroups.get -> Community.Zabbix.ZabbixConfigurationChanges?
+Community.Zabbix.ZabbixConfigurationComparison.TemplateGroups.init -> void
+Community.Zabbix.ZabbixConfigurationComparison.Templates.get -> Community.Zabbix.ZabbixConfigurationChanges?
+Community.Zabbix.ZabbixConfigurationComparison.Templates.init -> void
+Community.Zabbix.ZabbixConfigurationComparison.Triggers.get -> Community.Zabbix.ZabbixConfigurationChanges?
+Community.Zabbix.ZabbixConfigurationComparison.Triggers.init -> void
+Community.Zabbix.ZabbixConfigurationComparison.ZabbixConfigurationComparison() -> void
 Community.Zabbix.ZabbixConfigurationExportOptionRequest
 Community.Zabbix.ZabbixConfigurationExportOptionRequest.<Clone>$() -> Community.Zabbix.ZabbixConfigurationExportOptionRequest!
 Community.Zabbix.ZabbixConfigurationExportOptionRequest.Dashboards.get -> System.Collections.Generic.IReadOnlyList<ulong>?
@@ -2284,6 +2412,12 @@ Community.Zabbix.ZabbixConfigurationImportRequest.Source.get -> string!
 Community.Zabbix.ZabbixConfigurationImportRequest.Source.set -> void
 Community.Zabbix.ZabbixConfigurationImportRequest.ZabbixConfigurationImportRequest() -> void
 Community.Zabbix.ZabbixConfigurationImportRequest.ZabbixConfigurationImportRequest(string! format, string! source, Community.Zabbix.ZabbixConfigurationImportRuleRequest! rules) -> void
+Community.Zabbix.ZabbixConfigurationImportResult
+Community.Zabbix.ZabbixConfigurationImportResult.<Clone>$() -> Community.Zabbix.ZabbixConfigurationImportResult!
+Community.Zabbix.ZabbixConfigurationImportResult.Equals(Community.Zabbix.ZabbixConfigurationImportResult? other) -> bool
+Community.Zabbix.ZabbixConfigurationImportResult.MissingObjects.get -> Community.Zabbix.ZabbixConfigurationMissingObjects?
+Community.Zabbix.ZabbixConfigurationImportResult.MissingObjects.init -> void
+Community.Zabbix.ZabbixConfigurationImportResult.ZabbixConfigurationImportResult() -> void
 Community.Zabbix.ZabbixConfigurationImportRuleDashboardRequest
 Community.Zabbix.ZabbixConfigurationImportRuleDashboardRequest.<Clone>$() -> Community.Zabbix.ZabbixConfigurationImportRuleDashboardRequest!
 Community.Zabbix.ZabbixConfigurationImportRuleDashboardRequest.CreateMissing.get -> bool?
@@ -2472,6 +2606,42 @@ Community.Zabbix.ZabbixConfigurationImportRuleValueMapRequest.Equals(Community.Z
 Community.Zabbix.ZabbixConfigurationImportRuleValueMapRequest.UpdateExisting.get -> bool?
 Community.Zabbix.ZabbixConfigurationImportRuleValueMapRequest.UpdateExisting.init -> void
 Community.Zabbix.ZabbixConfigurationImportRuleValueMapRequest.ZabbixConfigurationImportRuleValueMapRequest() -> void
+Community.Zabbix.ZabbixConfigurationMissingObject
+Community.Zabbix.ZabbixConfigurationMissingObject.<Clone>$() -> Community.Zabbix.ZabbixConfigurationMissingObject!
+Community.Zabbix.ZabbixConfigurationMissingObject.Equals(Community.Zabbix.ZabbixConfigurationMissingObject? other) -> bool
+Community.Zabbix.ZabbixConfigurationMissingObject.HostName.get -> string?
+Community.Zabbix.ZabbixConfigurationMissingObject.HostName.init -> void
+Community.Zabbix.ZabbixConfigurationMissingObject.Key.get -> string?
+Community.Zabbix.ZabbixConfigurationMissingObject.Key.init -> void
+Community.Zabbix.ZabbixConfigurationMissingObject.Name.get -> string?
+Community.Zabbix.ZabbixConfigurationMissingObject.Name.init -> void
+Community.Zabbix.ZabbixConfigurationMissingObject.UserName.get -> string?
+Community.Zabbix.ZabbixConfigurationMissingObject.UserName.init -> void
+Community.Zabbix.ZabbixConfigurationMissingObject.ZabbixConfigurationMissingObject() -> void
+Community.Zabbix.ZabbixConfigurationMissingObjects
+Community.Zabbix.ZabbixConfigurationMissingObjects.<Clone>$() -> Community.Zabbix.ZabbixConfigurationMissingObjects!
+Community.Zabbix.ZabbixConfigurationMissingObjects.Actions.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixConfigurationMissingObject!>?
+Community.Zabbix.ZabbixConfigurationMissingObjects.Actions.init -> void
+Community.Zabbix.ZabbixConfigurationMissingObjects.Equals(Community.Zabbix.ZabbixConfigurationMissingObjects? other) -> bool
+Community.Zabbix.ZabbixConfigurationMissingObjects.Graphs.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixConfigurationMissingObject!>?
+Community.Zabbix.ZabbixConfigurationMissingObjects.Graphs.init -> void
+Community.Zabbix.ZabbixConfigurationMissingObjects.HostGroups.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixConfigurationMissingObject!>?
+Community.Zabbix.ZabbixConfigurationMissingObjects.HostGroups.init -> void
+Community.Zabbix.ZabbixConfigurationMissingObjects.Hosts.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixConfigurationMissingObject!>?
+Community.Zabbix.ZabbixConfigurationMissingObjects.Hosts.init -> void
+Community.Zabbix.ZabbixConfigurationMissingObjects.Items.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixConfigurationMissingObject!>?
+Community.Zabbix.ZabbixConfigurationMissingObjects.Items.init -> void
+Community.Zabbix.ZabbixConfigurationMissingObjects.Maps.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixConfigurationMissingObject!>?
+Community.Zabbix.ZabbixConfigurationMissingObjects.Maps.init -> void
+Community.Zabbix.ZabbixConfigurationMissingObjects.MediaTypes.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixConfigurationMissingObject!>?
+Community.Zabbix.ZabbixConfigurationMissingObjects.MediaTypes.init -> void
+Community.Zabbix.ZabbixConfigurationMissingObjects.Services.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixConfigurationMissingObject!>?
+Community.Zabbix.ZabbixConfigurationMissingObjects.Services.init -> void
+Community.Zabbix.ZabbixConfigurationMissingObjects.Slas.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixConfigurationMissingObject!>?
+Community.Zabbix.ZabbixConfigurationMissingObjects.Slas.init -> void
+Community.Zabbix.ZabbixConfigurationMissingObjects.Users.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixConfigurationMissingObject!>?
+Community.Zabbix.ZabbixConfigurationMissingObjects.Users.init -> void
+Community.Zabbix.ZabbixConfigurationMissingObjects.ZabbixConfigurationMissingObjects() -> void
 Community.Zabbix.ZabbixConnector
 Community.Zabbix.ZabbixConnector.<Clone>$() -> Community.Zabbix.ZabbixConnector!
 Community.Zabbix.ZabbixConnector.AttemptInterval.get -> Community.Zabbix.ZabbixDuration?
@@ -3320,6 +3490,22 @@ Community.Zabbix.ZabbixDeviceInitRequest.Equals(Community.Zabbix.ZabbixDeviceIni
 Community.Zabbix.ZabbixDeviceInitRequest.UserId.get -> ulong?
 Community.Zabbix.ZabbixDeviceInitRequest.UserId.set -> void
 Community.Zabbix.ZabbixDeviceInitRequest.ZabbixDeviceInitRequest() -> void
+Community.Zabbix.ZabbixDeviceInitResult
+Community.Zabbix.ZabbixDeviceInitResult.<Clone>$() -> Community.Zabbix.ZabbixDeviceInitResult!
+Community.Zabbix.ZabbixDeviceInitResult.BridgeAdapterEncryptionKey.get -> string?
+Community.Zabbix.ZabbixDeviceInitResult.BridgeAdapterEncryptionKey.init -> void
+Community.Zabbix.ZabbixDeviceInitResult.BridgeEnrollmentUrl.get -> string?
+Community.Zabbix.ZabbixDeviceInitResult.BridgeEnrollmentUrl.init -> void
+Community.Zabbix.ZabbixDeviceInitResult.EnrollmentToken.get -> string?
+Community.Zabbix.ZabbixDeviceInitResult.EnrollmentToken.init -> void
+Community.Zabbix.ZabbixDeviceInitResult.EnrollmentTokenExpiresAt.get -> System.DateTimeOffset?
+Community.Zabbix.ZabbixDeviceInitResult.EnrollmentTokenExpiresAt.init -> void
+Community.Zabbix.ZabbixDeviceInitResult.Equals(Community.Zabbix.ZabbixDeviceInitResult? other) -> bool
+Community.Zabbix.ZabbixDeviceInitResult.MobileEnrollmentToken.get -> string?
+Community.Zabbix.ZabbixDeviceInitResult.MobileEnrollmentToken.init -> void
+Community.Zabbix.ZabbixDeviceInitResult.Uuid.get -> string?
+Community.Zabbix.ZabbixDeviceInitResult.Uuid.init -> void
+Community.Zabbix.ZabbixDeviceInitResult.ZabbixDeviceInitResult() -> void
 Community.Zabbix.ZabbixDeviceOffboardRequest
 Community.Zabbix.ZabbixDeviceOffboardRequest.<Clone>$() -> Community.Zabbix.ZabbixDeviceOffboardRequest!
 Community.Zabbix.ZabbixDeviceOffboardRequest.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
@@ -3331,6 +3517,12 @@ Community.Zabbix.ZabbixDeviceOffboardRequest.Uuid.get -> string!
 Community.Zabbix.ZabbixDeviceOffboardRequest.Uuid.set -> void
 Community.Zabbix.ZabbixDeviceOffboardRequest.ZabbixDeviceOffboardRequest() -> void
 Community.Zabbix.ZabbixDeviceOffboardRequest.ZabbixDeviceOffboardRequest(string! uuid) -> void
+Community.Zabbix.ZabbixDeviceOffboardResult
+Community.Zabbix.ZabbixDeviceOffboardResult.<Clone>$() -> Community.Zabbix.ZabbixDeviceOffboardResult!
+Community.Zabbix.ZabbixDeviceOffboardResult.Equals(Community.Zabbix.ZabbixDeviceOffboardResult? other) -> bool
+Community.Zabbix.ZabbixDeviceOffboardResult.Uuid.get -> string?
+Community.Zabbix.ZabbixDeviceOffboardResult.Uuid.init -> void
+Community.Zabbix.ZabbixDeviceOffboardResult.ZabbixDeviceOffboardResult() -> void
 Community.Zabbix.ZabbixDeviceOnboardMobileEncryptionKeyRequest
 Community.Zabbix.ZabbixDeviceOnboardMobileEncryptionKeyRequest.<Clone>$() -> Community.Zabbix.ZabbixDeviceOnboardMobileEncryptionKeyRequest!
 Community.Zabbix.ZabbixDeviceOnboardMobileEncryptionKeyRequest.Alg.get -> string?
@@ -3386,6 +3578,12 @@ Community.Zabbix.ZabbixDeviceOnboardRequest.PushToken.get -> string!
 Community.Zabbix.ZabbixDeviceOnboardRequest.PushToken.set -> void
 Community.Zabbix.ZabbixDeviceOnboardRequest.ZabbixDeviceOnboardRequest() -> void
 Community.Zabbix.ZabbixDeviceOnboardRequest.ZabbixDeviceOnboardRequest(string! enrollmentToken, Community.Zabbix.ZabbixDeviceOnboardMobileIdentityKeyRequest! mobileIdentityKey, Community.Zabbix.ZabbixDeviceOnboardMobileEncryptionKeyRequest! mobileEncryptionKey, string! pushToken, string! name) -> void
+Community.Zabbix.ZabbixDeviceOnboardResult
+Community.Zabbix.ZabbixDeviceOnboardResult.<Clone>$() -> Community.Zabbix.ZabbixDeviceOnboardResult!
+Community.Zabbix.ZabbixDeviceOnboardResult.Equals(Community.Zabbix.ZabbixDeviceOnboardResult? other) -> bool
+Community.Zabbix.ZabbixDeviceOnboardResult.Token.get -> string?
+Community.Zabbix.ZabbixDeviceOnboardResult.Token.init -> void
+Community.Zabbix.ZabbixDeviceOnboardResult.ZabbixDeviceOnboardResult() -> void
 Community.Zabbix.ZabbixDeviceStatus
 Community.Zabbix.ZabbixDeviceStatus.Activated = 1 -> Community.Zabbix.ZabbixDeviceStatus
 Community.Zabbix.ZabbixDeviceStatus.New = 0 -> Community.Zabbix.ZabbixDeviceStatus
@@ -5466,6 +5664,14 @@ Community.Zabbix.ZabbixExpressionType.ContainsString = 0 -> Community.Zabbix.Zab
 Community.Zabbix.ZabbixExpressionType.MatchesRegex = 3 -> Community.Zabbix.ZabbixExpressionType
 Community.Zabbix.ZabbixExpressionType.NotContainsString = 2 -> Community.Zabbix.ZabbixExpressionType
 Community.Zabbix.ZabbixExpressionType.NotMatchesRegex = 4 -> Community.Zabbix.ZabbixExpressionType
+Community.Zabbix.ZabbixGeneratedToken
+Community.Zabbix.ZabbixGeneratedToken.<Clone>$() -> Community.Zabbix.ZabbixGeneratedToken!
+Community.Zabbix.ZabbixGeneratedToken.Equals(Community.Zabbix.ZabbixGeneratedToken? other) -> bool
+Community.Zabbix.ZabbixGeneratedToken.Token.get -> string?
+Community.Zabbix.ZabbixGeneratedToken.Token.init -> void
+Community.Zabbix.ZabbixGeneratedToken.TokenId.get -> ulong?
+Community.Zabbix.ZabbixGeneratedToken.TokenId.init -> void
+Community.Zabbix.ZabbixGeneratedToken.ZabbixGeneratedToken() -> void
 Community.Zabbix.ZabbixGraph
 Community.Zabbix.ZabbixGraph.<Clone>$() -> Community.Zabbix.ZabbixGraph!
 Community.Zabbix.ZabbixGraph.DiscoveryData.get -> Community.Zabbix.ZabbixGraphDiscoveryData?
@@ -13046,6 +13252,49 @@ Community.Zabbix.ZabbixOptional<T>.IsNull.get -> bool
 Community.Zabbix.ZabbixOptional<T>.IsSent.get -> bool
 Community.Zabbix.ZabbixOptional<T>.TryGetValue(out T value) -> bool
 Community.Zabbix.ZabbixOptional<T>.ZabbixOptional() -> void
+Community.Zabbix.ZabbixPageContext
+Community.Zabbix.ZabbixPageContext.Host = 0 -> Community.Zabbix.ZabbixPageContext
+Community.Zabbix.ZabbixPageContext.Template = 1 -> Community.Zabbix.ZabbixPageContext
+Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageKind.Action = 18 -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageKind.Dashboard = 9 -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageKind.DiscoveryRule = 7 -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageKind.Event = 12 -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageKind.Graph = 6 -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageKind.Host = 0 -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageKind.HostGroup = 1 -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageKind.Item = 4 -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageKind.Maintenance = 13 -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageKind.Map = 10 -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageKind.MediaType = 19 -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageKind.NetworkDiscoveryRule = 17 -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageKind.Problem = 11 -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageKind.Proxy = 16 -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageKind.Script = 20 -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageKind.Service = 21 -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageKind.Sla = 22 -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageKind.Template = 2 -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageKind.TemplateGroup = 3 -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageKind.Trigger = 5 -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageKind.User = 14 -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageKind.UserGroup = 15 -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageKind.WebScenario = 8 -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageTarget
+Community.Zabbix.ZabbixPageTarget.<Clone>$() -> Community.Zabbix.ZabbixPageTarget!
+Community.Zabbix.ZabbixPageTarget.Context.get -> Community.Zabbix.ZabbixPageContext?
+Community.Zabbix.ZabbixPageTarget.Context.init -> void
+Community.Zabbix.ZabbixPageTarget.Equals(Community.Zabbix.ZabbixPageTarget? other) -> bool
+Community.Zabbix.ZabbixPageTarget.EventSource.get -> Community.Zabbix.ZabbixEventSource?
+Community.Zabbix.ZabbixPageTarget.EventSource.init -> void
+Community.Zabbix.ZabbixPageTarget.HostId.get -> ulong?
+Community.Zabbix.ZabbixPageTarget.HostId.init -> void
+Community.Zabbix.ZabbixPageTarget.Id.get -> ulong
+Community.Zabbix.ZabbixPageTarget.Kind.get -> Community.Zabbix.ZabbixPageKind
+Community.Zabbix.ZabbixPageTarget.Name.get -> string?
+Community.Zabbix.ZabbixPageTarget.Name.init -> void
+Community.Zabbix.ZabbixPageTarget.TriggerId.get -> ulong?
+Community.Zabbix.ZabbixPageTarget.TriggerId.init -> void
+Community.Zabbix.ZabbixPageTarget.ZabbixPageTarget(Community.Zabbix.ZabbixPageKind kind, ulong id) -> void
 Community.Zabbix.ZabbixPasswordCheckRules
 Community.Zabbix.ZabbixPasswordCheckRules.Case = 1 -> Community.Zabbix.ZabbixPasswordCheckRules
 Community.Zabbix.ZabbixPasswordCheckRules.Digits = 2 -> Community.Zabbix.ZabbixPasswordCheckRules
@@ -13057,10 +13306,6 @@ Community.Zabbix.ZabbixPermissionLevel.Deny = 0 -> Community.Zabbix.ZabbixPermis
 Community.Zabbix.ZabbixPermissionLevel.None = -1 -> Community.Zabbix.ZabbixPermissionLevel
 Community.Zabbix.ZabbixPermissionLevel.Read = 2 -> Community.Zabbix.ZabbixPermissionLevel
 Community.Zabbix.ZabbixPermissionLevel.ReadWrite = 3 -> Community.Zabbix.ZabbixPermissionLevel
-Community.Zabbix.ZabbixPort
-Community.Zabbix.ZabbixPort.Equals(Community.Zabbix.ZabbixPort other) -> bool
-Community.Zabbix.ZabbixPort.Number.get -> int?
-Community.Zabbix.ZabbixPort.ZabbixPort() -> void
 Community.Zabbix.ZabbixPreprocessingErrorHandler
 Community.Zabbix.ZabbixPreprocessingErrorHandler.Default = 0 -> Community.Zabbix.ZabbixPreprocessingErrorHandler
 Community.Zabbix.ZabbixPreprocessingErrorHandler.DiscardValue = 1 -> Community.Zabbix.ZabbixPreprocessingErrorHandler
@@ -14630,6 +14875,24 @@ Community.Zabbix.ZabbixScriptCreateRequest.UserName.get -> string?
 Community.Zabbix.ZabbixScriptCreateRequest.UserName.set -> void
 Community.Zabbix.ZabbixScriptCreateRequest.ZabbixScriptCreateRequest() -> void
 Community.Zabbix.ZabbixScriptCreateRequest.ZabbixScriptCreateRequest(string! name, Community.Zabbix.ZabbixScriptScope scope) -> void
+Community.Zabbix.ZabbixScriptExecuteDebug
+Community.Zabbix.ZabbixScriptExecuteDebug.<Clone>$() -> Community.Zabbix.ZabbixScriptExecuteDebug!
+Community.Zabbix.ZabbixScriptExecuteDebug.Elapsed.get -> System.TimeSpan?
+Community.Zabbix.ZabbixScriptExecuteDebug.Elapsed.init -> void
+Community.Zabbix.ZabbixScriptExecuteDebug.Entries.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixScriptExecuteLogEntry!>?
+Community.Zabbix.ZabbixScriptExecuteDebug.Entries.init -> void
+Community.Zabbix.ZabbixScriptExecuteDebug.Equals(Community.Zabbix.ZabbixScriptExecuteDebug? other) -> bool
+Community.Zabbix.ZabbixScriptExecuteDebug.ZabbixScriptExecuteDebug() -> void
+Community.Zabbix.ZabbixScriptExecuteLogEntry
+Community.Zabbix.ZabbixScriptExecuteLogEntry.<Clone>$() -> Community.Zabbix.ZabbixScriptExecuteLogEntry!
+Community.Zabbix.ZabbixScriptExecuteLogEntry.Elapsed.get -> System.TimeSpan?
+Community.Zabbix.ZabbixScriptExecuteLogEntry.Elapsed.init -> void
+Community.Zabbix.ZabbixScriptExecuteLogEntry.Equals(Community.Zabbix.ZabbixScriptExecuteLogEntry? other) -> bool
+Community.Zabbix.ZabbixScriptExecuteLogEntry.Level.get -> int?
+Community.Zabbix.ZabbixScriptExecuteLogEntry.Level.init -> void
+Community.Zabbix.ZabbixScriptExecuteLogEntry.Message.get -> string?
+Community.Zabbix.ZabbixScriptExecuteLogEntry.Message.init -> void
+Community.Zabbix.ZabbixScriptExecuteLogEntry.ZabbixScriptExecuteLogEntry() -> void
 Community.Zabbix.ZabbixScriptExecuteOn
 Community.Zabbix.ZabbixScriptExecuteOn.Agent = 0 -> Community.Zabbix.ZabbixScriptExecuteOn
 Community.Zabbix.ZabbixScriptExecuteOn.Proxy = 2 -> Community.Zabbix.ZabbixScriptExecuteOn
@@ -14649,6 +14912,16 @@ Community.Zabbix.ZabbixScriptExecuteRequest.ScriptId.get -> ulong
 Community.Zabbix.ZabbixScriptExecuteRequest.ScriptId.init -> void
 Community.Zabbix.ZabbixScriptExecuteRequest.ZabbixScriptExecuteRequest() -> void
 Community.Zabbix.ZabbixScriptExecuteRequest.ZabbixScriptExecuteRequest(ulong scriptId) -> void
+Community.Zabbix.ZabbixScriptExecuteResult
+Community.Zabbix.ZabbixScriptExecuteResult.<Clone>$() -> Community.Zabbix.ZabbixScriptExecuteResult!
+Community.Zabbix.ZabbixScriptExecuteResult.Debug.get -> Community.Zabbix.ZabbixScriptExecuteDebug?
+Community.Zabbix.ZabbixScriptExecuteResult.Debug.init -> void
+Community.Zabbix.ZabbixScriptExecuteResult.Equals(Community.Zabbix.ZabbixScriptExecuteResult? other) -> bool
+Community.Zabbix.ZabbixScriptExecuteResult.Response.get -> string?
+Community.Zabbix.ZabbixScriptExecuteResult.Response.init -> void
+Community.Zabbix.ZabbixScriptExecuteResult.Value.get -> string?
+Community.Zabbix.ZabbixScriptExecuteResult.Value.init -> void
+Community.Zabbix.ZabbixScriptExecuteResult.ZabbixScriptExecuteResult() -> void
 Community.Zabbix.ZabbixScriptFields
 Community.Zabbix.ZabbixScriptGetFilter
 Community.Zabbix.ZabbixScriptGetFilter.Command.get -> System.Collections.Generic.IReadOnlyList<string!>?
@@ -15134,6 +15407,20 @@ Community.Zabbix.ZabbixServiceSelectStatusTimelineFilter.PeriodTo.get -> System.
 Community.Zabbix.ZabbixServiceSelectStatusTimelineFilter.PeriodTo.init -> void
 Community.Zabbix.ZabbixServiceSelectStatusTimelineFilter.ZabbixServiceSelectStatusTimelineFilter() -> void
 Community.Zabbix.ZabbixServiceSelectStatusTimelineFilter.ZabbixServiceSelectStatusTimelineFilter(System.DateTimeOffset periodFrom, System.DateTimeOffset periodTo) -> void
+Community.Zabbix.ZabbixServiceSli
+Community.Zabbix.ZabbixServiceSli.<Clone>$() -> Community.Zabbix.ZabbixServiceSli!
+Community.Zabbix.ZabbixServiceSli.Downtime.get -> System.TimeSpan?
+Community.Zabbix.ZabbixServiceSli.Downtime.init -> void
+Community.Zabbix.ZabbixServiceSli.Equals(Community.Zabbix.ZabbixServiceSli? other) -> bool
+Community.Zabbix.ZabbixServiceSli.ErrorBudget.get -> System.TimeSpan?
+Community.Zabbix.ZabbixServiceSli.ErrorBudget.init -> void
+Community.Zabbix.ZabbixServiceSli.ExcludedDowntimes.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixSlaRecordExcludedDowntime!>?
+Community.Zabbix.ZabbixServiceSli.ExcludedDowntimes.init -> void
+Community.Zabbix.ZabbixServiceSli.Sli.get -> double?
+Community.Zabbix.ZabbixServiceSli.Sli.init -> void
+Community.Zabbix.ZabbixServiceSli.Uptime.get -> System.TimeSpan?
+Community.Zabbix.ZabbixServiceSli.Uptime.init -> void
+Community.Zabbix.ZabbixServiceSli.ZabbixServiceSli() -> void
 Community.Zabbix.ZabbixServiceStatus
 Community.Zabbix.ZabbixServiceStatus.Average = 3 -> Community.Zabbix.ZabbixServiceStatus
 Community.Zabbix.ZabbixServiceStatus.Disaster = 5 -> Community.Zabbix.ZabbixServiceStatus
@@ -15815,6 +16102,24 @@ Community.Zabbix.ZabbixSlaUpdateRequest.Timezone.get -> string?
 Community.Zabbix.ZabbixSlaUpdateRequest.Timezone.set -> void
 Community.Zabbix.ZabbixSlaUpdateRequest.ZabbixSlaUpdateRequest() -> void
 Community.Zabbix.ZabbixSlaUpdateRequest.ZabbixSlaUpdateRequest(ulong slaId) -> void
+Community.Zabbix.ZabbixSliPeriod
+Community.Zabbix.ZabbixSliPeriod.<Clone>$() -> Community.Zabbix.ZabbixSliPeriod!
+Community.Zabbix.ZabbixSliPeriod.Equals(Community.Zabbix.ZabbixSliPeriod? other) -> bool
+Community.Zabbix.ZabbixSliPeriod.PeriodFrom.get -> System.DateTimeOffset?
+Community.Zabbix.ZabbixSliPeriod.PeriodFrom.init -> void
+Community.Zabbix.ZabbixSliPeriod.PeriodTo.get -> System.DateTimeOffset?
+Community.Zabbix.ZabbixSliPeriod.PeriodTo.init -> void
+Community.Zabbix.ZabbixSliPeriod.ZabbixSliPeriod() -> void
+Community.Zabbix.ZabbixSliReport
+Community.Zabbix.ZabbixSliReport.<Clone>$() -> Community.Zabbix.ZabbixSliReport!
+Community.Zabbix.ZabbixSliReport.Equals(Community.Zabbix.ZabbixSliReport? other) -> bool
+Community.Zabbix.ZabbixSliReport.Periods.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixSliPeriod!>?
+Community.Zabbix.ZabbixSliReport.Periods.init -> void
+Community.Zabbix.ZabbixSliReport.ServiceIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
+Community.Zabbix.ZabbixSliReport.ServiceIds.init -> void
+Community.Zabbix.ZabbixSliReport.Sli.get -> System.Collections.Generic.IReadOnlyList<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixServiceSli!>!>?
+Community.Zabbix.ZabbixSliReport.Sli.init -> void
+Community.Zabbix.ZabbixSliReport.ZabbixSliReport() -> void
 Community.Zabbix.ZabbixSmtpAuthentication
 Community.Zabbix.ZabbixSmtpAuthentication.None = 0 -> Community.Zabbix.ZabbixSmtpAuthentication
 Community.Zabbix.ZabbixSmtpAuthentication.Oauth = 2 -> Community.Zabbix.ZabbixSmtpAuthentication
@@ -18455,6 +18760,16 @@ Community.Zabbix.ZabbixUserDirectoryProvisionMediaRequest.Status.get -> Communit
 Community.Zabbix.ZabbixUserDirectoryProvisionMediaRequest.Status.init -> void
 Community.Zabbix.ZabbixUserDirectoryProvisionMediaRequest.ZabbixUserDirectoryProvisionMediaRequest() -> void
 Community.Zabbix.ZabbixUserDirectoryProvisionMediaRequest.ZabbixUserDirectoryProvisionMediaRequest(string! name, ulong mediaTypeId, string! attribute) -> void
+Community.Zabbix.ZabbixUserDirectoryTestMedia
+Community.Zabbix.ZabbixUserDirectoryTestMedia.<Clone>$() -> Community.Zabbix.ZabbixUserDirectoryTestMedia!
+Community.Zabbix.ZabbixUserDirectoryTestMedia.Equals(Community.Zabbix.ZabbixUserDirectoryTestMedia? other) -> bool
+Community.Zabbix.ZabbixUserDirectoryTestMedia.MediaTypeId.get -> ulong?
+Community.Zabbix.ZabbixUserDirectoryTestMedia.MediaTypeId.init -> void
+Community.Zabbix.ZabbixUserDirectoryTestMedia.Name.get -> string?
+Community.Zabbix.ZabbixUserDirectoryTestMedia.Name.init -> void
+Community.Zabbix.ZabbixUserDirectoryTestMedia.SendTo.get -> System.Collections.Generic.IReadOnlyList<string!>?
+Community.Zabbix.ZabbixUserDirectoryTestMedia.SendTo.init -> void
+Community.Zabbix.ZabbixUserDirectoryTestMedia.ZabbixUserDirectoryTestMedia() -> void
 Community.Zabbix.ZabbixUserDirectoryTestProvisionGroupRequest
 Community.Zabbix.ZabbixUserDirectoryTestProvisionGroupRequest.<Clone>$() -> Community.Zabbix.ZabbixUserDirectoryTestProvisionGroupRequest!
 Community.Zabbix.ZabbixUserDirectoryTestProvisionGroupRequest.Equals(Community.Zabbix.ZabbixUserDirectoryTestProvisionGroupRequest? other) -> bool
@@ -18545,6 +18860,30 @@ Community.Zabbix.ZabbixUserDirectoryTestRequest.UserUserName.get -> string?
 Community.Zabbix.ZabbixUserDirectoryTestRequest.UserUserName.set -> void
 Community.Zabbix.ZabbixUserDirectoryTestRequest.ZabbixUserDirectoryTestRequest() -> void
 Community.Zabbix.ZabbixUserDirectoryTestRequest.ZabbixUserDirectoryTestRequest(string! host, Community.Zabbix.ZabbixPort port, string! baseDN, string! searchAttribute, string! testUserName, string! testPassword) -> void
+Community.Zabbix.ZabbixUserDirectoryTestResult
+Community.Zabbix.ZabbixUserDirectoryTestResult.<Clone>$() -> Community.Zabbix.ZabbixUserDirectoryTestResult!
+Community.Zabbix.ZabbixUserDirectoryTestResult.Equals(Community.Zabbix.ZabbixUserDirectoryTestResult? other) -> bool
+Community.Zabbix.ZabbixUserDirectoryTestResult.FirstName.get -> string?
+Community.Zabbix.ZabbixUserDirectoryTestResult.FirstName.init -> void
+Community.Zabbix.ZabbixUserDirectoryTestResult.LastName.get -> string?
+Community.Zabbix.ZabbixUserDirectoryTestResult.LastName.init -> void
+Community.Zabbix.ZabbixUserDirectoryTestResult.Medias.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixUserDirectoryTestMedia!>?
+Community.Zabbix.ZabbixUserDirectoryTestResult.Medias.init -> void
+Community.Zabbix.ZabbixUserDirectoryTestResult.RoleId.get -> ulong?
+Community.Zabbix.ZabbixUserDirectoryTestResult.RoleId.init -> void
+Community.Zabbix.ZabbixUserDirectoryTestResult.UserDirectoryId.get -> ulong?
+Community.Zabbix.ZabbixUserDirectoryTestResult.UserDirectoryId.init -> void
+Community.Zabbix.ZabbixUserDirectoryTestResult.UserGroups.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixUserDirectoryTestUserGroup!>?
+Community.Zabbix.ZabbixUserDirectoryTestResult.UserGroups.init -> void
+Community.Zabbix.ZabbixUserDirectoryTestResult.UserName.get -> string?
+Community.Zabbix.ZabbixUserDirectoryTestResult.UserName.init -> void
+Community.Zabbix.ZabbixUserDirectoryTestResult.ZabbixUserDirectoryTestResult() -> void
+Community.Zabbix.ZabbixUserDirectoryTestUserGroup
+Community.Zabbix.ZabbixUserDirectoryTestUserGroup.<Clone>$() -> Community.Zabbix.ZabbixUserDirectoryTestUserGroup!
+Community.Zabbix.ZabbixUserDirectoryTestUserGroup.Equals(Community.Zabbix.ZabbixUserDirectoryTestUserGroup? other) -> bool
+Community.Zabbix.ZabbixUserDirectoryTestUserGroup.UserGroupId.get -> ulong?
+Community.Zabbix.ZabbixUserDirectoryTestUserGroup.UserGroupId.init -> void
+Community.Zabbix.ZabbixUserDirectoryTestUserGroup.ZabbixUserDirectoryTestUserGroup() -> void
 Community.Zabbix.ZabbixUserDirectoryUpdateProvisionMediaRequest
 Community.Zabbix.ZabbixUserDirectoryUpdateProvisionMediaRequest.<Clone>$() -> Community.Zabbix.ZabbixUserDirectoryUpdateProvisionMediaRequest!
 Community.Zabbix.ZabbixUserDirectoryUpdateProvisionMediaRequest.Attribute.get -> string?
@@ -19899,6 +20238,9 @@ override Community.Zabbix.ZabbixAuditLogGetSearch.ToString() -> string!
 override Community.Zabbix.ZabbixAuditLogRecord.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixAuditLogRecord.GetHashCode() -> int
 override Community.Zabbix.ZabbixAuditLogRecord.ToString() -> string!
+override Community.Zabbix.ZabbixAuthenticatedUser.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixAuthenticatedUser.GetHashCode() -> int
+override Community.Zabbix.ZabbixAuthenticatedUser.ToString() -> string!
 override Community.Zabbix.ZabbixAuthenticationGetParameters.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixAuthenticationGetParameters.GetHashCode() -> int
 override Community.Zabbix.ZabbixAuthenticationGetParameters.ToString() -> string!
@@ -19958,6 +20300,9 @@ override Community.Zabbix.ZabbixCepRuleOperationRequest.ToString() -> string!
 override Community.Zabbix.ZabbixCepRuleResetTimeWindowsRequest.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixCepRuleResetTimeWindowsRequest.GetHashCode() -> int
 override Community.Zabbix.ZabbixCepRuleResetTimeWindowsRequest.ToString() -> string!
+override Community.Zabbix.ZabbixCepRuleResetTimeWindowsResult.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixCepRuleResetTimeWindowsResult.GetHashCode() -> int
+override Community.Zabbix.ZabbixCepRuleResetTimeWindowsResult.ToString() -> string!
 override Community.Zabbix.ZabbixCepRuleUpdateRequest.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixCepRuleUpdateRequest.GetHashCode() -> int
 override Community.Zabbix.ZabbixCepRuleUpdateRequest.ToString() -> string!
@@ -19967,6 +20312,15 @@ override Community.Zabbix.ZabbixCepRuleWindow.ToString() -> string!
 override Community.Zabbix.ZabbixCepRuleWindowRequest.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixCepRuleWindowRequest.GetHashCode() -> int
 override Community.Zabbix.ZabbixCepRuleWindowRequest.ToString() -> string!
+override Community.Zabbix.ZabbixConfigurationChange.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixConfigurationChange.GetHashCode() -> int
+override Community.Zabbix.ZabbixConfigurationChange.ToString() -> string!
+override Community.Zabbix.ZabbixConfigurationChanges.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixConfigurationChanges.GetHashCode() -> int
+override Community.Zabbix.ZabbixConfigurationChanges.ToString() -> string!
+override Community.Zabbix.ZabbixConfigurationComparison.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixConfigurationComparison.GetHashCode() -> int
+override Community.Zabbix.ZabbixConfigurationComparison.ToString() -> string!
 override Community.Zabbix.ZabbixConfigurationExportOptionRequest.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixConfigurationExportOptionRequest.GetHashCode() -> int
 override Community.Zabbix.ZabbixConfigurationExportOptionRequest.ToString() -> string!
@@ -19976,6 +20330,9 @@ override Community.Zabbix.ZabbixConfigurationExportRequest.ToString() -> string!
 override Community.Zabbix.ZabbixConfigurationImportRequest.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixConfigurationImportRequest.GetHashCode() -> int
 override Community.Zabbix.ZabbixConfigurationImportRequest.ToString() -> string!
+override Community.Zabbix.ZabbixConfigurationImportResult.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixConfigurationImportResult.GetHashCode() -> int
+override Community.Zabbix.ZabbixConfigurationImportResult.ToString() -> string!
 override Community.Zabbix.ZabbixConfigurationImportRuleDashboardRequest.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixConfigurationImportRuleDashboardRequest.GetHashCode() -> int
 override Community.Zabbix.ZabbixConfigurationImportRuleDashboardRequest.ToString() -> string!
@@ -20030,6 +20387,12 @@ override Community.Zabbix.ZabbixConfigurationImportRuleTriggerRequest.ToString()
 override Community.Zabbix.ZabbixConfigurationImportRuleValueMapRequest.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixConfigurationImportRuleValueMapRequest.GetHashCode() -> int
 override Community.Zabbix.ZabbixConfigurationImportRuleValueMapRequest.ToString() -> string!
+override Community.Zabbix.ZabbixConfigurationMissingObject.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixConfigurationMissingObject.GetHashCode() -> int
+override Community.Zabbix.ZabbixConfigurationMissingObject.ToString() -> string!
+override Community.Zabbix.ZabbixConfigurationMissingObjects.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixConfigurationMissingObjects.GetHashCode() -> int
+override Community.Zabbix.ZabbixConfigurationMissingObjects.ToString() -> string!
 override Community.Zabbix.ZabbixConnector.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixConnector.GetHashCode() -> int
 override Community.Zabbix.ZabbixConnector.ToString() -> string!
@@ -20161,9 +20524,15 @@ override Community.Zabbix.ZabbixDeviceGetSearch.ToString() -> string!
 override Community.Zabbix.ZabbixDeviceInitRequest.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixDeviceInitRequest.GetHashCode() -> int
 override Community.Zabbix.ZabbixDeviceInitRequest.ToString() -> string!
+override Community.Zabbix.ZabbixDeviceInitResult.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixDeviceInitResult.GetHashCode() -> int
+override Community.Zabbix.ZabbixDeviceInitResult.ToString() -> string!
 override Community.Zabbix.ZabbixDeviceOffboardRequest.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixDeviceOffboardRequest.GetHashCode() -> int
 override Community.Zabbix.ZabbixDeviceOffboardRequest.ToString() -> string!
+override Community.Zabbix.ZabbixDeviceOffboardResult.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixDeviceOffboardResult.GetHashCode() -> int
+override Community.Zabbix.ZabbixDeviceOffboardResult.ToString() -> string!
 override Community.Zabbix.ZabbixDeviceOnboardMobileEncryptionKeyRequest.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixDeviceOnboardMobileEncryptionKeyRequest.GetHashCode() -> int
 override Community.Zabbix.ZabbixDeviceOnboardMobileEncryptionKeyRequest.ToString() -> string!
@@ -20173,6 +20542,9 @@ override Community.Zabbix.ZabbixDeviceOnboardMobileIdentityKeyRequest.ToString()
 override Community.Zabbix.ZabbixDeviceOnboardRequest.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixDeviceOnboardRequest.GetHashCode() -> int
 override Community.Zabbix.ZabbixDeviceOnboardRequest.ToString() -> string!
+override Community.Zabbix.ZabbixDeviceOnboardResult.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixDeviceOnboardResult.GetHashCode() -> int
+override Community.Zabbix.ZabbixDeviceOnboardResult.ToString() -> string!
 override Community.Zabbix.ZabbixDiscoveredHost.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixDiscoveredHost.GetHashCode() -> int
 override Community.Zabbix.ZabbixDiscoveredHost.ToString() -> string!
@@ -20410,6 +20782,9 @@ override Community.Zabbix.ZabbixEventSuppressionData.ToString() -> string!
 override Community.Zabbix.ZabbixEventUrl.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixEventUrl.GetHashCode() -> int
 override Community.Zabbix.ZabbixEventUrl.ToString() -> string!
+override Community.Zabbix.ZabbixGeneratedToken.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixGeneratedToken.GetHashCode() -> int
+override Community.Zabbix.ZabbixGeneratedToken.ToString() -> string!
 override Community.Zabbix.ZabbixGraph.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixGraph.GetHashCode() -> int
 override Community.Zabbix.ZabbixGraph.ToString() -> string!
@@ -21276,8 +21651,9 @@ override Community.Zabbix.ZabbixNetworkDiscoveryRuleUpdateRequest.ToString() -> 
 override Community.Zabbix.ZabbixOptional<T>.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixOptional<T>.GetHashCode() -> int
 override Community.Zabbix.ZabbixOptional<T>.ToString() -> string!
-override Community.Zabbix.ZabbixPort.GetHashCode() -> int
-override Community.Zabbix.ZabbixPort.ToString() -> string!
+override Community.Zabbix.ZabbixPageTarget.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixPageTarget.GetHashCode() -> int
+override Community.Zabbix.ZabbixPageTarget.ToString() -> string!
 override Community.Zabbix.ZabbixPreprocessingStep.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixPreprocessingStep.GetHashCode() -> int
 override Community.Zabbix.ZabbixPreprocessingStep.ToString() -> string!
@@ -21476,9 +21852,18 @@ override Community.Zabbix.ZabbixScriptAction.ToString() -> string!
 override Community.Zabbix.ZabbixScriptCreateRequest.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixScriptCreateRequest.GetHashCode() -> int
 override Community.Zabbix.ZabbixScriptCreateRequest.ToString() -> string!
+override Community.Zabbix.ZabbixScriptExecuteDebug.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixScriptExecuteDebug.GetHashCode() -> int
+override Community.Zabbix.ZabbixScriptExecuteDebug.ToString() -> string!
+override Community.Zabbix.ZabbixScriptExecuteLogEntry.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixScriptExecuteLogEntry.GetHashCode() -> int
+override Community.Zabbix.ZabbixScriptExecuteLogEntry.ToString() -> string!
 override Community.Zabbix.ZabbixScriptExecuteRequest.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixScriptExecuteRequest.GetHashCode() -> int
 override Community.Zabbix.ZabbixScriptExecuteRequest.ToString() -> string!
+override Community.Zabbix.ZabbixScriptExecuteResult.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixScriptExecuteResult.GetHashCode() -> int
+override Community.Zabbix.ZabbixScriptExecuteResult.ToString() -> string!
 override Community.Zabbix.ZabbixScriptGetFilter.<Clone>$() -> Community.Zabbix.ZabbixScriptGetFilter!
 override Community.Zabbix.ZabbixScriptGetFilter.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixScriptGetFilter.GetHashCode() -> int
@@ -21552,6 +21937,9 @@ override Community.Zabbix.ZabbixServiceRecordStatusRule.ToString() -> string!
 override Community.Zabbix.ZabbixServiceSelectStatusTimelineFilter.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixServiceSelectStatusTimelineFilter.GetHashCode() -> int
 override Community.Zabbix.ZabbixServiceSelectStatusTimelineFilter.ToString() -> string!
+override Community.Zabbix.ZabbixServiceSli.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixServiceSli.GetHashCode() -> int
+override Community.Zabbix.ZabbixServiceSli.ToString() -> string!
 override Community.Zabbix.ZabbixServiceStatusRuleRequest.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixServiceStatusRuleRequest.GetHashCode() -> int
 override Community.Zabbix.ZabbixServiceStatusRuleRequest.ToString() -> string!
@@ -21614,6 +22002,12 @@ override Community.Zabbix.ZabbixSlaServiceTagRequest.ToString() -> string!
 override Community.Zabbix.ZabbixSlaUpdateRequest.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixSlaUpdateRequest.GetHashCode() -> int
 override Community.Zabbix.ZabbixSlaUpdateRequest.ToString() -> string!
+override Community.Zabbix.ZabbixSliPeriod.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixSliPeriod.GetHashCode() -> int
+override Community.Zabbix.ZabbixSliPeriod.ToString() -> string!
+override Community.Zabbix.ZabbixSliReport.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixSliReport.GetHashCode() -> int
+override Community.Zabbix.ZabbixSliReport.ToString() -> string!
 override Community.Zabbix.ZabbixTag.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixTag.GetHashCode() -> int
 override Community.Zabbix.ZabbixTag.ToString() -> string!
@@ -22012,6 +22406,9 @@ override Community.Zabbix.ZabbixUserDirectoryProvisionMedia.ToString() -> string
 override Community.Zabbix.ZabbixUserDirectoryProvisionMediaRequest.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixUserDirectoryProvisionMediaRequest.GetHashCode() -> int
 override Community.Zabbix.ZabbixUserDirectoryProvisionMediaRequest.ToString() -> string!
+override Community.Zabbix.ZabbixUserDirectoryTestMedia.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixUserDirectoryTestMedia.GetHashCode() -> int
+override Community.Zabbix.ZabbixUserDirectoryTestMedia.ToString() -> string!
 override Community.Zabbix.ZabbixUserDirectoryTestProvisionGroupRequest.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixUserDirectoryTestProvisionGroupRequest.GetHashCode() -> int
 override Community.Zabbix.ZabbixUserDirectoryTestProvisionGroupRequest.ToString() -> string!
@@ -22024,6 +22421,12 @@ override Community.Zabbix.ZabbixUserDirectoryTestProvisionMediaRequest.ToString(
 override Community.Zabbix.ZabbixUserDirectoryTestRequest.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixUserDirectoryTestRequest.GetHashCode() -> int
 override Community.Zabbix.ZabbixUserDirectoryTestRequest.ToString() -> string!
+override Community.Zabbix.ZabbixUserDirectoryTestResult.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixUserDirectoryTestResult.GetHashCode() -> int
+override Community.Zabbix.ZabbixUserDirectoryTestResult.ToString() -> string!
+override Community.Zabbix.ZabbixUserDirectoryTestUserGroup.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixUserDirectoryTestUserGroup.GetHashCode() -> int
+override Community.Zabbix.ZabbixUserDirectoryTestUserGroup.ToString() -> string!
 override Community.Zabbix.ZabbixUserDirectoryUpdateProvisionMediaRequest.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixUserDirectoryUpdateProvisionMediaRequest.GetHashCode() -> int
 override Community.Zabbix.ZabbixUserDirectoryUpdateProvisionMediaRequest.ToString() -> string!
@@ -22783,6 +23186,8 @@ static Community.Zabbix.ZabbixAuditLogGetSearch.operator !=(Community.Zabbix.Zab
 static Community.Zabbix.ZabbixAuditLogGetSearch.operator ==(Community.Zabbix.ZabbixAuditLogGetSearch? left, Community.Zabbix.ZabbixAuditLogGetSearch? right) -> bool
 static Community.Zabbix.ZabbixAuditLogRecord.operator !=(Community.Zabbix.ZabbixAuditLogRecord? left, Community.Zabbix.ZabbixAuditLogRecord? right) -> bool
 static Community.Zabbix.ZabbixAuditLogRecord.operator ==(Community.Zabbix.ZabbixAuditLogRecord? left, Community.Zabbix.ZabbixAuditLogRecord? right) -> bool
+static Community.Zabbix.ZabbixAuthenticatedUser.operator !=(Community.Zabbix.ZabbixAuthenticatedUser? left, Community.Zabbix.ZabbixAuthenticatedUser? right) -> bool
+static Community.Zabbix.ZabbixAuthenticatedUser.operator ==(Community.Zabbix.ZabbixAuthenticatedUser? left, Community.Zabbix.ZabbixAuthenticatedUser? right) -> bool
 static Community.Zabbix.ZabbixAuthenticationGetParameters.FilterableFields.get -> System.Collections.Frozen.FrozenSet<string!>!
 static Community.Zabbix.ZabbixAuthenticationGetParameters.operator !=(Community.Zabbix.ZabbixAuthenticationGetParameters? left, Community.Zabbix.ZabbixAuthenticationGetParameters? right) -> bool
 static Community.Zabbix.ZabbixAuthenticationGetParameters.operator ==(Community.Zabbix.ZabbixAuthenticationGetParameters? left, Community.Zabbix.ZabbixAuthenticationGetParameters? right) -> bool
@@ -22832,18 +23237,28 @@ static Community.Zabbix.ZabbixCepRuleResetTimeWindowsRequest.FromUInt64(ulong id
 static Community.Zabbix.ZabbixCepRuleResetTimeWindowsRequest.implicit operator Community.Zabbix.ZabbixCepRuleResetTimeWindowsRequest!(ulong id) -> Community.Zabbix.ZabbixCepRuleResetTimeWindowsRequest!
 static Community.Zabbix.ZabbixCepRuleResetTimeWindowsRequest.operator !=(Community.Zabbix.ZabbixCepRuleResetTimeWindowsRequest? left, Community.Zabbix.ZabbixCepRuleResetTimeWindowsRequest? right) -> bool
 static Community.Zabbix.ZabbixCepRuleResetTimeWindowsRequest.operator ==(Community.Zabbix.ZabbixCepRuleResetTimeWindowsRequest? left, Community.Zabbix.ZabbixCepRuleResetTimeWindowsRequest? right) -> bool
+static Community.Zabbix.ZabbixCepRuleResetTimeWindowsResult.operator !=(Community.Zabbix.ZabbixCepRuleResetTimeWindowsResult? left, Community.Zabbix.ZabbixCepRuleResetTimeWindowsResult? right) -> bool
+static Community.Zabbix.ZabbixCepRuleResetTimeWindowsResult.operator ==(Community.Zabbix.ZabbixCepRuleResetTimeWindowsResult? left, Community.Zabbix.ZabbixCepRuleResetTimeWindowsResult? right) -> bool
 static Community.Zabbix.ZabbixCepRuleUpdateRequest.operator !=(Community.Zabbix.ZabbixCepRuleUpdateRequest? left, Community.Zabbix.ZabbixCepRuleUpdateRequest? right) -> bool
 static Community.Zabbix.ZabbixCepRuleUpdateRequest.operator ==(Community.Zabbix.ZabbixCepRuleUpdateRequest? left, Community.Zabbix.ZabbixCepRuleUpdateRequest? right) -> bool
 static Community.Zabbix.ZabbixCepRuleWindow.operator !=(Community.Zabbix.ZabbixCepRuleWindow? left, Community.Zabbix.ZabbixCepRuleWindow? right) -> bool
 static Community.Zabbix.ZabbixCepRuleWindow.operator ==(Community.Zabbix.ZabbixCepRuleWindow? left, Community.Zabbix.ZabbixCepRuleWindow? right) -> bool
 static Community.Zabbix.ZabbixCepRuleWindowRequest.operator !=(Community.Zabbix.ZabbixCepRuleWindowRequest? left, Community.Zabbix.ZabbixCepRuleWindowRequest? right) -> bool
 static Community.Zabbix.ZabbixCepRuleWindowRequest.operator ==(Community.Zabbix.ZabbixCepRuleWindowRequest? left, Community.Zabbix.ZabbixCepRuleWindowRequest? right) -> bool
+static Community.Zabbix.ZabbixConfigurationChange.operator !=(Community.Zabbix.ZabbixConfigurationChange? left, Community.Zabbix.ZabbixConfigurationChange? right) -> bool
+static Community.Zabbix.ZabbixConfigurationChange.operator ==(Community.Zabbix.ZabbixConfigurationChange? left, Community.Zabbix.ZabbixConfigurationChange? right) -> bool
+static Community.Zabbix.ZabbixConfigurationChanges.operator !=(Community.Zabbix.ZabbixConfigurationChanges? left, Community.Zabbix.ZabbixConfigurationChanges? right) -> bool
+static Community.Zabbix.ZabbixConfigurationChanges.operator ==(Community.Zabbix.ZabbixConfigurationChanges? left, Community.Zabbix.ZabbixConfigurationChanges? right) -> bool
+static Community.Zabbix.ZabbixConfigurationComparison.operator !=(Community.Zabbix.ZabbixConfigurationComparison? left, Community.Zabbix.ZabbixConfigurationComparison? right) -> bool
+static Community.Zabbix.ZabbixConfigurationComparison.operator ==(Community.Zabbix.ZabbixConfigurationComparison? left, Community.Zabbix.ZabbixConfigurationComparison? right) -> bool
 static Community.Zabbix.ZabbixConfigurationExportOptionRequest.operator !=(Community.Zabbix.ZabbixConfigurationExportOptionRequest? left, Community.Zabbix.ZabbixConfigurationExportOptionRequest? right) -> bool
 static Community.Zabbix.ZabbixConfigurationExportOptionRequest.operator ==(Community.Zabbix.ZabbixConfigurationExportOptionRequest? left, Community.Zabbix.ZabbixConfigurationExportOptionRequest? right) -> bool
 static Community.Zabbix.ZabbixConfigurationExportRequest.operator !=(Community.Zabbix.ZabbixConfigurationExportRequest? left, Community.Zabbix.ZabbixConfigurationExportRequest? right) -> bool
 static Community.Zabbix.ZabbixConfigurationExportRequest.operator ==(Community.Zabbix.ZabbixConfigurationExportRequest? left, Community.Zabbix.ZabbixConfigurationExportRequest? right) -> bool
 static Community.Zabbix.ZabbixConfigurationImportRequest.operator !=(Community.Zabbix.ZabbixConfigurationImportRequest? left, Community.Zabbix.ZabbixConfigurationImportRequest? right) -> bool
 static Community.Zabbix.ZabbixConfigurationImportRequest.operator ==(Community.Zabbix.ZabbixConfigurationImportRequest? left, Community.Zabbix.ZabbixConfigurationImportRequest? right) -> bool
+static Community.Zabbix.ZabbixConfigurationImportResult.operator !=(Community.Zabbix.ZabbixConfigurationImportResult? left, Community.Zabbix.ZabbixConfigurationImportResult? right) -> bool
+static Community.Zabbix.ZabbixConfigurationImportResult.operator ==(Community.Zabbix.ZabbixConfigurationImportResult? left, Community.Zabbix.ZabbixConfigurationImportResult? right) -> bool
 static Community.Zabbix.ZabbixConfigurationImportRuleDashboardRequest.operator !=(Community.Zabbix.ZabbixConfigurationImportRuleDashboardRequest? left, Community.Zabbix.ZabbixConfigurationImportRuleDashboardRequest? right) -> bool
 static Community.Zabbix.ZabbixConfigurationImportRuleDashboardRequest.operator ==(Community.Zabbix.ZabbixConfigurationImportRuleDashboardRequest? left, Community.Zabbix.ZabbixConfigurationImportRuleDashboardRequest? right) -> bool
 static Community.Zabbix.ZabbixConfigurationImportRuleDiscoveryRuleRequest.operator !=(Community.Zabbix.ZabbixConfigurationImportRuleDiscoveryRuleRequest? left, Community.Zabbix.ZabbixConfigurationImportRuleDiscoveryRuleRequest? right) -> bool
@@ -22880,6 +23295,10 @@ static Community.Zabbix.ZabbixConfigurationImportRuleTriggerRequest.operator !=(
 static Community.Zabbix.ZabbixConfigurationImportRuleTriggerRequest.operator ==(Community.Zabbix.ZabbixConfigurationImportRuleTriggerRequest? left, Community.Zabbix.ZabbixConfigurationImportRuleTriggerRequest? right) -> bool
 static Community.Zabbix.ZabbixConfigurationImportRuleValueMapRequest.operator !=(Community.Zabbix.ZabbixConfigurationImportRuleValueMapRequest? left, Community.Zabbix.ZabbixConfigurationImportRuleValueMapRequest? right) -> bool
 static Community.Zabbix.ZabbixConfigurationImportRuleValueMapRequest.operator ==(Community.Zabbix.ZabbixConfigurationImportRuleValueMapRequest? left, Community.Zabbix.ZabbixConfigurationImportRuleValueMapRequest? right) -> bool
+static Community.Zabbix.ZabbixConfigurationMissingObject.operator !=(Community.Zabbix.ZabbixConfigurationMissingObject? left, Community.Zabbix.ZabbixConfigurationMissingObject? right) -> bool
+static Community.Zabbix.ZabbixConfigurationMissingObject.operator ==(Community.Zabbix.ZabbixConfigurationMissingObject? left, Community.Zabbix.ZabbixConfigurationMissingObject? right) -> bool
+static Community.Zabbix.ZabbixConfigurationMissingObjects.operator !=(Community.Zabbix.ZabbixConfigurationMissingObjects? left, Community.Zabbix.ZabbixConfigurationMissingObjects? right) -> bool
+static Community.Zabbix.ZabbixConfigurationMissingObjects.operator ==(Community.Zabbix.ZabbixConfigurationMissingObjects? left, Community.Zabbix.ZabbixConfigurationMissingObjects? right) -> bool
 static Community.Zabbix.ZabbixConnector.operator !=(Community.Zabbix.ZabbixConnector? left, Community.Zabbix.ZabbixConnector? right) -> bool
 static Community.Zabbix.ZabbixConnector.operator ==(Community.Zabbix.ZabbixConnector? left, Community.Zabbix.ZabbixConnector? right) -> bool
 static Community.Zabbix.ZabbixConnectorCreateRequest.operator !=(Community.Zabbix.ZabbixConnectorCreateRequest? left, Community.Zabbix.ZabbixConnectorCreateRequest? right) -> bool
@@ -22974,14 +23393,20 @@ static Community.Zabbix.ZabbixDeviceGetSearch.operator !=(Community.Zabbix.Zabbi
 static Community.Zabbix.ZabbixDeviceGetSearch.operator ==(Community.Zabbix.ZabbixDeviceGetSearch? left, Community.Zabbix.ZabbixDeviceGetSearch? right) -> bool
 static Community.Zabbix.ZabbixDeviceInitRequest.operator !=(Community.Zabbix.ZabbixDeviceInitRequest? left, Community.Zabbix.ZabbixDeviceInitRequest? right) -> bool
 static Community.Zabbix.ZabbixDeviceInitRequest.operator ==(Community.Zabbix.ZabbixDeviceInitRequest? left, Community.Zabbix.ZabbixDeviceInitRequest? right) -> bool
+static Community.Zabbix.ZabbixDeviceInitResult.operator !=(Community.Zabbix.ZabbixDeviceInitResult? left, Community.Zabbix.ZabbixDeviceInitResult? right) -> bool
+static Community.Zabbix.ZabbixDeviceInitResult.operator ==(Community.Zabbix.ZabbixDeviceInitResult? left, Community.Zabbix.ZabbixDeviceInitResult? right) -> bool
 static Community.Zabbix.ZabbixDeviceOffboardRequest.operator !=(Community.Zabbix.ZabbixDeviceOffboardRequest? left, Community.Zabbix.ZabbixDeviceOffboardRequest? right) -> bool
 static Community.Zabbix.ZabbixDeviceOffboardRequest.operator ==(Community.Zabbix.ZabbixDeviceOffboardRequest? left, Community.Zabbix.ZabbixDeviceOffboardRequest? right) -> bool
+static Community.Zabbix.ZabbixDeviceOffboardResult.operator !=(Community.Zabbix.ZabbixDeviceOffboardResult? left, Community.Zabbix.ZabbixDeviceOffboardResult? right) -> bool
+static Community.Zabbix.ZabbixDeviceOffboardResult.operator ==(Community.Zabbix.ZabbixDeviceOffboardResult? left, Community.Zabbix.ZabbixDeviceOffboardResult? right) -> bool
 static Community.Zabbix.ZabbixDeviceOnboardMobileEncryptionKeyRequest.operator !=(Community.Zabbix.ZabbixDeviceOnboardMobileEncryptionKeyRequest? left, Community.Zabbix.ZabbixDeviceOnboardMobileEncryptionKeyRequest? right) -> bool
 static Community.Zabbix.ZabbixDeviceOnboardMobileEncryptionKeyRequest.operator ==(Community.Zabbix.ZabbixDeviceOnboardMobileEncryptionKeyRequest? left, Community.Zabbix.ZabbixDeviceOnboardMobileEncryptionKeyRequest? right) -> bool
 static Community.Zabbix.ZabbixDeviceOnboardMobileIdentityKeyRequest.operator !=(Community.Zabbix.ZabbixDeviceOnboardMobileIdentityKeyRequest? left, Community.Zabbix.ZabbixDeviceOnboardMobileIdentityKeyRequest? right) -> bool
 static Community.Zabbix.ZabbixDeviceOnboardMobileIdentityKeyRequest.operator ==(Community.Zabbix.ZabbixDeviceOnboardMobileIdentityKeyRequest? left, Community.Zabbix.ZabbixDeviceOnboardMobileIdentityKeyRequest? right) -> bool
 static Community.Zabbix.ZabbixDeviceOnboardRequest.operator !=(Community.Zabbix.ZabbixDeviceOnboardRequest? left, Community.Zabbix.ZabbixDeviceOnboardRequest? right) -> bool
 static Community.Zabbix.ZabbixDeviceOnboardRequest.operator ==(Community.Zabbix.ZabbixDeviceOnboardRequest? left, Community.Zabbix.ZabbixDeviceOnboardRequest? right) -> bool
+static Community.Zabbix.ZabbixDeviceOnboardResult.operator !=(Community.Zabbix.ZabbixDeviceOnboardResult? left, Community.Zabbix.ZabbixDeviceOnboardResult? right) -> bool
+static Community.Zabbix.ZabbixDeviceOnboardResult.operator ==(Community.Zabbix.ZabbixDeviceOnboardResult? left, Community.Zabbix.ZabbixDeviceOnboardResult? right) -> bool
 static Community.Zabbix.ZabbixDiscoveredHost.operator !=(Community.Zabbix.ZabbixDiscoveredHost? left, Community.Zabbix.ZabbixDiscoveredHost? right) -> bool
 static Community.Zabbix.ZabbixDiscoveredHost.operator ==(Community.Zabbix.ZabbixDiscoveredHost? left, Community.Zabbix.ZabbixDiscoveredHost? right) -> bool
 static Community.Zabbix.ZabbixDiscoveredHostGetFilter.operator !=(Community.Zabbix.ZabbixDiscoveredHostGetFilter? left, Community.Zabbix.ZabbixDiscoveredHostGetFilter? right) -> bool
@@ -23157,6 +23582,8 @@ static Community.Zabbix.ZabbixEventSuppressionData.operator !=(Community.Zabbix.
 static Community.Zabbix.ZabbixEventSuppressionData.operator ==(Community.Zabbix.ZabbixEventSuppressionData? left, Community.Zabbix.ZabbixEventSuppressionData? right) -> bool
 static Community.Zabbix.ZabbixEventUrl.operator !=(Community.Zabbix.ZabbixEventUrl? left, Community.Zabbix.ZabbixEventUrl? right) -> bool
 static Community.Zabbix.ZabbixEventUrl.operator ==(Community.Zabbix.ZabbixEventUrl? left, Community.Zabbix.ZabbixEventUrl? right) -> bool
+static Community.Zabbix.ZabbixGeneratedToken.operator !=(Community.Zabbix.ZabbixGeneratedToken? left, Community.Zabbix.ZabbixGeneratedToken? right) -> bool
+static Community.Zabbix.ZabbixGeneratedToken.operator ==(Community.Zabbix.ZabbixGeneratedToken? left, Community.Zabbix.ZabbixGeneratedToken? right) -> bool
 static Community.Zabbix.ZabbixGraph.operator !=(Community.Zabbix.ZabbixGraph? left, Community.Zabbix.ZabbixGraph? right) -> bool
 static Community.Zabbix.ZabbixGraph.operator ==(Community.Zabbix.ZabbixGraph? left, Community.Zabbix.ZabbixGraph? right) -> bool
 static Community.Zabbix.ZabbixGraphCreateRequest.operator !=(Community.Zabbix.ZabbixGraphCreateRequest? left, Community.Zabbix.ZabbixGraphCreateRequest? right) -> bool
@@ -23854,14 +24281,8 @@ static Community.Zabbix.ZabbixOptional<T>.implicit operator Community.Zabbix.Zab
 static Community.Zabbix.ZabbixOptional<T>.Null.get -> Community.Zabbix.ZabbixOptional<T>
 static Community.Zabbix.ZabbixOptional<T>.operator !=(Community.Zabbix.ZabbixOptional<T> left, Community.Zabbix.ZabbixOptional<T> right) -> bool
 static Community.Zabbix.ZabbixOptional<T>.operator ==(Community.Zabbix.ZabbixOptional<T> left, Community.Zabbix.ZabbixOptional<T> right) -> bool
-static Community.Zabbix.ZabbixPort.FromInt32(int number) -> Community.Zabbix.ZabbixPort
-static Community.Zabbix.ZabbixPort.implicit operator Community.Zabbix.ZabbixPort(int number) -> Community.Zabbix.ZabbixPort
-static Community.Zabbix.ZabbixPort.operator !=(Community.Zabbix.ZabbixPort left, Community.Zabbix.ZabbixPort right) -> bool
-static Community.Zabbix.ZabbixPort.operator ==(Community.Zabbix.ZabbixPort left, Community.Zabbix.ZabbixPort right) -> bool
-static Community.Zabbix.ZabbixPort.Parse(string! s) -> Community.Zabbix.ZabbixPort
-static Community.Zabbix.ZabbixPort.Parse(System.ReadOnlySpan<char> s) -> Community.Zabbix.ZabbixPort
-static Community.Zabbix.ZabbixPort.TryParse(string? s, out Community.Zabbix.ZabbixPort result) -> bool
-static Community.Zabbix.ZabbixPort.TryParse(System.ReadOnlySpan<char> s, out Community.Zabbix.ZabbixPort result) -> bool
+static Community.Zabbix.ZabbixPageTarget.operator !=(Community.Zabbix.ZabbixPageTarget? left, Community.Zabbix.ZabbixPageTarget? right) -> bool
+static Community.Zabbix.ZabbixPageTarget.operator ==(Community.Zabbix.ZabbixPageTarget? left, Community.Zabbix.ZabbixPageTarget? right) -> bool
 static Community.Zabbix.ZabbixPreprocessingStep.operator !=(Community.Zabbix.ZabbixPreprocessingStep? left, Community.Zabbix.ZabbixPreprocessingStep? right) -> bool
 static Community.Zabbix.ZabbixPreprocessingStep.operator ==(Community.Zabbix.ZabbixPreprocessingStep? left, Community.Zabbix.ZabbixPreprocessingStep? right) -> bool
 static Community.Zabbix.ZabbixPreprocessingStepRequest.operator !=(Community.Zabbix.ZabbixPreprocessingStepRequest? left, Community.Zabbix.ZabbixPreprocessingStepRequest? right) -> bool
@@ -24012,8 +24433,14 @@ static Community.Zabbix.ZabbixScriptAction.operator !=(Community.Zabbix.ZabbixSc
 static Community.Zabbix.ZabbixScriptAction.operator ==(Community.Zabbix.ZabbixScriptAction? left, Community.Zabbix.ZabbixScriptAction? right) -> bool
 static Community.Zabbix.ZabbixScriptCreateRequest.operator !=(Community.Zabbix.ZabbixScriptCreateRequest? left, Community.Zabbix.ZabbixScriptCreateRequest? right) -> bool
 static Community.Zabbix.ZabbixScriptCreateRequest.operator ==(Community.Zabbix.ZabbixScriptCreateRequest? left, Community.Zabbix.ZabbixScriptCreateRequest? right) -> bool
+static Community.Zabbix.ZabbixScriptExecuteDebug.operator !=(Community.Zabbix.ZabbixScriptExecuteDebug? left, Community.Zabbix.ZabbixScriptExecuteDebug? right) -> bool
+static Community.Zabbix.ZabbixScriptExecuteDebug.operator ==(Community.Zabbix.ZabbixScriptExecuteDebug? left, Community.Zabbix.ZabbixScriptExecuteDebug? right) -> bool
+static Community.Zabbix.ZabbixScriptExecuteLogEntry.operator !=(Community.Zabbix.ZabbixScriptExecuteLogEntry? left, Community.Zabbix.ZabbixScriptExecuteLogEntry? right) -> bool
+static Community.Zabbix.ZabbixScriptExecuteLogEntry.operator ==(Community.Zabbix.ZabbixScriptExecuteLogEntry? left, Community.Zabbix.ZabbixScriptExecuteLogEntry? right) -> bool
 static Community.Zabbix.ZabbixScriptExecuteRequest.operator !=(Community.Zabbix.ZabbixScriptExecuteRequest? left, Community.Zabbix.ZabbixScriptExecuteRequest? right) -> bool
 static Community.Zabbix.ZabbixScriptExecuteRequest.operator ==(Community.Zabbix.ZabbixScriptExecuteRequest? left, Community.Zabbix.ZabbixScriptExecuteRequest? right) -> bool
+static Community.Zabbix.ZabbixScriptExecuteResult.operator !=(Community.Zabbix.ZabbixScriptExecuteResult? left, Community.Zabbix.ZabbixScriptExecuteResult? right) -> bool
+static Community.Zabbix.ZabbixScriptExecuteResult.operator ==(Community.Zabbix.ZabbixScriptExecuteResult? left, Community.Zabbix.ZabbixScriptExecuteResult? right) -> bool
 static Community.Zabbix.ZabbixScriptGetFilter.operator !=(Community.Zabbix.ZabbixScriptGetFilter? left, Community.Zabbix.ZabbixScriptGetFilter? right) -> bool
 static Community.Zabbix.ZabbixScriptGetFilter.operator ==(Community.Zabbix.ZabbixScriptGetFilter? left, Community.Zabbix.ZabbixScriptGetFilter? right) -> bool
 static Community.Zabbix.ZabbixScriptGetParameters.FilterableFields.get -> System.Collections.Frozen.FrozenSet<string!>!
@@ -24073,6 +24500,8 @@ static Community.Zabbix.ZabbixServiceRecordStatusRule.operator !=(Community.Zabb
 static Community.Zabbix.ZabbixServiceRecordStatusRule.operator ==(Community.Zabbix.ZabbixServiceRecordStatusRule? left, Community.Zabbix.ZabbixServiceRecordStatusRule? right) -> bool
 static Community.Zabbix.ZabbixServiceSelectStatusTimelineFilter.operator !=(Community.Zabbix.ZabbixServiceSelectStatusTimelineFilter? left, Community.Zabbix.ZabbixServiceSelectStatusTimelineFilter? right) -> bool
 static Community.Zabbix.ZabbixServiceSelectStatusTimelineFilter.operator ==(Community.Zabbix.ZabbixServiceSelectStatusTimelineFilter? left, Community.Zabbix.ZabbixServiceSelectStatusTimelineFilter? right) -> bool
+static Community.Zabbix.ZabbixServiceSli.operator !=(Community.Zabbix.ZabbixServiceSli? left, Community.Zabbix.ZabbixServiceSli? right) -> bool
+static Community.Zabbix.ZabbixServiceSli.operator ==(Community.Zabbix.ZabbixServiceSli? left, Community.Zabbix.ZabbixServiceSli? right) -> bool
 static Community.Zabbix.ZabbixServiceStatusRuleRequest.operator !=(Community.Zabbix.ZabbixServiceStatusRuleRequest? left, Community.Zabbix.ZabbixServiceStatusRuleRequest? right) -> bool
 static Community.Zabbix.ZabbixServiceStatusRuleRequest.operator ==(Community.Zabbix.ZabbixServiceStatusRuleRequest? left, Community.Zabbix.ZabbixServiceStatusRuleRequest? right) -> bool
 static Community.Zabbix.ZabbixServiceUpdateRequest.operator !=(Community.Zabbix.ZabbixServiceUpdateRequest? left, Community.Zabbix.ZabbixServiceUpdateRequest? right) -> bool
@@ -24119,6 +24548,10 @@ static Community.Zabbix.ZabbixSlaServiceTagRequest.operator !=(Community.Zabbix.
 static Community.Zabbix.ZabbixSlaServiceTagRequest.operator ==(Community.Zabbix.ZabbixSlaServiceTagRequest? left, Community.Zabbix.ZabbixSlaServiceTagRequest? right) -> bool
 static Community.Zabbix.ZabbixSlaUpdateRequest.operator !=(Community.Zabbix.ZabbixSlaUpdateRequest? left, Community.Zabbix.ZabbixSlaUpdateRequest? right) -> bool
 static Community.Zabbix.ZabbixSlaUpdateRequest.operator ==(Community.Zabbix.ZabbixSlaUpdateRequest? left, Community.Zabbix.ZabbixSlaUpdateRequest? right) -> bool
+static Community.Zabbix.ZabbixSliPeriod.operator !=(Community.Zabbix.ZabbixSliPeriod? left, Community.Zabbix.ZabbixSliPeriod? right) -> bool
+static Community.Zabbix.ZabbixSliPeriod.operator ==(Community.Zabbix.ZabbixSliPeriod? left, Community.Zabbix.ZabbixSliPeriod? right) -> bool
+static Community.Zabbix.ZabbixSliReport.operator !=(Community.Zabbix.ZabbixSliReport? left, Community.Zabbix.ZabbixSliReport? right) -> bool
+static Community.Zabbix.ZabbixSliReport.operator ==(Community.Zabbix.ZabbixSliReport? left, Community.Zabbix.ZabbixSliReport? right) -> bool
 static Community.Zabbix.ZabbixTag.operator !=(Community.Zabbix.ZabbixTag? left, Community.Zabbix.ZabbixTag? right) -> bool
 static Community.Zabbix.ZabbixTag.operator ==(Community.Zabbix.ZabbixTag? left, Community.Zabbix.ZabbixTag? right) -> bool
 static Community.Zabbix.ZabbixTagFilter.operator !=(Community.Zabbix.ZabbixTagFilter? left, Community.Zabbix.ZabbixTagFilter? right) -> bool
@@ -24446,6 +24879,8 @@ static Community.Zabbix.ZabbixUserDirectoryProvisionMedia.operator !=(Community.
 static Community.Zabbix.ZabbixUserDirectoryProvisionMedia.operator ==(Community.Zabbix.ZabbixUserDirectoryProvisionMedia? left, Community.Zabbix.ZabbixUserDirectoryProvisionMedia? right) -> bool
 static Community.Zabbix.ZabbixUserDirectoryProvisionMediaRequest.operator !=(Community.Zabbix.ZabbixUserDirectoryProvisionMediaRequest? left, Community.Zabbix.ZabbixUserDirectoryProvisionMediaRequest? right) -> bool
 static Community.Zabbix.ZabbixUserDirectoryProvisionMediaRequest.operator ==(Community.Zabbix.ZabbixUserDirectoryProvisionMediaRequest? left, Community.Zabbix.ZabbixUserDirectoryProvisionMediaRequest? right) -> bool
+static Community.Zabbix.ZabbixUserDirectoryTestMedia.operator !=(Community.Zabbix.ZabbixUserDirectoryTestMedia? left, Community.Zabbix.ZabbixUserDirectoryTestMedia? right) -> bool
+static Community.Zabbix.ZabbixUserDirectoryTestMedia.operator ==(Community.Zabbix.ZabbixUserDirectoryTestMedia? left, Community.Zabbix.ZabbixUserDirectoryTestMedia? right) -> bool
 static Community.Zabbix.ZabbixUserDirectoryTestProvisionGroupRequest.operator !=(Community.Zabbix.ZabbixUserDirectoryTestProvisionGroupRequest? left, Community.Zabbix.ZabbixUserDirectoryTestProvisionGroupRequest? right) -> bool
 static Community.Zabbix.ZabbixUserDirectoryTestProvisionGroupRequest.operator ==(Community.Zabbix.ZabbixUserDirectoryTestProvisionGroupRequest? left, Community.Zabbix.ZabbixUserDirectoryTestProvisionGroupRequest? right) -> bool
 static Community.Zabbix.ZabbixUserDirectoryTestProvisionGroupUserGroupRequest.FromUInt64(ulong id) -> Community.Zabbix.ZabbixUserDirectoryTestProvisionGroupUserGroupRequest!
@@ -24456,6 +24891,10 @@ static Community.Zabbix.ZabbixUserDirectoryTestProvisionMediaRequest.operator !=
 static Community.Zabbix.ZabbixUserDirectoryTestProvisionMediaRequest.operator ==(Community.Zabbix.ZabbixUserDirectoryTestProvisionMediaRequest? left, Community.Zabbix.ZabbixUserDirectoryTestProvisionMediaRequest? right) -> bool
 static Community.Zabbix.ZabbixUserDirectoryTestRequest.operator !=(Community.Zabbix.ZabbixUserDirectoryTestRequest? left, Community.Zabbix.ZabbixUserDirectoryTestRequest? right) -> bool
 static Community.Zabbix.ZabbixUserDirectoryTestRequest.operator ==(Community.Zabbix.ZabbixUserDirectoryTestRequest? left, Community.Zabbix.ZabbixUserDirectoryTestRequest? right) -> bool
+static Community.Zabbix.ZabbixUserDirectoryTestResult.operator !=(Community.Zabbix.ZabbixUserDirectoryTestResult? left, Community.Zabbix.ZabbixUserDirectoryTestResult? right) -> bool
+static Community.Zabbix.ZabbixUserDirectoryTestResult.operator ==(Community.Zabbix.ZabbixUserDirectoryTestResult? left, Community.Zabbix.ZabbixUserDirectoryTestResult? right) -> bool
+static Community.Zabbix.ZabbixUserDirectoryTestUserGroup.operator !=(Community.Zabbix.ZabbixUserDirectoryTestUserGroup? left, Community.Zabbix.ZabbixUserDirectoryTestUserGroup? right) -> bool
+static Community.Zabbix.ZabbixUserDirectoryTestUserGroup.operator ==(Community.Zabbix.ZabbixUserDirectoryTestUserGroup? left, Community.Zabbix.ZabbixUserDirectoryTestUserGroup? right) -> bool
 static Community.Zabbix.ZabbixUserDirectoryUpdateProvisionMediaRequest.operator !=(Community.Zabbix.ZabbixUserDirectoryUpdateProvisionMediaRequest? left, Community.Zabbix.ZabbixUserDirectoryUpdateProvisionMediaRequest? right) -> bool
 static Community.Zabbix.ZabbixUserDirectoryUpdateProvisionMediaRequest.operator ==(Community.Zabbix.ZabbixUserDirectoryUpdateProvisionMediaRequest? left, Community.Zabbix.ZabbixUserDirectoryUpdateProvisionMediaRequest? right) -> bool
 static Community.Zabbix.ZabbixUserDirectoryUpdateRequest.operator !=(Community.Zabbix.ZabbixUserDirectoryUpdateRequest? left, Community.Zabbix.ZabbixUserDirectoryUpdateRequest? right) -> bool
@@ -26435,4 +26874,3 @@ static readonly Community.Zabbix.ZabbixValueMapFields.ValueMapId -> Community.Za
 static readonly Community.Zabbix.ZabbixValueMapMappingFields.NewValue -> Community.Zabbix.ZabbixField<Community.Zabbix.ZabbixValueMapMapping!>
 static readonly Community.Zabbix.ZabbixValueMapMappingFields.Type -> Community.Zabbix.ZabbixField<Community.Zabbix.ZabbixValueMapMapping!>
 static readonly Community.Zabbix.ZabbixValueMapMappingFields.Value -> Community.Zabbix.ZabbixField<Community.Zabbix.ZabbixValueMapMapping!>
-~override Community.Zabbix.ZabbixPort.Equals(object obj) -> bool

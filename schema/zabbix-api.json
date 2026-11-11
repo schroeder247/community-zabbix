@@ -10101,6 +10101,185 @@
    ]
   },
   {
+   "name": "AuthenticatedUser",
+   "role": "read",
+   "summary": "The user a session or an API token authenticates, as <c>user.checkAuthentication</c> answers it and <c>user.login</c> with <c>userData</c>.",
+   "extensionData": true,
+   "fields": [
+    {
+     "name": "UserId",
+     "wire": "userid",
+     "kind": "id",
+     "summary": "The user's id."
+    },
+    {
+     "name": "Username",
+     "wire": "username",
+     "kind": "string",
+     "summary": "The name the user signs in with."
+    },
+    {
+     "name": "FirstName",
+     "wire": "name",
+     "kind": "string",
+     "summary": "The user's first name."
+    },
+    {
+     "name": "LastName",
+     "wire": "surname",
+     "kind": "string",
+     "summary": "The user's last name."
+    },
+    {
+     "name": "Url",
+     "wire": "url",
+     "kind": "string",
+     "summary": "The page the frontend opens after the user signs in."
+    },
+    {
+     "name": "AutoLogin",
+     "wire": "autologin",
+     "kind": "bool",
+     "summary": "Whether the frontend keeps the user signed in."
+    },
+    {
+     "name": "AutoLogout",
+     "wire": "autologout",
+     "kind": "string",
+     "summary": "How long the user may be idle before the frontend signs them out; 0 never."
+    },
+    {
+     "name": "Language",
+     "wire": "lang",
+     "kind": "string",
+     "summary": "The user's language, the server's default resolved."
+    },
+    {
+     "name": "Refresh",
+     "wire": "refresh",
+     "kind": "string",
+     "summary": "How often the user's pages refresh."
+    },
+    {
+     "name": "Theme",
+     "wire": "theme",
+     "kind": "string",
+     "summary": "The user's frontend theme."
+    },
+    {
+     "name": "AttemptFailed",
+     "wire": "attempt_failed",
+     "kind": "int",
+     "summary": "How many sign-ins failed in a row."
+    },
+    {
+     "name": "AttemptIp",
+     "wire": "attempt_ip",
+     "kind": "string",
+     "summary": "The address of the last failed sign-in."
+    },
+    {
+     "name": "AttemptClock",
+     "wire": "attempt_clock",
+     "kind": "clock",
+     "summary": "When the last failed sign-in was."
+    },
+    {
+     "name": "RowsPerPage",
+     "wire": "rows_per_page",
+     "kind": "int",
+     "summary": "How many rows the user's lists show."
+    },
+    {
+     "name": "Timezone",
+     "wire": "timezone",
+     "kind": "string",
+     "summary": "The user's time zone, the server's default resolved."
+    },
+    {
+     "name": "RoleId",
+     "wire": "roleid",
+     "kind": "id",
+     "summary": "The user's role."
+    },
+    {
+     "name": "UserDirectoryId",
+     "wire": "userdirectoryid",
+     "kind": "id",
+     "summary": "The user directory that provisions the user; 0 for none."
+    },
+    {
+     "name": "TsProvisioned",
+     "wire": "ts_provisioned",
+     "kind": "clock",
+     "summary": "When the user directory last provisioned the user."
+    },
+    {
+     "name": "DefaultMaintenancePeriod",
+     "wire": "default_maintenance_period",
+     "kind": "string",
+     "since": "8.0",
+     "summary": "The period a maintenance the user creates starts with."
+    },
+    {
+     "name": "Type",
+     "wire": "type",
+     "kind": "enum:RoleType",
+     "summary": "The user's type, from their role: user, admin or super admin."
+    },
+    {
+     "name": "GuiAccess",
+     "wire": "gui_access",
+     "kind": "enum:GuiAccess",
+     "summary": "How the user signs in to the frontend, from their groups."
+    },
+    {
+     "name": "DebugMode",
+     "wire": "debug_mode",
+     "kind": "bool",
+     "summary": "Whether one of the user's groups turns the frontend's debug mode on."
+    },
+    {
+     "name": "Deprovisioned",
+     "wire": "deprovisioned",
+     "kind": "bool",
+     "summary": "Whether the user is in the group a user directory moves the users it no longer provisions to."
+    },
+    {
+     "name": "MfaId",
+     "wire": "mfaid",
+     "kind": "id",
+     "summary": "The multi-factor authentication method the user signs in with; 0 for none."
+    },
+    {
+     "name": "AuthenticationType",
+     "wire": "auth_type",
+     "kind": "enum:AuthenticationType",
+     "summary": "Whether the user signs in with an internal password or through LDAP."
+    },
+    {
+     "name": "UserIp",
+     "wire": "userip",
+     "kind": "string",
+     "summary": "The address the request came from."
+    },
+    {
+     "name": "SessionId",
+     "wire": "sessionid",
+     "kind": "string",
+     "summary": "The session's id; absent when an API token authenticated the request.",
+     "secret": true
+    },
+    {
+     "name": "Secret",
+     "wire": "secret",
+     "kind": "string",
+     "summary": "The session's secret, which the frontend signs its forms with; absent when an API token authenticated the request.",
+     "secret": true
+    }
+   ]
+  },
+  {
    "name": "AuthenticationGetParameters",
    "role": "get",
    "object": "authentication",
@@ -11104,6 +11283,21 @@
    ]
   },
   {
+   "name": "CepRuleResetTimeWindowsResult",
+   "role": "read",
+   "summary": "What <c>ceprule.resettimewindows</c> answers: the rule whose windows it reset.",
+   "extensionData": true,
+   "fields": [
+    {
+     "name": "CepRuleId",
+     "wire": "cep_ruleid",
+     "kind": "id",
+     "since": "8.0",
+     "summary": "The rule."
+    }
+   ]
+  },
+  {
    "name": "CepRuleUpdateRequest",
    "role": "request",
    "object": "ceprule",
@@ -11308,6 +11502,180 @@
    ]
   },
   {
+   "name": "ConfigurationChange",
+   "role": "read",
+   "summary": "One entity the import adds, removes or updates: its two sides, and the changes to what it holds.",
+   "extensionData": true,
+   "fields": [
+    {
+     "name": "Before",
+     "wire": "before",
+     "kind": "json",
+     "summary": "The entity as the server has it, without what it holds; absent for an added entity.",
+     "json": "an entity of the import format, whose fields differ by entity type and version: the format, not the API, defines it"
+    },
+    {
+     "name": "After",
+     "wire": "after",
+     "kind": "json",
+     "summary": "The entity as the document has it, without what it holds; absent for a removed entity.",
+     "json": "an entity of the import format, whose fields differ by entity type and version: the format, not the API, defines it"
+    },
+    {
+     "name": "Items",
+     "wire": "items",
+     "kind": "object:ConfigurationChanges",
+     "summary": "The changes to its items."
+    },
+    {
+     "name": "Triggers",
+     "wire": "triggers",
+     "kind": "object:ConfigurationChanges",
+     "summary": "The changes to its triggers."
+    },
+    {
+     "name": "DiscoveryRules",
+     "wire": "discovery_rules",
+     "kind": "object:ConfigurationChanges",
+     "summary": "The changes to its discovery rules."
+    },
+    {
+     "name": "ItemPrototypes",
+     "wire": "item_prototypes",
+     "kind": "object:ConfigurationChanges",
+     "summary": "The changes to its item prototypes."
+    },
+    {
+     "name": "TriggerPrototypes",
+     "wire": "trigger_prototypes",
+     "kind": "object:ConfigurationChanges",
+     "summary": "The changes to its trigger prototypes."
+    },
+    {
+     "name": "GraphPrototypes",
+     "wire": "graph_prototypes",
+     "kind": "object:ConfigurationChanges",
+     "summary": "The changes to its graph prototypes."
+    },
+    {
+     "name": "HostPrototypes",
+     "wire": "host_prototypes",
+     "kind": "object:ConfigurationChanges",
+     "summary": "The changes to its host prototypes."
+    },
+    {
+     "name": "Dashboards",
+     "wire": "dashboards",
+     "kind": "object:ConfigurationChanges",
+     "summary": "The changes to its dashboards."
+    },
+    {
+     "name": "HttpTests",
+     "wire": "httptests",
+     "kind": "object:ConfigurationChanges",
+     "summary": "The changes to its web scenarios."
+    },
+    {
+     "name": "ValueMaps",
+     "wire": "valuemaps",
+     "kind": "object:ConfigurationChanges",
+     "summary": "The changes to its value maps."
+    },
+    {
+     "name": "Pages",
+     "wire": "pages",
+     "kind": "object:ConfigurationChanges",
+     "since": "8.0",
+     "summary": "The changes to a global dashboard's pages."
+    },
+    {
+     "name": "Widgets",
+     "wire": "widgets",
+     "kind": "object:ConfigurationChanges",
+     "since": "8.0",
+     "summary": "The changes to a dashboard page's widgets."
+    }
+   ]
+  },
+  {
+   "name": "ConfigurationChanges",
+   "role": "read",
+   "summary": "What the import changes in one type of entity.",
+   "extensionData": true,
+   "fields": [
+    {
+     "name": "Added",
+     "wire": "added",
+     "kind": "list:object:ConfigurationChange",
+     "summary": "The entities the import adds."
+    },
+    {
+     "name": "Removed",
+     "wire": "removed",
+     "kind": "list:object:ConfigurationChange",
+     "summary": "The entities the import removes."
+    },
+    {
+     "name": "Updated",
+     "wire": "updated",
+     "kind": "list:object:ConfigurationChange",
+     "summary": "The entities the import updates."
+    }
+   ]
+  },
+  {
+   "name": "ConfigurationComparison",
+   "role": "read",
+   "summary": "What <c>configuration.importcompare</c> answers: what importing the document would add, remove and update, by entity type.",
+   "extensionData": true,
+   "fields": [
+    {
+     "name": "TemplateGroups",
+     "wire": "template_groups",
+     "kind": "object:ConfigurationChanges",
+     "summary": "The template groups the import changes."
+    },
+    {
+     "name": "HostGroups",
+     "wire": "host_groups",
+     "kind": "object:ConfigurationChanges",
+     "summary": "The host groups the import changes."
+    },
+    {
+     "name": "Templates",
+     "wire": "templates",
+     "kind": "object:ConfigurationChanges",
+     "summary": "The templates the import changes, each with the changes to what it holds."
+    },
+    {
+     "name": "Triggers",
+     "wire": "triggers",
+     "kind": "object:ConfigurationChanges",
+     "summary": "The triggers on more than one template the import changes."
+    },
+    {
+     "name": "Graphs",
+     "wire": "graphs",
+     "kind": "object:ConfigurationChanges",
+     "summary": "The graphs on more than one template the import changes."
+    },
+    {
+     "name": "Dashboards",
+     "wire": "dashboards",
+     "kind": "object:ConfigurationChanges",
+     "since": "8.0",
+     "summary": "The global dashboards the import changes."
+    },
+    {
+     "name": "MissingObjects",
+     "wire": "missingObjects",
+     "kind": "object:ConfigurationMissingObjects",
+     "since": "8.0",
+     "summary": "The objects the document names that the server lacks, when the request asks for them."
+    }
+   ]
+  },
+  {
    "name": "ConfigurationExportOptionRequest",
    "role": "nested-request",
    "summary": "<c>options</c> of a <see cref=\"ZabbixConfigurationExportRequest\"/>.",
@@ -11433,6 +11801,21 @@
      "kind": "apibool",
      "since": "8.0",
      "summary": "When true, the response lists the objects that the imported data refers to but that do not exist, such as hosts, items, users or media types; off by default."
+    }
+   ]
+  },
+  {
+   "name": "ConfigurationImportResult",
+   "role": "read",
+   "summary": "What <c>configuration.import</c> answers: nothing unless the request asks for the objects the document names that the server lacks.",
+   "extensionData": true,
+   "fields": [
+    {
+     "name": "MissingObjects",
+     "wire": "missingObjects",
+     "kind": "object:ConfigurationMissingObjects",
+     "since": "8.0",
+     "summary": "The objects the document names that the server lacks, when the request asks for them."
     }
    ]
   },
@@ -11913,6 +12296,120 @@
      "wire": "deleteMissing",
      "kind": "apibool",
      "summary": "Whether the import deletes value maps that exist in Zabbix but are absent from the import data; the default is false."
+    }
+   ]
+  },
+  {
+   "name": "ConfigurationMissingObject",
+   "role": "read",
+   "summary": "An object an import document names that the server lacks, by the fields that identify it.",
+   "extensionData": true,
+   "fields": [
+    {
+     "name": "Name",
+     "wire": "name",
+     "kind": "string",
+     "since": "8.0",
+     "summary": "The object's name."
+    },
+    {
+     "name": "HostName",
+     "wire": "host",
+     "kind": "string",
+     "since": "8.0",
+     "summary": "The host an item or a graph is on."
+    },
+    {
+     "name": "Key",
+     "wire": "key",
+     "kind": "string",
+     "since": "8.0",
+     "summary": "An item's key."
+    },
+    {
+     "name": "UserName",
+     "wire": "username",
+     "kind": "string",
+     "since": "8.0",
+     "summary": "A user's name."
+    }
+   ]
+  },
+  {
+   "name": "ConfigurationMissingObjects",
+   "role": "read",
+   "summary": "The objects an import document names that the server lacks, by type.",
+   "extensionData": true,
+   "fields": [
+    {
+     "name": "Hosts",
+     "wire": "hosts",
+     "kind": "list:object:ConfigurationMissingObject",
+     "since": "8.0",
+     "summary": "Hosts, by name."
+    },
+    {
+     "name": "HostGroups",
+     "wire": "hostgroups",
+     "kind": "list:object:ConfigurationMissingObject",
+     "since": "8.0",
+     "summary": "Host groups, by name."
+    },
+    {
+     "name": "Items",
+     "wire": "items",
+     "kind": "list:object:ConfigurationMissingObject",
+     "since": "8.0",
+     "summary": "Items, by host and key."
+    },
+    {
+     "name": "Graphs",
+     "wire": "graphs",
+     "kind": "list:object:ConfigurationMissingObject",
+     "since": "8.0",
+     "summary": "Graphs, by host and name."
+    },
+    {
+     "name": "Services",
+     "wire": "services",
+     "kind": "list:object:ConfigurationMissingObject",
+     "since": "8.0",
+     "summary": "Services, by name."
+    },
+    {
+     "name": "Slas",
+     "wire": "slas",
+     "kind": "list:object:ConfigurationMissingObject",
+     "since": "8.0",
+     "summary": "SLAs, by name."
+    },
+    {
+     "name": "Actions",
+     "wire": "actions",
+     "kind": "list:object:ConfigurationMissingObject",
+     "since": "8.0",
+     "summary": "Actions, by name."
+    },
+    {
+     "name": "MediaTypes",
+     "wire": "mediatypes",
+     "kind": "list:object:ConfigurationMissingObject",
+     "since": "8.0",
+     "summary": "Media types, by name."
+    },
+    {
+     "name": "Maps",
+     "wire": "sysmaps",
+     "kind": "list:object:ConfigurationMissingObject",
+     "since": "8.0",
+     "summary": "Maps, by name."
+    },
+    {
+     "name": "Users",
+     "wire": "users",
+     "kind": "list:object:ConfigurationMissingObject",
+     "since": "8.0",
+     "summary": "Users, by user name."
     }
    ]
   },
@@ -13977,6 +14474,59 @@
    ]
   },
   {
+   "name": "DeviceInitResult",
+   "role": "read",
+   "summary": "What <c>device.init</c> answers: the new device's id and what enrols it.",
+   "extensionData": true,
+   "fields": [
+    {
+     "name": "Uuid",
+     "wire": "uuid",
+     "kind": "string",
+     "since": "8.0",
+     "summary": "The device's id."
+    },
+    {
+     "name": "EnrollmentToken",
+     "wire": "enrollment_token",
+     "kind": "string",
+     "since": "8.0",
+     "summary": "The token the device enrols with.",
+     "secret": true
+    },
+    {
+     "name": "EnrollmentTokenExpiresAt",
+     "wire": "enrollment_token_expires_at",
+     "kind": "clock",
+     "since": "8.0",
+     "summary": "When the enrolment token expires."
+    },
+    {
+     "name": "MobileEnrollmentToken",
+     "wire": "mobile_enrollment_token",
+     "kind": "string",
+     "since": "8.0",
+     "summary": "The token the mobile application enrols with.",
+     "secret": true
+    },
+    {
+     "name": "BridgeAdapterEncryptionKey",
+     "wire": "bridge_adapter_encryption_key",
+     "kind": "string",
+     "since": "8.0",
+     "summary": "The key the bridge adapter encrypts with.",
+     "secret": true
+    },
+    {
+     "name": "BridgeEnrollmentUrl",
+     "wire": "bridge_enrollment_url",
+     "kind": "string",
+     "since": "8.0",
+     "summary": "Where the device enrols with the bridge."
+    }
+   ]
+  },
+  {
    "name": "DeviceOffboardRequest",
    "role": "request",
    "object": "device",
@@ -13997,6 +14547,21 @@
      "kind": "apibool",
      "since": "8.0",
      "summary": "Whether the device is removed even when Zabbix server cannot find it; accepted only from Super admins. Off by default."
+    }
+   ]
+  },
+  {
+   "name": "DeviceOffboardResult",
+   "role": "read",
+   "summary": "What <c>device.offboard</c> answers: the device it offboarded.",
+   "extensionData": true,
+   "fields": [
+    {
+     "name": "Uuid",
+     "wire": "uuid",
+     "kind": "string",
+     "since": "8.0",
+     "summary": "The device's id."
     }
    ]
   },
@@ -14171,6 +14736,22 @@
      "since": "8.0",
      "maxLength": 255,
      "summary": "The display name of the device; required."
+    }
+   ]
+  },
+  {
+   "name": "DeviceOnboardResult",
+   "role": "read",
+   "summary": "What <c>device.onboard</c> answers: the token the device authenticates with.",
+   "extensionData": true,
+   "fields": [
+    {
+     "name": "Token",
+     "wire": "token",
+     "kind": "string",
+     "since": "8.0",
+     "summary": "The token the device authenticates with.",
+     "secret": true
     }
    ]
   },
@@ -19239,6 +19820,27 @@
      "wire": "url",
      "kind": "string",
      "summary": "The address that the link opens, with macros resolved."
+    }
+   ]
+  },
+  {
+   "name": "GeneratedToken",
+   "role": "read",
+   "summary": "A token <c>token.generate</c> generated: its id, and the secret the server answers only this once.",
+   "extensionData": true,
+   "fields": [
+    {
+     "name": "TokenId",
+     "wire": "tokenid",
+     "kind": "id",
+     "summary": "The token's id."
+    },
+    {
+     "name": "Token",
+     "wire": "token",
+     "kind": "string",
+     "summary": "The token itself, to authenticate with. The server keeps only its hash, so it answers it only here.",
+     "secret": true
     }
    ]
   },
@@ -41293,6 +41895,52 @@
    ]
   },
   {
+   "name": "ScriptExecuteDebug",
+   "role": "read",
+   "summary": "A webhook script's log: what it wrote with <c>Zabbix.log</c>, and how long it ran.",
+   "extensionData": true,
+   "fields": [
+    {
+     "name": "Entries",
+     "wire": "logs",
+     "kind": "list:object:ScriptExecuteLogEntry",
+     "summary": "What the script logged, in the order it logged it."
+    },
+    {
+     "name": "Elapsed",
+     "wire": "ms",
+     "kind": "milliseconds",
+     "summary": "How long the script ran."
+    }
+   ]
+  },
+  {
+   "name": "ScriptExecuteLogEntry",
+   "role": "read",
+   "summary": "One line a webhook script wrote with <c>Zabbix.log</c>.",
+   "extensionData": true,
+   "fields": [
+    {
+     "name": "Level",
+     "wire": "level",
+     "kind": "int",
+     "summary": "The level the script passed to <c>Zabbix.log</c>, from 1 (critical) to 5 (trace)."
+    },
+    {
+     "name": "Elapsed",
+     "wire": "ms",
+     "kind": "milliseconds",
+     "summary": "How long the script had run when it wrote the line."
+    },
+    {
+     "name": "Message",
+     "wire": "message",
+     "kind": "string",
+     "summary": "The text the script wrote."
+    }
+   ]
+  },
+  {
    "name": "ScriptExecuteRequest",
    "role": "request",
    "object": "script",
@@ -41323,6 +41971,32 @@
      "wire": "manualinput",
      "kind": "string",
      "summary": "Whether the script prompts for manual input before running (0/1)."
+    }
+   ]
+  },
+  {
+   "name": "ScriptExecuteResult",
+   "role": "read",
+   "summary": "What <c>script.execute</c> answers: the script's output and, for a webhook, its log.",
+   "extensionData": true,
+   "fields": [
+    {
+     "name": "Response",
+     "wire": "response",
+     "kind": "string",
+     "summary": "<c>success</c>: a script that fails is an API error, not a reply."
+    },
+    {
+     "name": "Value",
+     "wire": "value",
+     "kind": "string",
+     "summary": "What the script printed, or a webhook returned."
+    },
+    {
+     "name": "Debug",
+     "wire": "debug",
+     "kind": "object:ScriptExecuteDebug",
+     "summary": "A webhook's log and how long it ran; absent for the other script types."
     }
    ]
   },
@@ -42431,6 +43105,44 @@
      "kind": "clock",
      "required": true,
      "summary": "End of the period whose status changes are returned, as a Unix timestamp."
+    }
+   ]
+  },
+  {
+   "name": "ServiceSli",
+   "role": "read",
+   "summary": "A service's SLI in one reporting period.",
+   "extensionData": true,
+   "fields": [
+    {
+     "name": "Uptime",
+     "wire": "uptime",
+     "kind": "seconds",
+     "summary": "How long the service was up in the period, excluded downtimes left out."
+    },
+    {
+     "name": "Downtime",
+     "wire": "downtime",
+     "kind": "seconds",
+     "summary": "How long the service was down in the period, excluded downtimes left out."
+    },
+    {
+     "name": "Sli",
+     "wire": "sli",
+     "kind": "double",
+     "summary": "The share of the period the service was up, as a percentage; -1 when the period has no data."
+    },
+    {
+     "name": "ErrorBudget",
+     "wire": "error_budget",
+     "kind": "seconds",
+     "summary": "How much more downtime the period allows before the SLI falls below the SLO; negative once it has."
+    },
+    {
+     "name": "ExcludedDowntimes",
+     "wire": "excluded_downtimes",
+     "kind": "list:object:SlaRecordExcludedDowntime",
+     "summary": "The SLA's excluded downtimes that overlap the period, clipped to it."
     }
    ]
   },
@@ -44220,6 +44932,52 @@
      "wire": "excluded_downtimes",
      "kind": "list:object:SlaExcludedDowntimeRequest",
      "summary": "Named one-off periods, given as Unix timestamps, that are left out of the SLA calculation, such as planned maintenance."
+    }
+   ]
+  },
+  {
+   "name": "SliPeriod",
+   "role": "read",
+   "summary": "One reporting period of an SLA's report.",
+   "extensionData": true,
+   "fields": [
+    {
+     "name": "PeriodFrom",
+     "wire": "period_from",
+     "kind": "clock",
+     "summary": "When the period starts."
+    },
+    {
+     "name": "PeriodTo",
+     "wire": "period_to",
+     "kind": "clock",
+     "summary": "When the period ends."
+    }
+   ]
+  },
+  {
+   "name": "SliReport",
+   "role": "read",
+   "summary": "What <c>sla.getsli</c> answers: an SLA's reporting periods, its services, and the SLI of each service in each period.",
+   "extensionData": true,
+   "fields": [
+    {
+     "name": "Periods",
+     "wire": "periods",
+     "kind": "list:object:SliPeriod",
+     "summary": "The reporting periods, oldest first."
+    },
+    {
+     "name": "ServiceIds",
+     "wire": "serviceids",
+     "kind": "list:id",
+     "summary": "The services the report covers, in the order of each period's SLIs."
+    },
+    {
+     "name": "Sli",
+     "wire": "sli",
+     "kind": "list:list:object:ServiceSli",
+     "summary": "One list per period, in the order of <see cref=\"Periods\"/>, of one SLI per service, in the order of <see cref=\"ServiceIds\"/>."
     }
    ]
   },
@@ -50644,6 +51402,32 @@
    ]
   },
   {
+   "name": "UserDirectoryTestMedia",
+   "role": "read",
+   "summary": "A medium a user directory provisions.",
+   "extensionData": true,
+   "fields": [
+    {
+     "name": "Name",
+     "wire": "name",
+     "kind": "string",
+     "summary": "The name of the directory's media mapping."
+    },
+    {
+     "name": "MediaTypeId",
+     "wire": "mediatypeid",
+     "kind": "id",
+     "summary": "The media type."
+    },
+    {
+     "name": "SendTo",
+     "wire": "sendto",
+     "kind": "list:string",
+     "summary": "The addresses, from the directory's attribute."
+    }
+   ]
+  },
+  {
    "name": "UserDirectoryTestProvisionGroupRequest",
    "role": "nested-request",
    "summary": "<c>provision_groups</c> of a <see cref=\"ZabbixUserDirectoryTestRequest\"/>.",
@@ -50897,6 +51681,70 @@
      "required": true,
      "summary": "The password of the account whose login is tested against the LDAP server; required.",
      "secret": true
+    }
+   ]
+  },
+  {
+   "name": "UserDirectoryTestResult",
+   "role": "read",
+   "summary": "What <c>userdirectory.test</c> answers: the test user, and what the directory provisions for them when provisioning is on.",
+   "extensionData": true,
+   "fields": [
+    {
+     "name": "UserName",
+     "wire": "username",
+     "kind": "string",
+     "summary": "The test user's name."
+    },
+    {
+     "name": "FirstName",
+     "wire": "name",
+     "kind": "string",
+     "summary": "The first name the directory provisions."
+    },
+    {
+     "name": "LastName",
+     "wire": "surname",
+     "kind": "string",
+     "summary": "The last name the directory provisions."
+    },
+    {
+     "name": "Medias",
+     "wire": "medias",
+     "kind": "list:object:UserDirectoryTestMedia",
+     "summary": "The media the directory provisions."
+    },
+    {
+     "name": "UserGroups",
+     "wire": "usrgrps",
+     "kind": "list:object:UserDirectoryTestUserGroup",
+     "summary": "The user groups the directory's group mappings give the user."
+    },
+    {
+     "name": "RoleId",
+     "wire": "roleid",
+     "kind": "id",
+     "summary": "The role the directory's group mappings give the user; 0 for none."
+    },
+    {
+     "name": "UserDirectoryId",
+     "wire": "userdirectoryid",
+     "kind": "id",
+     "summary": "The directory tested, when the request named a saved one."
+    }
+   ]
+  },
+  {
+   "name": "UserDirectoryTestUserGroup",
+   "role": "read",
+   "summary": "A user group a user directory's group mapping gives the user.",
+   "extensionData": true,
+   "fields": [
+    {
+     "name": "UserGroupId",
+     "wire": "usrgrpid",
+     "kind": "id",
+     "summary": "The user group."
     }
    ]
   },
@@ -53770,7 +54618,7 @@
      "shape": "call",
      "parameters": "object:AuthenticationUpdateRequest",
      "batch": false,
-     "result": "json"
+     "result": "list:string"
     }
    ]
   },
@@ -53805,7 +54653,7 @@
      "shape": "call",
      "parameters": "object:AutoregistrationUpdateRequest",
      "batch": false,
-     "result": "json"
+     "result": "true"
     }
    ]
   },
@@ -53893,7 +54741,7 @@
      "shape": "call",
      "parameters": "object:CepRuleResetTimeWindowsRequest",
      "batch": false,
-     "result": "json"
+     "result": "object:CepRuleResetTimeWindowsResult"
     }
    ]
   },
@@ -53927,7 +54775,7 @@
      "shape": "call",
      "parameters": "object:ConfigurationImportRequest",
      "batch": false,
-     "result": "json"
+     "result": "or-empty:object:ConfigurationImportResult"
     },
     {
      "api": "configuration.importcompare",
@@ -53940,7 +54788,7 @@
      "shape": "call",
      "parameters": "object:ConfigurationImportRequest",
      "batch": false,
-     "result": "json"
+     "result": "or-empty:object:ConfigurationComparison"
     }
    ]
   },
@@ -54216,7 +55064,7 @@
      "shape": "call",
      "parameters": "object:DeviceInitRequest",
      "batch": false,
-     "result": "json"
+     "result": "object:DeviceInitResult"
     },
     {
      "api": "device.onboard",
@@ -54229,7 +55077,7 @@
      "shape": "call",
      "parameters": "object:DeviceOnboardRequest",
      "batch": false,
-     "result": "json"
+     "result": "object:DeviceOnboardResult"
     },
     {
      "api": "device.offboard",
@@ -54243,7 +55091,7 @@
      "shape": "call",
      "parameters": "object:DeviceOffboardRequest",
      "batch": false,
-     "result": "json"
+     "result": "object:DeviceOffboardResult"
     }
    ]
   },
@@ -54356,7 +55204,7 @@
      "shape": "call",
      "parameters": "object:DiscoveryRuleCopyRequest",
      "batch": false,
-     "result": "json"
+     "result": "true"
     }
    ]
   },
@@ -55282,7 +56130,7 @@
      "shape": "call",
      "parameters": "object:HousekeepingUpdateRequest",
      "batch": false,
-     "result": "json"
+     "result": "list:string"
     }
    ]
   },
@@ -56450,7 +57298,7 @@
      "shape": "call",
      "parameters": "object:ScriptExecuteRequest",
      "batch": false,
-     "result": "json"
+     "result": "object:ScriptExecuteResult"
     }
    ]
   },
@@ -56577,7 +57425,7 @@
      "shape": "call",
      "parameters": "object:SettingsUpdateRequest",
      "batch": false,
-     "result": "json"
+     "result": "list:string"
     }
    ]
   },
@@ -56620,7 +57468,7 @@
      "shape": "call",
      "parameters": "object:SlaGetSliRequest",
      "batch": false,
-     "result": "json"
+     "result": "object:SliReport"
     },
     {
      "api": "sla.create",
@@ -57073,7 +57921,7 @@
      "source": "ui/include/classes/api/services/CToken.php:426",
      "shape": "ids",
      "parameters": "list:id",
-     "result": "json"
+     "result": "list:object:GeneratedToken"
     }
    ]
   },
@@ -57312,7 +58160,7 @@
      "shape": "call",
      "parameters": "object:UserCheckAuthenticationRequest",
      "batch": false,
-     "result": "json"
+     "result": "object:AuthenticatedUser"
     },
     {
      "api": "user.login",
@@ -57324,7 +58172,7 @@
      "shape": "call",
      "parameters": "object:UserLoginRequest",
      "batch": false,
-     "result": "json"
+     "result": "or-text:object:AuthenticatedUser:sessionid"
     },
     {
      "api": "user.logout",
@@ -57336,7 +58184,7 @@
      "source": "ui/include/classes/api/services/CUser.php:2341",
      "shape": "call",
      "parameters": "none",
-     "result": "json"
+     "result": "true"
     },
     {
      "api": "user.unblock",
@@ -57454,7 +58302,7 @@
      "shape": "call",
      "parameters": "object:UserDirectoryTestRequest",
      "batch": false,
-     "result": "json"
+     "result": "object:UserDirectoryTestResult"
     }
    ]
   },

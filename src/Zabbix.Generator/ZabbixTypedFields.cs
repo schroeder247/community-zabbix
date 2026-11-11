@@ -170,8 +170,8 @@ internal static class ZabbixTypedFields
     // the port of each interface a host's, a host prototype's (CHostPrototype.php 7.0:740) and the interfaces' own
     // requests hold, an action operation's escalation period (CAction.php 7.0), a web scenario step's timeout
     // (CHttpTest.php), a maintenance period's length (CMaintenance.php), an 8.0 correlation rule's window and suppression
-    // (CCepRule.php 8.0), the escalation period a script's action reports, and the key of the prototype an item was
-    // discovered from.
+    // (CCepRule.php 8.0), the escalation period a script's action reports, the key of the prototype an item was
+    // discovered from, and the lengths of time of the user a session authenticates (user.checkAuthentication).
     private static readonly (string Record, string Wire, string Kind)[] s_nestedFields =
     [
         ("DiscoveryRuleOverrideOperationOpperiodRequest", "delay", Interval),
@@ -192,6 +192,9 @@ internal static class ZabbixTypedFields
         ("CepRuleWindowRequest", "duration", Duration),
         ("CepRuleOperation", "suppress_duration", Duration),
         ("CepRuleOperationRequest", "suppress_duration", Duration),
+        ("AuthenticatedUser", "autologout", Duration),
+        ("AuthenticatedUser", "refresh", Duration),
+        ("AuthenticatedUser", "default_maintenance_period", Duration),
         ("HostInterfaceRequest", "port", Port),
         ("HostMassAddInterfaceRequest", "port", Port),
         ("HostMassInterfaceRequest", "port", Port),

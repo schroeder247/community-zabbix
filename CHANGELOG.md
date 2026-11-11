@@ -28,7 +28,13 @@ its package (`Community.Zabbix.Sdk.dll`), and the namespaces and telemetry names
   resilience are the same whichever way it's made. One generated client per API
   object (`zabbix.Hosts`, `zabbix.Items`, …); the JSON-RPC transport over `IHttpClientFactory` and the standard resilience
   handler (a read is retried on a transient failure, a write never is); API tokens or a session login that renews itself,
-  which `LogOffAsync` ends (`user.logout`, as `Users.LogOffAsync`; `user.login` is `Users.LogOnAsync`); the client's options
+  which `LogOffAsync` ends (`user.logout`, as `Users.LogOffAsync`; `user.login` is `Users.LogOnAsync`, which answers a
+  `ZabbixAuthenticatedUser`); every call the API answers with a record built by hand answers a record too
+  (`Scripts.ExecuteAsync` a `ZabbixScriptExecuteResult` with a webhook's log, `Slas.GetSliAsync` a `ZabbixSliReport`,
+  `Tokens.GenerateAsync` the `ZabbixGeneratedToken`s, `Configuration.ImportCompareAsync` a `ZabbixConfigurationComparison`,
+  `Users.CheckAuthenticationAsync` a `ZabbixAuthenticatedUser`), a call the API answers with `true` returns a `Task`
+  (`Autoregistration.UpdateAsync`, `Users.LogOffAsync`), and a singleton's update answers the names of the parameters it
+  changed; `SendAsync(ZabbixApiMethod, JsonElement)` stays the raw path for a call the model doesn't type; the client's options
   are `ZabbixClientOptions`, and a verb and the option it sets share a name (`WithMaxConnectionsPerServer`,
   `WithMaxResponseContentBytes`);
   `ZabbixApiException` with a classified `Kind`.
@@ -110,7 +116,14 @@ its package (`Community.Zabbix.Sdk.dll`), and the namespaces and telemetry names
   client models (`AsExchange(ZabbixExchangeOptions.AcceptLargeReplies)` for a proxy's configuration). An agent's reason for a
   refusal is `Error`, on `ZabbixAgentRefusedException` and `ZabbixItemNotSupportedException` as on `ZabbixAgentAnswer`, and
   `ZabbixItemKey.Parse("app.disk.free[/]")` reads a key. Every call takes an optional token last, and the clients' virtual
-  members let an application fake them in its tests.
+  members let an application fake them in its tests. A server's replies are records
+  ([ADR 0013](docs/adr/0013-builders-verbs-and-typed-values.md), section 5): `GetStatusAsync` answers a `ZabbixServerStatus`
+  (the System information counts, the whole installation's and each proxy's), `GetStatisticsAsync` a `ZabbixServerStatistics`
+  (`zabbix.stats`: uptime, caches, queues and each process type's utilization, with what differs between a server and a
+  proxy kept as the server sent it), `TestItemAsync` takes a `ZabbixItemTestRequest` and answers a `ZabbixItemTestResult`,
+  `TestReportAsync` takes a `ZabbixReportTestRequest` and answers each recipient, and `SendAlertAsync` answers a webhook's value
+  and log. `SendRequestAsync` sends a request the client has no method for and hands back the raw reply, and
+  `ZabbixWireJson.Options` reads and writes the wire's records as the client does.
 - **Agents** (`Community.Zabbix.Agent`, and `ZabbixPassiveAgent` in `Community.Zabbix.Proxy`)
   ([ADR 0013](docs/adr/0013-builders-verbs-and-typed-values.md)). `ZabbixPushAgent.CreateBuilder("web-01")`,
   `ZabbixActiveAgent.CreateBuilder("web-01")` and `ZabbixPassiveAgent.CreateBuilder("web-01")` build an agent on a container of
@@ -198,7 +211,9 @@ its package (`Community.Zabbix.Sdk.dll`), and the namespaces and telemetry names
   listeners from any configuration source.
 - **Telemetry.** Activity sources and meters named under `Community.Zabbix.` (one subscription, `Community.Zabbix.*`), durations in
   seconds, the OpenTelemetry RPC conventions; every log event a `[LoggerMessage]` with a fixed id; secrets and item keys
-  (whose parameters can carry a credential, `ZabbixDataClassifications.ItemKey`) classified for `AddZabbixRedaction`.
+  (whose parameters can carry a credential, `ZabbixDataClassifications.ItemKey`) classified, and the SDK's redactor for each
+  class set on the application's own redaction builder: `services.AddRedaction(r => r.SetZabbixRedactors())`, which leaves
+  `EnableRedaction`, the logger's options and the fallback to the application.
 - **The `Community.Zabbix` module.** 267 cmdlets over `Community.Zabbix.Sdk` and `Community.Zabbix.Wire`: a per-runspace connection context (`Connect-ZbxServer`,
   `Get-ZbxContext`), generated `Get-`/`New-`/`Set-`/`Remove-` cmdlets for every API object, `-Filter` taking the typed
   `.get` parameters, `-AdditionalProperty` on every `New-`/`Set-`, hashtables that bind to any request record, name wildcards,
@@ -209,7 +224,8 @@ its package (`Community.Zabbix.Sdk.dll`), and the namespaces and telemetry names
 - **Frontend page links.** `ZabbixFrontend` (`client.GetFrontendAsync()`) gives the web frontend's page of any API
   object (`UriFor(host)`, `UriFor(item, ZabbixPageView.Graph)`, `UriFor(new ZabbixPageTarget(kind, id))`) by the
   routes of the server's own version, read from the 7.0, 7.4 and 8.0 frontend sources and opened in each version's
-  frontend by a live test; `ZabbixClientOptions.FrontendUri` names a frontend that is not at the API's address.
+  frontend by a live test; every record with a page implements `IZabbixFrontendPage`, which `UriFor` takes;
+  `ZabbixClientOptions.FrontendUri` names a frontend that is not at the API's address.
   `Show-ZbxPage` opens the page of each piped object in the browser, or writes its address (`-PassThru`).
 - **A model with a pinned provenance.** `tools/zabbix-sources.lock` pins the Zabbix commits the API model is extracted
   from (the tags 7.0.31, 7.4.15 and 8.0.0rc1, the latest 8.0 tag when the model was extracted); `tools/regenerate-schema.sh`
@@ -290,8 +306,9 @@ The main ones; [docs/KNOWN-LIMITATIONS.md](docs/KNOWN-LIMITATIONS.md) lists them
 
 - Periods of the week stay seconds (an SLA schedule's periods); Zabbix's `0` for "not
   yet" reads as `ZabbixClock.UnixEpoch`.
-- Fourteen API fields stay untyped `JsonElement?` (free-form JSON whose shape Zabbix does not
-  fix); `ZabbixWireClient.GetStatsAsync`/`GetStatusAsync` also answer `JsonElement`.
+- Sixteen API fields stay untyped `JsonElement?` (free-form JSON whose shape Zabbix does not
+  fix, and an entity in `configuration.importcompare`'s answer, a piece of the import format);
+  `zabbix.stats`' parts that differ between components and versions are kept as the server sent them.
 - Version gating is at run time only (`ZabbixVersionException`); there is no compile-time version analyzer.
 - The 8.0 emulation of the removed mass-update methods is not atomic (reads, then one batched write).
 - The passive proxy answers every `active checks` request in full; agent sessions are in memory and do not survive a

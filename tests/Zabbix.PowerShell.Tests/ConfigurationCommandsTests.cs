@@ -147,18 +147,18 @@ public sealed class ConfigurationCommandsTests
     public async Task Compare_ZbxConfiguration_redacts_the_diffs_before_side_by_default()
     {
         await using FakeZabbix server = await FakeZabbix.StartAsync();
-        server.On("configuration.importcompare", """{"host":{"updated":[{"before":{"password":"hunter2"},"after":{"password":""}}]}}""");
+        server.On("configuration.importcompare", """{"templates":{"updated":[{"before":{"template":"t","password":"hunter2"},"after":{"template":"t","password":""}}]}}""");
         using Shell shell = Shell.Open();
         shell.Connect(server);
 
         Run run = shell.Invoke("""
             $diff = '{"zabbix_export":{}}' | Compare-ZbxConfiguration -Rules ([Community.Zabbix.ZabbixConfigurationImportRuleRequest]@{})
             @($diff).Count
-            $diff.host.updated[0].before.password
+            $diff.templates.updated[0].before.password
             """);
 
         Assert.Empty(run.Errors);
-        // The diff is a navigable shell object (ConvertFrom-Json's shape), not a raw JsonElement.
+        // The diff is the comparison's record, whose entities are navigable shell objects, not raw JsonElements.
         Assert.Equal(2, run.Output.Count);
         Assert.Equal("1", run.Output[0].ToString());
         Assert.NotEqual("hunter2", run.Output[1].ToString());
@@ -169,8 +169,8 @@ public sealed class ConfigurationCommandsTests
     [InlineData(" -Unredacted")]
     public async Task Compare_ZbxConfiguration_writes_nothing_for_an_unchanged_document(string unredacted)
     {
-        // configuration.importcompare answers [] when nothing would change; that is no diff, not one
-        // JsonElement "[]" (which would make @($diff).Count 1).
+        // configuration.importcompare answers [] when nothing would change; that is no diff, not one empty comparison
+        // (which would make @($diff).Count 1).
         await using FakeZabbix server = await FakeZabbix.StartAsync();
         server.On("configuration.importcompare", "[]");
         using Shell shell = Shell.Open();

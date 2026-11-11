@@ -360,6 +360,68 @@ if (refused != 0)
 }
 Console.WriteLine($"bundled: {keys.Length} keys answered");
 
+// The wire's replies read into their models by the wire's own JSON context: a server's status and statistics, an item's
+// test, a report's test and a webhook's test, over an exchange that answers as a 7.4 server does.
+Func<ReadOnlyMemory<byte>, CancellationToken, ValueTask<ReadOnlyMemory<byte>>> serverAnswers = (request, _) =>
+{
+    using JsonDocument frame = JsonDocument.Parse(request);
+    string reply = frame.RootElement.GetProperty("request").GetString() switch
+    {
+        "status.get" => """{"response":"success","data":{"template stats":[{"count":312}],"host stats":[{"attributes":{"proxyid":0,"status":0},"count":5},{"attributes":{"proxyid":0,"status":1},"count":1},{"attributes":{"proxyid":12,"status":0},"count":2}],"required performance":[{"attributes":{"proxyid":0},"count":"4.250000"}],"server stats":{"version":"7.4.15"}}}""",
+        "zabbix.stats" => """{"response":"success","data":{"boottime":1700000000,"uptime":3600,"version":"7.4.15","wcache":{"values":{"all":10,"float":4}},"process":{"trapper":{"busy":{"avg":1.5,"max":3,"min":0},"idle":{"avg":98.5,"max":100,"min":97},"count":5}},"ha":[]}}""",
+        "item.test" => """{"response":"success","data":{"item":{"result":"1","eol":"LF"},"preprocessing":{"steps":[{"result":"1"}],"result":"1"}}}""",
+        "report.test" => """{"response":"success","data":{"recipients":[{"status":1,"recipient":"Admin"}]}}""",
+        _ => """{"response":"success","data":"ok","debug":{"logs":[{"level":4,"ms":3,"message":"sent"}],"ms":12}}""",
+    };
+    return ValueTask.FromResult<ReadOnlyMemory<byte>>(Encoding.UTF8.GetBytes(reply));
+};
+await using (var asking = new ZabbixWireClient(serverAnswers))
+{
+    ZabbixServerStatus status = await asking.GetStatusAsync().ConfigureAwait(false);
+    ZabbixServerStatistics statistics = await asking.GetStatisticsAsync().ConfigureAwait(false);
+    ZabbixItemTestResult tested = await asking.TestItemAsync(new ZabbixItemTestRequest(new ZabbixItemTestItem { Key = ZabbixItemKey.Parse("agent.ping"), ValueType = 3 })).ConfigureAwait(false);
+    ZabbixReportTestResult report = await asking.TestReportAsync(new ZabbixReportTestRequest("smoke", 1, 1)).ConfigureAwait(false);
+    ZabbixAlertSendResult alert = await asking.SendAlertAsync(1, "ops", "s", "m").ConfigureAwait(false);
+    if (status is not { TemplateCount: 312, EnabledHostCount: 5, DisabledHostCount: 1, RequiredPerformance: 4.25, Proxies: [{ ProxyId: 12, EnabledHostCount: 2 }] }
+        || status.Version != new Version(7, 4, 15)
+        || statistics.Uptime != TimeSpan.FromHours(1) || statistics.Processes?["trapper"].Count != 5 || statistics.WriteCache?.Values?.FloatCount != 4
+        || ((IZabbixAdditionalFields)statistics).AdditionalFields?.ContainsKey("ha") != true
+        || tested.Preprocessing?.Result != "1" || report.Recipients is not [{ Status: 1 }]
+        || alert.Log?.Elapsed != TimeSpan.FromMilliseconds(12) || alert.Value != "ok")
+    {
+        Console.WriteLine("aot smoke: a server wire reply didn't read into its model");
+        return 1;
+    }
+}
+
+// The API's replies the generated records read: a comparison with an empty one for [], a script's result, a token, and the
+// frontend link of a record with a page.
+ZabbixConfigurationComparison comparison = JsonSerializer.Deserialize("""{"templates":{"updated":[{"before":{"name":"a"},"after":{"name":"b"},"items":{"added":[{"after":{"key":"k"}}]}}]}}""", TypeInfo<ZabbixConfigurationComparison>())!;
+ZabbixScriptExecuteResult executed = JsonSerializer.Deserialize("""{"response":"success","value":"pong","debug":{"logs":[{"level":3,"ms":1,"message":"m"}],"ms":2}}""", TypeInfo<ZabbixScriptExecuteResult>())!;
+ZabbixSliReport sli = JsonSerializer.Deserialize("""{"periods":[{"period_from":1700000000,"period_to":1700086400}],"serviceids":["5"],"sli":[[{"uptime":86000,"downtime":400,"sli":99.5,"error_budget":-100,"excluded_downtimes":[]}]]}""", TypeInfo<ZabbixSliReport>())!;
+Uri hostPage = new ZabbixFrontend(new Uri("https://zbx.example/"), new Version(7, 4)).UriFor(new ZabbixHost { HostId = 10084 });
+if (comparison.Templates?.Updated?[0].Items?.Added?.Count != 1 || executed.Debug?.Elapsed != TimeSpan.FromMilliseconds(2)
+    || sli.Sli?[0][0].Downtime != TimeSpan.FromSeconds(400) || sli.Sli[0][0].ErrorBudget != TimeSpan.FromSeconds(-100)
+    || hostPage.AbsoluteUri != "https://zbx.example/zabbix.php?action=popup&popup=host.edit&hostid=10084")
+{
+    Console.WriteLine("aot smoke: an API reply didn't read into its record, or a record's page didn't link");
+    return 1;
+}
+
+// The SDK's redactors, set on the application's redaction builder and activated by the container.
+var redacting = new ServiceCollection();
+redacting.AddRedaction(redaction => redaction.SetZabbixRedactors());
+await using (ServiceProvider redactors = redacting.BuildServiceProvider())
+{
+    Microsoft.Extensions.Compliance.Redaction.IRedactorProvider provider2 = redactors.GetRequiredService<Microsoft.Extensions.Compliance.Redaction.IRedactorProvider>();
+    if (provider2.GetRedactor(ZabbixDataClassifications.Secret).Redact("secret").Length != 0
+        || provider2.GetRedactor(ZabbixDataClassifications.ItemKey).Redact("web.page.get[a,b]") != "web.page.get[***]")
+    {
+        Console.WriteLine("aot smoke: the SDK's redactors didn't redact");
+        return 1;
+    }
+}
+
 Console.WriteLine("aot smoke: ok");
 return 0;
 

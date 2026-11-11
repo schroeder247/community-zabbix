@@ -112,6 +112,8 @@ public sealed partial class DesignConformanceTests
         ("ZabbixNetworkDiscoveryCheck" or "ZabbixNetworkDiscoveryCheckRequest", "key_") => "a check's key: an agent item key, or the OID an SNMP check reads",
         ("ZabbixProxyAutoregistrationItem" or "ZabbixProxyDiscoveryItem" or "ZabbixProxyTask", "port") => "the proxy protocol's port: a number a proxy writes",
         ("ZabbixServiceGetParameters", "selectStatusTimeline") => "a list of periods to report on, not an output",
+        ("ZabbixWriteCacheStatistics", "history") => "the part of zabbix.stats' write cache that holds the values, not a length",
+        ("ZabbixItemTestConditions", "history") => "the previous value item.test's preprocessing compares with, not a length",
         _ => null,
     };
 

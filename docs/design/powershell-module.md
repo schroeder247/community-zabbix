@@ -314,10 +314,16 @@ each module's compiled metadata, generated code included, and holds it to that.
   and merges the answers into one document (a single export of a stock server's templates exhausts the frontend's PHP
   memory limit). The merge model, `ZabbixConfigurationDocument` (`Commands/ZabbixConfigurationDocument.cs`), reads
   JSON, XML and YAML.
-- **Untyped JSON** (`script.execute`, `sla.getsli`, `Invoke-ZbxApi`) crosses the edge through `ZabbixJsonShape`, which
-  produces the shapes `ConvertFrom-Json` users know (`[pscustomobject]`, `object[]`, `long`/`double`) but walks
-  System.Text.Json in both directions; PowerShell's `JsonObject` (Newtonsoft underneath) is rejected there
-  (`ZabbixJsonShape.cs:22-30`), and a string the server sent stays a string.
+- **A reply is its record.** A command writes the SDK's model of what it asked (`Get-ZbxServerStatus` a
+  `ZabbixServerStatus`, `Invoke-ZbxScript` a `ZabbixScriptExecuteResult`, `Get-ZbxSli` a `ZabbixSliReport`,
+  `Test-ZbxItem` a `ZabbixItemTestResult`), and the format file gives the records with more than a handful of
+  members a view. `Test-ZbxItem -Data` binds through the wire's own JSON contract (`ZabbixWireJson.Options`), so a
+  hashtable shaped as the frontend sends `item.test` works as it is, by wire or member names, and a field the request
+  doesn't model is sent by its wire name.
+- **Untyped JSON** (`Invoke-ZbxApi`, and the fields the API leaves free-form) crosses the edge through
+  `ZabbixJsonShape`, which produces the shapes `ConvertFrom-Json` users know (`[pscustomobject]`, `object[]`,
+  `long`/`double`) but walks System.Text.Json in both directions; PowerShell's `JsonObject` (Newtonsoft underneath) is
+  rejected there (`ZabbixJsonShape.cs:22-30`), and a string the server sent stays a string.
 - **Typed input binds through PowerShell's own binder.** `ZabbixRecordConverter` (a `PSTypeConverter`) is the
   `<TypeConverter>` of every request, parameters and nested record in `Community.Zabbix.types.ps1xml`, generated at build by
   `ZabbixGenerateTypesPs1Xml` from the schema and loaded by the manifest's `TypesToProcess`. A command declares the

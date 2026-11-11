@@ -13,7 +13,7 @@ Get-ZbxSli [-Sla] <ZabbixReference<ZabbixSlaRecord>> [-PeriodFrom <DateTimeOffse
 
 ## DESCRIPTION
 
-The Get-ZbxSli cmdlet reads an SLA's report with sla.getsli: for each reporting period and each service the SLA covers, the uptime, downtime, error budget and the SLI reached. By default it reports the SLA's recent periods; -PeriodFrom, -PeriodTo and -Periods choose others, and -ServiceId narrows the services. It writes one object as the server sent it and needs a connection made with Connect-ZbxServer.
+The Get-ZbxSli cmdlet reads an SLA's report with sla.getsli: for each reporting period and each service the SLA covers, the uptime, downtime, error budget and the SLI reached. By default it reports the SLA's recent periods; -PeriodFrom, -PeriodTo and -Periods choose others, and -ServiceId narrows the services. It writes a ZabbixSliReport, whose Sli holds one list per period of one SLI per service, and needs a connection made with Connect-ZbxServer.
 
 ## EXAMPLES
 
@@ -135,7 +135,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 
 ## OUTPUTS
 
-- `Community.Zabbix.PowerShell.Sli`: The objects this command writes.
+- `ZabbixSliReport`: What sla.getsli answers: an SLA's reporting periods, its services, and the SLI of each service in each period.
 
 ## RELATED LINKS
 

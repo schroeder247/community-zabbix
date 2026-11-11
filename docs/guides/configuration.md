@@ -34,11 +34,13 @@ dotnet add package Community.Zabbix.Proxy    # AddZabbixProxies: the push agents
 ```csharp
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Community.Zabbix;
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddZabbixClients(builder.Configuration.GetSection(ZabbixConfigurationSections.Section));
-builder.Logging.AddZabbixRedaction();
+builder.Logging.EnableRedaction();
+builder.Services.AddRedaction(redaction => redaction.SetZabbixRedactors());
 
 using IHost app = builder.Build();
 ZabbixClient prod = app.Services.GetRequiredService<IZabbixClientFactory>().Create("prod");
@@ -192,8 +194,9 @@ dotnet user-secrets set "Zabbix:Servers:prod:ApiToken" "<token>"           # use
 - A token is one word. A token read from a file keeps its line end, and validation refuses whitespace, so trim it.
 - The secret members (`ZabbixClientOptions.ApiToken`, `ZabbixTlsOptions.Psk`, and the session password) are marked `[ZabbixSecret]`, the
   `ZabbixDataClassifications.Secret` class. The SDK's own events never write their values.
-- Call `builder.Logging.AddZabbixRedaction()`, in `Community.Zabbix.Sdk`, to erase any logged value of that class in every environment.
-  An application without that package registers its own redactors ([known limitations](../KNOWN-LIMITATIONS.md#behaviour)).
+- Turn redaction on with `builder.Logging.EnableRedaction()`, and set the SDK's redactors with
+  `builder.Services.AddRedaction(redaction => redaction.SetZabbixRedactors())`: a logged value of that class is erased in every
+  environment. Every package's application sets them this way ([known limitations](../KNOWN-LIMITATIONS.md#behaviour)).
 - A configured secret is a string. It lives as long as the options and the configuration providers that hold it, and can't be zeroed
   ([SECURITY.md](../../SECURITY.md)).
 

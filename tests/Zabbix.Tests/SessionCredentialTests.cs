@@ -70,6 +70,8 @@ public sealed class SessionCredentialTests
                 string? bearer = request.Headers.Authorization?.Parameter;
                 Bearers.Enqueue(bearer);
                 member = Call(bearer);
+                // CUser::logout answers true (CUser.php 8.0:2341-2380), unless the call is answered otherwise
+                if (method == "user.logout" && member == "\"result\":[]") member = "\"result\":true";
             }
             return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent($$"""{"jsonrpc":"2.0",{{member}},"id":{{id}}}""", Encoding.UTF8, "application/json") };
         }

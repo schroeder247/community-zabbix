@@ -248,11 +248,15 @@ public class ZabbixWireClient : IDisposable, IAsyncDisposable
     /// <exception cref="ObjectDisposedException">The client was disposed.</exception>
     public virtual Task<ZabbixAgentAnswer> GetAgentItemAsync(string agent, ZabbixItemKey key, CancellationToken cancellationToken = default) => Getter(agent).GetAsync(key, cancellationToken);
 
-    /// <summary><c>zabbix.stats</c>: the server's internal statistics (<c>StatsAllowedIP</c> must admit this address).</summary>
+    /// <summary>
+    /// <c>zabbix.stats</c>: the internal statistics of the server or proxy, the values of its <c>zabbix[...]</c> items
+    /// (<c>StatsAllowedIP</c> must admit this address).
+    /// </summary>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The statistics object.</returns>
+    /// <returns>The statistics; what differs between a server and a proxy, or between versions, is in its <see cref="IZabbixAdditionalFields.AdditionalFields"/>.</returns>
     /// <exception cref="ZabbixServerRefusedException">The server refused (<c>Permission denied.</c> when the address is not allowed).</exception>
-    public virtual Task<JsonElement> GetStatsAsync(CancellationToken cancellationToken = default) => ServerWire.GetStatsAsync(cancellationToken);
+    /// <exception cref="InvalidDataException">The reply isn't the statistics' shape.</exception>
+    public virtual Task<ZabbixServerStatistics> GetStatisticsAsync(CancellationToken cancellationToken = default) => ServerWire.GetStatisticsAsync(cancellationToken);
 
     /// <summary>
     /// <c>zabbix.stats</c> with <c>type: queue</c>: how many items are overdue by at least <paramref name="fromDelay"/> (6 s by
@@ -279,11 +283,15 @@ public class ZabbixWireClient : IDisposable, IAsyncDisposable
     /// <exception cref="ZabbixServerRefusedException">The server refused.</exception>
     public virtual Task<ZabbixQueueDetails> GetQueueDetailsAsync(int limit, CancellationToken cancellationToken = default) => ServerWire.GetQueueDetailsAsync(limit, cancellationToken);
 
-    /// <summary><c>status.get</c> with <c>type: full</c>: the "System information" statistics (empty for a non-super-admin session).</summary>
+    /// <summary>
+    /// <c>status.get</c> with <c>type: full</c>: the counts the frontend's System information page shows, for the whole
+    /// installation and for each proxy.
+    /// </summary>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The statistics object.</returns>
+    /// <returns>The counts; every count is <see langword="null"/> for a session that isn't a super admin's.</returns>
     /// <exception cref="ZabbixServerRefusedException">The server refused (the session is not valid).</exception>
-    public virtual Task<JsonElement> GetStatusAsync(CancellationToken cancellationToken = default) => ServerWire.GetStatusAsync(cancellationToken);
+    /// <exception cref="InvalidDataException">The reply isn't the counts' shape.</exception>
+    public virtual Task<ZabbixServerStatus> GetStatusAsync(CancellationToken cancellationToken = default) => ServerWire.GetStatusAsync(cancellationToken);
 
     /// <summary><c>status.get</c> with <c>type: ping</c>: whether the server is running and takes this session (the frontend's <c>isRunning</c>).</summary>
     /// <param name="cancellationToken">A cancellation token.</param>
@@ -292,11 +300,13 @@ public class ZabbixWireClient : IDisposable, IAsyncDisposable
     public virtual Task PingAsync(CancellationToken cancellationToken = default) => ServerWire.PingAsync(cancellationToken);
 
     /// <summary><c>item.test</c>: the server runs one item's collection and preprocessing as the frontend's "Test" does.</summary>
-    /// <param name="data">The request's <c>data</c> as the frontend sends it (<c>item</c>, <c>host</c>, <c>options</c>).</param>
+    /// <param name="request">The item, its host, and how the preprocessing test runs.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The reply.</returns>
-    /// <exception cref="ZabbixServerRefusedException">The server refused.</exception>
-    public virtual Task<ZabbixServerReply> TestItemAsync(JsonElement data, CancellationToken cancellationToken = default) => ServerWire.TestItemAsync(data, cancellationToken);
+    /// <returns>The value the server collected, or why it couldn't, and what the preprocessing steps made of it.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="request"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ZabbixServerRefusedException">The server refused (the session is a user's, not an admin's).</exception>
+    /// <exception cref="InvalidDataException">The reply isn't a test's shape.</exception>
+    public virtual Task<ZabbixItemTestResult> TestItemAsync(ZabbixItemTestRequest request, CancellationToken cancellationToken = default) => ServerWire.TestItemAsync(request, cancellationToken);
 
     /// <summary>
     /// <c>alert.send</c>: a test message through a media type, as the frontend's "Test" sends it
@@ -309,16 +319,22 @@ public class ZabbixWireClient : IDisposable, IAsyncDisposable
     /// <param name="message">The body of the test message.</param>
     /// <param name="parameters">A script's or a webhook's parameters; none for the other types.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The reply.</returns>
-    /// <exception cref="ZabbixServerRefusedException">The server refused.</exception>
-    public virtual Task<ZabbixServerReply> SendAlertAsync(ulong mediaTypeId, string sendTo, string subject, string message, ZabbixAlertParameters? parameters = null, CancellationToken cancellationToken = default) => ServerWire.SendAlertAsync(mediaTypeId, sendTo, subject, message, parameters, cancellationToken);
+    /// <returns>What a webhook returned and logged; empty for the other media types.</returns>
+    /// <exception cref="ZabbixServerRefusedException">The server refused, or the message didn't go out (the media type's error).</exception>
+    public virtual Task<ZabbixAlertSendResult> SendAlertAsync(ulong mediaTypeId, string sendTo, string subject, string message, ZabbixAlertParameters? parameters = null, CancellationToken cancellationToken = default) => ServerWire.SendAlertAsync(mediaTypeId, sendTo, subject, message, parameters, cancellationToken);
 
-    /// <summary><c>report.test</c>: a scheduled report generated and sent now.</summary>
-    /// <param name="data">The request's <c>data</c> as the frontend sends it.</param>
+    /// <summary><c>report.test</c>: a scheduled report generated now and sent to the session's user.</summary>
+    /// <param name="request">The report: its dashboard, the user whose view it shows, its period, and its message.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The reply.</returns>
-    /// <exception cref="ZabbixServerRefusedException">The server refused.</exception>
-    public virtual Task<ZabbixServerReply> TestReportAsync(JsonElement data, CancellationToken cancellationToken = default) => ServerWire.TestReportAsync(data, cancellationToken);
+    /// <returns>Whether the report reached each recipient.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="request"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ZabbixServerRefusedException">The server refused (the report manager is off, or the report couldn't be generated).</exception>
+    /// <exception cref="InvalidDataException">The reply isn't a test's shape.</exception>
+    public virtual Task<ZabbixReportTestResult> TestReportAsync(ZabbixReportTestRequest request, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return ServerWire.TestReportAsync(request.Now is null ? request with { Now = _time.GetUtcNow() } : request, cancellationToken);
+    }
 
     /// <summary><c>expressions.evaluate</c>: trigger expressions evaluated by the server.</summary>
     /// <param name="expressions">The trigger expressions to evaluate.</param>
@@ -327,13 +343,17 @@ public class ZabbixWireClient : IDisposable, IAsyncDisposable
     /// <exception cref="ZabbixServerRefusedException">The server refused.</exception>
     public virtual Task<IReadOnlyList<ZabbixExpressionResult>> EvaluateExpressionsAsync(IEnumerable<string> expressions, CancellationToken cancellationToken = default) => ServerWire.EvaluateExpressionsAsync(expressions, cancellationToken);
 
-    /// <summary>Any request whose handler reads a <c>data</c> object, in the server's own form, with the session id.</summary>
+    /// <summary>
+    /// Sends a request the client has no method for, with the session id: the low-level path for a handler that reads a
+    /// <c>data</c> object, in the server's own form, and whose reply the caller reads itself.
+    /// </summary>
     /// <param name="request">The request name.</param>
     /// <param name="data">The request's <c>data</c> object.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
-    /// <returns>The reply.</returns>
+    /// <returns>The reply as the server sent it.</returns>
+    /// <exception cref="ArgumentException"><paramref name="request"/> is empty.</exception>
     /// <exception cref="ZabbixServerRefusedException">The server refused.</exception>
-    public virtual Task<ZabbixServerReply> RequestAsync(string request, JsonElement data, CancellationToken cancellationToken = default) => ServerWire.RequestAsync(request, data, cancellationToken);
+    public virtual Task<ZabbixServerReply> SendRequestAsync(string request, JsonElement data, CancellationToken cancellationToken = default) => ServerWire.SendRequestAsync(request, data, cancellationToken);
 
     /// <summary>
     /// Releases what the client built: its connections, what certificate mode read from their files, and the container a

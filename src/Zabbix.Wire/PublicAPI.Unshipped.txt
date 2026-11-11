@@ -27,6 +27,28 @@ Community.Zabbix.ZabbixAgentRefusedException.ZabbixAgentRefusedException(string!
 Community.Zabbix.ZabbixAgentRefusedException.ZabbixAgentRefusedException(string! message, System.Exception! innerException) -> void
 Community.Zabbix.ZabbixAlertParameters
 Community.Zabbix.ZabbixAlertParameters.IsWebhook.get -> bool
+Community.Zabbix.ZabbixAlertSendResult
+Community.Zabbix.ZabbixAlertSendResult.<Clone>$() -> Community.Zabbix.ZabbixAlertSendResult!
+Community.Zabbix.ZabbixAlertSendResult.Equals(Community.Zabbix.ZabbixAlertSendResult? other) -> bool
+Community.Zabbix.ZabbixAlertSendResult.Log.get -> Community.Zabbix.ZabbixWebhookLog?
+Community.Zabbix.ZabbixAlertSendResult.Log.init -> void
+Community.Zabbix.ZabbixAlertSendResult.Value.get -> string?
+Community.Zabbix.ZabbixAlertSendResult.Value.init -> void
+Community.Zabbix.ZabbixAlertSendResult.ZabbixAlertSendResult() -> void
+Community.Zabbix.ZabbixCacheUsage
+Community.Zabbix.ZabbixCacheUsage.<Clone>$() -> Community.Zabbix.ZabbixCacheUsage!
+Community.Zabbix.ZabbixCacheUsage.Equals(Community.Zabbix.ZabbixCacheUsage? other) -> bool
+Community.Zabbix.ZabbixCacheUsage.FreeBytes.get -> long?
+Community.Zabbix.ZabbixCacheUsage.FreeBytes.init -> void
+Community.Zabbix.ZabbixCacheUsage.FreePercent.get -> double?
+Community.Zabbix.ZabbixCacheUsage.FreePercent.init -> void
+Community.Zabbix.ZabbixCacheUsage.TotalBytes.get -> long?
+Community.Zabbix.ZabbixCacheUsage.TotalBytes.init -> void
+Community.Zabbix.ZabbixCacheUsage.UsedBytes.get -> long?
+Community.Zabbix.ZabbixCacheUsage.UsedBytes.init -> void
+Community.Zabbix.ZabbixCacheUsage.UsedPercent.get -> double?
+Community.Zabbix.ZabbixCacheUsage.UsedPercent.init -> void
+Community.Zabbix.ZabbixCacheUsage.ZabbixCacheUsage() -> void
 Community.Zabbix.ZabbixConnectionOptions
 Community.Zabbix.ZabbixConnectionOptions.Compress.get -> bool
 Community.Zabbix.ZabbixConnectionOptions.Compress.set -> void
@@ -51,6 +73,28 @@ Community.Zabbix.ZabbixExpressionResult.IsTrue.get -> bool
 Community.Zabbix.ZabbixExpressionResult.Value.get -> int?
 Community.Zabbix.ZabbixExpressionResult.Value.init -> void
 Community.Zabbix.ZabbixExpressionResult.ZabbixExpressionResult(string? Expression, int? Value, string? Error) -> void
+Community.Zabbix.ZabbixHistoryValueCounts
+Community.Zabbix.ZabbixHistoryValueCounts.<Clone>$() -> Community.Zabbix.ZabbixHistoryValueCounts!
+Community.Zabbix.ZabbixHistoryValueCounts.BinaryCount.get -> long?
+Community.Zabbix.ZabbixHistoryValueCounts.BinaryCount.init -> void
+Community.Zabbix.ZabbixHistoryValueCounts.CharacterCount.get -> long?
+Community.Zabbix.ZabbixHistoryValueCounts.CharacterCount.init -> void
+Community.Zabbix.ZabbixHistoryValueCounts.Equals(Community.Zabbix.ZabbixHistoryValueCounts? other) -> bool
+Community.Zabbix.ZabbixHistoryValueCounts.FloatCount.get -> long?
+Community.Zabbix.ZabbixHistoryValueCounts.FloatCount.init -> void
+Community.Zabbix.ZabbixHistoryValueCounts.JsonCount.get -> long?
+Community.Zabbix.ZabbixHistoryValueCounts.JsonCount.init -> void
+Community.Zabbix.ZabbixHistoryValueCounts.LogCount.get -> long?
+Community.Zabbix.ZabbixHistoryValueCounts.LogCount.init -> void
+Community.Zabbix.ZabbixHistoryValueCounts.NotSupportedCount.get -> long?
+Community.Zabbix.ZabbixHistoryValueCounts.NotSupportedCount.init -> void
+Community.Zabbix.ZabbixHistoryValueCounts.TextCount.get -> long?
+Community.Zabbix.ZabbixHistoryValueCounts.TextCount.init -> void
+Community.Zabbix.ZabbixHistoryValueCounts.TotalCount.get -> long?
+Community.Zabbix.ZabbixHistoryValueCounts.TotalCount.init -> void
+Community.Zabbix.ZabbixHistoryValueCounts.UnsignedCount.get -> long?
+Community.Zabbix.ZabbixHistoryValueCounts.UnsignedCount.init -> void
+Community.Zabbix.ZabbixHistoryValueCounts.ZabbixHistoryValueCounts() -> void
 Community.Zabbix.ZabbixItemNotSupportedException
 Community.Zabbix.ZabbixItemNotSupportedException.Error.get -> string?
 Community.Zabbix.ZabbixItemNotSupportedException.Key.get -> Community.Zabbix.ZabbixItemKey
@@ -58,6 +102,301 @@ Community.Zabbix.ZabbixItemNotSupportedException.ZabbixItemNotSupportedException
 Community.Zabbix.ZabbixItemNotSupportedException.ZabbixItemNotSupportedException(Community.Zabbix.ZabbixItemKey key, string? error) -> void
 Community.Zabbix.ZabbixItemNotSupportedException.ZabbixItemNotSupportedException(string! message) -> void
 Community.Zabbix.ZabbixItemNotSupportedException.ZabbixItemNotSupportedException(string! message, System.Exception! innerException) -> void
+Community.Zabbix.ZabbixItemTestConditions
+Community.Zabbix.ZabbixItemTestConditions.<Clone>$() -> Community.Zabbix.ZabbixItemTestConditions!
+Community.Zabbix.ZabbixItemTestConditions.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
+Community.Zabbix.ZabbixItemTestConditions.AdditionalFields.set -> void
+Community.Zabbix.ZabbixItemTestConditions.Equals(Community.Zabbix.ZabbixItemTestConditions? other) -> bool
+Community.Zabbix.ZabbixItemTestConditions.PreviousValue.get -> Community.Zabbix.ZabbixItemTestPreviousValue?
+Community.Zabbix.ZabbixItemTestConditions.PreviousValue.set -> void
+Community.Zabbix.ZabbixItemTestConditions.RuntimeError.get -> string?
+Community.Zabbix.ZabbixItemTestConditions.RuntimeError.set -> void
+Community.Zabbix.ZabbixItemTestConditions.SkipValueTypeCheck.get -> bool?
+Community.Zabbix.ZabbixItemTestConditions.SkipValueTypeCheck.set -> void
+Community.Zabbix.ZabbixItemTestConditions.State.get -> int?
+Community.Zabbix.ZabbixItemTestConditions.State.set -> void
+Community.Zabbix.ZabbixItemTestConditions.ZabbixItemTestConditions() -> void
+Community.Zabbix.ZabbixItemTestHost
+Community.Zabbix.ZabbixItemTestHost.<Clone>$() -> Community.Zabbix.ZabbixItemTestHost!
+Community.Zabbix.ZabbixItemTestHost.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
+Community.Zabbix.ZabbixItemTestHost.AdditionalFields.set -> void
+Community.Zabbix.ZabbixItemTestHost.Equals(Community.Zabbix.ZabbixItemTestHost? other) -> bool
+Community.Zabbix.ZabbixItemTestHost.HostId.get -> ulong?
+Community.Zabbix.ZabbixItemTestHost.HostId.set -> void
+Community.Zabbix.ZabbixItemTestHost.HostName.get -> string?
+Community.Zabbix.ZabbixItemTestHost.HostName.set -> void
+Community.Zabbix.ZabbixItemTestHost.Interface.get -> Community.Zabbix.ZabbixItemTestInterface?
+Community.Zabbix.ZabbixItemTestHost.Interface.set -> void
+Community.Zabbix.ZabbixItemTestHost.IpmiAuthenticationType.get -> int?
+Community.Zabbix.ZabbixItemTestHost.IpmiAuthenticationType.set -> void
+Community.Zabbix.ZabbixItemTestHost.IpmiPassword.get -> string?
+Community.Zabbix.ZabbixItemTestHost.IpmiPassword.set -> void
+Community.Zabbix.ZabbixItemTestHost.IpmiPrivilege.get -> int?
+Community.Zabbix.ZabbixItemTestHost.IpmiPrivilege.set -> void
+Community.Zabbix.ZabbixItemTestHost.IpmiUserName.get -> string?
+Community.Zabbix.ZabbixItemTestHost.IpmiUserName.set -> void
+Community.Zabbix.ZabbixItemTestHost.MaintenanceStatus.get -> int?
+Community.Zabbix.ZabbixItemTestHost.MaintenanceStatus.set -> void
+Community.Zabbix.ZabbixItemTestHost.MaintenanceType.get -> int?
+Community.Zabbix.ZabbixItemTestHost.MaintenanceType.set -> void
+Community.Zabbix.ZabbixItemTestHost.ProxyId.get -> ulong?
+Community.Zabbix.ZabbixItemTestHost.ProxyId.set -> void
+Community.Zabbix.ZabbixItemTestHost.TlsConnect.get -> int?
+Community.Zabbix.ZabbixItemTestHost.TlsConnect.set -> void
+Community.Zabbix.ZabbixItemTestHost.TlsIssuer.get -> string?
+Community.Zabbix.ZabbixItemTestHost.TlsIssuer.set -> void
+Community.Zabbix.ZabbixItemTestHost.TlsPsk.get -> string?
+Community.Zabbix.ZabbixItemTestHost.TlsPsk.set -> void
+Community.Zabbix.ZabbixItemTestHost.TlsPskIdentity.get -> string?
+Community.Zabbix.ZabbixItemTestHost.TlsPskIdentity.set -> void
+Community.Zabbix.ZabbixItemTestHost.TlsSubject.get -> string?
+Community.Zabbix.ZabbixItemTestHost.TlsSubject.set -> void
+Community.Zabbix.ZabbixItemTestHost.ZabbixItemTestHost() -> void
+Community.Zabbix.ZabbixItemTestInterface
+Community.Zabbix.ZabbixItemTestInterface.<Clone>$() -> Community.Zabbix.ZabbixItemTestInterface!
+Community.Zabbix.ZabbixItemTestInterface.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
+Community.Zabbix.ZabbixItemTestInterface.AdditionalFields.set -> void
+Community.Zabbix.ZabbixItemTestInterface.Address.get -> string?
+Community.Zabbix.ZabbixItemTestInterface.Address.set -> void
+Community.Zabbix.ZabbixItemTestInterface.Available.get -> int?
+Community.Zabbix.ZabbixItemTestInterface.Available.set -> void
+Community.Zabbix.ZabbixItemTestInterface.Details.get -> Community.Zabbix.ZabbixItemTestSnmpDetails?
+Community.Zabbix.ZabbixItemTestInterface.Details.set -> void
+Community.Zabbix.ZabbixItemTestInterface.Equals(Community.Zabbix.ZabbixItemTestInterface? other) -> bool
+Community.Zabbix.ZabbixItemTestInterface.InterfaceId.get -> ulong?
+Community.Zabbix.ZabbixItemTestInterface.InterfaceId.set -> void
+Community.Zabbix.ZabbixItemTestInterface.Port.get -> Community.Zabbix.ZabbixPort?
+Community.Zabbix.ZabbixItemTestInterface.Port.set -> void
+Community.Zabbix.ZabbixItemTestInterface.UseIP.get -> bool?
+Community.Zabbix.ZabbixItemTestInterface.UseIP.set -> void
+Community.Zabbix.ZabbixItemTestInterface.ZabbixItemTestInterface() -> void
+Community.Zabbix.ZabbixItemTestItem
+Community.Zabbix.ZabbixItemTestItem.<Clone>$() -> Community.Zabbix.ZabbixItemTestItem!
+Community.Zabbix.ZabbixItemTestItem.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
+Community.Zabbix.ZabbixItemTestItem.AdditionalFields.set -> void
+Community.Zabbix.ZabbixItemTestItem.AuthenticationType.get -> int?
+Community.Zabbix.ZabbixItemTestItem.AuthenticationType.set -> void
+Community.Zabbix.ZabbixItemTestItem.Equals(Community.Zabbix.ZabbixItemTestItem? other) -> bool
+Community.Zabbix.ZabbixItemTestItem.Flags.get -> int?
+Community.Zabbix.ZabbixItemTestItem.Flags.set -> void
+Community.Zabbix.ZabbixItemTestItem.FollowRedirects.get -> bool?
+Community.Zabbix.ZabbixItemTestItem.FollowRedirects.set -> void
+Community.Zabbix.ZabbixItemTestItem.Headers.get -> string?
+Community.Zabbix.ZabbixItemTestItem.Headers.set -> void
+Community.Zabbix.ZabbixItemTestItem.HttpProxy.get -> string?
+Community.Zabbix.ZabbixItemTestItem.HttpProxy.set -> void
+Community.Zabbix.ZabbixItemTestItem.IpmiSensor.get -> string?
+Community.Zabbix.ZabbixItemTestItem.IpmiSensor.set -> void
+Community.Zabbix.ZabbixItemTestItem.ItemType.get -> int?
+Community.Zabbix.ZabbixItemTestItem.ItemType.set -> void
+Community.Zabbix.ZabbixItemTestItem.JmxEndpoint.get -> string?
+Community.Zabbix.ZabbixItemTestItem.JmxEndpoint.set -> void
+Community.Zabbix.ZabbixItemTestItem.Key.get -> Community.Zabbix.ZabbixItemKey?
+Community.Zabbix.ZabbixItemTestItem.Key.set -> void
+Community.Zabbix.ZabbixItemTestItem.OutputFormat.get -> int?
+Community.Zabbix.ZabbixItemTestItem.OutputFormat.set -> void
+Community.Zabbix.ZabbixItemTestItem.Parameters.get -> string?
+Community.Zabbix.ZabbixItemTestItem.Parameters.set -> void
+Community.Zabbix.ZabbixItemTestItem.Password.get -> string?
+Community.Zabbix.ZabbixItemTestItem.Password.set -> void
+Community.Zabbix.ZabbixItemTestItem.Posts.get -> string?
+Community.Zabbix.ZabbixItemTestItem.Posts.set -> void
+Community.Zabbix.ZabbixItemTestItem.PostType.get -> int?
+Community.Zabbix.ZabbixItemTestItem.PostType.set -> void
+Community.Zabbix.ZabbixItemTestItem.PrivateKeyFile.get -> string?
+Community.Zabbix.ZabbixItemTestItem.PrivateKeyFile.set -> void
+Community.Zabbix.ZabbixItemTestItem.PublicKeyFile.get -> string?
+Community.Zabbix.ZabbixItemTestItem.PublicKeyFile.set -> void
+Community.Zabbix.ZabbixItemTestItem.QueryFields.get -> string?
+Community.Zabbix.ZabbixItemTestItem.QueryFields.set -> void
+Community.Zabbix.ZabbixItemTestItem.RequestMethod.get -> int?
+Community.Zabbix.ZabbixItemTestItem.RequestMethod.set -> void
+Community.Zabbix.ZabbixItemTestItem.RetrieveMode.get -> int?
+Community.Zabbix.ZabbixItemTestItem.RetrieveMode.set -> void
+Community.Zabbix.ZabbixItemTestItem.ScriptParameters.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>?
+Community.Zabbix.ZabbixItemTestItem.ScriptParameters.set -> void
+Community.Zabbix.ZabbixItemTestItem.SnmpOid.get -> string?
+Community.Zabbix.ZabbixItemTestItem.SnmpOid.set -> void
+Community.Zabbix.ZabbixItemTestItem.SslCertificateFile.get -> string?
+Community.Zabbix.ZabbixItemTestItem.SslCertificateFile.set -> void
+Community.Zabbix.ZabbixItemTestItem.SslKeyFile.get -> string?
+Community.Zabbix.ZabbixItemTestItem.SslKeyFile.set -> void
+Community.Zabbix.ZabbixItemTestItem.SslKeyPassword.get -> string?
+Community.Zabbix.ZabbixItemTestItem.SslKeyPassword.set -> void
+Community.Zabbix.ZabbixItemTestItem.StatusCodes.get -> string?
+Community.Zabbix.ZabbixItemTestItem.StatusCodes.set -> void
+Community.Zabbix.ZabbixItemTestItem.Steps.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixItemTestStep!>?
+Community.Zabbix.ZabbixItemTestItem.Steps.set -> void
+Community.Zabbix.ZabbixItemTestItem.Timeout.get -> Community.Zabbix.ZabbixDuration?
+Community.Zabbix.ZabbixItemTestItem.Timeout.set -> void
+Community.Zabbix.ZabbixItemTestItem.Url.get -> string?
+Community.Zabbix.ZabbixItemTestItem.Url.set -> void
+Community.Zabbix.ZabbixItemTestItem.UserName.get -> string?
+Community.Zabbix.ZabbixItemTestItem.UserName.set -> void
+Community.Zabbix.ZabbixItemTestItem.Value.get -> string?
+Community.Zabbix.ZabbixItemTestItem.Value.set -> void
+Community.Zabbix.ZabbixItemTestItem.ValueType.get -> int?
+Community.Zabbix.ZabbixItemTestItem.ValueType.set -> void
+Community.Zabbix.ZabbixItemTestItem.VerifyHost.get -> bool?
+Community.Zabbix.ZabbixItemTestItem.VerifyHost.set -> void
+Community.Zabbix.ZabbixItemTestItem.VerifyPeer.get -> bool?
+Community.Zabbix.ZabbixItemTestItem.VerifyPeer.set -> void
+Community.Zabbix.ZabbixItemTestItem.ZabbixItemTestItem() -> void
+Community.Zabbix.ZabbixItemTestPreprocessing
+Community.Zabbix.ZabbixItemTestPreprocessing.<Clone>$() -> Community.Zabbix.ZabbixItemTestPreprocessing!
+Community.Zabbix.ZabbixItemTestPreprocessing.Equals(Community.Zabbix.ZabbixItemTestPreprocessing? other) -> bool
+Community.Zabbix.ZabbixItemTestPreprocessing.Error.get -> string?
+Community.Zabbix.ZabbixItemTestPreprocessing.Error.init -> void
+Community.Zabbix.ZabbixItemTestPreprocessing.IsTruncated.get -> bool?
+Community.Zabbix.ZabbixItemTestPreprocessing.IsTruncated.init -> void
+Community.Zabbix.ZabbixItemTestPreprocessing.OriginalSize.get -> long?
+Community.Zabbix.ZabbixItemTestPreprocessing.OriginalSize.init -> void
+Community.Zabbix.ZabbixItemTestPreprocessing.Result.get -> string?
+Community.Zabbix.ZabbixItemTestPreprocessing.Result.init -> void
+Community.Zabbix.ZabbixItemTestPreprocessing.Steps.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixItemTestStepResult!>?
+Community.Zabbix.ZabbixItemTestPreprocessing.Steps.init -> void
+Community.Zabbix.ZabbixItemTestPreprocessing.UsedPreviousValue.get -> bool?
+Community.Zabbix.ZabbixItemTestPreprocessing.UsedPreviousValue.init -> void
+Community.Zabbix.ZabbixItemTestPreprocessing.ZabbixItemTestPreprocessing() -> void
+Community.Zabbix.ZabbixItemTestPreviousValue
+Community.Zabbix.ZabbixItemTestPreviousValue.<Clone>$() -> Community.Zabbix.ZabbixItemTestPreviousValue!
+Community.Zabbix.ZabbixItemTestPreviousValue.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
+Community.Zabbix.ZabbixItemTestPreviousValue.AdditionalFields.set -> void
+Community.Zabbix.ZabbixItemTestPreviousValue.Age.get -> System.TimeSpan?
+Community.Zabbix.ZabbixItemTestPreviousValue.Age.set -> void
+Community.Zabbix.ZabbixItemTestPreviousValue.Equals(Community.Zabbix.ZabbixItemTestPreviousValue? other) -> bool
+Community.Zabbix.ZabbixItemTestPreviousValue.Value.get -> string?
+Community.Zabbix.ZabbixItemTestPreviousValue.Value.set -> void
+Community.Zabbix.ZabbixItemTestPreviousValue.ZabbixItemTestPreviousValue() -> void
+Community.Zabbix.ZabbixItemTestRequest
+Community.Zabbix.ZabbixItemTestRequest.<Clone>$() -> Community.Zabbix.ZabbixItemTestRequest!
+Community.Zabbix.ZabbixItemTestRequest.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
+Community.Zabbix.ZabbixItemTestRequest.AdditionalFields.set -> void
+Community.Zabbix.ZabbixItemTestRequest.Conditions.get -> Community.Zabbix.ZabbixItemTestConditions?
+Community.Zabbix.ZabbixItemTestRequest.Conditions.set -> void
+Community.Zabbix.ZabbixItemTestRequest.Equals(Community.Zabbix.ZabbixItemTestRequest? other) -> bool
+Community.Zabbix.ZabbixItemTestRequest.Host.get -> Community.Zabbix.ZabbixItemTestHost?
+Community.Zabbix.ZabbixItemTestRequest.Host.set -> void
+Community.Zabbix.ZabbixItemTestRequest.Item.get -> Community.Zabbix.ZabbixItemTestItem!
+Community.Zabbix.ZabbixItemTestRequest.Item.set -> void
+Community.Zabbix.ZabbixItemTestRequest.ZabbixItemTestRequest() -> void
+Community.Zabbix.ZabbixItemTestRequest.ZabbixItemTestRequest(Community.Zabbix.ZabbixItemTestItem! item) -> void
+Community.Zabbix.ZabbixItemTestResult
+Community.Zabbix.ZabbixItemTestResult.<Clone>$() -> Community.Zabbix.ZabbixItemTestResult!
+Community.Zabbix.ZabbixItemTestResult.Equals(Community.Zabbix.ZabbixItemTestResult? other) -> bool
+Community.Zabbix.ZabbixItemTestResult.Item.get -> Community.Zabbix.ZabbixItemTestValue?
+Community.Zabbix.ZabbixItemTestResult.Item.init -> void
+Community.Zabbix.ZabbixItemTestResult.Preprocessing.get -> Community.Zabbix.ZabbixItemTestPreprocessing?
+Community.Zabbix.ZabbixItemTestResult.Preprocessing.init -> void
+Community.Zabbix.ZabbixItemTestResult.ZabbixItemTestResult() -> void
+Community.Zabbix.ZabbixItemTestSnmpDetails
+Community.Zabbix.ZabbixItemTestSnmpDetails.<Clone>$() -> Community.Zabbix.ZabbixItemTestSnmpDetails!
+Community.Zabbix.ZabbixItemTestSnmpDetails.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
+Community.Zabbix.ZabbixItemTestSnmpDetails.AdditionalFields.set -> void
+Community.Zabbix.ZabbixItemTestSnmpDetails.AuthenticationPassphrase.get -> string?
+Community.Zabbix.ZabbixItemTestSnmpDetails.AuthenticationPassphrase.set -> void
+Community.Zabbix.ZabbixItemTestSnmpDetails.AuthenticationProtocol.get -> int?
+Community.Zabbix.ZabbixItemTestSnmpDetails.AuthenticationProtocol.set -> void
+Community.Zabbix.ZabbixItemTestSnmpDetails.Community.get -> string?
+Community.Zabbix.ZabbixItemTestSnmpDetails.Community.set -> void
+Community.Zabbix.ZabbixItemTestSnmpDetails.ContextName.get -> string?
+Community.Zabbix.ZabbixItemTestSnmpDetails.ContextName.set -> void
+Community.Zabbix.ZabbixItemTestSnmpDetails.Equals(Community.Zabbix.ZabbixItemTestSnmpDetails? other) -> bool
+Community.Zabbix.ZabbixItemTestSnmpDetails.MaxRepetitions.get -> int?
+Community.Zabbix.ZabbixItemTestSnmpDetails.MaxRepetitions.set -> void
+Community.Zabbix.ZabbixItemTestSnmpDetails.PrivacyPassphrase.get -> string?
+Community.Zabbix.ZabbixItemTestSnmpDetails.PrivacyPassphrase.set -> void
+Community.Zabbix.ZabbixItemTestSnmpDetails.PrivacyProtocol.get -> int?
+Community.Zabbix.ZabbixItemTestSnmpDetails.PrivacyProtocol.set -> void
+Community.Zabbix.ZabbixItemTestSnmpDetails.SecurityLevel.get -> int?
+Community.Zabbix.ZabbixItemTestSnmpDetails.SecurityLevel.set -> void
+Community.Zabbix.ZabbixItemTestSnmpDetails.SecurityName.get -> string?
+Community.Zabbix.ZabbixItemTestSnmpDetails.SecurityName.set -> void
+Community.Zabbix.ZabbixItemTestSnmpDetails.Version.get -> int?
+Community.Zabbix.ZabbixItemTestSnmpDetails.Version.set -> void
+Community.Zabbix.ZabbixItemTestSnmpDetails.ZabbixItemTestSnmpDetails() -> void
+Community.Zabbix.ZabbixItemTestStep
+Community.Zabbix.ZabbixItemTestStep.<Clone>$() -> Community.Zabbix.ZabbixItemTestStep!
+Community.Zabbix.ZabbixItemTestStep.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
+Community.Zabbix.ZabbixItemTestStep.AdditionalFields.set -> void
+Community.Zabbix.ZabbixItemTestStep.Equals(Community.Zabbix.ZabbixItemTestStep? other) -> bool
+Community.Zabbix.ZabbixItemTestStep.ErrorHandler.get -> int?
+Community.Zabbix.ZabbixItemTestStep.ErrorHandler.set -> void
+Community.Zabbix.ZabbixItemTestStep.ErrorHandlerParameters.get -> string?
+Community.Zabbix.ZabbixItemTestStep.ErrorHandlerParameters.set -> void
+Community.Zabbix.ZabbixItemTestStep.Parameters.get -> string?
+Community.Zabbix.ZabbixItemTestStep.Parameters.set -> void
+Community.Zabbix.ZabbixItemTestStep.StepType.get -> int?
+Community.Zabbix.ZabbixItemTestStep.StepType.set -> void
+Community.Zabbix.ZabbixItemTestStep.ZabbixItemTestStep() -> void
+Community.Zabbix.ZabbixItemTestStepError
+Community.Zabbix.ZabbixItemTestStepError.<Clone>$() -> Community.Zabbix.ZabbixItemTestStepError!
+Community.Zabbix.ZabbixItemTestStepError.Equals(Community.Zabbix.ZabbixItemTestStepError? other) -> bool
+Community.Zabbix.ZabbixItemTestStepError.IsTruncated.get -> bool?
+Community.Zabbix.ZabbixItemTestStepError.IsTruncated.init -> void
+Community.Zabbix.ZabbixItemTestStepError.Message.get -> string?
+Community.Zabbix.ZabbixItemTestStepError.Message.init -> void
+Community.Zabbix.ZabbixItemTestStepError.OriginalSize.get -> long?
+Community.Zabbix.ZabbixItemTestStepError.OriginalSize.init -> void
+Community.Zabbix.ZabbixItemTestStepError.ZabbixItemTestStepError() -> void
+Community.Zabbix.ZabbixItemTestStepResult
+Community.Zabbix.ZabbixItemTestStepResult.<Clone>$() -> Community.Zabbix.ZabbixItemTestStepResult!
+Community.Zabbix.ZabbixItemTestStepResult.Action.get -> int?
+Community.Zabbix.ZabbixItemTestStepResult.Action.init -> void
+Community.Zabbix.ZabbixItemTestStepResult.Equals(Community.Zabbix.ZabbixItemTestStepResult? other) -> bool
+Community.Zabbix.ZabbixItemTestStepResult.Error.get -> Community.Zabbix.ZabbixItemTestStepError?
+Community.Zabbix.ZabbixItemTestStepResult.Error.init -> void
+Community.Zabbix.ZabbixItemTestStepResult.Failed.get -> string?
+Community.Zabbix.ZabbixItemTestStepResult.Failed.init -> void
+Community.Zabbix.ZabbixItemTestStepResult.IsTruncated.get -> bool?
+Community.Zabbix.ZabbixItemTestStepResult.IsTruncated.init -> void
+Community.Zabbix.ZabbixItemTestStepResult.OriginalSize.get -> long?
+Community.Zabbix.ZabbixItemTestStepResult.OriginalSize.init -> void
+Community.Zabbix.ZabbixItemTestStepResult.Result.get -> string?
+Community.Zabbix.ZabbixItemTestStepResult.Result.init -> void
+Community.Zabbix.ZabbixItemTestStepResult.ZabbixItemTestStepResult() -> void
+Community.Zabbix.ZabbixItemTestValue
+Community.Zabbix.ZabbixItemTestValue.<Clone>$() -> Community.Zabbix.ZabbixItemTestValue!
+Community.Zabbix.ZabbixItemTestValue.EndOfLine.get -> string?
+Community.Zabbix.ZabbixItemTestValue.EndOfLine.init -> void
+Community.Zabbix.ZabbixItemTestValue.Equals(Community.Zabbix.ZabbixItemTestValue? other) -> bool
+Community.Zabbix.ZabbixItemTestValue.Error.get -> string?
+Community.Zabbix.ZabbixItemTestValue.Error.init -> void
+Community.Zabbix.ZabbixItemTestValue.IsTruncated.get -> bool?
+Community.Zabbix.ZabbixItemTestValue.IsTruncated.init -> void
+Community.Zabbix.ZabbixItemTestValue.OriginalSize.get -> long?
+Community.Zabbix.ZabbixItemTestValue.OriginalSize.init -> void
+Community.Zabbix.ZabbixItemTestValue.Result.get -> string?
+Community.Zabbix.ZabbixItemTestValue.Result.init -> void
+Community.Zabbix.ZabbixItemTestValue.ZabbixItemTestValue() -> void
+Community.Zabbix.ZabbixProcessUtilization
+Community.Zabbix.ZabbixProcessUtilization.<Clone>$() -> Community.Zabbix.ZabbixProcessUtilization!
+Community.Zabbix.ZabbixProcessUtilization.Busy.get -> Community.Zabbix.ZabbixUtilization?
+Community.Zabbix.ZabbixProcessUtilization.Busy.init -> void
+Community.Zabbix.ZabbixProcessUtilization.Count.get -> int?
+Community.Zabbix.ZabbixProcessUtilization.Count.init -> void
+Community.Zabbix.ZabbixProcessUtilization.Equals(Community.Zabbix.ZabbixProcessUtilization? other) -> bool
+Community.Zabbix.ZabbixProcessUtilization.Idle.get -> Community.Zabbix.ZabbixUtilization?
+Community.Zabbix.ZabbixProcessUtilization.Idle.init -> void
+Community.Zabbix.ZabbixProcessUtilization.ZabbixProcessUtilization() -> void
+Community.Zabbix.ZabbixProxyLoad
+Community.Zabbix.ZabbixProxyLoad.<Clone>$() -> Community.Zabbix.ZabbixProxyLoad!
+Community.Zabbix.ZabbixProxyLoad.DisabledHostCount.get -> long?
+Community.Zabbix.ZabbixProxyLoad.DisabledHostCount.init -> void
+Community.Zabbix.ZabbixProxyLoad.DisabledItemCount.get -> long?
+Community.Zabbix.ZabbixProxyLoad.DisabledItemCount.init -> void
+Community.Zabbix.ZabbixProxyLoad.EnabledHostCount.get -> long?
+Community.Zabbix.ZabbixProxyLoad.EnabledHostCount.init -> void
+Community.Zabbix.ZabbixProxyLoad.EnabledItemCount.get -> long?
+Community.Zabbix.ZabbixProxyLoad.EnabledItemCount.init -> void
+Community.Zabbix.ZabbixProxyLoad.Equals(Community.Zabbix.ZabbixProxyLoad? other) -> bool
+Community.Zabbix.ZabbixProxyLoad.ProxyId.get -> ulong
+Community.Zabbix.ZabbixProxyLoad.ProxyId.init -> void
+Community.Zabbix.ZabbixProxyLoad.RequiredPerformance.get -> double?
+Community.Zabbix.ZabbixProxyLoad.RequiredPerformance.init -> void
+Community.Zabbix.ZabbixProxyLoad.UnsupportedItemCount.get -> long?
+Community.Zabbix.ZabbixProxyLoad.UnsupportedItemCount.init -> void
+Community.Zabbix.ZabbixProxyLoad.ZabbixProxyLoad() -> void
 Community.Zabbix.ZabbixQueueDelays
 Community.Zabbix.ZabbixQueueDelays.<Clone>$() -> Community.Zabbix.ZabbixQueueDelays!
 Community.Zabbix.ZabbixQueueDelays.Deconstruct(out int? ItemType, out ulong? ProxyId, out long Delay5, out long Delay10, out long Delay30, out long Delay60, out long Delay300, out long Delay600) -> void
@@ -100,6 +439,41 @@ Community.Zabbix.ZabbixQueuedItem.ZabbixQueuedItem(ulong ItemId, System.DateTime
 Community.Zabbix.ZabbixQueueOverview
 Community.Zabbix.ZabbixQueueOverview.ByItemType = 0 -> Community.Zabbix.ZabbixQueueOverview
 Community.Zabbix.ZabbixQueueOverview.ByProxy = 1 -> Community.Zabbix.ZabbixQueueOverview
+Community.Zabbix.ZabbixReportRecipient
+Community.Zabbix.ZabbixReportRecipient.<Clone>$() -> Community.Zabbix.ZabbixReportRecipient!
+Community.Zabbix.ZabbixReportRecipient.Equals(Community.Zabbix.ZabbixReportRecipient? other) -> bool
+Community.Zabbix.ZabbixReportRecipient.Info.get -> string?
+Community.Zabbix.ZabbixReportRecipient.Info.init -> void
+Community.Zabbix.ZabbixReportRecipient.Recipient.get -> string?
+Community.Zabbix.ZabbixReportRecipient.Recipient.init -> void
+Community.Zabbix.ZabbixReportRecipient.Status.get -> int?
+Community.Zabbix.ZabbixReportRecipient.Status.init -> void
+Community.Zabbix.ZabbixReportRecipient.ZabbixReportRecipient() -> void
+Community.Zabbix.ZabbixReportTestRequest
+Community.Zabbix.ZabbixReportTestRequest.<Clone>$() -> Community.Zabbix.ZabbixReportTestRequest!
+Community.Zabbix.ZabbixReportTestRequest.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
+Community.Zabbix.ZabbixReportTestRequest.AdditionalFields.set -> void
+Community.Zabbix.ZabbixReportTestRequest.DashboardId.get -> ulong
+Community.Zabbix.ZabbixReportTestRequest.DashboardId.set -> void
+Community.Zabbix.ZabbixReportTestRequest.Equals(Community.Zabbix.ZabbixReportTestRequest? other) -> bool
+Community.Zabbix.ZabbixReportTestRequest.Name.get -> string!
+Community.Zabbix.ZabbixReportTestRequest.Name.set -> void
+Community.Zabbix.ZabbixReportTestRequest.Now.get -> System.DateTimeOffset?
+Community.Zabbix.ZabbixReportTestRequest.Now.set -> void
+Community.Zabbix.ZabbixReportTestRequest.Parameters.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>?
+Community.Zabbix.ZabbixReportTestRequest.Parameters.set -> void
+Community.Zabbix.ZabbixReportTestRequest.Period.get -> int
+Community.Zabbix.ZabbixReportTestRequest.Period.set -> void
+Community.Zabbix.ZabbixReportTestRequest.UserId.get -> ulong
+Community.Zabbix.ZabbixReportTestRequest.UserId.set -> void
+Community.Zabbix.ZabbixReportTestRequest.ZabbixReportTestRequest() -> void
+Community.Zabbix.ZabbixReportTestRequest.ZabbixReportTestRequest(string! name, ulong dashboardId, ulong userId) -> void
+Community.Zabbix.ZabbixReportTestResult
+Community.Zabbix.ZabbixReportTestResult.<Clone>$() -> Community.Zabbix.ZabbixReportTestResult!
+Community.Zabbix.ZabbixReportTestResult.Equals(Community.Zabbix.ZabbixReportTestResult? other) -> bool
+Community.Zabbix.ZabbixReportTestResult.Recipients.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixReportRecipient!>?
+Community.Zabbix.ZabbixReportTestResult.Recipients.init -> void
+Community.Zabbix.ZabbixReportTestResult.ZabbixReportTestResult() -> void
 Community.Zabbix.ZabbixSendBatch
 Community.Zabbix.ZabbixSendBatch.Add<T>(string! hostName, Community.Zabbix.ZabbixItemKey<T> key, T value) -> Community.Zabbix.ZabbixSendBatch!
 Community.Zabbix.ZabbixSendBatch.Add<T>(string! hostName, Community.Zabbix.ZabbixItemKey<T> key, T value, System.DateTimeOffset time) -> Community.Zabbix.ZabbixSendBatch!
@@ -156,6 +530,76 @@ Community.Zabbix.ZabbixServerReply.Response.init -> void
 Community.Zabbix.ZabbixServerReply.Total.get -> long?
 Community.Zabbix.ZabbixServerReply.Total.init -> void
 Community.Zabbix.ZabbixServerReply.ZabbixServerReply(string? Response, System.Text.Json.JsonElement? Data, string? Info, long? Total) -> void
+Community.Zabbix.ZabbixServerStatistics
+Community.Zabbix.ZabbixServerStatistics.<Clone>$() -> Community.Zabbix.ZabbixServerStatistics!
+Community.Zabbix.ZabbixServerStatistics.BootTime.get -> System.DateTimeOffset?
+Community.Zabbix.ZabbixServerStatistics.BootTime.init -> void
+Community.Zabbix.ZabbixServerStatistics.ConfigurationCache.get -> Community.Zabbix.ZabbixCacheUsage?
+Community.Zabbix.ZabbixServerStatistics.ConfigurationCache.init -> void
+Community.Zabbix.ZabbixServerStatistics.ConnectorQueue.get -> long?
+Community.Zabbix.ZabbixServerStatistics.ConnectorQueue.init -> void
+Community.Zabbix.ZabbixServerStatistics.DiscoveryQueue.get -> long?
+Community.Zabbix.ZabbixServerStatistics.DiscoveryQueue.init -> void
+Community.Zabbix.ZabbixServerStatistics.Equals(Community.Zabbix.ZabbixServerStatistics? other) -> bool
+Community.Zabbix.ZabbixServerStatistics.HostCount.get -> long?
+Community.Zabbix.ZabbixServerStatistics.HostCount.init -> void
+Community.Zabbix.ZabbixServerStatistics.ItemCount.get -> long?
+Community.Zabbix.ZabbixServerStatistics.ItemCount.init -> void
+Community.Zabbix.ZabbixServerStatistics.LowLevelDiscoveryQueue.get -> long?
+Community.Zabbix.ZabbixServerStatistics.LowLevelDiscoveryQueue.init -> void
+Community.Zabbix.ZabbixServerStatistics.PreprocessingQueue.get -> long?
+Community.Zabbix.ZabbixServerStatistics.PreprocessingQueue.init -> void
+Community.Zabbix.ZabbixServerStatistics.Processes.get -> System.Collections.Generic.IReadOnlyDictionary<string!, Community.Zabbix.ZabbixProcessUtilization!>?
+Community.Zabbix.ZabbixServerStatistics.Processes.init -> void
+Community.Zabbix.ZabbixServerStatistics.RequiredPerformance.get -> double?
+Community.Zabbix.ZabbixServerStatistics.RequiredPerformance.init -> void
+Community.Zabbix.ZabbixServerStatistics.TriggerCount.get -> long?
+Community.Zabbix.ZabbixServerStatistics.TriggerCount.init -> void
+Community.Zabbix.ZabbixServerStatistics.UnsupportedItemCount.get -> long?
+Community.Zabbix.ZabbixServerStatistics.UnsupportedItemCount.init -> void
+Community.Zabbix.ZabbixServerStatistics.Uptime.get -> System.TimeSpan?
+Community.Zabbix.ZabbixServerStatistics.Uptime.init -> void
+Community.Zabbix.ZabbixServerStatistics.ValueCache.get -> Community.Zabbix.ZabbixValueCacheStatistics?
+Community.Zabbix.ZabbixServerStatistics.ValueCache.init -> void
+Community.Zabbix.ZabbixServerStatistics.Version.get -> System.Version?
+Community.Zabbix.ZabbixServerStatistics.Version.init -> void
+Community.Zabbix.ZabbixServerStatistics.VMwareCache.get -> Community.Zabbix.ZabbixCacheUsage?
+Community.Zabbix.ZabbixServerStatistics.VMwareCache.init -> void
+Community.Zabbix.ZabbixServerStatistics.WriteCache.get -> Community.Zabbix.ZabbixWriteCacheStatistics?
+Community.Zabbix.ZabbixServerStatistics.WriteCache.init -> void
+Community.Zabbix.ZabbixServerStatistics.ZabbixServerStatistics() -> void
+Community.Zabbix.ZabbixServerStatus
+Community.Zabbix.ZabbixServerStatus.<Clone>$() -> Community.Zabbix.ZabbixServerStatus!
+Community.Zabbix.ZabbixServerStatus.DisabledHostCount.get -> long?
+Community.Zabbix.ZabbixServerStatus.DisabledHostCount.init -> void
+Community.Zabbix.ZabbixServerStatus.DisabledItemCount.get -> long?
+Community.Zabbix.ZabbixServerStatus.DisabledItemCount.init -> void
+Community.Zabbix.ZabbixServerStatus.DisabledTriggerCount.get -> long?
+Community.Zabbix.ZabbixServerStatus.DisabledTriggerCount.init -> void
+Community.Zabbix.ZabbixServerStatus.EnabledHostCount.get -> long?
+Community.Zabbix.ZabbixServerStatus.EnabledHostCount.init -> void
+Community.Zabbix.ZabbixServerStatus.EnabledItemCount.get -> long?
+Community.Zabbix.ZabbixServerStatus.EnabledItemCount.init -> void
+Community.Zabbix.ZabbixServerStatus.Equals(Community.Zabbix.ZabbixServerStatus? other) -> bool
+Community.Zabbix.ZabbixServerStatus.OfflineUserCount.get -> long?
+Community.Zabbix.ZabbixServerStatus.OfflineUserCount.init -> void
+Community.Zabbix.ZabbixServerStatus.OkTriggerCount.get -> long?
+Community.Zabbix.ZabbixServerStatus.OkTriggerCount.init -> void
+Community.Zabbix.ZabbixServerStatus.OnlineUserCount.get -> long?
+Community.Zabbix.ZabbixServerStatus.OnlineUserCount.init -> void
+Community.Zabbix.ZabbixServerStatus.ProblemTriggerCount.get -> long?
+Community.Zabbix.ZabbixServerStatus.ProblemTriggerCount.init -> void
+Community.Zabbix.ZabbixServerStatus.Proxies.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixProxyLoad!>!
+Community.Zabbix.ZabbixServerStatus.Proxies.init -> void
+Community.Zabbix.ZabbixServerStatus.RequiredPerformance.get -> double?
+Community.Zabbix.ZabbixServerStatus.RequiredPerformance.init -> void
+Community.Zabbix.ZabbixServerStatus.TemplateCount.get -> long?
+Community.Zabbix.ZabbixServerStatus.TemplateCount.init -> void
+Community.Zabbix.ZabbixServerStatus.UnsupportedItemCount.get -> long?
+Community.Zabbix.ZabbixServerStatus.UnsupportedItemCount.init -> void
+Community.Zabbix.ZabbixServerStatus.Version.get -> System.Version?
+Community.Zabbix.ZabbixServerStatus.Version.init -> void
+Community.Zabbix.ZabbixServerStatus.ZabbixServerStatus() -> void
 Community.Zabbix.ZabbixTlsMode
 Community.Zabbix.ZabbixTlsMode.Certificate = 1 -> Community.Zabbix.ZabbixTlsMode
 Community.Zabbix.ZabbixTlsMode.PreSharedKey = 2 -> Community.Zabbix.ZabbixTlsMode
@@ -189,6 +633,57 @@ Community.Zabbix.ZabbixTrapperRefusedException.ZabbixTrapperRefusedException() -
 Community.Zabbix.ZabbixTrapperRefusedException.ZabbixTrapperRefusedException(string! message) -> void
 Community.Zabbix.ZabbixTrapperRefusedException.ZabbixTrapperRefusedException(string! message, System.Exception! innerException) -> void
 Community.Zabbix.ZabbixTrapperRefusedException.ZabbixTrapperRefusedException(string? response, string? info) -> void
+Community.Zabbix.ZabbixUtilization
+Community.Zabbix.ZabbixUtilization.<Clone>$() -> Community.Zabbix.ZabbixUtilization!
+Community.Zabbix.ZabbixUtilization.Average.get -> double?
+Community.Zabbix.ZabbixUtilization.Average.init -> void
+Community.Zabbix.ZabbixUtilization.Equals(Community.Zabbix.ZabbixUtilization? other) -> bool
+Community.Zabbix.ZabbixUtilization.Max.get -> double?
+Community.Zabbix.ZabbixUtilization.Max.init -> void
+Community.Zabbix.ZabbixUtilization.Min.get -> double?
+Community.Zabbix.ZabbixUtilization.Min.init -> void
+Community.Zabbix.ZabbixUtilization.ZabbixUtilization() -> void
+Community.Zabbix.ZabbixValueCacheActivity
+Community.Zabbix.ZabbixValueCacheActivity.<Clone>$() -> Community.Zabbix.ZabbixValueCacheActivity!
+Community.Zabbix.ZabbixValueCacheActivity.Equals(Community.Zabbix.ZabbixValueCacheActivity? other) -> bool
+Community.Zabbix.ZabbixValueCacheActivity.HitCount.get -> long?
+Community.Zabbix.ZabbixValueCacheActivity.HitCount.init -> void
+Community.Zabbix.ZabbixValueCacheActivity.MissCount.get -> long?
+Community.Zabbix.ZabbixValueCacheActivity.MissCount.init -> void
+Community.Zabbix.ZabbixValueCacheActivity.Mode.get -> Community.Zabbix.ZabbixValueCacheMode?
+Community.Zabbix.ZabbixValueCacheActivity.Mode.init -> void
+Community.Zabbix.ZabbixValueCacheActivity.RequestCount.get -> long?
+Community.Zabbix.ZabbixValueCacheActivity.RequestCount.init -> void
+Community.Zabbix.ZabbixValueCacheActivity.ZabbixValueCacheActivity() -> void
+Community.Zabbix.ZabbixValueCacheMode
+Community.Zabbix.ZabbixValueCacheMode.LowMemory = 1 -> Community.Zabbix.ZabbixValueCacheMode
+Community.Zabbix.ZabbixValueCacheMode.Normal = 0 -> Community.Zabbix.ZabbixValueCacheMode
+Community.Zabbix.ZabbixValueCacheStatistics
+Community.Zabbix.ZabbixValueCacheStatistics.<Clone>$() -> Community.Zabbix.ZabbixValueCacheStatistics!
+Community.Zabbix.ZabbixValueCacheStatistics.Buffer.get -> Community.Zabbix.ZabbixCacheUsage?
+Community.Zabbix.ZabbixValueCacheStatistics.Buffer.init -> void
+Community.Zabbix.ZabbixValueCacheStatistics.Cache.get -> Community.Zabbix.ZabbixValueCacheActivity?
+Community.Zabbix.ZabbixValueCacheStatistics.Cache.init -> void
+Community.Zabbix.ZabbixValueCacheStatistics.Equals(Community.Zabbix.ZabbixValueCacheStatistics? other) -> bool
+Community.Zabbix.ZabbixValueCacheStatistics.ZabbixValueCacheStatistics() -> void
+Community.Zabbix.ZabbixWebhookLog
+Community.Zabbix.ZabbixWebhookLog.<Clone>$() -> Community.Zabbix.ZabbixWebhookLog!
+Community.Zabbix.ZabbixWebhookLog.Elapsed.get -> System.TimeSpan?
+Community.Zabbix.ZabbixWebhookLog.Elapsed.init -> void
+Community.Zabbix.ZabbixWebhookLog.Entries.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixWebhookLogEntry!>?
+Community.Zabbix.ZabbixWebhookLog.Entries.init -> void
+Community.Zabbix.ZabbixWebhookLog.Equals(Community.Zabbix.ZabbixWebhookLog? other) -> bool
+Community.Zabbix.ZabbixWebhookLog.ZabbixWebhookLog() -> void
+Community.Zabbix.ZabbixWebhookLogEntry
+Community.Zabbix.ZabbixWebhookLogEntry.<Clone>$() -> Community.Zabbix.ZabbixWebhookLogEntry!
+Community.Zabbix.ZabbixWebhookLogEntry.Elapsed.get -> System.TimeSpan?
+Community.Zabbix.ZabbixWebhookLogEntry.Elapsed.init -> void
+Community.Zabbix.ZabbixWebhookLogEntry.Equals(Community.Zabbix.ZabbixWebhookLogEntry? other) -> bool
+Community.Zabbix.ZabbixWebhookLogEntry.Level.get -> int?
+Community.Zabbix.ZabbixWebhookLogEntry.Level.init -> void
+Community.Zabbix.ZabbixWebhookLogEntry.Message.get -> string?
+Community.Zabbix.ZabbixWebhookLogEntry.Message.init -> void
+Community.Zabbix.ZabbixWebhookLogEntry.ZabbixWebhookLogEntry() -> void
 Community.Zabbix.ZabbixWireClient
 Community.Zabbix.ZabbixWireClient.Dispose() -> void
 Community.Zabbix.ZabbixWireClient.DisposeAsync() -> System.Threading.Tasks.ValueTask
@@ -234,14 +729,81 @@ Community.Zabbix.ZabbixWireClientOptions.SessionId.get -> string?
 Community.Zabbix.ZabbixWireClientOptions.SessionId.set -> void
 Community.Zabbix.ZabbixWireClientOptions.ZabbixWireClientOptions() -> void
 Community.Zabbix.ZabbixWireClientServiceCollectionExtensions
+Community.Zabbix.ZabbixWireJson
+Community.Zabbix.ZabbixWriteCacheStatistics
+Community.Zabbix.ZabbixWriteCacheStatistics.<Clone>$() -> Community.Zabbix.ZabbixWriteCacheStatistics!
+Community.Zabbix.ZabbixWriteCacheStatistics.Equals(Community.Zabbix.ZabbixWriteCacheStatistics? other) -> bool
+Community.Zabbix.ZabbixWriteCacheStatistics.History.get -> Community.Zabbix.ZabbixCacheUsage?
+Community.Zabbix.ZabbixWriteCacheStatistics.History.init -> void
+Community.Zabbix.ZabbixWriteCacheStatistics.Index.get -> Community.Zabbix.ZabbixCacheUsage?
+Community.Zabbix.ZabbixWriteCacheStatistics.Index.init -> void
+Community.Zabbix.ZabbixWriteCacheStatistics.Trend.get -> Community.Zabbix.ZabbixCacheUsage?
+Community.Zabbix.ZabbixWriteCacheStatistics.Trend.init -> void
+Community.Zabbix.ZabbixWriteCacheStatistics.Values.get -> Community.Zabbix.ZabbixHistoryValueCounts?
+Community.Zabbix.ZabbixWriteCacheStatistics.Values.init -> void
+Community.Zabbix.ZabbixWriteCacheStatistics.ZabbixWriteCacheStatistics() -> void
 const Community.Zabbix.ZabbixConnectionOptions.DefaultMaxPayloadBytes = 16777216 -> long
 const Community.Zabbix.ZabbixWireClient.DefaultAgentPort = 10050 -> int
 const Community.Zabbix.ZabbixWireClient.DefaultServerPort = 10051 -> int
 const Community.Zabbix.ZabbixWireClientOptions.DefaultBatchSize = 250 -> int
 const Community.Zabbix.ZabbixWireClientOptions.DefaultMaxBatchBytes = 1073741824 -> long
+override Community.Zabbix.ZabbixAlertSendResult.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixAlertSendResult.GetHashCode() -> int
+override Community.Zabbix.ZabbixAlertSendResult.ToString() -> string!
+override Community.Zabbix.ZabbixCacheUsage.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixCacheUsage.GetHashCode() -> int
+override Community.Zabbix.ZabbixCacheUsage.ToString() -> string!
 override Community.Zabbix.ZabbixExpressionResult.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixExpressionResult.GetHashCode() -> int
 override Community.Zabbix.ZabbixExpressionResult.ToString() -> string!
+override Community.Zabbix.ZabbixHistoryValueCounts.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixHistoryValueCounts.GetHashCode() -> int
+override Community.Zabbix.ZabbixHistoryValueCounts.ToString() -> string!
+override Community.Zabbix.ZabbixItemTestConditions.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixItemTestConditions.GetHashCode() -> int
+override Community.Zabbix.ZabbixItemTestConditions.ToString() -> string!
+override Community.Zabbix.ZabbixItemTestHost.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixItemTestHost.GetHashCode() -> int
+override Community.Zabbix.ZabbixItemTestHost.ToString() -> string!
+override Community.Zabbix.ZabbixItemTestInterface.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixItemTestInterface.GetHashCode() -> int
+override Community.Zabbix.ZabbixItemTestInterface.ToString() -> string!
+override Community.Zabbix.ZabbixItemTestItem.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixItemTestItem.GetHashCode() -> int
+override Community.Zabbix.ZabbixItemTestItem.ToString() -> string!
+override Community.Zabbix.ZabbixItemTestPreprocessing.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixItemTestPreprocessing.GetHashCode() -> int
+override Community.Zabbix.ZabbixItemTestPreprocessing.ToString() -> string!
+override Community.Zabbix.ZabbixItemTestPreviousValue.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixItemTestPreviousValue.GetHashCode() -> int
+override Community.Zabbix.ZabbixItemTestPreviousValue.ToString() -> string!
+override Community.Zabbix.ZabbixItemTestRequest.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixItemTestRequest.GetHashCode() -> int
+override Community.Zabbix.ZabbixItemTestRequest.ToString() -> string!
+override Community.Zabbix.ZabbixItemTestResult.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixItemTestResult.GetHashCode() -> int
+override Community.Zabbix.ZabbixItemTestResult.ToString() -> string!
+override Community.Zabbix.ZabbixItemTestSnmpDetails.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixItemTestSnmpDetails.GetHashCode() -> int
+override Community.Zabbix.ZabbixItemTestSnmpDetails.ToString() -> string!
+override Community.Zabbix.ZabbixItemTestStep.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixItemTestStep.GetHashCode() -> int
+override Community.Zabbix.ZabbixItemTestStep.ToString() -> string!
+override Community.Zabbix.ZabbixItemTestStepError.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixItemTestStepError.GetHashCode() -> int
+override Community.Zabbix.ZabbixItemTestStepError.ToString() -> string!
+override Community.Zabbix.ZabbixItemTestStepResult.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixItemTestStepResult.GetHashCode() -> int
+override Community.Zabbix.ZabbixItemTestStepResult.ToString() -> string!
+override Community.Zabbix.ZabbixItemTestValue.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixItemTestValue.GetHashCode() -> int
+override Community.Zabbix.ZabbixItemTestValue.ToString() -> string!
+override Community.Zabbix.ZabbixProcessUtilization.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixProcessUtilization.GetHashCode() -> int
+override Community.Zabbix.ZabbixProcessUtilization.ToString() -> string!
+override Community.Zabbix.ZabbixProxyLoad.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixProxyLoad.GetHashCode() -> int
+override Community.Zabbix.ZabbixProxyLoad.ToString() -> string!
 override Community.Zabbix.ZabbixQueueDelays.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixQueueDelays.GetHashCode() -> int
 override Community.Zabbix.ZabbixQueueDelays.ToString() -> string!
@@ -251,14 +813,51 @@ override Community.Zabbix.ZabbixQueueDetails.ToString() -> string!
 override Community.Zabbix.ZabbixQueuedItem.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixQueuedItem.GetHashCode() -> int
 override Community.Zabbix.ZabbixQueuedItem.ToString() -> string!
+override Community.Zabbix.ZabbixReportRecipient.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixReportRecipient.GetHashCode() -> int
+override Community.Zabbix.ZabbixReportRecipient.ToString() -> string!
+override Community.Zabbix.ZabbixReportTestRequest.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixReportTestRequest.GetHashCode() -> int
+override Community.Zabbix.ZabbixReportTestRequest.ToString() -> string!
+override Community.Zabbix.ZabbixReportTestResult.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixReportTestResult.GetHashCode() -> int
+override Community.Zabbix.ZabbixReportTestResult.ToString() -> string!
 override Community.Zabbix.ZabbixSenderResponse.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixSenderResponse.GetHashCode() -> int
 override Community.Zabbix.ZabbixSenderResponse.ToString() -> string!
 override Community.Zabbix.ZabbixServerReply.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixServerReply.GetHashCode() -> int
 override Community.Zabbix.ZabbixServerReply.ToString() -> string!
+override Community.Zabbix.ZabbixServerStatistics.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixServerStatistics.GetHashCode() -> int
+override Community.Zabbix.ZabbixServerStatistics.ToString() -> string!
+override Community.Zabbix.ZabbixServerStatus.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixServerStatus.GetHashCode() -> int
+override Community.Zabbix.ZabbixServerStatus.ToString() -> string!
+override Community.Zabbix.ZabbixUtilization.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixUtilization.GetHashCode() -> int
+override Community.Zabbix.ZabbixUtilization.ToString() -> string!
+override Community.Zabbix.ZabbixValueCacheActivity.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixValueCacheActivity.GetHashCode() -> int
+override Community.Zabbix.ZabbixValueCacheActivity.ToString() -> string!
+override Community.Zabbix.ZabbixValueCacheStatistics.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixValueCacheStatistics.GetHashCode() -> int
+override Community.Zabbix.ZabbixValueCacheStatistics.ToString() -> string!
+override Community.Zabbix.ZabbixWebhookLog.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixWebhookLog.GetHashCode() -> int
+override Community.Zabbix.ZabbixWebhookLog.ToString() -> string!
+override Community.Zabbix.ZabbixWebhookLogEntry.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixWebhookLogEntry.GetHashCode() -> int
+override Community.Zabbix.ZabbixWebhookLogEntry.ToString() -> string!
+override Community.Zabbix.ZabbixWriteCacheStatistics.Equals(object? obj) -> bool
+override Community.Zabbix.ZabbixWriteCacheStatistics.GetHashCode() -> int
+override Community.Zabbix.ZabbixWriteCacheStatistics.ToString() -> string!
 static Community.Zabbix.ZabbixAlertParameters.Script(System.Collections.Generic.IEnumerable<string!>! values) -> Community.Zabbix.ZabbixAlertParameters!
 static Community.Zabbix.ZabbixAlertParameters.Webhook(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string!, string!>>! parameters) -> Community.Zabbix.ZabbixAlertParameters!
+static Community.Zabbix.ZabbixAlertSendResult.operator !=(Community.Zabbix.ZabbixAlertSendResult? left, Community.Zabbix.ZabbixAlertSendResult? right) -> bool
+static Community.Zabbix.ZabbixAlertSendResult.operator ==(Community.Zabbix.ZabbixAlertSendResult? left, Community.Zabbix.ZabbixAlertSendResult? right) -> bool
+static Community.Zabbix.ZabbixCacheUsage.operator !=(Community.Zabbix.ZabbixCacheUsage? left, Community.Zabbix.ZabbixCacheUsage? right) -> bool
+static Community.Zabbix.ZabbixCacheUsage.operator ==(Community.Zabbix.ZabbixCacheUsage? left, Community.Zabbix.ZabbixCacheUsage? right) -> bool
 static Community.Zabbix.ZabbixEndPoint.Format(System.Net.DnsEndPoint! endPoint) -> string!
 static Community.Zabbix.ZabbixEndPoint.Parse(string! text) -> System.Net.DnsEndPoint!
 static Community.Zabbix.ZabbixEndPoint.Parse(string! text, int defaultPort) -> System.Net.DnsEndPoint!
@@ -266,16 +865,68 @@ static Community.Zabbix.ZabbixEndPoint.ParseServerActive(string! serverActive) -
 static Community.Zabbix.ZabbixEndPoint.TryParse(string? text, int defaultPort, out System.Net.DnsEndPoint? endPoint) -> bool
 static Community.Zabbix.ZabbixExpressionResult.operator !=(Community.Zabbix.ZabbixExpressionResult? left, Community.Zabbix.ZabbixExpressionResult? right) -> bool
 static Community.Zabbix.ZabbixExpressionResult.operator ==(Community.Zabbix.ZabbixExpressionResult? left, Community.Zabbix.ZabbixExpressionResult? right) -> bool
+static Community.Zabbix.ZabbixHistoryValueCounts.operator !=(Community.Zabbix.ZabbixHistoryValueCounts? left, Community.Zabbix.ZabbixHistoryValueCounts? right) -> bool
+static Community.Zabbix.ZabbixHistoryValueCounts.operator ==(Community.Zabbix.ZabbixHistoryValueCounts? left, Community.Zabbix.ZabbixHistoryValueCounts? right) -> bool
+static Community.Zabbix.ZabbixItemTestConditions.operator !=(Community.Zabbix.ZabbixItemTestConditions? left, Community.Zabbix.ZabbixItemTestConditions? right) -> bool
+static Community.Zabbix.ZabbixItemTestConditions.operator ==(Community.Zabbix.ZabbixItemTestConditions? left, Community.Zabbix.ZabbixItemTestConditions? right) -> bool
+static Community.Zabbix.ZabbixItemTestHost.operator !=(Community.Zabbix.ZabbixItemTestHost? left, Community.Zabbix.ZabbixItemTestHost? right) -> bool
+static Community.Zabbix.ZabbixItemTestHost.operator ==(Community.Zabbix.ZabbixItemTestHost? left, Community.Zabbix.ZabbixItemTestHost? right) -> bool
+static Community.Zabbix.ZabbixItemTestInterface.operator !=(Community.Zabbix.ZabbixItemTestInterface? left, Community.Zabbix.ZabbixItemTestInterface? right) -> bool
+static Community.Zabbix.ZabbixItemTestInterface.operator ==(Community.Zabbix.ZabbixItemTestInterface? left, Community.Zabbix.ZabbixItemTestInterface? right) -> bool
+static Community.Zabbix.ZabbixItemTestItem.operator !=(Community.Zabbix.ZabbixItemTestItem? left, Community.Zabbix.ZabbixItemTestItem? right) -> bool
+static Community.Zabbix.ZabbixItemTestItem.operator ==(Community.Zabbix.ZabbixItemTestItem? left, Community.Zabbix.ZabbixItemTestItem? right) -> bool
+static Community.Zabbix.ZabbixItemTestPreprocessing.operator !=(Community.Zabbix.ZabbixItemTestPreprocessing? left, Community.Zabbix.ZabbixItemTestPreprocessing? right) -> bool
+static Community.Zabbix.ZabbixItemTestPreprocessing.operator ==(Community.Zabbix.ZabbixItemTestPreprocessing? left, Community.Zabbix.ZabbixItemTestPreprocessing? right) -> bool
+static Community.Zabbix.ZabbixItemTestPreviousValue.operator !=(Community.Zabbix.ZabbixItemTestPreviousValue? left, Community.Zabbix.ZabbixItemTestPreviousValue? right) -> bool
+static Community.Zabbix.ZabbixItemTestPreviousValue.operator ==(Community.Zabbix.ZabbixItemTestPreviousValue? left, Community.Zabbix.ZabbixItemTestPreviousValue? right) -> bool
+static Community.Zabbix.ZabbixItemTestRequest.operator !=(Community.Zabbix.ZabbixItemTestRequest? left, Community.Zabbix.ZabbixItemTestRequest? right) -> bool
+static Community.Zabbix.ZabbixItemTestRequest.operator ==(Community.Zabbix.ZabbixItemTestRequest? left, Community.Zabbix.ZabbixItemTestRequest? right) -> bool
+static Community.Zabbix.ZabbixItemTestResult.operator !=(Community.Zabbix.ZabbixItemTestResult? left, Community.Zabbix.ZabbixItemTestResult? right) -> bool
+static Community.Zabbix.ZabbixItemTestResult.operator ==(Community.Zabbix.ZabbixItemTestResult? left, Community.Zabbix.ZabbixItemTestResult? right) -> bool
+static Community.Zabbix.ZabbixItemTestSnmpDetails.operator !=(Community.Zabbix.ZabbixItemTestSnmpDetails? left, Community.Zabbix.ZabbixItemTestSnmpDetails? right) -> bool
+static Community.Zabbix.ZabbixItemTestSnmpDetails.operator ==(Community.Zabbix.ZabbixItemTestSnmpDetails? left, Community.Zabbix.ZabbixItemTestSnmpDetails? right) -> bool
+static Community.Zabbix.ZabbixItemTestStep.operator !=(Community.Zabbix.ZabbixItemTestStep? left, Community.Zabbix.ZabbixItemTestStep? right) -> bool
+static Community.Zabbix.ZabbixItemTestStep.operator ==(Community.Zabbix.ZabbixItemTestStep? left, Community.Zabbix.ZabbixItemTestStep? right) -> bool
+static Community.Zabbix.ZabbixItemTestStepError.operator !=(Community.Zabbix.ZabbixItemTestStepError? left, Community.Zabbix.ZabbixItemTestStepError? right) -> bool
+static Community.Zabbix.ZabbixItemTestStepError.operator ==(Community.Zabbix.ZabbixItemTestStepError? left, Community.Zabbix.ZabbixItemTestStepError? right) -> bool
+static Community.Zabbix.ZabbixItemTestStepResult.operator !=(Community.Zabbix.ZabbixItemTestStepResult? left, Community.Zabbix.ZabbixItemTestStepResult? right) -> bool
+static Community.Zabbix.ZabbixItemTestStepResult.operator ==(Community.Zabbix.ZabbixItemTestStepResult? left, Community.Zabbix.ZabbixItemTestStepResult? right) -> bool
+static Community.Zabbix.ZabbixItemTestValue.operator !=(Community.Zabbix.ZabbixItemTestValue? left, Community.Zabbix.ZabbixItemTestValue? right) -> bool
+static Community.Zabbix.ZabbixItemTestValue.operator ==(Community.Zabbix.ZabbixItemTestValue? left, Community.Zabbix.ZabbixItemTestValue? right) -> bool
+static Community.Zabbix.ZabbixProcessUtilization.operator !=(Community.Zabbix.ZabbixProcessUtilization? left, Community.Zabbix.ZabbixProcessUtilization? right) -> bool
+static Community.Zabbix.ZabbixProcessUtilization.operator ==(Community.Zabbix.ZabbixProcessUtilization? left, Community.Zabbix.ZabbixProcessUtilization? right) -> bool
+static Community.Zabbix.ZabbixProxyLoad.operator !=(Community.Zabbix.ZabbixProxyLoad? left, Community.Zabbix.ZabbixProxyLoad? right) -> bool
+static Community.Zabbix.ZabbixProxyLoad.operator ==(Community.Zabbix.ZabbixProxyLoad? left, Community.Zabbix.ZabbixProxyLoad? right) -> bool
 static Community.Zabbix.ZabbixQueueDelays.operator !=(Community.Zabbix.ZabbixQueueDelays? left, Community.Zabbix.ZabbixQueueDelays? right) -> bool
 static Community.Zabbix.ZabbixQueueDelays.operator ==(Community.Zabbix.ZabbixQueueDelays? left, Community.Zabbix.ZabbixQueueDelays? right) -> bool
 static Community.Zabbix.ZabbixQueueDetails.operator !=(Community.Zabbix.ZabbixQueueDetails? left, Community.Zabbix.ZabbixQueueDetails? right) -> bool
 static Community.Zabbix.ZabbixQueueDetails.operator ==(Community.Zabbix.ZabbixQueueDetails? left, Community.Zabbix.ZabbixQueueDetails? right) -> bool
 static Community.Zabbix.ZabbixQueuedItem.operator !=(Community.Zabbix.ZabbixQueuedItem? left, Community.Zabbix.ZabbixQueuedItem? right) -> bool
 static Community.Zabbix.ZabbixQueuedItem.operator ==(Community.Zabbix.ZabbixQueuedItem? left, Community.Zabbix.ZabbixQueuedItem? right) -> bool
+static Community.Zabbix.ZabbixReportRecipient.operator !=(Community.Zabbix.ZabbixReportRecipient? left, Community.Zabbix.ZabbixReportRecipient? right) -> bool
+static Community.Zabbix.ZabbixReportRecipient.operator ==(Community.Zabbix.ZabbixReportRecipient? left, Community.Zabbix.ZabbixReportRecipient? right) -> bool
+static Community.Zabbix.ZabbixReportTestRequest.operator !=(Community.Zabbix.ZabbixReportTestRequest? left, Community.Zabbix.ZabbixReportTestRequest? right) -> bool
+static Community.Zabbix.ZabbixReportTestRequest.operator ==(Community.Zabbix.ZabbixReportTestRequest? left, Community.Zabbix.ZabbixReportTestRequest? right) -> bool
+static Community.Zabbix.ZabbixReportTestResult.operator !=(Community.Zabbix.ZabbixReportTestResult? left, Community.Zabbix.ZabbixReportTestResult? right) -> bool
+static Community.Zabbix.ZabbixReportTestResult.operator ==(Community.Zabbix.ZabbixReportTestResult? left, Community.Zabbix.ZabbixReportTestResult? right) -> bool
 static Community.Zabbix.ZabbixSenderResponse.operator !=(Community.Zabbix.ZabbixSenderResponse? left, Community.Zabbix.ZabbixSenderResponse? right) -> bool
 static Community.Zabbix.ZabbixSenderResponse.operator ==(Community.Zabbix.ZabbixSenderResponse? left, Community.Zabbix.ZabbixSenderResponse? right) -> bool
 static Community.Zabbix.ZabbixServerReply.operator !=(Community.Zabbix.ZabbixServerReply? left, Community.Zabbix.ZabbixServerReply? right) -> bool
 static Community.Zabbix.ZabbixServerReply.operator ==(Community.Zabbix.ZabbixServerReply? left, Community.Zabbix.ZabbixServerReply? right) -> bool
+static Community.Zabbix.ZabbixServerStatistics.operator !=(Community.Zabbix.ZabbixServerStatistics? left, Community.Zabbix.ZabbixServerStatistics? right) -> bool
+static Community.Zabbix.ZabbixServerStatistics.operator ==(Community.Zabbix.ZabbixServerStatistics? left, Community.Zabbix.ZabbixServerStatistics? right) -> bool
+static Community.Zabbix.ZabbixServerStatus.operator !=(Community.Zabbix.ZabbixServerStatus? left, Community.Zabbix.ZabbixServerStatus? right) -> bool
+static Community.Zabbix.ZabbixServerStatus.operator ==(Community.Zabbix.ZabbixServerStatus? left, Community.Zabbix.ZabbixServerStatus? right) -> bool
+static Community.Zabbix.ZabbixUtilization.operator !=(Community.Zabbix.ZabbixUtilization? left, Community.Zabbix.ZabbixUtilization? right) -> bool
+static Community.Zabbix.ZabbixUtilization.operator ==(Community.Zabbix.ZabbixUtilization? left, Community.Zabbix.ZabbixUtilization? right) -> bool
+static Community.Zabbix.ZabbixValueCacheActivity.operator !=(Community.Zabbix.ZabbixValueCacheActivity? left, Community.Zabbix.ZabbixValueCacheActivity? right) -> bool
+static Community.Zabbix.ZabbixValueCacheActivity.operator ==(Community.Zabbix.ZabbixValueCacheActivity? left, Community.Zabbix.ZabbixValueCacheActivity? right) -> bool
+static Community.Zabbix.ZabbixValueCacheStatistics.operator !=(Community.Zabbix.ZabbixValueCacheStatistics? left, Community.Zabbix.ZabbixValueCacheStatistics? right) -> bool
+static Community.Zabbix.ZabbixValueCacheStatistics.operator ==(Community.Zabbix.ZabbixValueCacheStatistics? left, Community.Zabbix.ZabbixValueCacheStatistics? right) -> bool
+static Community.Zabbix.ZabbixWebhookLog.operator !=(Community.Zabbix.ZabbixWebhookLog? left, Community.Zabbix.ZabbixWebhookLog? right) -> bool
+static Community.Zabbix.ZabbixWebhookLog.operator ==(Community.Zabbix.ZabbixWebhookLog? left, Community.Zabbix.ZabbixWebhookLog? right) -> bool
+static Community.Zabbix.ZabbixWebhookLogEntry.operator !=(Community.Zabbix.ZabbixWebhookLogEntry? left, Community.Zabbix.ZabbixWebhookLogEntry? right) -> bool
+static Community.Zabbix.ZabbixWebhookLogEntry.operator ==(Community.Zabbix.ZabbixWebhookLogEntry? left, Community.Zabbix.ZabbixWebhookLogEntry? right) -> bool
 static Community.Zabbix.ZabbixWireClient.CreateBuilder() -> Community.Zabbix.ZabbixWireClientBuilder!
 static Community.Zabbix.ZabbixWireClientBuilderExtensions.Bind<TBuilder>(this TBuilder builder, Microsoft.Extensions.Configuration.IConfiguration! section) -> TBuilder
 static Community.Zabbix.ZabbixWireClientBuilderExtensions.Configure<TBuilder>(this TBuilder builder, System.Action<Community.Zabbix.ZabbixWireClientOptions!>! configure) -> TBuilder
@@ -290,6 +941,10 @@ static Community.Zabbix.ZabbixWireClientBuilderExtensions.WithTimeout<TBuilder>(
 static Community.Zabbix.ZabbixWireClientBuilderExtensions.WithToken<TBuilder>(this TBuilder builder, string! token) -> TBuilder
 static Community.Zabbix.ZabbixWireClientServiceCollectionExtensions.AddZabbixWireClient(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Community.Zabbix.IZabbixWireClientBuilder!
 static Community.Zabbix.ZabbixWireClientServiceCollectionExtensions.AddZabbixWireClient(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string! name) -> Community.Zabbix.IZabbixWireClientBuilder!
+static Community.Zabbix.ZabbixWireJson.Options.get -> System.Text.Json.JsonSerializerOptions!
+static Community.Zabbix.ZabbixWireJson.TypeInfoResolver.get -> System.Text.Json.Serialization.Metadata.IJsonTypeInfoResolver!
+static Community.Zabbix.ZabbixWriteCacheStatistics.operator !=(Community.Zabbix.ZabbixWriteCacheStatistics? left, Community.Zabbix.ZabbixWriteCacheStatistics? right) -> bool
+static Community.Zabbix.ZabbixWriteCacheStatistics.operator ==(Community.Zabbix.ZabbixWriteCacheStatistics? left, Community.Zabbix.ZabbixWriteCacheStatistics? right) -> bool
 virtual Community.Zabbix.ZabbixWireClient.Dispose(bool disposing) -> void
 virtual Community.Zabbix.ZabbixWireClient.DisposeAsyncCore() -> System.Threading.Tasks.ValueTask
 virtual Community.Zabbix.ZabbixWireClient.EvaluateExpressionsAsync(System.Collections.Generic.IEnumerable<string!>! expressions, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixExpressionResult!>!>!
@@ -298,13 +953,13 @@ virtual Community.Zabbix.ZabbixWireClient.GetAgentItemAsync<T>(string! agent, Co
 virtual Community.Zabbix.ZabbixWireClient.GetQueueAsync(Community.Zabbix.ZabbixQueueOverview overview = Community.Zabbix.ZabbixQueueOverview.ByItemType, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixQueueDelays!>!>!
 virtual Community.Zabbix.ZabbixWireClient.GetQueueDetailsAsync(int limit, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixQueueDetails!>!
 virtual Community.Zabbix.ZabbixWireClient.GetQueueSizeAsync(System.TimeSpan? fromDelay = null, System.TimeSpan? toDelay = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<long>!
-virtual Community.Zabbix.ZabbixWireClient.GetStatsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
-virtual Community.Zabbix.ZabbixWireClient.GetStatusAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
+virtual Community.Zabbix.ZabbixWireClient.GetStatisticsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixServerStatistics!>!
+virtual Community.Zabbix.ZabbixWireClient.GetStatusAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixServerStatus!>!
 virtual Community.Zabbix.ZabbixWireClient.PingAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-virtual Community.Zabbix.ZabbixWireClient.RequestAsync(string! request, System.Text.Json.JsonElement data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixServerReply!>!
-virtual Community.Zabbix.ZabbixWireClient.SendAlertAsync(ulong mediaTypeId, string! sendTo, string! subject, string! message, Community.Zabbix.ZabbixAlertParameters? parameters = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixServerReply!>!
+virtual Community.Zabbix.ZabbixWireClient.SendAlertAsync(ulong mediaTypeId, string! sendTo, string! subject, string! message, Community.Zabbix.ZabbixAlertParameters? parameters = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixAlertSendResult!>!
 virtual Community.Zabbix.ZabbixWireClient.SendAsync(System.Action<Community.Zabbix.ZabbixSendBatch!>! build, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixSenderResponse!>!
 virtual Community.Zabbix.ZabbixWireClient.SendAsync(System.Collections.Generic.IReadOnlyCollection<Community.Zabbix.ZabbixValue!>! values, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixSenderResponse!>!
 virtual Community.Zabbix.ZabbixWireClient.SendAsync<T>(string! hostName, Community.Zabbix.ZabbixItemKey<T> key, T value, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixSenderResponse!>!
-virtual Community.Zabbix.ZabbixWireClient.TestItemAsync(System.Text.Json.JsonElement data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixServerReply!>!
-virtual Community.Zabbix.ZabbixWireClient.TestReportAsync(System.Text.Json.JsonElement data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixServerReply!>!
+virtual Community.Zabbix.ZabbixWireClient.SendRequestAsync(string! request, System.Text.Json.JsonElement data, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixServerReply!>!
+virtual Community.Zabbix.ZabbixWireClient.TestItemAsync(Community.Zabbix.ZabbixItemTestRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixItemTestResult!>!
+virtual Community.Zabbix.ZabbixWireClient.TestReportAsync(Community.Zabbix.ZabbixReportTestRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixReportTestResult!>!

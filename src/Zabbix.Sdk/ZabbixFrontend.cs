@@ -7,8 +7,8 @@ namespace Community.Zabbix;
 
 /// <summary>
 /// Represents a Zabbix web frontend of one version: the page links of its objects. <see cref="UriFor"/> maps an object
-/// (any API record with a page, or a <see cref="ZabbixPageTarget"/> for a bare id) to the address the frontend itself
-/// links it by, by the frontend's own routes for that version. Get one from a connected server with
+/// (any <see cref="IZabbixFrontendPage"/>: an API record with a page, or a <see cref="ZabbixPageTarget"/> for a bare id)
+/// to the address the frontend itself links it by, by the frontend's own routes for that version. Get one from a connected server with
 /// <see cref="ZabbixClient.GetFrontendAsync"/>, or build one for a known base and version. Immutable and thread-safe.
 /// </summary>
 /// <remarks>
@@ -55,21 +55,23 @@ public sealed class ZabbixFrontend
     public Version Version { get; }
 
     /// <summary>
-    /// The address of <paramref name="target"/>'s page: <paramref name="view"/> of it, by this version's route.
+    /// The address of <paramref name="page"/>'s page: <paramref name="view"/> of it, by this version's route.
     /// </summary>
-    /// <param name="target">The object: any API record with a page converts implicitly (<c>UriFor(host)</c>).</param>
+    /// <param name="page">The object: an API record with a page (<c>UriFor(host)</c>), or a <see cref="ZabbixPageTarget"/>.</param>
     /// <param name="view">Which page; <see cref="ZabbixPageView.Default"/> is the one the frontend opens the object on.</param>
     /// <returns>The absolute page address.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="page"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentException">
-    /// The target's id is not a decimal id; the kind has no such view (a dashboard has no <see cref="ZabbixPageView.Edit"/>,
-    /// a template's item no <see cref="ZabbixPageView.Latest"/>); or the route needs what the target does not carry (an
+    /// The object carries no id; the kind has no such view (a dashboard has no <see cref="ZabbixPageView.Edit"/>, a
+    /// template's item no <see cref="ZabbixPageView.Latest"/>); or the route needs what the object does not carry (an
     /// item's context, an action's event source, the trigger of an event), which the message names.
     /// </exception>
-    public Uri UriFor(ZabbixPageTarget target, ZabbixPageView view = ZabbixPageView.Default)
+    public Uri UriFor(IZabbixFrontendPage page, ZabbixPageView view = ZabbixPageView.Default)
     {
-        ArgumentNullException.ThrowIfNull(target);
+        ArgumentNullException.ThrowIfNull(page);
+        ZabbixPageTarget target = page.ToPageTarget();
         if (target.Id == 0)
-            throw new ArgumentException($"The {Describe(target.Kind)} carries no id: read it with an output that includes the id.", nameof(target));
+            throw new ArgumentException($"The {Describe(target.Kind)} carries no id: read it with an output that includes the id.", nameof(page));
         if (!s_routes.TryGetValue((target.Kind, view), out Route[]? routes)
             && !(view == ZabbixPageView.Default && s_routes.TryGetValue((target.Kind, ZabbixPageView.Edit), out routes)))
         {
@@ -263,39 +265,40 @@ public sealed class ZabbixFrontend
 
     private static (string, string)[] Popup(string popup) => [("action", "popup"), ("popup", popup)];
 
-    private static (string, string)[] FilterByName(ZabbixPageTarget target) => [("filter_set", "1"), ("filter_name", NameOf(target))];
+    private static (string, string)[] FilterByName(ZabbixPageTarget page) => [("filter_set", "1"), ("filter_name", NameOf(page))];
 
-    private static string ContextOf(ZabbixPageTarget target) => target.Context switch
+    private static string ContextOf(ZabbixPageTarget page) => page.Context switch
     {
         ZabbixPageContext.Host => "host",
         ZabbixPageContext.Template => "template",
-        _ => throw Missing(target, "whether it is on a host or a template (read it with selectHosts, or set Context)"),
+        _ => throw Missing(page, "whether it is on a host or a template (read it with selectHosts, or set Context)"),
     };
 
-    private static string HostOf(ZabbixPageTarget target, bool latest = false)
+    private static string HostOf(ZabbixPageTarget page, bool latest = false)
     {
-        if (latest && target.Context != ZabbixPageContext.Host)
+        if (latest && page.Context != ZabbixPageContext.Host)
         {
-            throw target.Context is null
-                ? Missing(target, "whether it is on a host or a template (read it with selectHosts, or set Context)")
-                : new ArgumentException("An item on a template has no latest data; only a host's item has.", nameof(target));
+            throw page.Context is null
+                ? Missing(page, "whether it is on a host or a template (read it with selectHosts, or set Context)")
+                : new ArgumentException("An item on a template has no latest data; only a host's item has.", nameof(page));
         }
-        return target.HostId is ulong host and not 0 ? host.ToString(CultureInfo.InvariantCulture) : throw Missing(target, "its host (read it with selectHosts, or set HostId)");
+        return page.HostId is ulong host and not 0 ? host.ToString(CultureInfo.InvariantCulture) : throw Missing(page, "its host (read it with selectHosts, or set HostId)");
     }
 
-    private static string NameOf(ZabbixPageTarget target)
-        => string.IsNullOrEmpty(target.Name) ? throw Missing(target, "its name, which this version's list is filtered by (read it with its name, or set Name)") : target.Name;
+    private static string NameOf(ZabbixPageTarget page)
+        => string.IsNullOrEmpty(page.Name) ? throw Missing(page, "its name, which this version's list is filtered by (read it with its name, or set Name)") : page.Name;
 
-    private static string SourceOf(ZabbixPageTarget target)
-        => target.EventSource is { } source
+    private static string SourceOf(ZabbixPageTarget page)
+        => page.EventSource is { } source
             ? ((int)source).ToString(CultureInfo.InvariantCulture)
-            : throw Missing(target, "its event source (read it with eventsource, or set EventSource)");
+            : throw Missing(page, "its event source (read it with eventsource, or set EventSource)");
 
-    private static string TriggerOf(ZabbixPageTarget target)
-        => target.TriggerId is ulong trigger and not 0
+    private static string TriggerOf(ZabbixPageTarget page)
+        => page.TriggerId is ulong trigger and not 0
             ? trigger.ToString(CultureInfo.InvariantCulture)
-            : throw Missing(target, "its trigger: only a trigger's problem or event has a page (read it with source, object and objectid, or set TriggerId)");
+            : throw Missing(page, "its trigger: only a trigger's problem or event has a page (read it with source, object and objectid, or set TriggerId)");
 
-    private static ArgumentException Missing(ZabbixPageTarget target, string what)
-        => new($"The page of {Describe(target.Kind)} {target.Id} needs {what}.", nameof(target));
+    // Named as UriFor's argument is, since a refusal here is that argument's fault.
+    private static ArgumentException Missing(ZabbixPageTarget page, string what)
+        => new($"The page of {Describe(page.Kind)} {page.Id} needs {what}.", nameof(page));
 }

@@ -1,6 +1,5 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
-using System.Management.Automation;
 using System.Text.Json;
 
 namespace Community.Zabbix.PowerShell.Tests;
@@ -26,7 +25,7 @@ public sealed class AdministrationCommandsTests
     public async Task Set_ZbxSetting_sends_the_typed_request_cast_from_a_hashtable()
     {
         await using FakeZabbix server = await FakeZabbix.StartAsync();
-        server.On("settings.update", "{}");
+        server.On("settings.update", """["default_theme"]""");                // CSettings::update: the names it updated
         server.On("settings.get", """{"work_period":"1-5,09:00-18:00"}""");
         using Shell shell = Shell.Open();
         shell.Connect(server);
@@ -43,15 +42,15 @@ public sealed class AdministrationCommandsTests
     {
         await using FakeZabbix server = await FakeZabbix.StartAsync();
         server.On("sla.get", """[{"slaid":"3","name":"Gold"}]""");
-        server.On("sla.getsli", """{"periods":[{"period_from":0,"period_to":1}],"sli":[[{"sli":99.9,"uptime":100,"downtime":0,"error_budget":0,"excluded_downtimes":[]}]]}""");
+        server.On("sla.getsli", """{"periods":[{"period_from":0,"period_to":1}],"serviceids":["5"],"sli":[[{"sli":99.9,"uptime":100,"downtime":0,"error_budget":0,"excluded_downtimes":[]}]]}""");
         using Shell shell = Shell.Open();
         shell.Connect(server);
 
         Run run = shell.Invoke("Get-ZbxSli Gold");
 
         Assert.Empty(run.Errors);
-        PSObject shaped = Assert.Single(run.Output);
-        Assert.NotNull(shaped.Properties["periods"]);
+        var report = Assert.IsType<ZabbixSliReport>(Assert.Single(run.Output).BaseObject);
+        Assert.Equal((99.9, 5UL, TimeSpan.FromSeconds(100)), (report.Sli![0][0].Sli!.Value, report.ServiceIds![0], report.Sli[0][0].Uptime!.Value));
         JsonElement asked = Assert.Single(server.ParamsOf("sla.getsli"));
         Assert.Equal("3", asked.GetProperty("slaid").GetString());
     }
@@ -60,7 +59,7 @@ public sealed class AdministrationCommandsTests
     public async Task Test_ZbxUserDirectory_sends_the_typed_request_cast_from_a_hashtable()
     {
         await using FakeZabbix server = await FakeZabbix.StartAsync();
-        server.On("userdirectory.test", """{"user":{"username":"probe"}}""");
+        server.On("userdirectory.test", """{"username":"probe"}""");             // CUserDirectory::test: the test user
         using Shell shell = Shell.Open();
         shell.Connect(server);
 
@@ -72,7 +71,7 @@ public sealed class AdministrationCommandsTests
             """);
 
         Assert.Empty(run.Errors);
-        Assert.Single(run.Output);
+        Assert.Equal("probe", Assert.IsType<ZabbixUserDirectoryTestResult>(Assert.Single(run.Output).BaseObject).UserName);
         JsonElement asked = Assert.Single(server.ParamsOf("userdirectory.test"));
         Assert.Equal("ldap.example", asked.GetProperty("host").GetString());
     }
@@ -128,14 +127,14 @@ public sealed class AdministrationCommandsTests
         await using FakeZabbix server = await FakeZabbix.StartAsync();
         server.On("script.get", """[{"scriptid":"12","name":"restart"}]""");
         server.On("host.get", FakeZabbix.Hosts(("10084", "web-01")));
-        server.On("script.execute", """{"response":"success","value":"restarted"}""");
+        server.On("script.execute", """{"response":"success","value":"restarted","debug":null}""");
         using Shell shell = Shell.Open();
         shell.Connect(server);
 
         Run run = shell.Invoke("Invoke-ZbxScript restart -Host web-01 -Confirm:$false");
 
         Assert.Empty(run.Errors);
-        Assert.Single(run.Output);
+        Assert.Equal("restarted", Assert.IsType<ZabbixScriptExecuteResult>(Assert.Single(run.Output).BaseObject).Value);
         JsonElement asked = Assert.Single(server.ParamsOf("script.execute"));
         Assert.Equal("12", asked.GetProperty("scriptid").GetString());
         Assert.Equal("10084", asked.GetProperty("hostid").GetString());

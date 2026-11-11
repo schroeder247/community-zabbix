@@ -1,7 +1,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
 using System.Management.Automation;
-using System.Text.Json;
 
 namespace Community.Zabbix.PowerShell.Commands;
 
@@ -9,7 +8,7 @@ namespace Community.Zabbix.PowerShell.Commands;
 /// <para type="synopsis">Runs a script against a host or event (<c>script.execute</c>).</para>
 /// </summary>
 [Cmdlet(VerbsLifecycle.Invoke, "ZbxScript", SupportsShouldProcess = true, ConfirmImpact = ConfirmImpact.Medium, DefaultParameterSetName = ParameterSets.Host)]
-[OutputType("Community.Zabbix.PowerShell.ScriptResult")]
+[OutputType(typeof(ZabbixScriptExecuteResult))]
 public sealed class InvokeZbxScriptCommand : ZabbixServerCmdlet
 {
     /// <summary>The script.</summary>
@@ -43,8 +42,8 @@ public sealed class InvokeZbxScriptCommand : ZabbixServerCmdlet
         string target = run.Host?.Target ?? $"event {EventId}";
         if (!ShouldProcess(target, $"Run {run.Script.Target}")) return;
         var request = new ZabbixScriptExecuteRequest { ScriptId = run.Script.Id, HostId = run.Host?.Id, EventId = EventId, ManualInput = ManualInput };
-        if (TryRun(cancellationToken => ZabbixClient.Scripts.ExecuteAsync(request, cancellationToken), out JsonElement executed, target))
-            WriteObject(ZabbixJsonShape.ToShell(executed, "Community.Zabbix.PowerShell.ScriptResult"));
+        if (TryRun(cancellationToken => ZabbixClient.Scripts.ExecuteAsync(request, cancellationToken), out ZabbixScriptExecuteResult? executed, target))
+            WriteObject(executed);
     }
 
     private async Task<((ulong Id, string Target) Script, (ulong Id, string Target)? Host)?> ResolveAsync(CancellationToken cancellationToken)

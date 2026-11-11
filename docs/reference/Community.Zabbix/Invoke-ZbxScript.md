@@ -36,7 +36,7 @@ Invoke-ZbxScript -Script 'Ping' -Host 'web-01'
 ### Example 2: Run a script against the hosts a search finds
 
 ```powershell
-Get-ZbxHost -Name 'web-*' | Invoke-ZbxScript -Script 'Ping' | Select-Object response, value
+Get-ZbxHost -Name 'web-*' | Invoke-ZbxScript -Script 'Ping' | Select-Object Response, Value
 ```
 
 A host piped from Get-ZbxHost binds -HostReference by its HostId; the script runs once per host.
@@ -136,7 +136,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 
 ## OUTPUTS
 
-- `Community.Zabbix.PowerShell.ScriptResult`: The objects this command writes.
+- `ZabbixScriptExecuteResult`: What script.execute answers: the script's output and, for a webhook, its log.
 
 ## RELATED LINKS
 

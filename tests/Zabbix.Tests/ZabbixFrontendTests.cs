@@ -18,7 +18,7 @@ public sealed class ZabbixFrontendTests
     private static readonly ZabbixHost OnTemplate = new() { HostId = 10001, Status = ZabbixHostStatus.Template };
 
     /// <summary>Each case: the object as code holds it, the view, and the page per version (7.0, 7.4, 8.0); null repeats the one before.</summary>
-    private static readonly Dictionary<string, (object Record, ZabbixPageView View, string V70, string? V74, string? V80)> Cases = new()
+    private static readonly Dictionary<string, (IZabbixFrontendPage Record, ZabbixPageView View, string V70, string? V74, string? V80)> Cases = new()
     {
         ["host"] = (new ZabbixHost { HostId = 10084, VisibleName = "Zabbix server" }, ZabbixPageView.Default,
             "zabbix.php?action=host.edit&hostid=10084", "zabbix.php?action=popup&popup=host.edit&hostid=10084", null),
@@ -109,8 +109,7 @@ public sealed class ZabbixFrontendTests
     [Theory, MemberData(nameof(Pages))]
     public void Each_kind_and_view_links_the_page_its_version_routes_it_to(string version, string name)
     {
-        (object record, ZabbixPageView view, string v70, string? v74, string? v80) = Cases[name];
-        Assert.True(ZabbixPageTarget.TryFrom(record, out ZabbixPageTarget? target));
+        (IZabbixFrontendPage record, ZabbixPageView view, string v70, string? v74, string? v80) = Cases[name];
         string expected = version switch
         {
             "7.0" => v70,
@@ -119,16 +118,17 @@ public sealed class ZabbixFrontendTests
         };
         var frontend = new ZabbixFrontend(Base, Version.Parse(version + ".3"));
 
-        Uri page = frontend.UriFor(target, view);
+        Uri page = frontend.UriFor(record, view);
 
         Assert.Equal("https://zbx.example/zabbix/" + expected, page.AbsoluteUri);
+        Assert.Equal(page, frontend.UriFor(record.ToPageTarget(), view));
     }
 
     [Fact]
     public void Every_kind_and_every_view_it_has_is_a_case()
     {
         List<(ZabbixPageKind Kind, ZabbixPageView View)> covered =
-            [.. Cases.Values.Select(c => (ZabbixPageTarget.TryFrom(c.Record, out ZabbixPageTarget? target) ? target.Kind : throw new InvalidOperationException(), c.View))];
+            [.. Cases.Values.Select(c => (c.Record.ToPageTarget().Kind, c.View))];
         foreach (ZabbixPageKind kind in Enum.GetValues<ZabbixPageKind>())
         {
             Assert.Contains(covered, c => c.Kind == kind && c.View == ZabbixPageView.Default);
@@ -138,23 +138,41 @@ public sealed class ZabbixFrontendTests
     }
 
     [Fact]
-    public void A_typed_record_converts_implicitly_to_the_target_its_runtime_type_reads_as()
+    public void A_record_with_a_page_gives_the_target_its_fields_fill()
     {
         var frontend = new ZabbixFrontend(Base, new Version(7, 4));
-        var host = new ZabbixHost { HostId = 10084, VisibleName = "Zabbix server" };
-        var item = new ZabbixItem { ItemId = 42237, HostId = 10084, Hosts = [OnHost] };
-        ZabbixPageTarget fromHost = host;
+        IZabbixFrontendPage host = new ZabbixHost { HostId = 10084, VisibleName = "Zabbix server" };
+        IZabbixFrontendPage item = new ZabbixItem { ItemId = 42237, HostId = 10084, Hosts = [OnHost] };
+        ZabbixPageTarget target = host.ToPageTarget();
 
-        Assert.True(ZabbixPageTarget.TryFrom(host, out ZabbixPageTarget? read));
-        Assert.Equal(read, fromHost);
-        Assert.Equal(new ZabbixPageTarget(ZabbixPageKind.Host, 10084UL) { Name = "Zabbix server" }, fromHost);
-        Assert.Equal(frontend.UriFor(read), frontend.UriFor(host));
-        Assert.Equal(ZabbixPageContext.Host, ((ZabbixPageTarget)item).Context);
-        Assert.True(ZabbixPageTarget.TryFrom(fromHost, out ZabbixPageTarget? same));
-        Assert.Same(fromHost, same);
-        Assert.False(ZabbixPageTarget.TryFrom("10084", out _));
-        Assert.False(ZabbixPageTarget.TryFrom(null, out _));
+        Assert.Equal(new ZabbixPageTarget(ZabbixPageKind.Host, 10084UL) { Name = "Zabbix server" }, target);
+        Assert.Equal(frontend.UriFor(target), frontend.UriFor(host));
+        Assert.Equal(new ZabbixPageTarget(ZabbixPageKind.Host, 10084UL) { Name = "web-01" }, ((IZabbixFrontendPage)new ZabbixHost { HostId = 10084, HostName = "web-01" }).ToPageTarget());
+        Assert.Equal(ZabbixPageContext.Host, item.ToPageTarget().Context);
+        Assert.Equal(10084UL, item.ToPageTarget().HostId);
+        Assert.Same(target, ((IZabbixFrontendPage)target).ToPageTarget());
     }
+
+    [Fact]
+    public void A_record_s_target_reads_its_host_context_source_and_trigger_from_what_it_carries()
+    {
+        IZabbixFrontendPage onTemplate = new ZabbixTrigger { TriggerId = 1, Hosts = [OnTemplate] };
+        IZabbixFrontendPage graph = new ZabbixGraph { GraphId = 2, Templates = [new ZabbixTemplate { TemplateId = 10001 }] };
+        IZabbixFrontendPage problem = new ZabbixProblem { EventId = 3, Source = ZabbixEventSource.Triggers, ObjectType = ZabbixEventObject.Trigger, ObjectId = 13491 };
+        IZabbixFrontendPage internalEvent = new ZabbixEvent { EventId = 4, Source = ZabbixEventSource.Internal, ObjectType = ZabbixEventObject.Item, ObjectId = 9 };
+        IZabbixFrontendPage action = new ZabbixAction { ActionId = 5, EventSource = ZabbixEventSource.Discovery };
+
+        Assert.Equal((ZabbixPageContext?)ZabbixPageContext.Template, onTemplate.ToPageTarget().Context);
+        Assert.Equal((10001UL, (ZabbixPageContext?)ZabbixPageContext.Template), (graph.ToPageTarget().HostId!.Value, graph.ToPageTarget().Context));
+        Assert.Equal(13491UL, problem.ToPageTarget().TriggerId);
+        Assert.Null(internalEvent.ToPageTarget().TriggerId);
+        Assert.Equal(ZabbixEventSource.Discovery, action.ToPageTarget().EventSource);
+        Assert.Null(((IZabbixFrontendPage)new ZabbixItem { ItemId = 6 }).ToPageTarget().Context);
+    }
+
+    [Fact]
+    public void A_null_page_is_refused()
+        => Assert.Throws<ArgumentNullException>("page", () => new ZabbixFrontend(Base, new Version(7, 4)).UriFor(null!));
 
     [Fact]
     public void The_views_of_a_kind_list_the_default_first()
@@ -174,13 +192,15 @@ public sealed class ZabbixFrontendTests
     }
 
     [Fact]
-    public void A_record_read_without_its_id_is_refused_at_the_link_not_at_the_conversion()
+    public void A_record_read_without_its_id_is_refused_at_the_link_not_when_it_gives_its_target()
     {
         var frontend = new ZabbixFrontend(Base, new Version(7, 4));
-        ZabbixPageTarget target = new ZabbixHost { VisibleName = "no id" };
+        var host = new ZabbixHost { VisibleName = "no id" };
 
-        ArgumentException refused = Assert.Throws<ArgumentException>(() => frontend.UriFor(target));
+        Assert.Equal(0UL, ((IZabbixFrontendPage)host).ToPageTarget().Id);
+        ArgumentException refused = Assert.Throws<ArgumentException>(() => frontend.UriFor(host));
         Assert.Contains("carries no id", refused.Message, StringComparison.Ordinal);
+        Assert.Equal("page", refused.ParamName);
     }
 
     [Theory]
@@ -192,6 +212,7 @@ public sealed class ZabbixFrontendTests
 
         ArgumentException context = Assert.Throws<ArgumentException>(() => frontend.UriFor(new ZabbixItem { ItemId = 1, HostId = 2, Name = "x" }));
         Assert.Contains("selectHosts", context.Message, StringComparison.Ordinal);
+        Assert.Equal("page", context.ParamName);
         ArgumentException source = Assert.Throws<ArgumentException>(() => frontend.UriFor(new ZabbixAction { ActionId = 3, Name = "a" }));
         Assert.Contains("event source", source.Message, StringComparison.Ordinal);
         ArgumentException trigger = Assert.Throws<ArgumentException>(() => frontend.UriFor(new ZabbixEvent { EventId = 4, Source = ZabbixEventSource.Internal, ObjectType = ZabbixEventObject.Item, ObjectId = 9 }));

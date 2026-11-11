@@ -251,6 +251,10 @@ Community.Zabbix.ZabbixPluginAttribute.Entry.get -> System.Type!
 Community.Zabbix.ZabbixPluginAttribute.ZabbixPluginAttribute(System.Type! entry) -> void
 Community.Zabbix.ZabbixPluginEntry
 Community.Zabbix.ZabbixPluginEntry.ZabbixPluginEntry() -> void
+Community.Zabbix.ZabbixPort
+Community.Zabbix.ZabbixPort.Equals(Community.Zabbix.ZabbixPort other) -> bool
+Community.Zabbix.ZabbixPort.Number.get -> int?
+Community.Zabbix.ZabbixPort.ZabbixPort() -> void
 Community.Zabbix.ZabbixProcessCpuTime
 Community.Zabbix.ZabbixProcessCpuTime.Privileged = 2 -> Community.Zabbix.ZabbixProcessCpuTime
 Community.Zabbix.ZabbixProcessCpuTime.Total = 0 -> Community.Zabbix.ZabbixProcessCpuTime
@@ -299,6 +303,7 @@ Community.Zabbix.ZabbixProcessState.Running = 1 -> Community.Zabbix.ZabbixProces
 Community.Zabbix.ZabbixProcessState.Sleeping = 2 -> Community.Zabbix.ZabbixProcessState
 Community.Zabbix.ZabbixProcessState.Traced = 5 -> Community.Zabbix.ZabbixProcessState
 Community.Zabbix.ZabbixProcessState.Zombie = 3 -> Community.Zabbix.ZabbixProcessState
+Community.Zabbix.ZabbixRedactionBuilderExtensions
 Community.Zabbix.ZabbixRefusedException
 Community.Zabbix.ZabbixRefusedException.ZabbixRefusedException() -> void
 Community.Zabbix.ZabbixRefusedException.ZabbixRefusedException(string! message) -> void
@@ -432,6 +437,8 @@ override Community.Zabbix.ZabbixPeer.GetHashCode() -> int
 override Community.Zabbix.ZabbixPeer.ToString() -> string!
 override Community.Zabbix.ZabbixPeerTextRedactor.GetRedactedLength(System.ReadOnlySpan<char> input) -> int
 override Community.Zabbix.ZabbixPeerTextRedactor.Redact(System.ReadOnlySpan<char> source, System.Span<char> destination) -> int
+override Community.Zabbix.ZabbixPort.GetHashCode() -> int
+override Community.Zabbix.ZabbixPort.ToString() -> string!
 override Community.Zabbix.ZabbixSample<T>.GetHashCode() -> int
 override Community.Zabbix.ZabbixSessionCredential.GetTokenAsync(Community.Zabbix.ZabbixTokenRequestContext context, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<string?>
 override Community.Zabbix.ZabbixSessionCredential.Invalidate(string! token, Community.Zabbix.ZabbixApiException! refusal) -> bool
@@ -693,6 +700,15 @@ static Community.Zabbix.ZabbixPeer.Parse(System.ReadOnlySpan<char> s) -> Communi
 static Community.Zabbix.ZabbixPeer.ParseList(string! s) -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixPeer>!
 static Community.Zabbix.ZabbixPeer.TryParse(string? s, out Community.Zabbix.ZabbixPeer result) -> bool
 static Community.Zabbix.ZabbixPeer.TryParse(System.ReadOnlySpan<char> s, out Community.Zabbix.ZabbixPeer result) -> bool
+static Community.Zabbix.ZabbixPort.FromInt32(int number) -> Community.Zabbix.ZabbixPort
+static Community.Zabbix.ZabbixPort.implicit operator Community.Zabbix.ZabbixPort(int number) -> Community.Zabbix.ZabbixPort
+static Community.Zabbix.ZabbixPort.operator !=(Community.Zabbix.ZabbixPort left, Community.Zabbix.ZabbixPort right) -> bool
+static Community.Zabbix.ZabbixPort.operator ==(Community.Zabbix.ZabbixPort left, Community.Zabbix.ZabbixPort right) -> bool
+static Community.Zabbix.ZabbixPort.Parse(string! s) -> Community.Zabbix.ZabbixPort
+static Community.Zabbix.ZabbixPort.Parse(System.ReadOnlySpan<char> s) -> Community.Zabbix.ZabbixPort
+static Community.Zabbix.ZabbixPort.TryParse(string? s, out Community.Zabbix.ZabbixPort result) -> bool
+static Community.Zabbix.ZabbixPort.TryParse(System.ReadOnlySpan<char> s, out Community.Zabbix.ZabbixPort result) -> bool
+static Community.Zabbix.ZabbixRedactionBuilderExtensions.SetZabbixRedactors(this Microsoft.Extensions.Compliance.Redaction.IRedactionBuilder! builder) -> Microsoft.Extensions.Compliance.Redaction.IRedactionBuilder!
 static Community.Zabbix.ZabbixSample<T>.operator !=(Community.Zabbix.ZabbixSample<T> left, Community.Zabbix.ZabbixSample<T> right) -> bool
 static Community.Zabbix.ZabbixSample<T>.operator ==(Community.Zabbix.ZabbixSample<T> left, Community.Zabbix.ZabbixSample<T> right) -> bool
 static Community.Zabbix.ZabbixSort<TRecord>.FromZabbixField(Community.Zabbix.ZabbixField<TRecord> field) -> Community.Zabbix.ZabbixSort<TRecord>
@@ -714,6 +730,7 @@ virtual Community.Zabbix.ZabbixGetConditions.PrintMembers(System.Text.StringBuil
 ~override Community.Zabbix.ZabbixInterval.Equals(object obj) -> bool
 ~override Community.Zabbix.ZabbixItemKey<T>.Equals(object obj) -> bool
 ~override Community.Zabbix.ZabbixPeer.Equals(object obj) -> bool
+~override Community.Zabbix.ZabbixPort.Equals(object obj) -> bool
 ~override Community.Zabbix.ZabbixSample<T>.Equals(object obj) -> bool
 ~override Community.Zabbix.ZabbixSample<T>.ToString() -> string
 ~override Community.Zabbix.ZabbixSort<TRecord>.Equals(object obj) -> bool

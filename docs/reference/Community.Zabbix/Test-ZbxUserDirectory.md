@@ -76,7 +76,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 
 ## OUTPUTS
 
-- `Community.Zabbix.PowerShell.UserDirectoryTestResult`: The objects this command writes.
+- `ZabbixUserDirectoryTestResult`: What userdirectory.test answers: the test user, and what the directory provisions for them when provisioning is on.
 
 ## RELATED LINKS
 

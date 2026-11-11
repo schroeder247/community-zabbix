@@ -200,7 +200,8 @@ await using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder()
     .WithToken(token)
     .Build();
 
-JsonElement status = await wire.GetStatusAsync();
+ZabbixServerStatus status = await wire.GetStatusAsync();
+Console.WriteLine($"{status.EnabledHostCount} hosts, {status.RequiredPerformance:F1} new values per second");
 IReadOnlyList<ZabbixQueueDelays> queue = await wire.GetQueueAsync();
 ```
 

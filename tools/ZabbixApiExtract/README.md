@@ -60,7 +60,9 @@ takes that its rules do not name: another method's element `list:obj.method`, an
 required; any other kind is a generator kind as written, `attributes=map:string`), `nestedTables`, `readFields`,
 `fieldKinds` (a reviewed kind for one record field: a generator kind, `enum:<family>`, a table or field list),
 `nullMeaningful` (an option whose `null` is its own request: emitted as `ZabbixOptional<T>`), `internalColumns`,
-`keepEnums`, `objectTables`, and `notFields` (a field a read, keyed by the object, or a request or get, keyed by
+`keepEnums`, `objectTables`, `resultRecords` (the record of a reply the source builds by hand, which a method's
+`result` names; a field may list the versions that carry it, `versions`, and mark a credential the reply hands back,
+`secret`), and `notFields` (a field a read, keyed by the object, or a request or get, keyed by
 `object.method`, does not have although a table or a shared validation names it: `hostinterface.create`'s
 `interface_ref`, which only the configuration import uses; a dotted path names a nested field). Under `enums`,
 `memberSummaries` gives a member its own sentence, keyed like `members` by what follows the family's prefix.

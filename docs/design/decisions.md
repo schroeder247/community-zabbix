@@ -100,7 +100,7 @@ ADRs: a lower document may add to a higher one and never contradicts it. Where t
 | enum values (`defines.inc.php`), 0/1/2 fields | per-object enums read by `ZabbixEnumConverter<TEnum>` | owned converter |
 | `.get` filter/search grammar (`dbFilter`) | the generated `*GetParameters` records (`Filter`, `Search`, `Output`) | generated (`IQueryable` and an expression walker rejected) |
 | history paging (`time_from` inclusive; `clock,ns`) | `ZabbixHistoryRead`: a second cursor, saturated seconds read whole, k-way merge | owned |
-| trapper frontend requests (`queue.get`, `status.get`) | `ZabbixWireClient`; stats and status as `JsonElement` | mated shape |
+| trapper frontend requests (`queue.get`, `status.get`, `zabbix.stats`, `item.test`) | `ZabbixWireClient`; each reply a record the wire's JSON context reads (`ZabbixServerStatus`, `ZabbixServerStatistics`, `ZabbixItemTestResult`) | mated shape |
 | active heartbeat (one-way) | `ZabbixNotificationCallback`, a delegate beside `ZabbixExchangeCallback` | owned |
 | passive proxy (conversations) | `ZabbixConversationCallback` owning the connection | owned |
 | proxy config (tables, deltas) | `ZabbixProxyConfig`: merged by id, a `FrozenDictionary` per revision | mated |
@@ -385,17 +385,33 @@ declaration without a diagnostic and logs the value. So every library that decla
 the package, and a conformance test invokes each classified event through an unredacted `FakeLogger` and requires the
 value to be absent from the message and the state. *Why:* a library that lacks the package logs the value in clear text
 and nothing reports it. *Consequence:* the guarantee holds with no redaction registered (a
-plain logger drops the value), and `AddZabbixRedaction` only chooses what a class becomes: `Secret` erased, `ItemKey`
-masked to its name by `ZabbixItemKeyRedactor` (`web.page.get[***]`), `PeerText` marked `[redacted]` by
-`ZabbixPeerTextRedactor`, anything else erased by the fallback. The policy turns the logger's discriminator off: it hands
-a redactor `value:Tag`, which would erase a bare key and make a pass-through print the tag.
+plain logger drops the value), and `SetZabbixRedactors` only chooses what each of the SDK's classes becomes: `Secret`
+erased, `ItemKey` masked to its name by `ZabbixItemKeyRedactor` (`web.page.get[***]`), `PeerText` marked `[redacted]`
+by `ZabbixPeerTextRedactor`.
 
-`AddZabbixRedaction` stays in `Zabbix.Sdk`. Its two halves are implementation packages: `EnableRedaction` is
-`Microsoft.Extensions.Telemetry` (its closure brings the host's abstractions and configuration) and `ErasingRedactor`
-and `AddRedaction` are `Microsoft.Extensions.Compliance.Redaction`. The contracts take abstractions only, and the wire
-does not need either for its guarantee. The item-key redactor is in `Zabbix.Abstractions`, so an application that takes
-only the wire, the agents or the proxies registers the same policy in its own `AddRedaction` call (the example is on
-`ZabbixItemKeyRedactor`).
+### The SDK sets its redactors and nothing else
+
+`SetZabbixRedactors` is an extension of `IRedactionBuilder` that sets a redactor for each of the SDK's own classes.
+Turning redaction on (`EnableRedaction`), the logger's options and the fallback redactor stay the application's, as
+[data redaction](https://learn.microsoft.com/dotnet/core/extensions/data-redaction) divides them. *Why:* the fallback
+and the logger's discriminator apply to every library's data; a library that set them would decide how another
+library's classes are redacted. *Consequence:* the item-key and peer-text redactors read a value with the logger's
+discriminator (`system.uptime:key`) as well as without it: a key name can't hold a colon, so a name, a colon and a
+tag's name is the bare key. The application keeps the logger's default.
+
+The extension is in `Zabbix.Abstractions`, beside the redactors: `IRedactionBuilder` is in
+`Microsoft.Extensions.Compliance.Abstractions`, and the `Secret` class is erased by the SDK's own redactor rather than
+the implementation package's `ErasingRedactor`. So an application that takes only the wire, the agents or the proxies
+sets the same redactors as one that takes the API client, and no library takes an implementation package for it.
+
+### A record with a frontend page says what its page needs
+
+The API records the frontend has a page for implement `IZabbixFrontendPage`, whose `ToPageTarget` gives the kind, the
+id and what the routes read besides, and `ZabbixFrontend.UriFor` takes the interface. *Why:* conversions to
+`ZabbixPageTarget` take an operator and a named method per record, and the target has to know every record; the
+interface keeps each record's reading beside the record, and a record that gains a page needs no new overload. The
+records are generated and partial, so each implementation is a hand-written part in `Zabbix.Api`, and a conformance
+test holds every kind of page to the record of its API object.
 
 ### The listener keeps its own accept loop
 

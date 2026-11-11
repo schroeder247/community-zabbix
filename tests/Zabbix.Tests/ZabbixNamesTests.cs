@@ -47,9 +47,10 @@ public sealed class ZabbixNamesTests
     public void Every_wire_part_the_vocabulary_cannot_split_is_a_reviewed_abbreviation()
     {
         // The dictionary's gaps: a lower-case part no known words make up stays one capitalised word. Each of these is
-        // one word or abbreviation, not a compound (authn: SAML's AuthnRequest; helo: SMTP's HELO); a new compound in
-        // a later Zabbix version fails here until schema/words.json learns its words.
-        string[] reviewed = ["a", "authn", "b", "c", "cert", "config", "d", "e", "exec", "exp", "helo", "num", "p", "params", "r", "regex", "stats", "x", "y"];
+        // one word or abbreviation, not a compound (authn: SAML's AuthnRequest; helo: SMTP's HELO; sli: the service level
+        // indicator sla.getsli answers); a new compound in a later Zabbix version fails here until schema/words.json learns
+        // its words.
+        string[] reviewed = ["a", "authn", "b", "c", "cert", "config", "d", "e", "exec", "exp", "helo", "num", "p", "params", "r", "regex", "sli", "stats", "x", "y"];
 
         string[] unsplit = [.. Description.Types.SelectMany(t => t.Fields).SelectMany(f => ZabbixNames.Unsplit(f.Wire)).Distinct().Order(StringComparer.Ordinal)];
 

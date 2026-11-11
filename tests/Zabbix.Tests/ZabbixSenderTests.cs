@@ -68,13 +68,13 @@ public sealed class ZabbixSenderTests
         Assert.Equal("web01", wire.Host);
         Assert.Equal("system.cpu.load[all,avg1]", wire.Key);
         Assert.Equal(clock, wire.Exact);                                                     // every nanosecond reaches the wire
-        Assert.Contains("\"clock\":1787054400,\"ns\":123456789", System.Text.Json.JsonSerializer.Serialize(wire, ZabbixWireJson.Default.ZabbixSenderItem), StringComparison.Ordinal);
+        Assert.Contains("\"clock\":1787054400,\"ns\":123456789", System.Text.Json.JsonSerializer.Serialize(wire, ZabbixSenderJson.Default.ZabbixSenderItem), StringComparison.Ordinal);
     }
 
     [Fact]
     public void The_wire_schema_is_derived_from_the_records_json_contract()
     {
-        JsonNode schema = JsonSchemaExporter.GetJsonSchemaAsNode(ZabbixWireJson.Default.ZabbixSenderItem);
+        JsonNode schema = JsonSchemaExporter.GetJsonSchemaAsNode(ZabbixSenderJson.Default.ZabbixSenderItem);
 
         JsonObject properties = schema["properties"]!.AsObject();
         Assert.Equal(["host", "key", "value", "clock", "ns", "state"], properties.Select(property => property.Key));

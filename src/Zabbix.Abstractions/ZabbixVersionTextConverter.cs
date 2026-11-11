@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Community.Zabbix.Proxy;
+namespace Community.Zabbix;
 
 /// <summary>
 /// A <c>version</c> tag as a <see cref="Version"/>: read as Zabbix reads it (<c>zbx_get_component_version</c>, so

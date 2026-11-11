@@ -55,14 +55,16 @@ internal static class ZabbixModuleTelemetry
 
     /// <summary>
     /// The module's one logging composition: no other provider, every level (the host's streams filter by preference),
-    /// the SDK's redaction policy (<see cref="ZabbixRedactionExtensions.AddZabbixRedaction"/>), and the container's
-    /// <see cref="ZabbixPowerShellLoggerProvider"/>, the bridge to the running command's streams.
+    /// redaction on, with the SDK's redactors (<see cref="ZabbixRedactionBuilderExtensions.SetZabbixRedactors"/>) and the
+    /// default fallback, which erases any other class, and the container's <see cref="ZabbixPowerShellLoggerProvider"/>,
+    /// the bridge to the running command's streams. The module is the application here, so the policy is its own.
     /// </summary>
     /// <param name="logging">The factory's builder.</param>
     public static ILoggingBuilder AddModuleLogging(ILoggingBuilder logging)
     {
         ArgumentNullException.ThrowIfNull(logging);
-        logging.ClearProviders().SetMinimumLevel(LogLevel.Trace).AddZabbixRedaction();
+        logging.ClearProviders().SetMinimumLevel(LogLevel.Trace).EnableRedaction();
+        logging.Services.AddRedaction(redaction => redaction.SetZabbixRedactors());
         logging.Services.AddSingleton<ILoggerProvider>(provider => provider.GetRequiredService<ZabbixPowerShellLoggerProvider>());
         return logging;
     }

@@ -69,8 +69,8 @@ A send can succeed and still report failed values. Check `Failed` on the respons
 
 | What you see | What it means | What to do |
 | --- | --- | --- |
-| `ZabbixServerRefusedException` with `Permission denied.` | Your address isn't one `StatsAllowedIP` admits. | Add it to the server's `StatsAllowedIP`, for `GetStatsAsync` and `GetQueueSizeAsync`. |
-| `ZabbixServerRefusedException` about the session | The session isn't valid, or isn't a super admin's. | Pass a super admin's API token. `GetStatusAsync` answers almost nothing for anyone else. |
+| `ZabbixServerRefusedException` with `Permission denied.` | Your address isn't one `StatsAllowedIP` admits. | Add it to the server's `StatsAllowedIP`, for `GetStatisticsAsync` and `GetQueueSizeAsync`. |
+| `ZabbixServerRefusedException` about the session | The session isn't valid, or isn't a super admin's. | Pass a super admin's API token. For anyone else, `GetStatusAsync` answers a `ZabbixServerStatus` whose counts are `null`. |
 | `InvalidOperationException` that says none is set | The request goes to a server, and the client has none. | Pass it to the constructor, or set it with the builder's `WithServer`. |
 
 ## Agents and proxies

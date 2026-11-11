@@ -1,5 +1,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+using System.Collections;
 using System.Text.Json;
 
 namespace Community.Zabbix;
@@ -82,9 +83,23 @@ internal static class ZabbixValueEquality
     /// <summary>Adds a JSON value to a hash: its kind.</summary>
     public static void AddJson(ref HashCode hash, JsonElement? element) => hash.Add(element is { } value ? (int)value.ValueKind : -1);
 
+    // A list of lists (an SLA report's periods by services) compares its inner lists by value too.
     private static bool ItemEqual<T>(T left, T right)
-        => left is JsonElement l && right is JsonElement r ? JsonEqual(l, r) : EqualityComparer<T>.Default.Equals(left, right);
+        => left is JsonElement l && right is JsonElement r ? JsonEqual(l, r)
+            : left is IList inner && right is IList other ? NestedEqual(inner, other)
+            : EqualityComparer<T>.Default.Equals(left, right);
 
     private static int ItemHash<T>(T item)
-        => item is JsonElement element ? (int)element.ValueKind : item is null ? 0 : EqualityComparer<T>.Default.GetHashCode(item);
+        => item is JsonElement element ? (int)element.ValueKind : item is IList inner ? inner.Count : item is null ? 0 : EqualityComparer<T>.Default.GetHashCode(item);
+
+    private static bool NestedEqual(IList left, IList right)
+    {
+        if (ReferenceEquals(left, right)) return true;
+        if (left.Count != right.Count) return false;
+        for (int i = 0; i < left.Count; i++)
+        {
+            if (!ItemEqual(left[i], right[i])) return false;
+        }
+        return true;
+    }
 }

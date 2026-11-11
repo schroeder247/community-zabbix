@@ -297,13 +297,15 @@ Replace `Program.cs` with this program, which registers a server by name:
 ```csharp
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Community.Zabbix;
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddZabbixClient("prod")
     .WithEndpoint("https://zabbix.example/")
     .WithToken(File.ReadAllText("zabbix.token").Trim());
-builder.Logging.AddZabbixRedaction();                 // erases the token from logs
+builder.Logging.EnableRedaction();
+builder.Services.AddRedaction(redaction => redaction.SetZabbixRedactors());   // erases the token from logs
 
 using IHost app = builder.Build();
 ZabbixClient zabbix = app.Services.GetRequiredService<IZabbixClientFactory>().Create("prod");

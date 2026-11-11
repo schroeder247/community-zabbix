@@ -7,7 +7,10 @@ using System.Text.Json.Serialization.Metadata;
 
 namespace Community.Zabbix;
 
-/// <summary>Reading the scalar results the generated clients return: a count, a text; and the parameters a count sends.</summary>
+/// <summary>
+/// Reading the results the generated clients don't hand to a record's type as they are: a count, a text, a <c>true</c>,
+/// a record or its absence, a record or its text; and the parameters a count sends.
+/// </summary>
 internal static class ZabbixApiResults
 {
     /// <summary>
@@ -47,4 +50,53 @@ internal static class ZabbixApiResults
         => result.ValueKind == JsonValueKind.String && result.GetString() is { } text
             ? text
             : throw new InvalidDataException($"The {method} reply is a {result.ValueKind} where the API returns text.");
+
+    /// <summary>A write's <c>true</c>: anything else is not the API's answer to it and throws.</summary>
+    /// <param name="result">The result.</param>
+    /// <param name="method">The method, for the message.</param>
+    /// <exception cref="InvalidDataException">The result is not <c>true</c>.</exception>
+    internal static void ReadTrue(JsonElement result, string method)
+    {
+        if (result.ValueKind != JsonValueKind.True)
+            throw new InvalidDataException($"The {method} reply is a {result.ValueKind} where the API returns true.");
+    }
+
+    /// <summary>
+    /// A record the API answers as <c>true</c> or as an empty list when it has nothing to say (PHP encodes an empty array as
+    /// <c>[]</c>): either reads as an empty record, and an object as the record.
+    /// </summary>
+    /// <typeparam name="TResult">The record.</typeparam>
+    /// <param name="result">The result.</param>
+    /// <param name="info">How the record is read.</param>
+    /// <param name="method">The method, for the message.</param>
+    /// <exception cref="InvalidDataException">The result is none of those.</exception>
+    /// <returns>The record the server answered, or an empty one.</returns>
+    internal static TResult ReadOrEmpty<TResult>(JsonElement result, JsonTypeInfo<TResult> info, string method)
+        where TResult : new()
+        => result.ValueKind switch
+        {
+            JsonValueKind.True => new TResult(),
+            JsonValueKind.Array when result.GetArrayLength() == 0 => new TResult(),
+            JsonValueKind.Object => result.Deserialize(info) ?? new TResult(),
+            _ => throw new InvalidDataException($"The {method} reply is a {result.ValueKind} where the API returns an object, true or an empty list."),
+        };
+
+    /// <summary>
+    /// A record the API answers as the text of one of its fields unless the request asks for the record (<c>user.login</c>
+    /// answers the session id, or the user with <c>userData</c>).
+    /// </summary>
+    /// <typeparam name="TResult">The record.</typeparam>
+    /// <param name="result">The result.</param>
+    /// <param name="info">How the record is read.</param>
+    /// <param name="fromText">The record that holds the text.</param>
+    /// <param name="method">The method, for the message.</param>
+    /// <exception cref="InvalidDataException">The result is neither text nor an object.</exception>
+    /// <returns>The record the server answered.</returns>
+    internal static TResult ReadOrText<TResult>(JsonElement result, JsonTypeInfo<TResult> info, Func<string, TResult> fromText, string method)
+        => result.ValueKind switch
+        {
+            JsonValueKind.String when result.GetString() is { } text => fromText(text),
+            JsonValueKind.Object => result.Deserialize(info) ?? throw new InvalidDataException($"The {method} reply is null."),
+            _ => throw new InvalidDataException($"The {method} reply is a {result.ValueKind} where the API returns text or an object."),
+        };
 }

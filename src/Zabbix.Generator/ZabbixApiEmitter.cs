@@ -146,6 +146,8 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
                 return "ulong";
             case "double":
                 return "double";
+            case "seconds" or "milliseconds":
+                return "global::System.TimeSpan";
             case "bool" or "apibool":
                 return "bool";
             case "json":
@@ -577,6 +579,9 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
             "date" => "global::Community.Zabbix.ZabbixDateConverter",
             // a time of day the API writes as seconds after midnight
             "timeofday" => "global::Community.Zabbix.ZabbixTimeOfDayConverter",
+            // a length of time the API writes as a whole number of seconds or milliseconds
+            "seconds" => "global::Community.Zabbix.ZabbixSecondsConverter",
+            "milliseconds" => "global::Community.Zabbix.ZabbixMillisecondsConverter",
             _ => null,
         };
         if (optional)
@@ -1216,6 +1221,10 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
             "The id the server answered in <c>" + field + "</c>: the object the call created or changed.");
     }
 
+    // The result kinds that read a reply with two shapes (docs/generator-diagnostics.md).
+    private const string OrEmpty = "or-empty:";
+    private const string OrText = "or-text:";
+
     private (string ReturnType, string? ResultInfo, Func<string, string> Body, string Returns)? Result(ServiceDescription service, MethodDescription m)
     {
         const string Task = "global::System.Threading.Tasks.Task";
@@ -1230,6 +1239,37 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
             return (Task + "<global::System.Text.Json.JsonElement>", null, send => "return await " + send + ".ConfigureAwait(false);", "The result, as the API answered it.");
         if (r == "string")
             return (Task + "<string>", null, send => "return global::Community.Zabbix.ZabbixApiResults.ReadText(await " + send + ".ConfigureAwait(false), " + Lit(m.Api) + ");", "The text the API answered.");
+        // a write the API answers with true and nothing else: the answer is checked, and there's nothing to return
+        if (r == "true")
+            return (Task, null, send => "global::Community.Zabbix.ZabbixApiResults.ReadTrue(await " + send + ".ConfigureAwait(false), " + Lit(m.Api) + ");", "A task that completes when the server has answered <c>true</c>.");
+        // a record the API answers as true, or as PHP's empty array, when it has nothing to say: those read as an empty record
+        if (r.StartsWith(OrEmpty, StringComparison.Ordinal))
+        {
+            string? record = ClrType(r[OrEmpty.Length..], service.Object, m.Api);
+            if (record is null) return null;
+            string info = Root(record);
+            return (Task + "<" + record + ">", null, send => "return global::Community.Zabbix.ZabbixApiResults.ReadOrEmpty(await " + send + ".ConfigureAwait(false), " + info + ", " + Lit(m.Api) + ");",
+                "The result the API answered; an empty one when the API answered <c>true</c> or an empty list.");
+        }
+        // a record the API answers as one of its fields' text unless the request asks for the record: or-text:object:X:wire
+        if (r.StartsWith(OrText, StringComparison.Ordinal))
+        {
+            int last = r.LastIndexOf(':');
+            string kind = r[OrText.Length..last];
+            string wire = r[(last + 1)..];
+            string? record = ClrType(kind, service.Object, m.Api);
+            if (record is null) return null;
+            if (!_types.TryGetValue(kind["object:".Length..], out TypeDescription? type) || type.Fields.FirstOrDefault(f => f.Wire == wire) is not { } field)
+            {
+                _problems.Add(new(ZabbixDiagnostics.Undeclared, $"'{r}' names a field '{wire}' the record does not declare", service.Object, m.Api));
+                return null;
+            }
+            string info = Root(record);
+            string member = Member(field.Name);
+            return (Task + "<" + record + ">", null, send => "return global::Community.Zabbix.ZabbixApiResults.ReadOrText(await " + send + ".ConfigureAwait(false), " + info
+                + ", static text => new " + record + " { " + member + " = text }, " + Lit(m.Api) + ");",
+                "The result the API answered; when the API answered text, a result that holds it in <see cref=\"" + record + "." + member + "\"/>.");
+        }
         string? clr = ClrType(r, service.Object, m.Api);
         if (clr is null) return null;
         return (Task + "<" + clr + ">", Root(clr), send => "return await " + send + ".ConfigureAwait(false);", "The result the API answered.");

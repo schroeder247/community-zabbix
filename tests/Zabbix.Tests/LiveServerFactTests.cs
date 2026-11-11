@@ -442,9 +442,30 @@ public sealed class LiveServerFactTests
         Assert.NotNull(queue);
         Assert.True(details.Items.Count <= 5);
         if (target.Features.Contains("connector"))                                              // the lab definition opens StatsAllowedIP
-            Assert.Equal(JsonValueKind.Object, (await wire.GetStatsAsync(Cancel)).ValueKind);
+        {
+            ZabbixServerStatistics stats = await wire.GetStatisticsAsync(Cancel);
+            Assert.Equal(version, $"{stats.Version!.Major}.{stats.Version.Minor}");
+            Assert.True(stats.Uptime > TimeSpan.Zero);
+            Assert.True(stats.BootTime < DateTimeOffset.UtcNow);
+            Assert.NotNull(stats.HostCount);
+            Assert.NotNull(stats.WriteCache?.Values?.TotalCount);
+            Assert.InRange(stats.ConfigurationCache!.UsedPercent!.Value, 0, 100);
+            Assert.Contains("trapper", stats.Processes!.Keys);
+            Assert.InRange(stats.Processes["trapper"].Busy!.Average!.Value, 0, 100);
+            Assert.NotNull(((IZabbixAdditionalFields)stats).AdditionalFields);       // a server's HA nodes and proxies, untyped
+        }
         else
-            Assert.Contains("Permission denied", (await Assert.ThrowsAsync<ZabbixServerRefusedException>(() => wire.GetStatsAsync(Cancel))).Info ?? string.Empty, StringComparison.Ordinal);
+        {
+            Assert.Contains("Permission denied", (await Assert.ThrowsAsync<ZabbixServerRefusedException>(() => wire.GetStatisticsAsync(Cancel))).Info ?? string.Empty, StringComparison.Ordinal);
+        }
+
+        ZabbixServerStatus status = await wire.GetStatusAsync(Cancel);                         // the lab's token is a super admin's
+        Assert.Equal(version, $"{status.Version!.Major}.{status.Version.Minor}");
+        Assert.True(status.TemplateCount > 0);
+        Assert.NotNull(status.EnabledHostCount);
+        Assert.NotNull(status.OkTriggerCount);
+        Assert.True(status.OnlineUserCount + status.OfflineUserCount > 0);
+        Assert.True(status.RequiredPerformance >= 0);
     }
 
     private static List<string?> Names(JsonElement rows, string field) => [.. rows.EnumerateArray().Select(r => r.GetProperty(field).GetString()).Order(StringComparer.Ordinal)];

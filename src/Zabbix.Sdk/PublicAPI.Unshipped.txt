@@ -125,7 +125,7 @@ Community.Zabbix.ZabbixEventClient.GetAsync(System.Threading.CancellationToken c
 Community.Zabbix.ZabbixEventClient.ZabbixEventClient() -> void
 Community.Zabbix.ZabbixFrontend
 Community.Zabbix.ZabbixFrontend.BaseUri.get -> System.Uri!
-Community.Zabbix.ZabbixFrontend.UriFor(Community.Zabbix.ZabbixPageTarget! target, Community.Zabbix.ZabbixPageView view = Community.Zabbix.ZabbixPageView.Default) -> System.Uri!
+Community.Zabbix.ZabbixFrontend.UriFor(Community.Zabbix.IZabbixFrontendPage! page, Community.Zabbix.ZabbixPageView view = Community.Zabbix.ZabbixPageView.Default) -> System.Uri!
 Community.Zabbix.ZabbixFrontend.Version.get -> System.Version!
 Community.Zabbix.ZabbixFrontend.ZabbixFrontend(System.Uri! baseUri, System.Version! version) -> void
 Community.Zabbix.ZabbixGraphClient
@@ -241,49 +241,6 @@ Community.Zabbix.ZabbixNotFoundException.ZabbixNotFoundException(string! message
 Community.Zabbix.ZabbixNotFoundException.ZabbixNotFoundException(string! objectType, string! name) -> void
 Community.Zabbix.ZabbixObjectNode<T>
 Community.Zabbix.ZabbixObjectNode<T>.ZabbixObjectNode() -> void
-Community.Zabbix.ZabbixPageContext
-Community.Zabbix.ZabbixPageContext.Host = 0 -> Community.Zabbix.ZabbixPageContext
-Community.Zabbix.ZabbixPageContext.Template = 1 -> Community.Zabbix.ZabbixPageContext
-Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageKind.Action = 18 -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageKind.Dashboard = 9 -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageKind.DiscoveryRule = 7 -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageKind.Event = 12 -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageKind.Graph = 6 -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageKind.Host = 0 -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageKind.HostGroup = 1 -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageKind.Item = 4 -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageKind.Maintenance = 13 -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageKind.Map = 10 -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageKind.MediaType = 19 -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageKind.NetworkDiscoveryRule = 17 -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageKind.Problem = 11 -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageKind.Proxy = 16 -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageKind.Script = 20 -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageKind.Service = 21 -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageKind.Sla = 22 -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageKind.Template = 2 -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageKind.TemplateGroup = 3 -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageKind.Trigger = 5 -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageKind.User = 14 -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageKind.UserGroup = 15 -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageKind.WebScenario = 8 -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageTarget
-Community.Zabbix.ZabbixPageTarget.<Clone>$() -> Community.Zabbix.ZabbixPageTarget!
-Community.Zabbix.ZabbixPageTarget.Context.get -> Community.Zabbix.ZabbixPageContext?
-Community.Zabbix.ZabbixPageTarget.Context.init -> void
-Community.Zabbix.ZabbixPageTarget.Equals(Community.Zabbix.ZabbixPageTarget? other) -> bool
-Community.Zabbix.ZabbixPageTarget.EventSource.get -> Community.Zabbix.ZabbixEventSource?
-Community.Zabbix.ZabbixPageTarget.EventSource.init -> void
-Community.Zabbix.ZabbixPageTarget.HostId.get -> ulong?
-Community.Zabbix.ZabbixPageTarget.HostId.init -> void
-Community.Zabbix.ZabbixPageTarget.Id.get -> ulong
-Community.Zabbix.ZabbixPageTarget.Kind.get -> Community.Zabbix.ZabbixPageKind
-Community.Zabbix.ZabbixPageTarget.Name.get -> string?
-Community.Zabbix.ZabbixPageTarget.Name.init -> void
-Community.Zabbix.ZabbixPageTarget.TriggerId.get -> ulong?
-Community.Zabbix.ZabbixPageTarget.TriggerId.init -> void
-Community.Zabbix.ZabbixPageTarget.ZabbixPageTarget(Community.Zabbix.ZabbixPageKind kind, ulong id) -> void
 Community.Zabbix.ZabbixPageView
 Community.Zabbix.ZabbixPageView.Default = 0 -> Community.Zabbix.ZabbixPageView
 Community.Zabbix.ZabbixPageView.Edit = 1 -> Community.Zabbix.ZabbixPageView
@@ -303,7 +260,6 @@ Community.Zabbix.ZabbixProxyGroupClient
 Community.Zabbix.ZabbixProxyGroupClient.CountAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<long>!
 Community.Zabbix.ZabbixProxyGroupClient.GetAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixProxyGroup!>!>!
 Community.Zabbix.ZabbixProxyGroupClient.ZabbixProxyGroupClient() -> void
-Community.Zabbix.ZabbixRedactionExtensions
 Community.Zabbix.ZabbixRegExpClient
 Community.Zabbix.ZabbixRegExpClient.CountAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<long>!
 Community.Zabbix.ZabbixRegExpClient.GetAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixRegExp!>!>!
@@ -401,9 +357,6 @@ Community.Zabbix.ZabbixWatchPlan.RefreshInterval.init -> void
 Community.Zabbix.ZabbixWatchPlan.WhenFull.get -> System.Threading.Channels.BoundedChannelFullMode
 Community.Zabbix.ZabbixWatchPlan.WhenFull.init -> void
 Community.Zabbix.ZabbixWatchPlan.ZabbixWatchPlan(System.TimeSpan Interval) -> void
-override Community.Zabbix.ZabbixPageTarget.Equals(object? obj) -> bool
-override Community.Zabbix.ZabbixPageTarget.GetHashCode() -> int
-override Community.Zabbix.ZabbixPageTarget.ToString() -> string!
 override Community.Zabbix.ZabbixWatchPlan.Equals(object? obj) -> bool
 override Community.Zabbix.ZabbixWatchPlan.GetHashCode() -> int
 override Community.Zabbix.ZabbixWatchPlan.ToString() -> string!
@@ -432,56 +385,6 @@ static Community.Zabbix.ZabbixHttp.Deadline.get -> System.Net.Http.HttpRequestOp
 static Community.Zabbix.ZabbixHttp.Method.get -> System.Net.Http.HttpRequestOptionsKey<Community.Zabbix.ZabbixApiMethod>
 static Community.Zabbix.ZabbixJson.Options.get -> System.Text.Json.JsonSerializerOptions!
 static Community.Zabbix.ZabbixJson.TypeInfoResolver.get -> System.Text.Json.Serialization.Metadata.IJsonTypeInfoResolver!
-static Community.Zabbix.ZabbixPageTarget.FromZabbixAction(Community.Zabbix.ZabbixAction? action) -> Community.Zabbix.ZabbixPageTarget?
-static Community.Zabbix.ZabbixPageTarget.FromZabbixDashboard(Community.Zabbix.ZabbixDashboard? dashboard) -> Community.Zabbix.ZabbixPageTarget?
-static Community.Zabbix.ZabbixPageTarget.FromZabbixDiscoveryRule(Community.Zabbix.ZabbixDiscoveryRule? rule) -> Community.Zabbix.ZabbixPageTarget?
-static Community.Zabbix.ZabbixPageTarget.FromZabbixEvent(Community.Zabbix.ZabbixEvent? event) -> Community.Zabbix.ZabbixPageTarget?
-static Community.Zabbix.ZabbixPageTarget.FromZabbixGraph(Community.Zabbix.ZabbixGraph? graph) -> Community.Zabbix.ZabbixPageTarget?
-static Community.Zabbix.ZabbixPageTarget.FromZabbixHost(Community.Zabbix.ZabbixHost? host) -> Community.Zabbix.ZabbixPageTarget?
-static Community.Zabbix.ZabbixPageTarget.FromZabbixHostGroup(Community.Zabbix.ZabbixHostGroup? group) -> Community.Zabbix.ZabbixPageTarget?
-static Community.Zabbix.ZabbixPageTarget.FromZabbixHttpTest(Community.Zabbix.ZabbixHttpTest? scenario) -> Community.Zabbix.ZabbixPageTarget?
-static Community.Zabbix.ZabbixPageTarget.FromZabbixItem(Community.Zabbix.ZabbixItem? item) -> Community.Zabbix.ZabbixPageTarget?
-static Community.Zabbix.ZabbixPageTarget.FromZabbixMaintenanceRecord(Community.Zabbix.ZabbixMaintenanceRecord? maintenance) -> Community.Zabbix.ZabbixPageTarget?
-static Community.Zabbix.ZabbixPageTarget.FromZabbixMap(Community.Zabbix.ZabbixMap? map) -> Community.Zabbix.ZabbixPageTarget?
-static Community.Zabbix.ZabbixPageTarget.FromZabbixMediaType(Community.Zabbix.ZabbixMediaType? mediaType) -> Community.Zabbix.ZabbixPageTarget?
-static Community.Zabbix.ZabbixPageTarget.FromZabbixNetworkDiscoveryRule(Community.Zabbix.ZabbixNetworkDiscoveryRule? rule) -> Community.Zabbix.ZabbixPageTarget?
-static Community.Zabbix.ZabbixPageTarget.FromZabbixProblem(Community.Zabbix.ZabbixProblem? problem) -> Community.Zabbix.ZabbixPageTarget?
-static Community.Zabbix.ZabbixPageTarget.FromZabbixProxy(Community.Zabbix.ZabbixProxy? proxy) -> Community.Zabbix.ZabbixPageTarget?
-static Community.Zabbix.ZabbixPageTarget.FromZabbixScript(Community.Zabbix.ZabbixScript? script) -> Community.Zabbix.ZabbixPageTarget?
-static Community.Zabbix.ZabbixPageTarget.FromZabbixServiceRecord(Community.Zabbix.ZabbixServiceRecord? service) -> Community.Zabbix.ZabbixPageTarget?
-static Community.Zabbix.ZabbixPageTarget.FromZabbixSlaRecord(Community.Zabbix.ZabbixSlaRecord? sla) -> Community.Zabbix.ZabbixPageTarget?
-static Community.Zabbix.ZabbixPageTarget.FromZabbixTemplate(Community.Zabbix.ZabbixTemplate? template) -> Community.Zabbix.ZabbixPageTarget?
-static Community.Zabbix.ZabbixPageTarget.FromZabbixTemplateGroup(Community.Zabbix.ZabbixTemplateGroup? group) -> Community.Zabbix.ZabbixPageTarget?
-static Community.Zabbix.ZabbixPageTarget.FromZabbixTrigger(Community.Zabbix.ZabbixTrigger? trigger) -> Community.Zabbix.ZabbixPageTarget?
-static Community.Zabbix.ZabbixPageTarget.FromZabbixUser(Community.Zabbix.ZabbixUser? user) -> Community.Zabbix.ZabbixPageTarget?
-static Community.Zabbix.ZabbixPageTarget.FromZabbixUserGroup(Community.Zabbix.ZabbixUserGroup? group) -> Community.Zabbix.ZabbixPageTarget?
-static Community.Zabbix.ZabbixPageTarget.implicit operator Community.Zabbix.ZabbixPageTarget!(Community.Zabbix.ZabbixAction! action) -> Community.Zabbix.ZabbixPageTarget!
-static Community.Zabbix.ZabbixPageTarget.implicit operator Community.Zabbix.ZabbixPageTarget!(Community.Zabbix.ZabbixDashboard! dashboard) -> Community.Zabbix.ZabbixPageTarget!
-static Community.Zabbix.ZabbixPageTarget.implicit operator Community.Zabbix.ZabbixPageTarget!(Community.Zabbix.ZabbixDiscoveryRule! rule) -> Community.Zabbix.ZabbixPageTarget!
-static Community.Zabbix.ZabbixPageTarget.implicit operator Community.Zabbix.ZabbixPageTarget!(Community.Zabbix.ZabbixEvent! event) -> Community.Zabbix.ZabbixPageTarget!
-static Community.Zabbix.ZabbixPageTarget.implicit operator Community.Zabbix.ZabbixPageTarget!(Community.Zabbix.ZabbixGraph! graph) -> Community.Zabbix.ZabbixPageTarget!
-static Community.Zabbix.ZabbixPageTarget.implicit operator Community.Zabbix.ZabbixPageTarget!(Community.Zabbix.ZabbixHost! host) -> Community.Zabbix.ZabbixPageTarget!
-static Community.Zabbix.ZabbixPageTarget.implicit operator Community.Zabbix.ZabbixPageTarget!(Community.Zabbix.ZabbixHostGroup! group) -> Community.Zabbix.ZabbixPageTarget!
-static Community.Zabbix.ZabbixPageTarget.implicit operator Community.Zabbix.ZabbixPageTarget!(Community.Zabbix.ZabbixHttpTest! scenario) -> Community.Zabbix.ZabbixPageTarget!
-static Community.Zabbix.ZabbixPageTarget.implicit operator Community.Zabbix.ZabbixPageTarget!(Community.Zabbix.ZabbixItem! item) -> Community.Zabbix.ZabbixPageTarget!
-static Community.Zabbix.ZabbixPageTarget.implicit operator Community.Zabbix.ZabbixPageTarget!(Community.Zabbix.ZabbixMaintenanceRecord! maintenance) -> Community.Zabbix.ZabbixPageTarget!
-static Community.Zabbix.ZabbixPageTarget.implicit operator Community.Zabbix.ZabbixPageTarget!(Community.Zabbix.ZabbixMap! map) -> Community.Zabbix.ZabbixPageTarget!
-static Community.Zabbix.ZabbixPageTarget.implicit operator Community.Zabbix.ZabbixPageTarget!(Community.Zabbix.ZabbixMediaType! mediaType) -> Community.Zabbix.ZabbixPageTarget!
-static Community.Zabbix.ZabbixPageTarget.implicit operator Community.Zabbix.ZabbixPageTarget!(Community.Zabbix.ZabbixNetworkDiscoveryRule! rule) -> Community.Zabbix.ZabbixPageTarget!
-static Community.Zabbix.ZabbixPageTarget.implicit operator Community.Zabbix.ZabbixPageTarget!(Community.Zabbix.ZabbixProblem! problem) -> Community.Zabbix.ZabbixPageTarget!
-static Community.Zabbix.ZabbixPageTarget.implicit operator Community.Zabbix.ZabbixPageTarget!(Community.Zabbix.ZabbixProxy! proxy) -> Community.Zabbix.ZabbixPageTarget!
-static Community.Zabbix.ZabbixPageTarget.implicit operator Community.Zabbix.ZabbixPageTarget!(Community.Zabbix.ZabbixScript! script) -> Community.Zabbix.ZabbixPageTarget!
-static Community.Zabbix.ZabbixPageTarget.implicit operator Community.Zabbix.ZabbixPageTarget!(Community.Zabbix.ZabbixServiceRecord! service) -> Community.Zabbix.ZabbixPageTarget!
-static Community.Zabbix.ZabbixPageTarget.implicit operator Community.Zabbix.ZabbixPageTarget!(Community.Zabbix.ZabbixSlaRecord! sla) -> Community.Zabbix.ZabbixPageTarget!
-static Community.Zabbix.ZabbixPageTarget.implicit operator Community.Zabbix.ZabbixPageTarget!(Community.Zabbix.ZabbixTemplate! template) -> Community.Zabbix.ZabbixPageTarget!
-static Community.Zabbix.ZabbixPageTarget.implicit operator Community.Zabbix.ZabbixPageTarget!(Community.Zabbix.ZabbixTemplateGroup! group) -> Community.Zabbix.ZabbixPageTarget!
-static Community.Zabbix.ZabbixPageTarget.implicit operator Community.Zabbix.ZabbixPageTarget!(Community.Zabbix.ZabbixTrigger! trigger) -> Community.Zabbix.ZabbixPageTarget!
-static Community.Zabbix.ZabbixPageTarget.implicit operator Community.Zabbix.ZabbixPageTarget!(Community.Zabbix.ZabbixUser! user) -> Community.Zabbix.ZabbixPageTarget!
-static Community.Zabbix.ZabbixPageTarget.implicit operator Community.Zabbix.ZabbixPageTarget!(Community.Zabbix.ZabbixUserGroup! group) -> Community.Zabbix.ZabbixPageTarget!
-static Community.Zabbix.ZabbixPageTarget.operator !=(Community.Zabbix.ZabbixPageTarget? left, Community.Zabbix.ZabbixPageTarget? right) -> bool
-static Community.Zabbix.ZabbixPageTarget.operator ==(Community.Zabbix.ZabbixPageTarget? left, Community.Zabbix.ZabbixPageTarget? right) -> bool
-static Community.Zabbix.ZabbixPageTarget.TryFrom(object? value, out Community.Zabbix.ZabbixPageTarget? target) -> bool
-static Community.Zabbix.ZabbixRedactionExtensions.AddZabbixRedaction(this Microsoft.Extensions.Logging.ILoggingBuilder! logging) -> Microsoft.Extensions.Logging.ILoggingBuilder!
 static Community.Zabbix.ZabbixWatchPlan.operator !=(Community.Zabbix.ZabbixWatchPlan? left, Community.Zabbix.ZabbixWatchPlan? right) -> bool
 static Community.Zabbix.ZabbixWatchPlan.operator ==(Community.Zabbix.ZabbixWatchPlan? left, Community.Zabbix.ZabbixWatchPlan? right) -> bool
 virtual Community.Zabbix.ZabbixActionClient.CountAsync(Community.Zabbix.ZabbixActionGetParameters! parameters, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<long>!
@@ -519,10 +422,10 @@ virtual Community.Zabbix.ZabbixAuditLogClient.GetAsync(Community.Zabbix.ZabbixAu
 virtual Community.Zabbix.ZabbixAuditLogClient.GetAsync(System.Action<Community.Zabbix.ZabbixAuditLogGetParameters!>! configure, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixAuditLogRecord!>!>!
 virtual Community.Zabbix.ZabbixAuthenticationClient.GetAsync(Community.Zabbix.ZabbixAuthenticationGetParameters! parameters, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixAuthenticationSettings!>!
 virtual Community.Zabbix.ZabbixAuthenticationClient.GetAsync(System.Action<Community.Zabbix.ZabbixAuthenticationGetParameters!>! configure, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixAuthenticationSettings!>!
-virtual Community.Zabbix.ZabbixAuthenticationClient.UpdateAsync(Community.Zabbix.ZabbixAuthenticationUpdateRequest? request = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
+virtual Community.Zabbix.ZabbixAuthenticationClient.UpdateAsync(Community.Zabbix.ZabbixAuthenticationUpdateRequest? request = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<string!>!>!
 virtual Community.Zabbix.ZabbixAutoregistrationClient.GetAsync(Community.Zabbix.ZabbixAutoregistrationGetParameters! parameters, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixAutoregistrationSettings!>!
 virtual Community.Zabbix.ZabbixAutoregistrationClient.GetAsync(System.Action<Community.Zabbix.ZabbixAutoregistrationGetParameters!>! configure, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixAutoregistrationSettings!>!
-virtual Community.Zabbix.ZabbixAutoregistrationClient.UpdateAsync(Community.Zabbix.ZabbixAutoregistrationUpdateRequest? request = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
+virtual Community.Zabbix.ZabbixAutoregistrationClient.UpdateAsync(Community.Zabbix.ZabbixAutoregistrationUpdateRequest? request = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 virtual Community.Zabbix.ZabbixCepRuleClient.CountAsync(Community.Zabbix.ZabbixCepRuleGetParameters! parameters, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<long>!
 virtual Community.Zabbix.ZabbixCepRuleClient.CountAsync(System.Action<Community.Zabbix.ZabbixCepRuleGetParameters!>! configure, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<long>!
 virtual Community.Zabbix.ZabbixCepRuleClient.CreateAsync(Community.Zabbix.ZabbixCepRuleCreateRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<ulong>!
@@ -534,7 +437,7 @@ virtual Community.Zabbix.ZabbixCepRuleClient.DeleteAsync(ulong id, System.Thread
 virtual Community.Zabbix.ZabbixCepRuleClient.FindAsync(ulong id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixCepRule?>!
 virtual Community.Zabbix.ZabbixCepRuleClient.GetAsync(Community.Zabbix.ZabbixCepRuleGetParameters! parameters, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixCepRule!>!>!
 virtual Community.Zabbix.ZabbixCepRuleClient.GetAsync(System.Action<Community.Zabbix.ZabbixCepRuleGetParameters!>! configure, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixCepRule!>!>!
-virtual Community.Zabbix.ZabbixCepRuleClient.ResetTimeWindowsAsync(Community.Zabbix.ZabbixCepRuleResetTimeWindowsRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
+virtual Community.Zabbix.ZabbixCepRuleClient.ResetTimeWindowsAsync(Community.Zabbix.ZabbixCepRuleResetTimeWindowsRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixCepRuleResetTimeWindowsResult!>!
 virtual Community.Zabbix.ZabbixCepRuleClient.this[ulong id].get -> Community.Zabbix.ZabbixUpdatableObjectNode<Community.Zabbix.ZabbixCepRule!, Community.Zabbix.ZabbixCepRuleUpdateRequest!>!
 virtual Community.Zabbix.ZabbixCepRuleClient.UpdateAsync(Community.Zabbix.ZabbixCepRuleUpdateRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<ulong>!
 virtual Community.Zabbix.ZabbixCepRuleClient.UpdateAsync(System.Collections.Generic.IEnumerable<Community.Zabbix.ZabbixCepRuleUpdateRequest!>! requests, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<ulong>!>!
@@ -622,8 +525,8 @@ virtual Community.Zabbix.ZabbixClient.Users.get -> Community.Zabbix.ZabbixUserCl
 virtual Community.Zabbix.ZabbixClient.ValueMaps.get -> Community.Zabbix.ZabbixValueMapClient!
 virtual Community.Zabbix.ZabbixClient.Watch(Community.Zabbix.ZabbixWatchPlan! plan) -> Community.Zabbix.IZabbixWatcher!
 virtual Community.Zabbix.ZabbixConfigurationClient.ExportAsync(Community.Zabbix.ZabbixConfigurationExportRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
-virtual Community.Zabbix.ZabbixConfigurationClient.ImportAsync(Community.Zabbix.ZabbixConfigurationImportRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
-virtual Community.Zabbix.ZabbixConfigurationClient.ImportCompareAsync(Community.Zabbix.ZabbixConfigurationImportRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
+virtual Community.Zabbix.ZabbixConfigurationClient.ImportAsync(Community.Zabbix.ZabbixConfigurationImportRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixConfigurationImportResult!>!
+virtual Community.Zabbix.ZabbixConfigurationClient.ImportCompareAsync(Community.Zabbix.ZabbixConfigurationImportRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixConfigurationComparison!>!
 virtual Community.Zabbix.ZabbixConnectorClient.CountAsync(Community.Zabbix.ZabbixConnectorGetParameters! parameters, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<long>!
 virtual Community.Zabbix.ZabbixConnectorClient.CountAsync(System.Action<Community.Zabbix.ZabbixConnectorGetParameters!>! configure, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<long>!
 virtual Community.Zabbix.ZabbixConnectorClient.CreateAsync(Community.Zabbix.ZabbixConnectorCreateRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<ulong>!
@@ -671,9 +574,9 @@ virtual Community.Zabbix.ZabbixDeviceClient.CountAsync(System.Action<Community.Z
 virtual Community.Zabbix.ZabbixDeviceClient.FindAsync(ulong id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixDevice?>!
 virtual Community.Zabbix.ZabbixDeviceClient.GetAsync(Community.Zabbix.ZabbixDeviceGetParameters! parameters, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixDevice!>!>!
 virtual Community.Zabbix.ZabbixDeviceClient.GetAsync(System.Action<Community.Zabbix.ZabbixDeviceGetParameters!>! configure, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixDevice!>!>!
-virtual Community.Zabbix.ZabbixDeviceClient.InitAsync(Community.Zabbix.ZabbixDeviceInitRequest? request = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
-virtual Community.Zabbix.ZabbixDeviceClient.OffboardAsync(Community.Zabbix.ZabbixDeviceOffboardRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
-virtual Community.Zabbix.ZabbixDeviceClient.OnboardAsync(Community.Zabbix.ZabbixDeviceOnboardRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
+virtual Community.Zabbix.ZabbixDeviceClient.InitAsync(Community.Zabbix.ZabbixDeviceInitRequest? request = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixDeviceInitResult!>!
+virtual Community.Zabbix.ZabbixDeviceClient.OffboardAsync(Community.Zabbix.ZabbixDeviceOffboardRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixDeviceOffboardResult!>!
+virtual Community.Zabbix.ZabbixDeviceClient.OnboardAsync(Community.Zabbix.ZabbixDeviceOnboardRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixDeviceOnboardResult!>!
 virtual Community.Zabbix.ZabbixDeviceClient.this[ulong id].get -> Community.Zabbix.ZabbixObjectNode<Community.Zabbix.ZabbixDevice!>!
 virtual Community.Zabbix.ZabbixDiscoveredHostClient.CountAsync(Community.Zabbix.ZabbixDiscoveredHostGetParameters! parameters, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<long>!
 virtual Community.Zabbix.ZabbixDiscoveredHostClient.CountAsync(System.Action<Community.Zabbix.ZabbixDiscoveredHostGetParameters!>! configure, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<long>!
@@ -687,7 +590,7 @@ virtual Community.Zabbix.ZabbixDiscoveredServiceClient.FindAsync(ulong id, Syste
 virtual Community.Zabbix.ZabbixDiscoveredServiceClient.GetAsync(Community.Zabbix.ZabbixDiscoveredServiceGetParameters! parameters, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixDiscoveredService!>!>!
 virtual Community.Zabbix.ZabbixDiscoveredServiceClient.GetAsync(System.Action<Community.Zabbix.ZabbixDiscoveredServiceGetParameters!>! configure, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixDiscoveredService!>!>!
 virtual Community.Zabbix.ZabbixDiscoveredServiceClient.this[ulong id].get -> Community.Zabbix.ZabbixObjectNode<Community.Zabbix.ZabbixDiscoveredService!>!
-virtual Community.Zabbix.ZabbixDiscoveryRuleClient.CopyAsync(Community.Zabbix.ZabbixDiscoveryRuleCopyRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
+virtual Community.Zabbix.ZabbixDiscoveryRuleClient.CopyAsync(Community.Zabbix.ZabbixDiscoveryRuleCopyRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 virtual Community.Zabbix.ZabbixDiscoveryRuleClient.CountAsync(Community.Zabbix.ZabbixDiscoveryRuleGetParameters! parameters, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<long>!
 virtual Community.Zabbix.ZabbixDiscoveryRuleClient.CountAsync(System.Action<Community.Zabbix.ZabbixDiscoveryRuleGetParameters!>! configure, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<long>!
 virtual Community.Zabbix.ZabbixDiscoveryRuleClient.CreateAsync(Community.Zabbix.ZabbixDiscoveryRuleCreateRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<ulong>!
@@ -857,7 +760,7 @@ virtual Community.Zabbix.ZabbixHostScope.GetAsyncEnumerator(System.Threading.Can
 virtual Community.Zabbix.ZabbixHostScope.this[string! hostName].get -> Community.Zabbix.ZabbixHostNode!
 virtual Community.Zabbix.ZabbixHousekeepingClient.GetAsync(Community.Zabbix.ZabbixHousekeepingGetParameters! parameters, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixHousekeepingSettings!>!
 virtual Community.Zabbix.ZabbixHousekeepingClient.GetAsync(System.Action<Community.Zabbix.ZabbixHousekeepingGetParameters!>! configure, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixHousekeepingSettings!>!
-virtual Community.Zabbix.ZabbixHousekeepingClient.UpdateAsync(Community.Zabbix.ZabbixHousekeepingUpdateRequest? request = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
+virtual Community.Zabbix.ZabbixHousekeepingClient.UpdateAsync(Community.Zabbix.ZabbixHousekeepingUpdateRequest? request = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<string!>!>!
 virtual Community.Zabbix.ZabbixHttpTestClient.CountAsync(Community.Zabbix.ZabbixHttpTestGetParameters! parameters, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<long>!
 virtual Community.Zabbix.ZabbixHttpTestClient.CountAsync(System.Action<Community.Zabbix.ZabbixHttpTestGetParameters!>! configure, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<long>!
 virtual Community.Zabbix.ZabbixHttpTestClient.CreateAsync(Community.Zabbix.ZabbixHttpTestCreateRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<ulong>!
@@ -1123,7 +1026,7 @@ virtual Community.Zabbix.ZabbixScriptClient.CreateAsync(string! name, Community.
 virtual Community.Zabbix.ZabbixScriptClient.CreateAsync(System.Collections.Generic.IEnumerable<Community.Zabbix.ZabbixScriptCreateRequest!>! requests, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<ulong>!>!
 virtual Community.Zabbix.ZabbixScriptClient.DeleteAsync(System.Collections.Generic.IEnumerable<ulong>! ids, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<ulong>!>!
 virtual Community.Zabbix.ZabbixScriptClient.DeleteAsync(ulong id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-virtual Community.Zabbix.ZabbixScriptClient.ExecuteAsync(Community.Zabbix.ZabbixScriptExecuteRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
+virtual Community.Zabbix.ZabbixScriptClient.ExecuteAsync(Community.Zabbix.ZabbixScriptExecuteRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixScriptExecuteResult!>!
 virtual Community.Zabbix.ZabbixScriptClient.FindAsync(ulong id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixScript?>!
 virtual Community.Zabbix.ZabbixScriptClient.GetAsync(Community.Zabbix.ZabbixScriptGetParameters! parameters, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixScript!>!>!
 virtual Community.Zabbix.ZabbixScriptClient.GetAsync(System.Action<Community.Zabbix.ZabbixScriptGetParameters!>! configure, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixScript!>!>!
@@ -1151,7 +1054,7 @@ virtual Community.Zabbix.ZabbixServiceClient.UpdateAsync(Community.Zabbix.Zabbix
 virtual Community.Zabbix.ZabbixServiceClient.UpdateAsync(System.Collections.Generic.IEnumerable<Community.Zabbix.ZabbixServiceUpdateRequest!>! requests, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<ulong>!>!
 virtual Community.Zabbix.ZabbixSettingsClient.GetAsync(Community.Zabbix.ZabbixSettingsGetParameters! parameters, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixSettingsRecord!>!
 virtual Community.Zabbix.ZabbixSettingsClient.GetAsync(System.Action<Community.Zabbix.ZabbixSettingsGetParameters!>! configure, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixSettingsRecord!>!
-virtual Community.Zabbix.ZabbixSettingsClient.UpdateAsync(Community.Zabbix.ZabbixSettingsUpdateRequest? request = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
+virtual Community.Zabbix.ZabbixSettingsClient.UpdateAsync(Community.Zabbix.ZabbixSettingsUpdateRequest? request = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<string!>!>!
 virtual Community.Zabbix.ZabbixSlaClient.CountAsync(Community.Zabbix.ZabbixSlaGetParameters! parameters, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<long>!
 virtual Community.Zabbix.ZabbixSlaClient.CountAsync(System.Action<Community.Zabbix.ZabbixSlaGetParameters!>! configure, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<long>!
 virtual Community.Zabbix.ZabbixSlaClient.CreateAsync(Community.Zabbix.ZabbixSlaCreateRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<ulong>!
@@ -1161,7 +1064,7 @@ virtual Community.Zabbix.ZabbixSlaClient.DeleteAsync(ulong id, System.Threading.
 virtual Community.Zabbix.ZabbixSlaClient.FindAsync(ulong id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixSlaRecord?>!
 virtual Community.Zabbix.ZabbixSlaClient.GetAsync(Community.Zabbix.ZabbixSlaGetParameters! parameters, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixSlaRecord!>!>!
 virtual Community.Zabbix.ZabbixSlaClient.GetAsync(System.Action<Community.Zabbix.ZabbixSlaGetParameters!>! configure, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixSlaRecord!>!>!
-virtual Community.Zabbix.ZabbixSlaClient.GetSliAsync(Community.Zabbix.ZabbixSlaGetSliRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
+virtual Community.Zabbix.ZabbixSlaClient.GetSliAsync(Community.Zabbix.ZabbixSlaGetSliRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixSliReport!>!
 virtual Community.Zabbix.ZabbixSlaClient.this[ulong id].get -> Community.Zabbix.ZabbixUpdatableObjectNode<Community.Zabbix.ZabbixSlaRecord!, Community.Zabbix.ZabbixSlaUpdateRequest!>!
 virtual Community.Zabbix.ZabbixSlaClient.UpdateAsync(Community.Zabbix.ZabbixSlaUpdateRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<ulong>!
 virtual Community.Zabbix.ZabbixSlaClient.UpdateAsync(System.Collections.Generic.IEnumerable<Community.Zabbix.ZabbixSlaUpdateRequest!>! requests, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<ulong>!>!
@@ -1231,7 +1134,7 @@ virtual Community.Zabbix.ZabbixTokenClient.CreateAsync(System.Collections.Generi
 virtual Community.Zabbix.ZabbixTokenClient.DeleteAsync(System.Collections.Generic.IEnumerable<ulong>! ids, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<ulong>!>!
 virtual Community.Zabbix.ZabbixTokenClient.DeleteAsync(ulong id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 virtual Community.Zabbix.ZabbixTokenClient.FindAsync(ulong id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixToken?>!
-virtual Community.Zabbix.ZabbixTokenClient.GenerateAsync(System.Collections.Generic.IEnumerable<ulong>! ids, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
+virtual Community.Zabbix.ZabbixTokenClient.GenerateAsync(System.Collections.Generic.IEnumerable<ulong>! ids, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixGeneratedToken!>!>!
 virtual Community.Zabbix.ZabbixTokenClient.GetAsync(Community.Zabbix.ZabbixTokenGetParameters! parameters, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixToken!>!>!
 virtual Community.Zabbix.ZabbixTokenClient.GetAsync(System.Action<Community.Zabbix.ZabbixTokenGetParameters!>! configure, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixToken!>!>!
 virtual Community.Zabbix.ZabbixTokenClient.this[ulong id].get -> Community.Zabbix.ZabbixUpdatableObjectNode<Community.Zabbix.ZabbixToken!, Community.Zabbix.ZabbixTokenUpdateRequest!>!
@@ -1271,7 +1174,7 @@ virtual Community.Zabbix.ZabbixTriggerPrototypeClient.UpdateAsync(Community.Zabb
 virtual Community.Zabbix.ZabbixTriggerPrototypeClient.UpdateAsync(System.Collections.Generic.IEnumerable<Community.Zabbix.ZabbixTriggerPrototypeUpdateRequest!>! requests, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<ulong>!>!
 virtual Community.Zabbix.ZabbixUpdatableObjectNode<T, TUpdate>.DeleteAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 virtual Community.Zabbix.ZabbixUpdatableObjectNode<T, TUpdate>.UpdateAsync(System.Action<TUpdate!>! configure, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-virtual Community.Zabbix.ZabbixUserClient.CheckAuthenticationAsync(Community.Zabbix.ZabbixUserCheckAuthenticationRequest? request = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
+virtual Community.Zabbix.ZabbixUserClient.CheckAuthenticationAsync(Community.Zabbix.ZabbixUserCheckAuthenticationRequest? request = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixAuthenticatedUser!>!
 virtual Community.Zabbix.ZabbixUserClient.CountAsync(Community.Zabbix.ZabbixUserGetParameters! parameters, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<long>!
 virtual Community.Zabbix.ZabbixUserClient.CountAsync(System.Action<Community.Zabbix.ZabbixUserGetParameters!>! configure, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<long>!
 virtual Community.Zabbix.ZabbixUserClient.CreateAsync(Community.Zabbix.ZabbixUserCreateRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<ulong>!
@@ -1283,8 +1186,8 @@ virtual Community.Zabbix.ZabbixUserClient.DeleteAsync(ulong id, System.Threading
 virtual Community.Zabbix.ZabbixUserClient.FindAsync(ulong id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixUser?>!
 virtual Community.Zabbix.ZabbixUserClient.GetAsync(Community.Zabbix.ZabbixUserGetParameters! parameters, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixUser!>!>!
 virtual Community.Zabbix.ZabbixUserClient.GetAsync(System.Action<Community.Zabbix.ZabbixUserGetParameters!>! configure, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixUser!>!>!
-virtual Community.Zabbix.ZabbixUserClient.LogOffAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
-virtual Community.Zabbix.ZabbixUserClient.LogOnAsync(Community.Zabbix.ZabbixUserLoginRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
+virtual Community.Zabbix.ZabbixUserClient.LogOffAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+virtual Community.Zabbix.ZabbixUserClient.LogOnAsync(Community.Zabbix.ZabbixUserLoginRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixAuthenticatedUser!>!
 virtual Community.Zabbix.ZabbixUserClient.ProvisionAsync(System.Collections.Generic.IEnumerable<ulong>! ids, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<ulong>!>!
 virtual Community.Zabbix.ZabbixUserClient.ResetTotpAsync(System.Collections.Generic.IEnumerable<ulong>! ids, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<ulong>!>!
 virtual Community.Zabbix.ZabbixUserClient.this[ulong id].get -> Community.Zabbix.ZabbixUpdatableObjectNode<Community.Zabbix.ZabbixUser!, Community.Zabbix.ZabbixUserUpdateRequest!>!
@@ -1302,7 +1205,7 @@ virtual Community.Zabbix.ZabbixUserDirectoryClient.DeleteAsync(ulong id, System.
 virtual Community.Zabbix.ZabbixUserDirectoryClient.FindAsync(ulong id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixUserDirectory?>!
 virtual Community.Zabbix.ZabbixUserDirectoryClient.GetAsync(Community.Zabbix.ZabbixUserDirectoryGetParameters! parameters, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixUserDirectory!>!>!
 virtual Community.Zabbix.ZabbixUserDirectoryClient.GetAsync(System.Action<Community.Zabbix.ZabbixUserDirectoryGetParameters!>! configure, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixUserDirectory!>!>!
-virtual Community.Zabbix.ZabbixUserDirectoryClient.TestAsync(Community.Zabbix.ZabbixUserDirectoryTestRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.JsonElement>!
+virtual Community.Zabbix.ZabbixUserDirectoryClient.TestAsync(Community.Zabbix.ZabbixUserDirectoryTestRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Community.Zabbix.ZabbixUserDirectoryTestResult!>!
 virtual Community.Zabbix.ZabbixUserDirectoryClient.this[ulong id].get -> Community.Zabbix.ZabbixUpdatableObjectNode<Community.Zabbix.ZabbixUserDirectory!, Community.Zabbix.ZabbixUserDirectoryUpdateRequest!>!
 virtual Community.Zabbix.ZabbixUserDirectoryClient.UpdateAsync(Community.Zabbix.ZabbixUserDirectoryUpdateRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<ulong>!
 virtual Community.Zabbix.ZabbixUserDirectoryClient.UpdateAsync(System.Collections.Generic.IEnumerable<Community.Zabbix.ZabbixUserDirectoryUpdateRequest!>! requests, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<ulong>!>!

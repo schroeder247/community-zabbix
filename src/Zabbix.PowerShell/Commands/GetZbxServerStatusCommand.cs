@@ -2,7 +2,6 @@
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
 using System.Management.Automation;
 using System.Net;
-using System.Text.Json;
 
 namespace Community.Zabbix.PowerShell.Commands;
 
@@ -10,7 +9,7 @@ namespace Community.Zabbix.PowerShell.Commands;
 /// <para type="synopsis">Gets the server's "System information" statistics (<c>status.get type=full</c>, super admin only).</para>
 /// </summary>
 [Cmdlet(VerbsCommon.Get, "ZbxServerStatus")]
-[OutputType("Community.Zabbix.PowerShell.ServerStatus")]
+[OutputType(typeof(ZabbixServerStatus))]
 public sealed class GetZbxServerStatusCommand : ZabbixServerWireCmdlet
 {
     /// <summary>
@@ -29,9 +28,9 @@ public sealed class GetZbxServerStatusCommand : ZabbixServerWireCmdlet
         if (TryRun(async cancellationToken =>
             {
                 return await CallWireAsync(Server, (wire, token) => wire.GetStatusAsync(token), cancellationToken).ConfigureAwait(false);
-            }, out JsonElement status, Connected.Name))
+            }, out ZabbixServerStatus? status, Connected.Name))
         {
-            WriteObject(ZabbixJsonShape.ToShell(status, "Community.Zabbix.PowerShell.ServerStatus"));
+            WriteObject(status);
         }
     }
 }

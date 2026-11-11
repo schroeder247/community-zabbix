@@ -69,8 +69,9 @@ public sealed class ShowZbxPageCommand : ZabbixServerCmdlet
                     "ZabbixPageNotAnId", ErrorCategory.InvalidArgument, value));
             }
         }
-        else if (ZabbixPageTarget.TryFrom(value, out ZabbixPageTarget? target))
+        else if (value is IZabbixFrontendPage page)
         {
+            ZabbixPageTarget target = page.ToPageTarget();
             Show(_frontend, target, target.Kind, target.Id);
         }
         else
@@ -182,7 +183,7 @@ public sealed class ShowZbxPageCommand : ZabbixServerCmdlet
             ZabbixPageKind.Sla => await ByIdAsync<ZabbixSlaRecord>(id, cancellationToken).ConfigureAwait(false),
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "not a kind of page"),
         };
-        return ZabbixPageTarget.TryFrom(record, out ZabbixPageTarget? target) ? target : null;
+        return (record as IZabbixFrontendPage)?.ToPageTarget();
     }
 
     private async Task<object?> ByIdAsync<TEntity>(ulong id, CancellationToken cancellationToken)

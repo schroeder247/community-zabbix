@@ -1,21 +1,31 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
 using Community.Zabbix.Protocol;
+using Microsoft.Extensions.Compliance.Classification;
 using Microsoft.Extensions.Compliance.Redaction;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
+using Microsoft.Extensions.Options;
 
 namespace Community.Zabbix.Tests;
 
 /// <summary>
 /// The taxonomy fails closed: a secret never reaches the log even when the
 /// template names it, and the fallback erases a class nobody gave a policy. Driven through the real redaction pipeline
-/// and the extended <c>[LoggerMessage]</c> generator the SDK's own events use.
+/// and the extended <c>[LoggerMessage]</c> generator the SDK's own events use, composed as an application composes it:
+/// <c>EnableRedaction()</c> with its defaults, and <c>AddRedaction(r =&gt; r.SetZabbixRedactors())</c>.
 /// </summary>
 public sealed partial class RedactionTests
 {
     private const string Token = "tok-2c26b46b68ffc68ff99b453c1d304134";
+
+    /// <summary>What an application on the SDK's redactors writes: redaction on, with the logger's own defaults.</summary>
+    private static void SdkRedactors(ILoggingBuilder logging)
+    {
+        logging.EnableRedaction();
+        logging.Services.AddRedaction(redaction => redaction.SetZabbixRedactors());
+    }
 
     [LoggerMessage(EventId = 9901, Level = LogLevel.Warning, Message = "Token {Token} for {User}")]
     private static partial void TokenFor(ILogger logger, [ZabbixSecret] string token, [ZabbixPersonal] string user);
@@ -39,7 +49,7 @@ public sealed partial class RedactionTests
     [Fact]
     public void A_secret_never_renders_even_when_the_template_names_it()
     {
-        FakeLogRecord record = LogOnce(logging => logging.AddZabbixRedaction());
+        FakeLogRecord record = LogOnce(SdkRedactors);
 
         Assert.DoesNotContain(Rendered(record), text => text?.Contains(Token, StringComparison.Ordinal) == true);
     }
@@ -47,7 +57,7 @@ public sealed partial class RedactionTests
     [Fact]
     public void The_fallback_erases_a_class_that_has_no_policy()
     {
-        FakeLogRecord record = LogOnce(logging => logging.AddZabbixRedaction());
+        FakeLogRecord record = LogOnce(SdkRedactors);
 
         Assert.DoesNotContain(Rendered(record), text => text?.Contains("alice", StringComparison.Ordinal) == true);
     }
@@ -87,21 +97,19 @@ public sealed partial class RedactionTests
     [Fact]
     public void The_wire_getter_logs_an_item_key_s_name_and_masks_its_parameters()
     {
-        FakeLogRecord record = LogFromWire(logging => logging.AddZabbixRedaction());
+        FakeLogRecord record = LogFromWire(SdkRedactors);
 
         Assert.DoesNotContain(Rendered(record), text => text?.Contains("hunter2", StringComparison.Ordinal) == true);
         Assert.Contains(Rendered(record), text => text?.Contains("web.page.get[***]", StringComparison.Ordinal) == true);
     }
 
     [Fact]
-    public void A_wire_only_application_registers_the_item_key_redactor_on_its_own_redaction_builder()
+    public void A_wire_only_application_sets_the_same_redactors_on_its_own_redaction_builder()
     {
         FakeLogRecord record = LogFromWire(logging =>
         {
-            logging.EnableRedaction();
-            logging.Services.AddRedaction(redaction => redaction
-                .SetRedactor<ErasingRedactor>(ZabbixDataClassifications.Secret)
-                .SetRedactor<ZabbixItemKeyRedactor>(ZabbixDataClassifications.ItemKey));
+            logging.EnableRedaction(options => options.ApplyDiscriminator = false);
+            logging.Services.AddRedaction(redaction => redaction.SetZabbixRedactors());
         });
 
         Assert.DoesNotContain(Rendered(record), text => text?.Contains("hunter2", StringComparison.Ordinal) == true);
@@ -117,12 +125,12 @@ public sealed partial class RedactionTests
     }
 
     [Fact]
-    public void A_pass_through_registered_after_the_policy_shows_the_whole_key()
+    public void A_pass_through_set_after_the_sdk_s_redactors_shows_the_whole_key()
     {
         FakeLogRecord record = LogFromWire(logging =>
         {
-            logging.AddZabbixRedaction();
-            logging.Services.AddRedaction(redaction => redaction.SetRedactor<NullRedactor>(ZabbixDataClassifications.ItemKey));
+            logging.EnableRedaction(options => options.ApplyDiscriminator = false);
+            logging.Services.AddRedaction(redaction => redaction.SetZabbixRedactors().SetRedactor<NullRedactor>(ZabbixDataClassifications.ItemKey));
         });
 
         Assert.Contains(Rendered(record), text => text?.Contains(SecretKey, StringComparison.Ordinal) == true);
@@ -150,33 +158,98 @@ public sealed partial class RedactionTests
     [Fact]
     public void The_policy_marks_a_peer_s_text_where_the_event_names_it()
     {
-        FakeLogRecord record = LogPeerText(logging => logging.AddZabbixRedaction());
+        FakeLogRecord record = LogPeerText(SdkRedactors);
 
         Assert.DoesNotContain(Rendered(record), text => text?.Contains("hunter2", StringComparison.Ordinal) == true);
         Assert.EndsWith(": [redacted]", record.Message, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void A_pass_through_registered_after_the_policy_shows_the_peer_s_text()
+    public void A_pass_through_set_after_the_sdk_s_redactors_shows_the_peer_s_text()
     {
         FakeLogRecord record = LogPeerText(logging =>
         {
-            logging.AddZabbixRedaction();
-            logging.Services.AddRedaction(redaction => redaction.SetRedactor<NullRedactor>(ZabbixDataClassifications.PeerText));
+            logging.EnableRedaction(options => options.ApplyDiscriminator = false);
+            logging.Services.AddRedaction(redaction => redaction.SetZabbixRedactors().SetRedactor<NullRedactor>(ZabbixDataClassifications.PeerText));
         });
 
         Assert.EndsWith(": " + PeerInfo, record.Message, StringComparison.Ordinal);
     }
 
-    // The logger's discriminator (on by default) hands a redactor "value:Tag": a bare key would not parse as a key and would be
-    // erased, and a pass-through would render the tag after the text. The policy turns the discriminator off.
+    // The logger's discriminator (on by default) hands a redactor "value:tag". The item-key redactor reads a name followed by
+    // the discriminator as the bare key, so the application keeps the logger's default and a bare key keeps its name.
     [Fact]
-    public void The_policy_keeps_a_bare_key_s_name()
+    public void A_bare_key_keeps_its_name_with_the_logger_s_discriminator_on()
     {
-        FakeLogRecord record = LogPeerText(logging => logging.AddZabbixRedaction());
+        FakeLogRecord record = LogPeerText(SdkRedactors);
 
-        Assert.StartsWith("Agent agent:10050 refused the request for item key \"system.uptime\": ", record.Message, StringComparison.Ordinal);
+        Assert.StartsWith("Agent agent:10050 refused the request for item key \"system.uptime\": [redacted]", record.Message, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void A_bare_key_keeps_its_name_with_the_logger_s_discriminator_off()
+    {
+        FakeLogRecord record = LogPeerText(logging =>
+        {
+            logging.EnableRedaction(options => options.ApplyDiscriminator = false);
+            logging.Services.AddRedaction(redaction => redaction.SetZabbixRedactors());
+        });
+
+        Assert.StartsWith("Agent agent:10050 refused the request for item key \"system.uptime\": [redacted]", record.Message, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("system.uptime:key", "system.uptime")]
+    [InlineData("web.page.get[intranet,/admin,user:hunter2]:key", "web.page.get[***]")]
+    [InlineData("system.uptime:", "")]
+    [InlineData("system.uptime:a b", "")]
+    [InlineData("user:hunter2 x", "")]
+    public void The_item_key_redactor_reads_a_value_with_the_logger_s_discriminator(string discriminated, string redacted)
+        => Assert.Equal(redacted, new ZabbixItemKeyRedactor().Redact(discriminated));
+
+    [Theory]
+    [InlineData(":info", "")]
+    [InlineData("refused:info", "[redacted]")]
+    [InlineData(":", "[redacted]")]
+    public void The_peer_text_redactor_keeps_an_empty_text_empty_with_the_logger_s_discriminator(string discriminated, string redacted)
+        => Assert.Equal(redacted, new ZabbixPeerTextRedactor().Redact(discriminated));
+
+    // The extension sets redactors for the SDK's own classes and nothing else: the logger's options and the fallback are the
+    // application's, so another library's data is redacted as the application decided, not as the SDK would.
+    [Fact]
+    public void The_sdk_s_redactors_leave_the_logger_s_options_and_the_fallback_to_the_application()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging(logging => logging.EnableRedaction());
+        services.AddRedaction(redaction => redaction.SetZabbixRedactors().SetFallbackRedactor<NullRedactor>());
+        using ServiceProvider provider = services.BuildValidated();
+        IRedactorProvider redactors = provider.GetRequiredService<IRedactorProvider>();
+
+        Assert.True(provider.GetRequiredService<IOptions<LoggerRedactionOptions>>().Value.ApplyDiscriminator);
+        Assert.IsType<NullRedactor>(redactors.GetRedactor(new DataClassification("Other", "Private")));
+        Assert.IsType<NullRedactor>(redactors.GetRedactor(ZabbixDataClassifications.Personal));
+        Assert.IsType<ZabbixItemKeyRedactor>(redactors.GetRedactor(ZabbixDataClassifications.ItemKey));
+        Assert.IsType<ZabbixPeerTextRedactor>(redactors.GetRedactor(ZabbixDataClassifications.PeerText));
+        Assert.Equal(string.Empty, redactors.GetRedactor(ZabbixDataClassifications.Secret).Redact(Token));
+    }
+
+    // A pass-through fallback, a development setting, still never renders a secret: the SDK's own redactor erases it.
+    [Fact]
+    public void A_secret_stays_erased_under_a_pass_through_fallback_while_the_application_s_classes_follow_it()
+    {
+        FakeLogRecord record = LogOnce(logging =>
+        {
+            logging.EnableRedaction();
+            logging.Services.AddRedaction(redaction => redaction.SetZabbixRedactors().SetFallbackRedactor<NullRedactor>());
+        });
+
+        Assert.DoesNotContain(Rendered(record), text => text?.Contains(Token, StringComparison.Ordinal) == true);
+        Assert.Contains(Rendered(record), text => text?.Contains("alice", StringComparison.Ordinal) == true);
+    }
+
+    [Fact]
+    public void Setting_the_sdk_s_redactors_on_no_builder_is_refused()
+        => Assert.Throws<ArgumentNullException>("builder", () => ZabbixRedactionBuilderExtensions.SetZabbixRedactors(null!));
 
     private static FakeLogRecord LogPeerText(Action<ILoggingBuilder> logging)
     {

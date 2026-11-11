@@ -302,7 +302,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 
 ## OUTPUTS
 
-- `Community.Zabbix.PowerShell.MediaTypeTestResult`: The objects this command writes.
+- `ZabbixAlertSendResult`: Represents what alert.send answers when the test message went out: what a webhook returned, and its log.
 
 ## RELATED LINKS
 

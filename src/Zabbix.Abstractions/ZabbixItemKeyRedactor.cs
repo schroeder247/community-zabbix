@@ -11,18 +11,21 @@ namespace Community.Zabbix;
 /// whose name is known to carry nothing.
 /// </summary>
 /// <remarks>
+/// <para>
 /// The name tells an operator which check a line is about; the parameters are where a credential, a connection string or
-/// a person's name can sit. <c>AddZabbixRedaction</c> registers this redactor for the class. An application that takes
-/// the wire or the hosts without <c>Zabbix.Sdk</c> registers it itself, beside the erasing rule for
-/// <see cref="ZabbixDataClassifications.Secret"/>:
-/// <code>
-/// builder.Logging.EnableRedaction(options => options.ApplyDiscriminator = false);   // a bare key keeps its name
-/// builder.Services.AddRedaction(redaction => redaction
-///     .SetRedactor&lt;ErasingRedactor&gt;(ZabbixDataClassifications.Secret)
-///     .SetRedactor&lt;ZabbixItemKeyRedactor&gt;(ZabbixDataClassifications.ItemKey)
-///     .SetRedactor&lt;ZabbixPeerTextRedactor&gt;(ZabbixDataClassifications.PeerText));
+/// a person's name can sit. <see cref="ZabbixRedactionBuilderExtensions.SetZabbixRedactors"/> sets this redactor for
+/// the class, in every package's application:
+/// </para>
+/// <code language="csharp">
+/// builder.Logging.EnableRedaction();
+/// builder.Services.AddRedaction(redaction => redaction.SetZabbixRedactors());
 /// </code>
-/// An application that logs to a trusted sink can register a pass-through for the class instead.
+/// <para>
+/// The logger hands a redactor the value and, by default, a discriminator: the tag's name after a colon
+/// (<c>system.uptime:key</c>, <c>LoggerRedactionOptions.ApplyDiscriminator</c>). A key name can't hold a colon, so a
+/// name followed by a colon and a tag's name is the bare key, and keeps its name either way. An application that logs to
+/// a trusted sink can set a pass-through redactor for the class instead.
+/// </para>
 /// </remarks>
 public sealed class ZabbixItemKeyRedactor : Redactor
 {
@@ -50,13 +53,32 @@ public sealed class ZabbixItemKeyRedactor : Redactor
         return length;
     }
 
-    /// <summary>Whether the text is a key name, alone or followed by <c>[</c>; the name's length; and whether parameters follow.</summary>
+    /// <summary>
+    /// Whether the text is a key name, alone, followed by <c>[</c>, or followed by the logger's discriminator (a colon and
+    /// a tag's name); the name's length; and whether parameters follow.
+    /// </summary>
     private static (bool IsKey, int Name, bool HasParameters) Shape(ReadOnlySpan<char> text)
     {
         int name = 0;
         while (name < text.Length && ZabbixItemKey.IsNameChar(text[name])) name++;
         if (name == 0) return (false, 0, false);
-        if (name == text.Length) return (true, name, false);
+        if (name == text.Length || IsDiscriminator(text[name..])) return (true, name, false);
         return text[name] == '[' ? (true, name, true) : (false, 0, false);
+    }
+
+    /// <summary>
+    /// Whether the text is the discriminator the logger appends to a redacted value: a colon and the tag's name, the name
+    /// of a log template's placeholder (<c>JustInTimeRedactor</c> in <c>Microsoft.Extensions.Telemetry</c>).
+    /// </summary>
+    /// <param name="text">The text after a value.</param>
+    /// <returns><see langword="true"/> when the text is a colon followed by a tag's name; otherwise <see langword="false"/>.</returns>
+    internal static bool IsDiscriminator(ReadOnlySpan<char> text)
+    {
+        if (text.Length < 2 || text[0] != ':') return false;
+        foreach (char c in text[1..])
+        {
+            if (!char.IsAsciiLetterOrDigit(c) && c is not ('_' or '.')) return false;
+        }
+        return true;
     }
 }

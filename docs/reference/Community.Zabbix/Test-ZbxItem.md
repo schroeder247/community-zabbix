@@ -13,7 +13,7 @@ Test-ZbxItem [-Data] <object> [-Server <DnsEndPoint[]>] [-Tls <ZabbixTlsMode>] [
 
 ## DESCRIPTION
 
-The Test-ZbxItem cmdlet asks the server's trapper to run an item's collection and preprocessing (item.test), as the Test button of the frontend's item form does, and writes the result: the value, or the error that stopped it. -Data is what the frontend sends: the item, its host and the test options, as a hashtable keyed by the API's field names. It saves nothing, so an item can be tried before it is created. It needs the trapper in -Server or the connection's.
+The Test-ZbxItem cmdlet asks the server's trapper to run an item's collection and preprocessing (item.test), as the Test button of the frontend's item form does, and writes the result: the value, or the error that stopped it, and what each preprocessing step made of it. -Data is the request: a ZabbixItemTestRequest, or what the frontend sends, the item, its host and the test options, as a hashtable keyed by the server's field names or the request's member names. It saves nothing, so an item can be tried before it is created. It needs the trapper in -Server or the connection's.
 
 ## EXAMPLES
 
@@ -220,7 +220,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 
 ## OUTPUTS
 
-- `Community.Zabbix.PowerShell.ItemTestResult`: The objects this command writes.
+- `ZabbixItemTestResult`: Represents what item.test answers: the value the server collected, and what the preprocessing steps made of it.
 
 ## RELATED LINKS
 

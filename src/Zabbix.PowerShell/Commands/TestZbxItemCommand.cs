@@ -3,19 +3,20 @@
 using System.Management.Automation;
 using System.Net;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 
 namespace Community.Zabbix.PowerShell.Commands;
 
 /// <summary>
 /// <para type="synopsis">Runs an item's collection and preprocessing on the server, as the UI's item "Test" does (<c>item.test</c>).</para>
 /// <para type="description">
-/// <c>-Data</c> is the request's <c>data</c> object exactly as the frontend sends it (<c>item</c>, <c>host</c>,
-/// <c>options</c>) — a hashtable or a <c>[pscustomobject]</c>; every field <c>item.test</c> reads is available this way,
-/// so the cmdlet stays a thin, typed door onto the server's own contract rather than a second copy of it.
+/// <c>-Data</c> is the request: a <c>ZabbixItemTestRequest</c>, or a hashtable or a <c>[pscustomobject]</c> shaped as the
+/// frontend sends it (<c>item</c>, <c>host</c>, <c>options</c>), by wire names or member names. A field the request
+/// doesn't model is sent as it is, so every field <c>item.test</c> reads is available this way.
 /// </para>
 /// </summary>
 [Cmdlet(VerbsDiagnostic.Test, "ZbxItem")]
-[OutputType("Community.Zabbix.PowerShell.ItemTestResult")]
+[OutputType(typeof(ZabbixItemTestResult))]
 public sealed class TestZbxItemCommand : ZabbixServerWireCmdlet
 {
     /// <summary>The request's <c>data</c>: the item under test, its host, and the test options.</summary>
@@ -36,13 +37,22 @@ public sealed class TestZbxItemCommand : ZabbixServerWireCmdlet
     /// <inheritdoc/>
     protected override void ProcessRecord()
     {
-        JsonElement data = ZabbixJsonShape.FromShell(Data);
+        ZabbixItemTestRequest request;
+        try
+        {
+            request = ZabbixJsonBinder.Bind(Data, (JsonTypeInfo<ZabbixItemTestRequest>)ZabbixWireJson.Options.GetTypeInfo(typeof(ZabbixItemTestRequest)));
+        }
+        catch (Exception unshaped) when (unshaped is ArgumentException or JsonException)
+        {
+            WriteError(new ErrorRecord(unshaped, "ZabbixItemTestRequestInvalid", ErrorCategory.InvalidArgument, Data));
+            return;
+        }
         if (TryRun(async cancellationToken =>
             {
-                return await CallWireAsync(Server, (wire, token) => wire.TestItemAsync(data, token), cancellationToken).ConfigureAwait(false);
-            }, out ZabbixServerReply? reply, Data))
+                return await CallWireAsync(Server, (wire, token) => wire.TestItemAsync(request, token), cancellationToken).ConfigureAwait(false);
+            }, out ZabbixItemTestResult? result, Data))
         {
-            WriteObject(ZabbixJsonShape.ToShell(reply!.Data ?? ZabbixServerReplies.Envelope(reply), "Community.Zabbix.PowerShell.ItemTestResult"));
+            WriteObject(result);
         }
     }
 }

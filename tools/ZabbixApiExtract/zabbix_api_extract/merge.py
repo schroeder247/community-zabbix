@@ -1219,7 +1219,8 @@ class Merger:
     def result_records(self) -> None:
         """The reviewed records of a method result the source builds by hand (``overlay.json`` ``resultRecords``:
         history.push answers ``{response, data: [{itemid?, error?}]}``, CHistory.php 8.0:459 and the server's
-        trapper_history_push.c 8.0:465-545); a method names one through its overlay ``result``."""
+        trapper_history_push.c 8.0:465-545); a method names one through its overlay ``result``. A field may name the
+        versions that carry it (``versions``) and mark a credential (``secret``)."""
         for name, spec in self.overlay.get('resultRecords', {}).items():
             if name.startswith('_'):
                 continue
@@ -1234,7 +1235,10 @@ class Merger:
                 f.reason = fspec.get('json')
                 f.name = fspec.get('name') or pascal(wire)
                 f.summary = fspec.get('summary')
-                f.versions = sorted(record.versions, key=vkey)
+                # a field the reply carries from a later version on than the record, and a credential the reply hands back
+                # under a name mark_secrets doesn't read as one (a session id, an encryption key)
+                f.versions = sorted(fspec.get('versions') or record.versions, key=vkey)
+                f.secret = bool(fspec.get('secret'))
                 record.fields[wire] = f
             record.extra['extensionData'] = record.role == 'read'
             self.records[name] = record

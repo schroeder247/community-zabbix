@@ -46,20 +46,22 @@ public sealed class ServerCommandsTests
     }
 
     [Fact]
-    public async Task Get_ZbxServerStatus_shapes_the_reply_as_ConvertFrom_Json_would()
+    public async Task Get_ZbxServerStatus_writes_the_status_counts_with_each_proxy_s()
     {
+        // status_stats_export (trapper.c): an entry per what it counts by, proxy 0 for the whole installation.
         await using FakeZabbix api = await FakeZabbix.StartAsync();
         await using FakeTrapper trapper = FakeTrapper.Start();
-        trapper.On("status.get", """{"response":"success","data":{"host":{"count":3}}}""");
+        trapper.On("status.get", """{"response":"success","data":{"template stats":[{"count":312}],"host stats":[{"attributes":{"proxyid":0,"status":0},"count":3},{"attributes":{"proxyid":0,"status":1},"count":1},{"attributes":{"proxyid":11,"status":0},"count":2},{"attributes":{"proxyid":11,"status":1},"count":0}],"server stats":{"version":"7.0.31"}}}""");
         using Shell shell = Shell.Open();
         shell.Connect(api, $"-Trapper 127.0.0.1:{trapper.Port}");
 
         Run run = shell.Invoke("Get-ZbxServerStatus");
 
         Assert.Empty(run.Errors);
-        PSObject shaped = Assert.Single(run.Output);
-        var host = Assert.IsAssignableFrom<PSObject>(shaped.Properties["host"].Value);
-        Assert.Equal(3L, host.Properties["count"].Value);
+        var status = Assert.IsType<ZabbixServerStatus>(Assert.Single(run.Output).BaseObject);
+        Assert.Equal((312L, 3L, 1L), (status.TemplateCount!.Value, status.EnabledHostCount!.Value, status.DisabledHostCount!.Value));
+        Assert.Equal(2L, Assert.Single(status.Proxies).EnabledHostCount);
+        Assert.Equal(new Version(7, 0, 31), status.Version);
     }
 
     [Fact]
@@ -100,26 +102,49 @@ public sealed class ServerCommandsTests
         Assert.False(((ZabbixExpressionResult)run.Output[1].BaseObject).IsTrue);
     }
 
-    [Fact]
-    public async Task Test_ZbxItem_sends_the_datas_shell_shape_and_shapes_the_reply_back()
+    [Theory]
+    [InlineData("@{ item = @{ key = 'agent.ping'; value_type = 3 }; host = @{ interface = @{ address = '10.0.0.2'; useip = 1; port = '10050' } } }")]
+    [InlineData("@{ Item = @{ Key = 'agent.ping'; ValueType = 3 }; Host = @{ Interface = @{ Address = '10.0.0.2'; UseIP = $true; Port = '10050' } } }")]
+    [InlineData("[Community.Zabbix.ZabbixItemTestRequest]::new([Community.Zabbix.ZabbixItemTestItem]@{ Key = 'agent.ping'; ValueType = 3 }) | ForEach-Object { $_.Host = [Community.Zabbix.ZabbixItemTestHost]@{ Interface = [Community.Zabbix.ZabbixItemTestInterface]@{ Address = '10.0.0.2'; UseIP = $true; Port = 10050 } }; $_ }")]
+    public async Task Test_ZbxItem_sends_the_request_by_wire_or_member_names_and_writes_the_test_s_result(string data)
     {
         await using FakeZabbix api = await FakeZabbix.StartAsync();
         await using FakeTrapper trapper = FakeTrapper.Start();
-        trapper.On("item.test", request => request.GetProperty("data").GetProperty("item").GetProperty("key_").GetString() == "agent.ping"
-            ? """{"response":"success","data":{"result":"1"}}"""
-            : """{"response":"failed","info":"unexpected key"}""");
+        trapper.On("item.test", request => request.GetProperty("data") is var sent
+            && sent.GetProperty("item").GetProperty("key").GetString() == "agent.ping"
+            && sent.GetProperty("host").GetProperty("interface").GetProperty("address").GetString() == "10.0.0.2"
+            && sent.GetProperty("host").GetProperty("interface").GetProperty("useip").GetString() == "1"
+            ? """{"response":"success","data":{"item":{"result":"1","eol":"LF"},"preprocessing":{"steps":[],"result":"1"}}}"""
+            : """{"response":"failed","info":"unexpected request"}""");
         using Shell shell = Shell.Open();
         shell.Connect(api, $"-Trapper 127.0.0.1:{trapper.Port}");
 
-        Run run = shell.Invoke("""Test-ZbxItem -Data @{ item = @{ key_ = 'agent.ping' } }""");
+        Run run = shell.Invoke($"Test-ZbxItem -Data ({data})");
 
         Assert.Empty(run.Errors);
-        PSObject shaped = Assert.Single(run.Output);
-        Assert.Equal("1", shaped.Properties["result"].Value);
+        var result = Assert.IsType<ZabbixItemTestResult>(Assert.Single(run.Output).BaseObject);
+        Assert.Equal(("1", "LF", "1"), (result.Item!.Result, result.Item.EndOfLine, result.Preprocessing!.Result));
     }
 
     [Fact]
-    public async Task Test_ZbxItem_writes_the_replys_envelope_when_the_server_sends_no_data_never_null()
+    public async Task Test_ZbxItem_passes_a_field_the_request_does_not_model_through_by_its_wire_name()
+    {
+        await using FakeZabbix api = await FakeZabbix.StartAsync();
+        await using FakeTrapper trapper = FakeTrapper.Start();
+        trapper.On("item.test", request => request.GetProperty("data").GetProperty("item").GetProperty("lookback_limit").GetString() == "1h"
+            ? """{"response":"success","data":{"item":{"result":"1"}}}"""
+            : """{"response":"failed","info":"unexpected request"}""");
+        using Shell shell = Shell.Open();
+        shell.Connect(api, $"-Trapper 127.0.0.1:{trapper.Port}");
+
+        Run run = shell.Invoke("""Test-ZbxItem -Data @{ item = @{ key = 'telemetry.query'; lookback_limit = '1h' } }""");
+
+        Assert.Empty(run.Errors);
+        Assert.Equal("1", Assert.IsType<ZabbixItemTestResult>(Assert.Single(run.Output).BaseObject).Item!.Result);
+    }
+
+    [Fact]
+    public async Task Test_ZbxItem_reports_a_success_without_its_data_as_an_error_never_a_null()
     {
         await using FakeZabbix api = await FakeZabbix.StartAsync();
         await using FakeTrapper trapper = FakeTrapper.Start();
@@ -127,12 +152,10 @@ public sealed class ServerCommandsTests
         using Shell shell = Shell.Open();
         shell.Connect(api, $"-Trapper 127.0.0.1:{trapper.Port}");
 
-        Run run = shell.Invoke("""Test-ZbxItem -Data @{ item = @{ key_ = 'agent.ping' } }""");
+        Run run = shell.Invoke("""Test-ZbxItem -Data @{ item = @{ key = 'agent.ping' } }""");
 
-        Assert.Empty(run.Errors);
-        PSObject shaped = Assert.Single(run.Output);
-        Assert.NotNull(shaped);
-        Assert.Equal("success", shaped.Properties["response"].Value);
+        Assert.Empty(run.Output);
+        Assert.IsType<InvalidDataException>(Assert.Single(run.Errors).Exception);
     }
 
     [Fact]
@@ -143,7 +166,7 @@ public sealed class ServerCommandsTests
         await using FakeTrapper trapper = FakeTrapper.Start();
         trapper.On("alert.send", request => request.GetProperty("data").GetProperty("mediatypeid").GetString() == "7"
                                              && request.GetProperty("data").GetProperty("sendto").GetString() == "ops@example.com"
-            ? """{"response":"success","data":{"eventid":"0"}}"""
+            ? """{"response":"success"}"""
             : """{"response":"failed","info":"unexpected data"}""");
         using Shell shell = Shell.Open();
         shell.Connect(api, $"-Trapper 127.0.0.1:{trapper.Port}");
@@ -151,7 +174,27 @@ public sealed class ServerCommandsTests
         Run run = shell.Invoke("Test-ZbxMediaType Email -SendTo ops@example.com -Confirm:$false");
 
         Assert.Empty(run.Errors);
-        Assert.Single(run.Output);
+        var sent = Assert.IsType<ZabbixAlertSendResult>(Assert.Single(run.Output).BaseObject);
+        Assert.Null(sent.Value);                                                        // an e-mail answers nothing but success
+    }
+
+    [Fact]
+    public async Task Test_ZbxMediaType_writes_a_webhook_s_value_and_its_log()
+    {
+        // trapper_process_alert_send: the webhook's value is data, its Zabbix.log lines are the root's debug.
+        await using FakeZabbix api = await FakeZabbix.StartAsync();
+        api.On("mediatype.get", """[{"mediatypeid":"7","name":"Hook","type":"4","parameters":[]}]""");
+        await using FakeTrapper trapper = FakeTrapper.Start();
+        trapper.On("alert.send", _ => """{"response":"success","data":"{\"tags\":{}}","debug":{"logs":[{"level":4,"ms":3,"message":"sent"}],"ms":15}}""");
+        using Shell shell = Shell.Open();
+        shell.Connect(api, $"-Trapper 127.0.0.1:{trapper.Port}");
+
+        Run run = shell.Invoke("Test-ZbxMediaType Hook -SendTo ops -Confirm:$false");
+
+        Assert.Empty(run.Errors);
+        var sent = Assert.IsType<ZabbixAlertSendResult>(Assert.Single(run.Output).BaseObject);
+        Assert.Equal("""{"tags":{}}""", sent.Value);
+        Assert.Equal(("sent", TimeSpan.FromMilliseconds(15)), (Assert.Single(sent.Log!.Entries!).Message, sent.Log.Elapsed!.Value));
     }
 
     [Theory]
@@ -186,7 +229,7 @@ public sealed class ServerCommandsTests
         api.On("mediatype.get", """[{"mediatypeid":"7","name":"Email"}]""");
         await using FakeTrapper trapper = FakeTrapper.Start();
         trapper.On("alert.send", request => request.GetProperty("data").GetProperty("mediatypeid").GetString() == "7"
-            ? """{"response":"success","data":{"eventid":"0"}}"""
+            ? """{"response":"success"}"""
             : """{"response":"failed","info":"unexpected data"}""");
         using Shell shell = Shell.Open();
         shell.Connect(api, $"-Trapper 127.0.0.1:{trapper.Port}");

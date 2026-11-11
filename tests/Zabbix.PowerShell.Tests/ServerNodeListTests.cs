@@ -53,9 +53,9 @@ public sealed class ServerNodeListTests
     {
         { "Get-ZbxQueue -Server {nodes}", "queue.get", """{"response":"success","data":[]}""" },
         { "Get-ZbxServerStatus -Server {nodes}", "status.get", """{"response":"success","data":{}}""" },
-        { "Test-ZbxItem -Data @{ item = @{ key_ = 'agent.ping' } } -Server {nodes}", "item.test", """{"response":"success","data":{"item":{"result":"1"}}}""" },
+        { "Test-ZbxItem -Data @{ item = @{ key = 'agent.ping' } } -Server {nodes}", "item.test", """{"response":"success","data":{"item":{"result":"1","eol":"LF"},"preprocessing":{"steps":[],"result":"1"}}}""" },
         { "Test-ZbxExpression 'a' -Server {nodes}", "expressions.evaluate", """{"response":"success","data":[{"expression":"a","value":1}]}""" },
-        { "Test-ZbxMediaType Email -SendTo ops@example.com -Server {nodes} -Confirm:$false", "alert.send", """{"response":"success","data":{"eventid":"0"}}""" },
+        { "Test-ZbxMediaType Email -SendTo ops@example.com -Server {nodes} -Confirm:$false", "alert.send", """{"response":"success"}""" },
         { "Send-ZbxData web-01 app.status ok -Server {nodes} -Confirm:$false", "sender data", FakeTrapper.Success(1, 0) },
         { "Receive-ZbxProxyConfig zbx-proxy -Server {nodes}", "proxy config", "{}" },
         { "Send-ZbxProxyData zbx-proxy -Server {nodes} -History (New-ZbxHistoryDataEntry -ItemId 1 -Value 1) -Confirm:$false", "proxy data", FakeTrapper.Success(1, 0) },

@@ -12,7 +12,7 @@ License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2
   -->
   <PropertyGroup>
     <!-- The case count this project runs today; a run that discovers fewer fails, so a test silently dropped from discovery cannot pass unnoticed. -->
-    <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --minimum-expected-tests 1861</TestingPlatformCommandLineArguments>
+    <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --minimum-expected-tests 1865</TestingPlatformCommandLineArguments>
     <!-- The run's own deadline: every wait in these tests is bounded, and a wait nobody has
          found yet still ends the run: after 10 minutes without a test finishing (a normal run is 80–300 s, no test
          over 60 s) the platform writes a dump, names the tests still running, and fails, instead of printing nothing

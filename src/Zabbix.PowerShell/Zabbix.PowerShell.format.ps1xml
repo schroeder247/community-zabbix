@@ -70,15 +70,48 @@
       </TableControl>
     </View>
     <View>
-      <Name>ScriptResult.Table</Name>
-      <ViewSelectedBy><TypeName>Community.Zabbix.PowerShell.ScriptResult</TypeName></ViewSelectedBy>
+      <Name>ZabbixServerStatus.List</Name>
+      <ViewSelectedBy><TypeName>Community.Zabbix.ZabbixServerStatus</TypeName></ViewSelectedBy>
+      <ListControl><ListEntries><ListEntry><ListItems>
+        <ListItem><PropertyName>Version</PropertyName></ListItem>
+        <ListItem><Label>Hosts (enabled/disabled)</Label><ScriptBlock>'{0} / {1}' -f $_.EnabledHostCount, $_.DisabledHostCount</ScriptBlock></ListItem>
+        <ListItem><Label>Templates</Label><PropertyName>TemplateCount</PropertyName></ListItem>
+        <ListItem><Label>Items (enabled/disabled/not supported)</Label><ScriptBlock>'{0} / {1} / {2}' -f $_.EnabledItemCount, $_.DisabledItemCount, $_.UnsupportedItemCount</ScriptBlock></ListItem>
+        <ListItem><Label>Triggers (ok/problem/disabled)</Label><ScriptBlock>'{0} / {1} / {2}' -f $_.OkTriggerCount, $_.ProblemTriggerCount, $_.DisabledTriggerCount</ScriptBlock></ListItem>
+        <ListItem><Label>Users (online/offline)</Label><ScriptBlock>'{0} / {1}' -f $_.OnlineUserCount, $_.OfflineUserCount</ScriptBlock></ListItem>
+        <ListItem><Label>Required performance (vps)</Label><PropertyName>RequiredPerformance</PropertyName></ListItem>
+        <ListItem><Label>Proxies</Label><ScriptBlock>@($_.Proxies).Count</ScriptBlock></ListItem>
+      </ListItems></ListEntry></ListEntries></ListControl>
+    </View>
+    <View>
+      <Name>ZabbixProxyLoad.Table</Name>
+      <ViewSelectedBy><TypeName>Community.Zabbix.ZabbixProxyLoad</TypeName></ViewSelectedBy>
       <TableControl>
-        <TableHeaders><TableColumnHeader /><TableColumnHeader /></TableHeaders>
-        <TableRowEntries><TableRowEntry><Wrap /><TableColumnItems>
-          <TableColumnItem><PropertyName>response</PropertyName></TableColumnItem>
-          <TableColumnItem><PropertyName>value</PropertyName></TableColumnItem>
+        <TableHeaders>
+          <TableColumnHeader />
+          <TableColumnHeader><Label>Hosts</Label></TableColumnHeader>
+          <TableColumnHeader><Label>Items</Label></TableColumnHeader>
+          <TableColumnHeader><Label>Not supported</Label></TableColumnHeader>
+          <TableColumnHeader><Label>Vps</Label></TableColumnHeader>
+        </TableHeaders>
+        <TableRowEntries><TableRowEntry><TableColumnItems>
+          <TableColumnItem><PropertyName>ProxyId</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>EnabledHostCount</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>EnabledItemCount</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>UnsupportedItemCount</PropertyName></TableColumnItem>
+          <TableColumnItem><PropertyName>RequiredPerformance</PropertyName></TableColumnItem>
         </TableColumnItems></TableRowEntry></TableRowEntries>
       </TableControl>
+    </View>
+    <View>
+      <Name>ZabbixItemTestResult.List</Name>
+      <ViewSelectedBy><TypeName>Community.Zabbix.ZabbixItemTestResult</TypeName></ViewSelectedBy>
+      <ListControl><ListEntries><ListEntry><ListItems>
+        <ListItem><Label>Value</Label><ScriptBlock>$_.Item.Result</ScriptBlock></ListItem>
+        <ListItem><Label>Error</Label><ScriptBlock>$_.Item.Error</ScriptBlock></ListItem>
+        <ListItem><Label>Steps</Label><ScriptBlock>@($_.Preprocessing.Steps | ForEach-Object { if ($null -ne $_.Error) { "error: $($_.Error.Message)" } else { $_.Result } }) -join ' | '</ScriptBlock></ListItem>
+        <ListItem><Label>Result</Label><ScriptBlock>if ($null -ne $_.Preprocessing.Error) { "error: $($_.Preprocessing.Error)" } else { $_.Preprocessing.Result }</ScriptBlock></ListItem>
+      </ListItems></ListEntry></ListEntries></ListControl>
     </View>
     <View>
       <Name>ZabbixContext.List</Name>

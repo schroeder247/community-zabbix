@@ -41,20 +41,6 @@ internal static class ZabbixJsonShape
     /// </summary>
     /// <param name="element">The JSON.</param>
     /// <exception cref="InvalidDataException">An object carries a member with an empty name, which no PowerShell property can have.</exception>
-    /// <remarks>An object is named <paramref name="typeName"/> first, the ETS type name its view and its <c>OutputType</c> use.</remarks>
-    /// <param name="typeName">The ETS type name of an object answer (<c>Zabbix.PowerShell.ScriptResult</c>).</param>
-    public static object? ToShell(JsonElement element, string typeName)
-    {
-        object? shaped = ToShell(element);
-        if (shaped is PSObject named) named.TypeNames.Insert(0, typeName);
-        return shaped;
-    }
-
-    /// <summary>
-    /// <paramref name="element"/> as <c>ConvertFrom-Json</c> shapes it (<see cref="ToShell(JsonElement)"/>).
-    /// </summary>
-    /// <param name="element">The JSON.</param>
-    /// <exception cref="InvalidDataException">An object carries a member with an empty name, which no PowerShell property can have.</exception>
     public static object? ToShell(JsonElement element)
     {
         switch (element.ValueKind)

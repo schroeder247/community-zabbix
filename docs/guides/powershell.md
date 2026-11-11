@@ -135,7 +135,7 @@ Stop-ZbxWatch -Name cpu
 | `Get-ZbxAgentItem` | Ask a passive agent for keys, as `zabbix_get` does. It needs no server. |
 | `Get-ZbxHistory`, `Get-ZbxTrend` | Read history and trends. A piped item gives its id and value type. |
 | `Watch-ZbxItem`, `Receive-ZbxWatch`, `Show-ZbxWatch`, `Get-ZbxWatch`, `Stop-ZbxWatch` | Run a watch session: new values of an item, a host, a group, or every host, each `-Interval`. |
-| `Get-ZbxQueue`, `Get-ZbxServerStatus`, `Test-ZbxItem` | Send the server's own requests over its trapper: `queue.get` and `status.get` with a Super admin's token, and `item.test`. |
+| `Get-ZbxQueue`, `Get-ZbxServerStatus`, `Test-ZbxItem`, `Test-ZbxMediaType` | Send the server's own requests over its trapper: `queue.get` and `status.get` with a Super admin's token, `item.test` and `alert.send`. Each writes the reply's record, such as `ZabbixServerStatus` or `ZabbixItemTestResult`. |
 | `Export-`, `Import-`, `Compare-`, `Test-ZbxConfiguration` | Move a configuration document in JSON, XML, or YAML, and back. |
 
 The commands that speak a Zabbix protocol take TLS parameters named after Zabbix's own configuration, as PEM files. Given once on `Connect-ZbxServer`, they

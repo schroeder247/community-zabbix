@@ -158,27 +158,63 @@ await using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder()
     .Build();
 
 await wire.PingAsync();
-JsonElement status = await wire.GetStatusAsync();
+ZabbixServerStatus status = await wire.GetStatusAsync();
+Console.WriteLine($"{status.EnabledHostCount} hosts enabled, {status.RequiredPerformance:F1} new values per second");
 foreach (ZabbixQueueDelays row in await wire.GetQueueAsync(ZabbixQueueOverview.ByProxy))
     Console.WriteLine($"proxy {row.ProxyId}: {row.Delay5} overdue 5-10 s, {row.Delay600} over 10 min");
 ```
 
-| Method | What it asks | What it needs |
-| --- | --- | --- |
-| `PingAsync` | Whether the server is up and takes this session | A session |
-| `GetStatusAsync` | The "System information" statistics | A super admin's session, for the full answer |
-| `GetQueueAsync` | Overdue items, counted by delay | A super admin's session |
-| `GetQueueDetailsAsync` | The most overdue items | A super admin's session |
-| `GetStatsAsync` | The server's internal statistics | An address `StatsAllowedIP` admits |
-| `GetQueueSizeAsync` | How many items are overdue | An address `StatsAllowedIP` admits |
-| `TestItemAsync` | Runs an item's collection and preprocessing | A session |
-| `SendAlertAsync` | Sends a test message through a media type | A session |
-| `TestReportAsync` | Generates and sends a scheduled report | A session |
-| `EvaluateExpressionsAsync` | Evaluates trigger expressions | A session |
-| `RequestAsync` | Any request whose handler reads a `data` object | What the request needs |
+| Method | What it asks | What it answers | What it needs |
+| --- | --- | --- | --- |
+| `PingAsync` | Whether the server is up and takes this session | Nothing | A session |
+| `GetStatusAsync` | The "System information" counts | `ZabbixServerStatus`, with each proxy's in `Proxies` | A super admin's session, for the counts |
+| `GetQueueAsync` | Overdue items, counted by delay | `ZabbixQueueDelays` rows | A super admin's session |
+| `GetQueueDetailsAsync` | The most overdue items | `ZabbixQueueDetails` | A super admin's session |
+| `GetStatisticsAsync` | The internal statistics of the server or proxy | `ZabbixServerStatistics` | An address `StatsAllowedIP` admits |
+| `GetQueueSizeAsync` | How many items are overdue | A count | An address `StatsAllowedIP` admits |
+| `TestItemAsync` | Runs an item's collection and preprocessing | `ZabbixItemTestResult` | An admin's session |
+| `SendAlertAsync` | Sends a test message through a media type | `ZabbixAlertSendResult`, with a webhook's log | A session |
+| `TestReportAsync` | Generates and sends a scheduled report | `ZabbixReportTestResult` | A session |
+| `EvaluateExpressionsAsync` | Evaluates trigger expressions | `ZabbixExpressionResult` rows | A session |
+| `SendRequestAsync` | Any request the client has no method for | The reply as the server sent it | What the request needs |
 
-A `failed` reply throws `ZabbixServerRefusedException`, with the server's reason in `Info`. A failed exchange throws what a send
-throws, with the request and the node in `Exception.Data` (`Zabbix.Request`, `Zabbix.Node`).
+A `failed` reply throws `ZabbixServerRefusedException`, with the server's reason in `Info`. A reply that isn't its request's
+shape throws `InvalidDataException`. A failed exchange throws what a send throws, with the request and the node in
+`Exception.Data` (`Zabbix.Request`, `Zabbix.Node`).
+
+### Read the server's statistics
+
+`GetStatisticsAsync` reads `zabbix.stats`, the values of the server's or proxy's `zabbix[...]` items:
+
+```csharp
+ZabbixServerStatistics stats = await wire.GetStatisticsAsync();
+Console.WriteLine($"up {stats.Uptime}, write cache {stats.WriteCache?.History?.UsedPercent:F1}% used");
+foreach ((string process, ZabbixProcessUtilization busy) in stats.Processes ?? new Dictionary<string, ZabbixProcessUtilization>())
+    Console.WriteLine($"{process}: {busy.Busy?.Average:F1}% busy");
+```
+
+A server and a proxy answer different parts, and the parts change between versions. The record holds what every
+component answers. The rest, such as a server's HA nodes (`ha`) and its proxies (`proxy`), is in
+`((IZabbixAdditionalFields)stats).AdditionalFields`, as the server sent it.
+
+### Test an item
+
+`TestItemAsync` runs an item's collection and preprocessing, as the frontend's "Test" does. The request's fields are the
+server's (`item.test` reads them by the item table's names), so an enumeration the API types is its number:
+
+```csharp
+ZabbixItemTestResult result = await wire.TestItemAsync(new ZabbixItemTestRequest(new ZabbixItemTestItem
+{
+    ItemType = 15,                          // a calculated item
+    ValueType = 0,                          // a float
+    Parameters = "1+1",
+}));
+Console.WriteLine(result.Item?.Result ?? result.Item?.Error);
+Console.WriteLine(result.Preprocessing?.Result ?? result.Preprocessing?.Error);
+```
+
+A field the request doesn't model goes in `AdditionalFields`, by its wire name. `ZabbixWireJson.Options` reads and writes the
+wire's records as the client does, so a request saved as JSON reads back as it was sent.
 
 ## Create a client
 
@@ -255,7 +291,7 @@ Func<ReadOnlyMemory<byte>, CancellationToken, ValueTask<ReadOnlyMemory<byte>>> l
 };
 
 await using var wire = new ZabbixWireClient(logged);
-JsonElement stats = await wire.GetStatsAsync();
+ZabbixServerStatistics stats = await wire.GetStatisticsAsync();
 ```
 
 - An exchange is one request and its reply, as a `Func`: the payload goes in, and the reply's payload comes back unframed.

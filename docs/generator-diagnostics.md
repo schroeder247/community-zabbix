@@ -18,13 +18,23 @@ member is left out. Each message is a sentence that starts with the entry it is 
 ## ZBX0002
 
 **A kind the generator does not know** (error). A field's, parameter's or result's `kind` is none of `string`, `id`,
-`clock`, `date`, `timeofday`, `int`, `long`, `ulong`, `double`, `bool`, `apibool`, `json`, `output`, `filter`, `enum:X`,
-`object:X`, `list:K` or `map:K`. The member is left out rather than typed as untyped JSON.
+`clock`, `date`, `timeofday`, `int`, `long`, `ulong`, `double`, `seconds`, `milliseconds`, `bool`, `apibool`, `json`,
+`output`, `filter`, `enum:X`, `object:X`, `list:K` or `map:K`. A method's result can also be one of these:
+
+- `ids:field`: the ids the API answers in `field`.
+- `true`: a write the API answers with `true` and nothing else; the method returns a `Task`.
+- `or-empty:object:X`: the record `X`, which the API answers as `true` or an empty array when it has nothing to say;
+  those read as an empty record.
+- `or-text:object:X:field`: the record `X`, which the API answers as the text of its field `field` unless the request
+  asks for the whole record; the text reads as a record that holds it in that field.
+
+The member is left out rather than typed as untyped JSON.
 
 ## ZBX0003
 
 **A kind names a record or enum the description does not declare** (error). An `object:X`, `list:object:X` or `enum:X`
-names a type that is not in the description. The member is left out.
+names a type that is not in the description, or an `or-text:object:X:field` result names a field that `X` does not
+declare. The member is left out.
 
 ## ZBX0004
 

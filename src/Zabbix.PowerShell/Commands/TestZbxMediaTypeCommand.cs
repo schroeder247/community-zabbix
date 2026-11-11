@@ -9,7 +9,7 @@ namespace Community.Zabbix.PowerShell.Commands;
 /// <para type="synopsis">Sends a test message through a media type (<c>alert.send</c>).</para>
 /// </summary>
 [Cmdlet(VerbsDiagnostic.Test, "ZbxMediaType", SupportsShouldProcess = true, ConfirmImpact = ConfirmImpact.Medium)]
-[OutputType("Community.Zabbix.PowerShell.MediaTypeTestResult")]
+[OutputType(typeof(ZabbixAlertSendResult))]
 public sealed class TestZbxMediaTypeCommand : ZabbixServerWireCmdlet
 {
     /// <summary>The media type: an id, a name, or the object (<c>Get-ZbxMediaType | Test-ZbxMediaType</c> binds its <c>MediaTypeId</c>).</summary>
@@ -59,9 +59,9 @@ public sealed class TestZbxMediaTypeCommand : ZabbixServerWireCmdlet
                 if (ids.Count == 0) return null;
                 ZabbixAlertParameters? parameters = Given(Parameter) ?? await SavedParametersAsync(ids[0], cancellationToken).ConfigureAwait(false);
                 return await CallWireAsync(Server, (wire, token) => wire.SendAlertAsync(ids[0], SendTo!, Subject, Message, parameters, token), cancellationToken).ConfigureAwait(false);
-            }, out ZabbixServerReply? reply, MediaType) && reply is not null)
+            }, out ZabbixAlertSendResult? result, MediaType) && result is not null)
         {
-            WriteObject(ZabbixJsonShape.ToShell(reply.Data ?? ZabbixServerReplies.Envelope(reply), "Community.Zabbix.PowerShell.MediaTypeTestResult"));
+            WriteObject(result);
         }
     }
 

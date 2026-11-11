@@ -3,7 +3,8 @@
 The Zabbix framed-TCP wire: the frame and the exchange (with the HA node walk and proxy-group redirects), TLS with
 certificates and PSK, and `ZabbixWireClient` over it, which sends values (what `zabbix_sender` does), reads an item from an
 agent (what `zabbix_get` does) and asks a server (its trapper requests: queue, status, item test, alert test, expression
-evaluation, statistics). It does not need the JSON-RPC API package.
+evaluation, statistics), reading each reply into a record such as `ZabbixServerStatus`. It does not need the JSON-RPC
+API package.
 
 ```shell
 dotnet add package Community.Zabbix.Wire

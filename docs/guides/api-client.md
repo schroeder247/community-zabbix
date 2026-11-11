@@ -45,7 +45,11 @@ Pass the frontend's address and an API token. You must dispose a client you cons
 To set more than the address and the credential, use the builder:
 
 ```csharp
-using ILoggerFactory loggers = LoggerFactory.Create(logging => logging.AddConsole().AddZabbixRedaction());
+using ILoggerFactory loggers = LoggerFactory.Create(logging =>
+{
+    logging.AddConsole().EnableRedaction();
+    logging.Services.AddRedaction(redaction => redaction.SetZabbixRedactors());
+});
 
 await using ZabbixClient zabbix = ZabbixClient.CreateBuilder()
     .WithEndpoint("https://zabbix.example/")
@@ -373,13 +377,19 @@ a write that failed may still have happened.
 ```csharp
 ZabbixFrontend frontend = await zabbix.GetFrontendAsync();
 
-Uri form = frontend.UriFor(host);                                         // any API record with a page converts
+Uri form = frontend.UriFor(host);                                         // any API record with a page
 Uri latest = frontend.UriFor(host, ZabbixPageView.Latest);
 Uri map = frontend.UriFor(new ZabbixPageTarget(ZabbixPageKind.Map, 3UL));   // a bare id
 ```
 
 `GetFrontendAsync` pairs the frontend's address with the server's version, whose routes the links follow. Zabbix 7.0 opens most forms
 from their list, and 7.4 and 8.0 address them directly.
+
+- `UriFor` takes an `IZabbixFrontendPage`: every API record the frontend has a page for implements it (a host, an item, a dashboard, and
+  the other kinds `ZabbixPageKind` names), and so does `ZabbixPageTarget`. Code that holds an `object`, such as a pipeline, tests for
+  the interface: `if (record is IZabbixFrontendPage page)`.
+- `page.ToPageTarget()` shows what a link reads off the record: the kind, the id, and the name, host, context, event source or trigger a
+  route needs.
 
 - The frontend's address is the endpoint's folder: `https://zabbix.example/` for `https://zabbix.example/api_jsonrpc.php`. Set
   `ZabbixClientOptions.FrontendUri` when the frontend is elsewhere.
@@ -395,13 +405,15 @@ Register the client, and the container shares it, and disposes it:
 ```csharp
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Community.Zabbix;
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddZabbixClient("prod")
     .WithEndpoint("https://zabbix.example/")
     .Bind(builder.Configuration.GetSection("Zabbix:Servers:prod"));   // the token, kept out of the source
-builder.Logging.AddZabbixRedaction();          // erases [ZabbixSecret] values from logs
+builder.Logging.EnableRedaction();
+builder.Services.AddRedaction(redaction => redaction.SetZabbixRedactors());   // erases [ZabbixSecret] values from logs
 
 using IHost app = builder.Build();
 ZabbixClient zabbix = app.Services.GetRequiredService<IZabbixClientFactory>().Create("prod");

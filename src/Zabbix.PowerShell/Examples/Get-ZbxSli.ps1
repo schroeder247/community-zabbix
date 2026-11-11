@@ -9,8 +9,8 @@ Gets the service level indicators of an SLA.
 .DESCRIPTION
 The Get-ZbxSli cmdlet reads an SLA's report with sla.getsli: for each reporting period and each service the SLA covers,
 the uptime, downtime, error budget and the SLI reached. By default it reports the SLA's recent periods; -PeriodFrom,
--PeriodTo and -Periods choose others, and -ServiceId narrows the services. It writes one object as the server sent it
-and needs a connection made with Connect-ZbxServer.
+-PeriodTo and -Periods choose others, and -ServiceId narrows the services. It writes a ZabbixSliReport, whose Sli holds
+one list per period of one SLI per service, and needs a connection made with Connect-ZbxServer.
 #>
 #region Get an SLA's report
 # -Sla (position 0) takes the SLA's name, id or object.

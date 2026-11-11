@@ -93,7 +93,7 @@ public sealed class WireTrustReleaseTests : IDisposable, IObserver<DiagnosticLis
     [InlineData("Get-ZbxQueue -Server 127.0.0.1:{port} {tls}")]
     [InlineData("Get-ZbxQueue -Server 127.0.0.1:{port} -Details {tls}")]
     [InlineData("Test-ZbxExpression 'last(/web-01/agent.ping)=1' -Server 127.0.0.1:{port} {tls}")]
-    [InlineData("Test-ZbxItem -Data @{ type = 0; key_ = 'agent.ping' } -Server 127.0.0.1:{port} {tls}")]
+    [InlineData("Test-ZbxItem -Data @{ item = @{ type = 0; key = 'agent.ping' } } -Server 127.0.0.1:{port} {tls}")]
     public async Task A_server_wire_command_releases_its_certificate_and_key_when_its_call_ends(string command)
     {
         await using FakeZabbix api = await FakeZabbix.StartAsync();

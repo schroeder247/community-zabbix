@@ -913,13 +913,17 @@
    "name": "GetAsync"
   },
   "authentication.update": {
-   "name": "UpdateAsync"
+   "name": "UpdateAsync",
+   "result": "list:string",
+   "_source": "CAuthentication::update answers the names of the parameters it updated (CAuthentication.php 8.0:103)"
   },
   "autoregistration.get": {
    "name": "GetAsync"
   },
   "autoregistration.update": {
-   "name": "UpdateAsync"
+   "name": "UpdateAsync",
+   "result": "true",
+   "_source": "CAutoregistration::update answers true (CAutoregistration.php 8.0:84)"
   },
   "configuration.export": {
    "name": "ExportAsync",
@@ -928,11 +932,15 @@
   },
   "configuration.import": {
    "name": "ImportAsync",
-   "parameters": "ConfigurationImportRequest"
+   "parameters": "ConfigurationImportRequest",
+   "result": "or-empty:object:ConfigurationImportResult",
+   "_source": "CConfiguration::import answers true, or the missing objects when returnMissingObjects asks for them (CConfiguration.php 8.0:651-655)"
   },
   "configuration.importcompare": {
    "name": "ImportCompareAsync",
-   "parameters": "ConfigurationImportRequest"
+   "parameters": "ConfigurationImportRequest",
+   "result": "or-empty:object:ConfigurationComparison",
+   "_source": "CConfigurationImportcompare answers an empty array when nothing differs (CConfigurationImportcompare.php 7.0:117-175)"
   },
   "event.acknowledge": {
    "name": "AcknowledgeAsync"
@@ -957,10 +965,14 @@
    "name": "GetAsync"
   },
   "housekeeping.update": {
-   "name": "UpdateAsync"
+   "name": "UpdateAsync",
+   "result": "list:string",
+   "_source": "CHousekeeping::update answers the names of the parameters it updated (CHousekeeping.php 8.0:73)"
   },
   "script.execute": {
-   "name": "ExecuteAsync"
+   "name": "ExecuteAsync",
+   "result": "object:ScriptExecuteResult",
+   "_source": "see resultRecords.ScriptExecuteResult"
   },
   "script.getscriptsbyhosts": {
    "name": "GetByHostAsync",
@@ -974,10 +986,14 @@
    "name": "GetAsync"
   },
   "settings.update": {
-   "name": "UpdateAsync"
+   "name": "UpdateAsync",
+   "result": "list:string",
+   "_source": "CSettings::update answers the names of the parameters it updated (CSettings.php 8.0:221)"
   },
   "sla.getsli": {
-   "name": "GetSliAsync"
+   "name": "GetSliAsync",
+   "result": "object:SliReport",
+   "_source": "see resultRecords.SliReport"
   },
   "task.create": {
    "name": "CreateAsync"
@@ -987,10 +1003,13 @@
   },
   "token.generate": {
    "name": "GenerateAsync",
-   "result": "json"
+   "result": "list:object:GeneratedToken",
+   "_source": "see resultRecords.GeneratedToken"
   },
   "userdirectory.test": {
-   "name": "TestAsync"
+   "name": "TestAsync",
+   "result": "object:UserDirectoryTestResult",
+   "_source": "see resultRecords.UserDirectoryTestResult"
   },
   "usermacro.createglobal": {
    "name": "CreateGlobalAsync"
@@ -1011,15 +1030,20 @@
    "name": "ResetTotpAsync"
   },
   "user.login": {
-   "name": "LogOnAsync"
+   "name": "LogOnAsync",
+   "result": "or-text:object:AuthenticatedUser:sessionid",
+   "_source": "CUser::login answers the session id, or the user with userData (CUser.php 8.0:2458)"
   },
   "user.logout": {
-   "name": "LogOffAsync"
+   "name": "LogOffAsync",
+   "result": "true",
+   "_source": "CUser::logout answers true (CUser.php 8.0:2341-2380)"
   },
   "user.checkauthentication": {
    "name": "CheckAuthenticationAsync",
    "idempotent": true,
-   "_source": "CUser::checkAuthentication updates the session lastaccess only; sending it twice leaves the same state"
+   "_source": "CUser::checkAuthentication updates the session lastaccess only; sending it twice leaves the same state; see resultRecords.AuthenticatedUser",
+   "result": "object:AuthenticatedUser"
   },
   "host.massupdate": {
    "replacement": "use host.update",
@@ -1040,6 +1064,26 @@
    "replacement": "use template.update",
    "emulation": "MassUpdateEmulatedAsync",
    "_source": "the 7.0 and 7.4 frontends send the same request; the 8.0 frontend does the same (CControllerPopupMassupdateHost.php:477, CControllerTemplateMassupdate.php:353)"
+  },
+  "discoveryrule.copy": {
+   "result": "true",
+   "_source": "CDiscoveryRule::copy answers true (CDiscoveryRule.php 7.0:3244-3273)"
+  },
+  "ceprule.resettimewindows": {
+   "result": "object:CepRuleResetTimeWindowsResult",
+   "_source": "see resultRecords.CepRuleResetTimeWindowsResult"
+  },
+  "device.init": {
+   "result": "object:DeviceInitResult",
+   "_source": "see resultRecords.DeviceInitResult"
+  },
+  "device.onboard": {
+   "result": "object:DeviceOnboardResult",
+   "_source": "see resultRecords.DeviceOnboardResult"
+  },
+  "device.offboard": {
+   "result": "object:DeviceOffboardResult",
+   "_source": "see resultRecords.DeviceOffboardResult"
   }
  },
  "types": {
@@ -26858,7 +26902,7 @@
   "history.get.maxValueSize": true
  },
  "resultRecords": {
-  "_source": "results the source builds by hand, not from a table: history.push answers {\"response\":\"success\",\"data\":[…]} (CHistory::push, 8.0:459), one row per pushed value in order, with the item's id when the value named one the caller may write and an error when it was refused (trapper_history_push.c 8.0:465-545; LIVE 8.0.0rc1: a refused value's row carries the itemid as a JSON number and an error saying the client's address is not among the item's allowed hosts); action.get's selectFilter/selectOperations/selectRecoveryOperations/selectUpdateOperations, correlation.get's and discoveryrule.get's selectFilter build their replies from the conditions/operations rows by hand (CAction::addRelatedObjects, 8.0:1501-1840; CCorrelation, CDiscoveryRule): the same shapes the create validates, read, with their row ids",
+  "_source": "results the source builds by hand, not from a table: history.push answers {\"response\":\"success\",\"data\":[…]} (CHistory::push, 8.0:459), one row per pushed value in order, with the item's id when the value named one the caller may write and an error when it was refused (trapper_history_push.c 8.0:465-545; LIVE 8.0.0rc1: a refused value's row carries the itemid as a JSON number and an error saying the client's address is not among the item's allowed hosts); action.get's selectFilter/selectOperations/selectRecoveryOperations/selectUpdateOperations, correlation.get's and discoveryrule.get's selectFilter build their replies from the conditions/operations rows by hand (CAction::addRelatedObjects, 8.0:1501-1840; CCorrelation, CDiscoveryRule): the same shapes the create validates, read, with their row ids; the replies of the calls the API answers with a record built by hand rather than with ids: each record below carries its own _source",
   "HistoryPushResult": {
    "summary": "What <c>history.push</c> answers: <c>success</c>, and one row per pushed value, in order.",
    "fields": {
@@ -27129,6 +27173,682 @@
     }
    },
    "role": "nested-read"
+  },
+  "ScriptExecuteResult": {
+   "_source": "CScript::execute answers the server's reply to the command request in a backwards-compatible shape (CScript.php 7.0:970-975, 8.0:972-977): success, the script's output, and the server's debug section",
+   "summary": "What <c>script.execute</c> answers: the script's output and, for a webhook, its log.",
+   "fields": {
+    "response": {
+     "kind": "string",
+     "summary": "<c>success</c>: a script that fails is an API error, not a reply."
+    },
+    "value": {
+     "kind": "string",
+     "summary": "What the script printed, or a webhook returned."
+    },
+    "debug": {
+     "kind": "object:ScriptExecuteDebug",
+     "summary": "A webhook's log and how long it ran; absent for the other script types."
+    }
+   }
+  },
+  "ScriptExecuteDebug": {
+   "_source": "the JavaScript engine's debug section (src/libs/zbxembed/embed.c 8.0:636 opens logs, 8.0:744 adds ms; zabbix.c 8.0:96-100 adds one entry per Zabbix.log call)",
+   "summary": "A webhook script's log: what it wrote with <c>Zabbix.log</c>, and how long it ran.",
+   "fields": {
+    "logs": {
+     "kind": "list:object:ScriptExecuteLogEntry",
+     "name": "Entries",
+     "summary": "What the script logged, in the order it logged it."
+    },
+    "ms": {
+     "kind": "milliseconds",
+     "name": "Elapsed",
+     "summary": "How long the script ran."
+    }
+   }
+  },
+  "ScriptExecuteLogEntry": {
+   "_source": "one entry per Zabbix.log call (src/libs/zbxembed/zabbix.c 8.0:96-100): the level, the milliseconds since the script started, the message",
+   "summary": "One line a webhook script wrote with <c>Zabbix.log</c>.",
+   "fields": {
+    "level": {
+     "kind": "int",
+     "summary": "The level the script passed to <c>Zabbix.log</c>, from 1 (critical) to 5 (trace)."
+    },
+    "ms": {
+     "kind": "milliseconds",
+     "name": "Elapsed",
+     "summary": "How long the script had run when it wrote the line."
+    },
+    "message": {
+     "kind": "string",
+     "summary": "The text the script wrote."
+    }
+   }
+  },
+  "SliReport": {
+   "_source": "CSla::getSli answers the reporting periods, the services and one SLI per period and service (CSla.php 7.0:1088-1092, 8.0:1075-1079); calculateSli builds each cell (8.0:1251-1380)",
+   "summary": "What <c>sla.getsli</c> answers: an SLA's reporting periods, its services, and the SLI of each service in each period.",
+   "fields": {
+    "periods": {
+     "kind": "list:object:SliPeriod",
+     "summary": "The reporting periods, oldest first."
+    },
+    "serviceids": {
+     "kind": "list:id",
+     "name": "ServiceIds",
+     "summary": "The services the report covers, in the order of each period's SLIs."
+    },
+    "sli": {
+     "kind": "list:list:object:ServiceSli",
+     "name": "Sli",
+     "summary": "One list per period, in the order of <see cref=\"Periods\"/>, of one SLI per service, in the order of <see cref=\"ServiceIds\"/>."
+    }
+   }
+  },
+  "SliPeriod": {
+   "_source": "a reporting period of CSla::getSli (CSla.php 8.0:1203: period_from, period_to as Unix seconds)",
+   "summary": "One reporting period of an SLA's report.",
+   "fields": {
+    "period_from": {
+     "kind": "clock",
+     "name": "PeriodFrom",
+     "summary": "When the period starts."
+    },
+    "period_to": {
+     "kind": "clock",
+     "name": "PeriodTo",
+     "summary": "When the period ends."
+    }
+   }
+  },
+  "ServiceSli": {
+   "_source": "a cell of CSla::calculateSli (CSla.php 8.0:1251-1380): uptime, downtime and error budget in seconds, the SLI as a percentage (-1 with no data), the excluded downtimes that overlap the period",
+   "summary": "A service's SLI in one reporting period.",
+   "fields": {
+    "uptime": {
+     "kind": "seconds",
+     "summary": "How long the service was up in the period, excluded downtimes left out."
+    },
+    "downtime": {
+     "kind": "seconds",
+     "summary": "How long the service was down in the period, excluded downtimes left out."
+    },
+    "sli": {
+     "kind": "double",
+     "name": "Sli",
+     "summary": "The share of the period the service was up, as a percentage; -1 when the period has no data."
+    },
+    "error_budget": {
+     "kind": "seconds",
+     "name": "ErrorBudget",
+     "summary": "How much more downtime the period allows before the SLI falls below the SLO; negative once it has."
+    },
+    "excluded_downtimes": {
+     "kind": "list:object:SlaRecordExcludedDowntime",
+     "name": "ExcludedDowntimes",
+     "summary": "The SLA's excluded downtimes that overlap the period, clipped to it."
+    }
+   }
+  },
+  "GeneratedToken": {
+   "_source": "CToken::generate answers one row per token, with the token in clear text, which nothing else answers again (CToken.php 7.0:69-73, 8.0:478-482)",
+   "summary": "A token <c>token.generate</c> generated: its id, and the secret the server answers only this once.",
+   "fields": {
+    "tokenid": {
+     "kind": "id",
+     "name": "TokenId",
+     "summary": "The token's id."
+    },
+    "token": {
+     "kind": "string",
+     "summary": "The token itself, to authenticate with. The server keeps only its hash, so it answers it only here."
+    }
+   }
+  },
+  "AuthenticatedUser": {
+   "_source": "CUser::checkAuthentication and CUser::login with userData answer the user row (CUser.php 8.0:3134-3137 the columns), the group fields (addUserGroupFields, 8.0:2650-2654: debug_mode, deprovisioned, gui_access, mfaid), the authentication type (8.0:2417-2422), the user type and address (addAdditionalFields, 8.0:2904-2906), and the session id and secret of a session (8.0:3036-3037; login, createSession 8.0:2940-2941)",
+   "summary": "The user a session or an API token authenticates, as <c>user.checkAuthentication</c> answers it and <c>user.login</c> with <c>userData</c>.",
+   "fields": {
+    "userid": {
+     "like": "User.userid",
+     "name": "UserId",
+     "summary": "The user's id."
+    },
+    "username": {
+     "like": "User.username",
+     "name": "Username",
+     "summary": "The name the user signs in with."
+    },
+    "name": {
+     "like": "User.name",
+     "name": "FirstName",
+     "summary": "The user's first name."
+    },
+    "surname": {
+     "like": "User.surname",
+     "name": "LastName",
+     "summary": "The user's last name."
+    },
+    "url": {
+     "like": "User.url",
+     "name": "Url",
+     "summary": "The page the frontend opens after the user signs in."
+    },
+    "autologin": {
+     "like": "User.autologin",
+     "name": "AutoLogin",
+     "summary": "Whether the frontend keeps the user signed in."
+    },
+    "autologout": {
+     "like": "User.autologout",
+     "name": "AutoLogout",
+     "summary": "How long the user may be idle before the frontend signs them out; 0 never."
+    },
+    "lang": {
+     "like": "User.lang",
+     "name": "Language",
+     "summary": "The user's language, the server's default resolved."
+    },
+    "refresh": {
+     "like": "User.refresh",
+     "name": "Refresh",
+     "summary": "How often the user's pages refresh."
+    },
+    "theme": {
+     "like": "User.theme",
+     "name": "Theme",
+     "summary": "The user's frontend theme."
+    },
+    "attempt_failed": {
+     "like": "User.attempt_failed",
+     "name": "AttemptFailed",
+     "summary": "How many sign-ins failed in a row."
+    },
+    "attempt_ip": {
+     "like": "User.attempt_ip",
+     "name": "AttemptIp",
+     "summary": "The address of the last failed sign-in."
+    },
+    "attempt_clock": {
+     "kind": "clock",
+     "name": "AttemptClock",
+     "summary": "When the last failed sign-in was."
+    },
+    "rows_per_page": {
+     "like": "User.rows_per_page",
+     "name": "RowsPerPage",
+     "summary": "How many rows the user's lists show."
+    },
+    "timezone": {
+     "like": "User.timezone",
+     "name": "Timezone",
+     "summary": "The user's time zone, the server's default resolved."
+    },
+    "roleid": {
+     "like": "User.roleid",
+     "name": "RoleId",
+     "summary": "The user's role."
+    },
+    "userdirectoryid": {
+     "like": "User.userdirectoryid",
+     "name": "UserDirectoryId",
+     "summary": "The user directory that provisions the user; 0 for none."
+    },
+    "ts_provisioned": {
+     "kind": "clock",
+     "name": "TsProvisioned",
+     "summary": "When the user directory last provisioned the user."
+    },
+    "default_maintenance_period": {
+     "like": "User.default_maintenance_period",
+     "name": "DefaultMaintenancePeriod",
+     "versions": [
+      "8.0"
+     ],
+     "summary": "The period a maintenance the user creates starts with."
+    },
+    "type": {
+     "kind": "enum:USER_TYPE",
+     "summary": "The user's type, from their role: user, admin or super admin."
+    },
+    "gui_access": {
+     "kind": "enum:GROUP_GUI_ACCESS",
+     "name": "GuiAccess",
+     "summary": "How the user signs in to the frontend, from their groups."
+    },
+    "debug_mode": {
+     "kind": "bool",
+     "name": "DebugMode",
+     "summary": "Whether one of the user's groups turns the frontend's debug mode on."
+    },
+    "deprovisioned": {
+     "kind": "bool",
+     "summary": "Whether the user is in the group a user directory moves the users it no longer provisions to."
+    },
+    "mfaid": {
+     "kind": "id",
+     "name": "MfaId",
+     "summary": "The multi-factor authentication method the user signs in with; 0 for none."
+    },
+    "auth_type": {
+     "kind": "enum:ZBX_AUTH",
+     "name": "AuthenticationType",
+     "summary": "Whether the user signs in with an internal password or through LDAP."
+    },
+    "userip": {
+     "kind": "string",
+     "name": "UserIp",
+     "summary": "The address the request came from."
+    },
+    "sessionid": {
+     "kind": "string",
+     "name": "SessionId",
+     "secret": true,
+     "summary": "The session's id; absent when an API token authenticated the request."
+    },
+    "secret": {
+     "kind": "string",
+     "secret": true,
+     "summary": "The session's secret, which the frontend signs its forms with; absent when an API token authenticated the request."
+    }
+   }
+  },
+  "UserDirectoryTestResult": {
+   "_source": "CUserDirectory::test answers the test user (CUserDirectory.php 8.0:1180-1212): the user name, and with provisioning on what the directory provisions (CLdap::getProvisionedData 8.0:439-473: name, surname, medias, user groups, role) and the directory's id",
+   "summary": "What <c>userdirectory.test</c> answers: the test user, and what the directory provisions for them when provisioning is on.",
+   "fields": {
+    "username": {
+     "kind": "string",
+     "name": "UserName",
+     "summary": "The test user's name."
+    },
+    "name": {
+     "kind": "string",
+     "name": "FirstName",
+     "summary": "The first name the directory provisions."
+    },
+    "surname": {
+     "kind": "string",
+     "name": "LastName",
+     "summary": "The last name the directory provisions."
+    },
+    "medias": {
+     "kind": "list:object:UserDirectoryTestMedia",
+     "summary": "The media the directory provisions."
+    },
+    "usrgrps": {
+     "kind": "list:object:UserDirectoryTestUserGroup",
+     "name": "UserGroups",
+     "summary": "The user groups the directory's group mappings give the user."
+    },
+    "roleid": {
+     "kind": "id",
+     "name": "RoleId",
+     "summary": "The role the directory's group mappings give the user; 0 for none."
+    },
+    "userdirectoryid": {
+     "kind": "id",
+     "name": "UserDirectoryId",
+     "summary": "The directory tested, when the request named a saved one."
+    }
+   }
+  },
+  "UserDirectoryTestMedia": {
+   "_source": "a medium CProvisioning::getUserMedias builds (CProvisioning.php 8.0:268-290: name, mediatypeid, sendto)",
+   "summary": "A medium a user directory provisions.",
+   "fields": {
+    "name": {
+     "kind": "string",
+     "summary": "The name of the directory's media mapping."
+    },
+    "mediatypeid": {
+     "kind": "id",
+     "name": "MediaTypeId",
+     "summary": "The media type."
+    },
+    "sendto": {
+     "kind": "list:string",
+     "name": "SendTo",
+     "summary": "The addresses, from the directory's attribute."
+    }
+   }
+  },
+  "UserDirectoryTestUserGroup": {
+   "_source": "a user group of a matched group mapping (CProvisioning::getUserGroupsAndRole, CProvisioning.php 8.0:346)",
+   "summary": "A user group a user directory's group mapping gives the user.",
+   "fields": {
+    "usrgrpid": {
+     "kind": "id",
+     "name": "UserGroupId",
+     "summary": "The user group."
+    }
+   }
+  },
+  "ConfigurationImportResult": {
+   "_source": "CConfiguration::import answers true (CConfiguration.php 7.0:392), and from 8.0 the missing objects when returnMissingObjects asks for them (8.0:651-655)",
+   "summary": "What <c>configuration.import</c> answers: nothing unless the request asks for the objects the document names that the server lacks.",
+   "fields": {
+    "missingObjects": {
+     "kind": "object:ConfigurationMissingObjects",
+     "name": "MissingObjects",
+     "versions": [
+      "8.0"
+     ],
+     "summary": "The objects the document names that the server lacks, when the request asks for them."
+    }
+   }
+  },
+  "ConfigurationMissingObjects": {
+   "_source": "CConfiguration::import and importcompare with returnMissingObjects (8.0): the objects the document names that the server lacks, each by the fields that identify it (CMissingObjectCollector::getMissingObjects, CMissingObjectCollector.php 8.0:82-125)",
+   "summary": "The objects an import document names that the server lacks, by type.",
+   "versions": [
+    "8.0"
+   ],
+   "fields": {
+    "hosts": {
+     "kind": "list:object:ConfigurationMissingObject",
+     "name": "Hosts",
+     "summary": "Hosts, by name."
+    },
+    "hostgroups": {
+     "kind": "list:object:ConfigurationMissingObject",
+     "name": "HostGroups",
+     "summary": "Host groups, by name."
+    },
+    "items": {
+     "kind": "list:object:ConfigurationMissingObject",
+     "name": "Items",
+     "summary": "Items, by host and key."
+    },
+    "graphs": {
+     "kind": "list:object:ConfigurationMissingObject",
+     "name": "Graphs",
+     "summary": "Graphs, by host and name."
+    },
+    "services": {
+     "kind": "list:object:ConfigurationMissingObject",
+     "name": "Services",
+     "summary": "Services, by name."
+    },
+    "slas": {
+     "kind": "list:object:ConfigurationMissingObject",
+     "name": "Slas",
+     "summary": "SLAs, by name."
+    },
+    "actions": {
+     "kind": "list:object:ConfigurationMissingObject",
+     "name": "Actions",
+     "summary": "Actions, by name."
+    },
+    "mediatypes": {
+     "kind": "list:object:ConfigurationMissingObject",
+     "name": "MediaTypes",
+     "summary": "Media types, by name."
+    },
+    "sysmaps": {
+     "kind": "list:object:ConfigurationMissingObject",
+     "name": "Maps",
+     "summary": "Maps, by name."
+    },
+    "users": {
+     "kind": "list:object:ConfigurationMissingObject",
+     "name": "Users",
+     "summary": "Users, by user name."
+    }
+   }
+  },
+  "ConfigurationMissingObject": {
+   "_source": "CConfiguration::import and importcompare with returnMissingObjects (8.0): the objects the document names that the server lacks, each by the fields that identify it (CMissingObjectCollector::getMissingObjects, CMissingObjectCollector.php 8.0:82-125)",
+   "summary": "An object an import document names that the server lacks, by the fields that identify it.",
+   "versions": [
+    "8.0"
+   ],
+   "fields": {
+    "name": {
+     "kind": "string",
+     "summary": "The object's name."
+    },
+    "host": {
+     "kind": "string",
+     "name": "HostName",
+     "summary": "The host an item or a graph is on."
+    },
+    "key": {
+     "kind": "string",
+     "summary": "An item's key."
+    },
+    "username": {
+     "kind": "string",
+     "name": "UserName",
+     "summary": "A user's name."
+    }
+   }
+  },
+  "ConfigurationComparison": {
+   "_source": "CConfigurationImportcompare::importcompare answers the differences by entity type, or an empty array when there are none (CConfigurationImportcompare.php 7.0:42-64 the types, 8.0:40-140 adds global dashboards); with returnMissingObjects (8.0) the missing objects too (CConfiguration.php 8.0:583-585)",
+   "summary": "What <c>configuration.importcompare</c> answers: what importing the document would add, remove and update, by entity type.",
+   "fields": {
+    "template_groups": {
+     "kind": "object:ConfigurationChanges",
+     "name": "TemplateGroups",
+     "summary": "The template groups the import changes."
+    },
+    "host_groups": {
+     "kind": "object:ConfigurationChanges",
+     "name": "HostGroups",
+     "summary": "The host groups the import changes."
+    },
+    "templates": {
+     "kind": "object:ConfigurationChanges",
+     "summary": "The templates the import changes, each with the changes to what it holds."
+    },
+    "triggers": {
+     "kind": "object:ConfigurationChanges",
+     "summary": "The triggers on more than one template the import changes."
+    },
+    "graphs": {
+     "kind": "object:ConfigurationChanges",
+     "summary": "The graphs on more than one template the import changes."
+    },
+    "dashboards": {
+     "kind": "object:ConfigurationChanges",
+     "versions": [
+      "8.0"
+     ],
+     "summary": "The global dashboards the import changes."
+    },
+    "missingObjects": {
+     "kind": "object:ConfigurationMissingObjects",
+     "name": "MissingObjects",
+     "versions": [
+      "8.0"
+     ],
+     "summary": "The objects the document names that the server lacks, when the request asks for them."
+    }
+   }
+  },
+  "ConfigurationChanges": {
+   "_source": "one entity type of the comparison (CConfigurationImportcompare::compareArrayByUniqueness, 7.0:190-262): the entities added, removed and updated",
+   "summary": "What the import changes in one type of entity.",
+   "fields": {
+    "added": {
+     "kind": "list:object:ConfigurationChange",
+     "summary": "The entities the import adds."
+    },
+    "removed": {
+     "kind": "list:object:ConfigurationChange",
+     "summary": "The entities the import removes."
+    },
+    "updated": {
+     "kind": "list:object:ConfigurationChange",
+     "summary": "The entities the import updates."
+    }
+   }
+  },
+  "ConfigurationChange": {
+   "_source": "one entity of the comparison (CConfigurationImportcompare::compareByStructure, 7.0:117-175, 8.0:245-310): before and after, and the changes to what the entity holds by type",
+   "summary": "One entity the import adds, removes or updates: its two sides, and the changes to what it holds.",
+   "fields": {
+    "before": {
+     "kind": "json",
+     "json": "an entity of the import format, whose fields differ by entity type and version: the format, not the API, defines it",
+     "summary": "The entity as the server has it, without what it holds; absent for an added entity."
+    },
+    "after": {
+     "kind": "json",
+     "json": "an entity of the import format, whose fields differ by entity type and version: the format, not the API, defines it",
+     "summary": "The entity as the document has it, without what it holds; absent for a removed entity."
+    },
+    "items": {
+     "kind": "object:ConfigurationChanges",
+     "name": "Items",
+     "summary": "The changes to its items."
+    },
+    "triggers": {
+     "kind": "object:ConfigurationChanges",
+     "name": "Triggers",
+     "summary": "The changes to its triggers."
+    },
+    "discovery_rules": {
+     "kind": "object:ConfigurationChanges",
+     "name": "DiscoveryRules",
+     "summary": "The changes to its discovery rules."
+    },
+    "item_prototypes": {
+     "kind": "object:ConfigurationChanges",
+     "name": "ItemPrototypes",
+     "summary": "The changes to its item prototypes."
+    },
+    "trigger_prototypes": {
+     "kind": "object:ConfigurationChanges",
+     "name": "TriggerPrototypes",
+     "summary": "The changes to its trigger prototypes."
+    },
+    "graph_prototypes": {
+     "kind": "object:ConfigurationChanges",
+     "name": "GraphPrototypes",
+     "summary": "The changes to its graph prototypes."
+    },
+    "host_prototypes": {
+     "kind": "object:ConfigurationChanges",
+     "name": "HostPrototypes",
+     "summary": "The changes to its host prototypes."
+    },
+    "dashboards": {
+     "kind": "object:ConfigurationChanges",
+     "name": "Dashboards",
+     "summary": "The changes to its dashboards."
+    },
+    "httptests": {
+     "kind": "object:ConfigurationChanges",
+     "name": "HttpTests",
+     "summary": "The changes to its web scenarios."
+    },
+    "valuemaps": {
+     "kind": "object:ConfigurationChanges",
+     "name": "ValueMaps",
+     "summary": "The changes to its value maps."
+    },
+    "pages": {
+     "kind": "object:ConfigurationChanges",
+     "versions": [
+      "8.0"
+     ],
+     "summary": "The changes to a global dashboard's pages."
+    },
+    "widgets": {
+     "kind": "object:ConfigurationChanges",
+     "versions": [
+      "8.0"
+     ],
+     "summary": "The changes to a dashboard page's widgets."
+    }
+   }
+  },
+  "CepRuleResetTimeWindowsResult": {
+   "_source": "CCepRule::resetTimeWindows answers the request it was given (CCepRule.php 8.0:1664-1681)",
+   "summary": "What <c>ceprule.resettimewindows</c> answers: the rule whose windows it reset.",
+   "versions": [
+    "8.0"
+   ],
+   "fields": {
+    "cep_ruleid": {
+     "kind": "id",
+     "name": "CepRuleId",
+     "summary": "The rule."
+    }
+   }
+  },
+  "DeviceInitResult": {
+   "_source": "CDevice::init answers the device's identity and what enrols it (CDevice.php 8.0:211-218)",
+   "summary": "What <c>device.init</c> answers: the new device's id and what enrols it.",
+   "versions": [
+    "8.0"
+   ],
+   "fields": {
+    "uuid": {
+     "kind": "string",
+     "name": "Uuid",
+     "summary": "The device's id."
+    },
+    "enrollment_token": {
+     "kind": "string",
+     "name": "EnrollmentToken",
+     "secret": true,
+     "summary": "The token the device enrols with."
+    },
+    "enrollment_token_expires_at": {
+     "kind": "clock",
+     "name": "EnrollmentTokenExpiresAt",
+     "summary": "When the enrolment token expires."
+    },
+    "mobile_enrollment_token": {
+     "kind": "string",
+     "name": "MobileEnrollmentToken",
+     "secret": true,
+     "summary": "The token the mobile application enrols with."
+    },
+    "bridge_adapter_encryption_key": {
+     "kind": "string",
+     "name": "BridgeAdapterEncryptionKey",
+     "secret": true,
+     "summary": "The key the bridge adapter encrypts with."
+    },
+    "bridge_enrollment_url": {
+     "kind": "string",
+     "name": "BridgeEnrollmentUrl",
+     "summary": "Where the device enrols with the bridge."
+    }
+   }
+  },
+  "DeviceOnboardResult": {
+   "_source": "CDevice::onboard answers the device's token (CDevice.php 8.0:311)",
+   "summary": "What <c>device.onboard</c> answers: the token the device authenticates with.",
+   "versions": [
+    "8.0"
+   ],
+   "fields": {
+    "token": {
+     "kind": "string",
+     "summary": "The token the device authenticates with."
+    }
+   }
+  },
+  "DeviceOffboardResult": {
+   "_source": "CDevice::offboard answers the request it was given, less force (CDevice.php 8.0:445-485)",
+   "summary": "What <c>device.offboard</c> answers: the device it offboarded.",
+   "versions": [
+    "8.0"
+   ],
+   "fields": {
+    "uuid": {
+     "kind": "string",
+     "name": "Uuid",
+     "summary": "The device's id."
+    }
+   }
   }
  },
  "notFields": {

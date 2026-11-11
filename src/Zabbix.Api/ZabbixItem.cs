@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 namespace Community.Zabbix;
 
 /// <summary>What <c>item.get</c> adds to an item on request and what the tree reads off it.</summary>
-public sealed partial record ZabbixItem
+public sealed partial record ZabbixItem : IZabbixFrontendPage
 {
     /// <summary>
     /// The technical name of the item's host, when <c>selectHosts</c> included <c>host</c>; <see langword="null"/> otherwise
@@ -13,4 +13,12 @@ public sealed partial record ZabbixItem
     /// </summary>
     [JsonIgnore]
     public string? HostName => Hosts is [{ HostName: { } host }, ..] ? host : null;
+
+    /// <inheritdoc/>
+    ZabbixPageTarget IZabbixFrontendPage.ToPageTarget()
+        => new(ZabbixPageKind.Item, ItemId, Name)
+        {
+            HostId = HostId ?? ZabbixPageTarget.OnlyHost(Hosts)?.HostId,
+            Context = ZabbixPageTarget.ContextOf(Hosts),
+        };
 }

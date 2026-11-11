@@ -5,8 +5,9 @@
 Collects an item's value on the server without saving it.
 .DESCRIPTION
 The Test-ZbxItem cmdlet asks the server's trapper to run an item's collection and preprocessing (item.test), as the
-Test button of the frontend's item form does, and writes the result: the value, or the error that stopped it. -Data is
-what the frontend sends: the item, its host and the test options, as a hashtable keyed by the API's field names. It
+Test button of the frontend's item form does, and writes the result: the value, or the error that stopped it, and what
+each preprocessing step made of it. -Data is the request: a ZabbixItemTestRequest, or what the frontend sends, the
+item, its host and the test options, as a hashtable keyed by the server's field names or the request's member names. It
 saves nothing, so an item can be tried before it is created. It needs the trapper in -Server or the connection's.
 #>
 #region Test a calculated item's formula

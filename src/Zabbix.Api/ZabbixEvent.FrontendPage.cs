@@ -1,0 +1,14 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
+namespace Community.Zabbix;
+
+public sealed partial record ZabbixEvent : IZabbixFrontendPage
+{
+    /// <inheritdoc/>
+    ZabbixPageTarget IZabbixFrontendPage.ToPageTarget()
+        => new(ZabbixPageKind.Event, EventId, Name)
+        {
+            EventSource = Source,
+            TriggerId = ZabbixPageTarget.TriggerOf(Source, ObjectType, ObjectId),
+        };
+}

@@ -30,7 +30,7 @@ public sealed class SingletonAndUnfilteredCommandsTests
     public async Task Set_ZbxHousekeeping_sends_only_the_bound_fields()
     {
         await using FakeZabbix server = await FakeZabbix.StartAsync();
-        server.On("housekeeping.update", "{}");
+        server.On("housekeeping.update", """["hk_events_mode"]""");             // CHousekeeping::update: the names it updated
         server.On("housekeeping.get", """{"hk_history":"31d"}""");
         using Shell shell = Shell.Open();
         shell.Connect(server);
@@ -50,7 +50,7 @@ public sealed class SingletonAndUnfilteredCommandsTests
     {
         // Set-ZbxHousekeeping is a sink and writes nothing without -PassThru (Learn, "Support the PassThru Parameter").
         await using FakeZabbix server = await FakeZabbix.StartAsync();
-        server.On("housekeeping.update", "{}");
+        server.On("housekeeping.update", """["hk_events_mode"]""");             // CHousekeeping::update: the names it updated
         using Shell shell = Shell.Open();
         shell.Connect(server);
 
@@ -80,7 +80,7 @@ public sealed class SingletonAndUnfilteredCommandsTests
     public async Task Set_ZbxAuthentication_sends_only_the_bound_fields()
     {
         await using FakeZabbix server = await FakeZabbix.StartAsync();
-        server.On("authentication.update", "{}");
+        server.On("authentication.update", """["authentication_type"]""");     // CAuthentication::update: the names it updated
         server.On("authentication.get", """{"mfa_status":"1"}""");
         using Shell shell = Shell.Open();
         shell.Connect(server);
@@ -113,7 +113,7 @@ public sealed class SingletonAndUnfilteredCommandsTests
     public async Task Set_ZbxAutoregistration_decodes_the_secure_string_psk()
     {
         await using FakeZabbix server = await FakeZabbix.StartAsync();
-        server.On("autoregistration.update", "{}");
+        server.On("autoregistration.update", "true");                          // CAutoregistration::update answers true
         server.On("autoregistration.get", """{"tls_psk_identity":"auto-id"}""");
         using Shell shell = Shell.Open();
         shell.Connect(server);
@@ -133,7 +133,7 @@ public sealed class SingletonAndUnfilteredCommandsTests
         // -TlsAccept is an array (ZabbixTlsAcceptModes[]) so both an array literal and a comma string bind
         // to it; BuildRequest ORs every given mode onto the request's single [Flags] field.
         await using FakeZabbix server = await FakeZabbix.StartAsync();
-        server.On("autoregistration.update", "{}");
+        server.On("autoregistration.update", "true");                          // CAutoregistration::update answers true
         server.On("autoregistration.get", """{"tls_accept":3}""");
         using Shell shell = Shell.Open();
         shell.Connect(server);
@@ -149,7 +149,7 @@ public sealed class SingletonAndUnfilteredCommandsTests
     public async Task Set_ZbxSetting_still_takes_the_typed_Request_cast_from_a_hashtable()
     {
         await using FakeZabbix server = await FakeZabbix.StartAsync();
-        server.On("settings.update", "{}");
+        server.On("settings.update", """["work_period"]""");                     // CSettings::update: the names it updated
         server.On("settings.get", """{"work_period":"1-5,09:00-18:00"}""");
         using Shell shell = Shell.Open();
         shell.Connect(server);

@@ -39,9 +39,11 @@ still flow. This sample takes `Community.Zabbix.Sdk` for the client and `Communi
 ```csharp
 using OpenTelemetry.Logs;
 
-using ILoggerFactory loggers = LoggerFactory.Create(logging => logging
-    .AddZabbixRedaction()                                                             // secrets and item keys stay out
-    .AddOpenTelemetry(o => o.AddOtlpExporter()));
+using ILoggerFactory loggers = LoggerFactory.Create(logging =>
+{
+    logging.EnableRedaction().AddOpenTelemetry(o => o.AddOtlpExporter());
+    logging.Services.AddRedaction(redaction => redaction.SetZabbixRedactors());         // secrets and item keys stay out
+});
 
 await using ZabbixClient client = ZabbixClient.CreateBuilder()
     .WithEndpoint("https://zabbix.example/")
@@ -139,31 +141,36 @@ category. To quiet it, set `"Logging": { "LogLevel": { "Polly": "Warning" } }`. 
 ## Redact logs
 
 ```csharp
-builder.Logging.AddZabbixRedaction();
+builder.Logging.EnableRedaction();
+builder.Services.AddRedaction(redaction => redaction.SetZabbixRedactors());
 ```
 
-`AddZabbixRedaction`, in `Community.Zabbix.Sdk`, turns on the explicit policy for each class of `ZabbixDataClassifications`. Without it, a
-classified value still stays out of the message and the state, because a plain logger drops it.
+`EnableRedaction` turns redaction on for your application's logs, and `SetZabbixRedactors`, in `Community.Zabbix.Abstractions`, sets the
+SDK's redactor for each class of `ZabbixDataClassifications`. Without them, a classified value still stays out of the message and the
+state, because a plain logger drops it.
 
-| Class | Attribute | What it holds | What the policy does |
+| Class | Attribute | What it holds | What the SDK's redactor does |
 | --- | --- | --- | --- |
 | `Secret` | `[ZabbixSecret]` | Tokens, passwords, and pre-shared keys: `ZabbixClientOptions.ApiToken`, `ZabbixListenerOptions.PreSharedKeys`, `ZabbixConnectorOptions.BearerToken` | Erases it in every environment |
 | `ItemKey` | `[ZabbixItemKeyData]` | Item keys | Keeps the name and masks the parameters (`ZabbixItemKeyRedactor`): `web.page.get[host,,user:password]` is logged as `web.page.get[***]` |
 | `PeerText` | `[ZabbixPeerText]` | A server's, proxy's, or agent's own explanation | Writes `[redacted]` (`ZabbixPeerTextRedactor`), because Zabbix echoes the request into it |
-| `Personal` | `[ZabbixPersonal]` | User names | Erases it, as it does any class without a redactor |
+| `Personal` | `[ZabbixPersonal]` | User names | Nothing: your fallback redactor handles it, as it handles any class without a redactor. The default fallback erases it |
 
-- The policy turns the logger's discriminator off, so a bare key keeps its name.
-- An application that takes `Community.Zabbix.Wire` or the hosting packages without `Community.Zabbix.Sdk` registers the same policy itself. The
-  remarks on `ZabbixItemKeyRedactor` show the calls.
+- `SetZabbixRedactors` sets redactors for the SDK's classes and nothing else. The fallback, the logger's options, and every other
+  library's classes stay yours.
+- The item-key redactor reads a key with the logger's discriminator on or off, so a bare key keeps its name either way.
+- Every package's application sets the redactors the same way: the extension is in `Community.Zabbix.Abstractions`.
 - Exported spans aren't redacted, so they carry error types and never messages.
 
-To see a class in full on a trusted sink, register a pass-through after the call:
+To see a class in full on a trusted sink, set a pass-through after the SDK's redactors:
 
 ```csharp
 using Microsoft.Extensions.Compliance.Redaction;
 
-builder.Logging.AddZabbixRedaction();
-builder.Services.AddRedaction(r => r.SetRedactor<NullRedactor>(ZabbixDataClassifications.ItemKey));   // trusted sinks only
+builder.Logging.EnableRedaction();
+builder.Services.AddRedaction(redaction => redaction
+    .SetZabbixRedactors()
+    .SetRedactor<NullRedactor>(ZabbixDataClassifications.ItemKey));   // trusted sinks only
 ```
 
 ## Run a local collector
@@ -187,7 +194,8 @@ The host's own builder subscribes once, for every registration:
 using OpenTelemetry;                                 // UseOtlpExporter
 using Community.Zabbix.Diagnostics;                  // ZabbixTelemetryNames
 
-builder.Logging.AddZabbixRedaction();
+builder.Logging.EnableRedaction();
+builder.Services.AddRedaction(redaction => redaction.SetZabbixRedactors());
 builder.Services.AddOpenTelemetry()
     .WithTracing(t => t.AddSource(ZabbixTelemetryNames.Subscription))      // "Community.Zabbix.*"
     .WithMetrics(m => m.AddMeter(ZabbixTelemetryNames.Subscription))

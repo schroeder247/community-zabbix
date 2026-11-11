@@ -9,7 +9,8 @@ namespace Community.Zabbix.PowerShell.Tests;
 
 /// <summary>
 /// The module logs exactly as an application on the SDK's policy does: a connection's container and the loggers of a
-/// session or a connection-less command render a classified event the way <c>AddZabbixRedaction</c> alone renders it
+/// session or a connection-less command render a classified event the way an application with the logger's defaults and
+/// the SDK's redactors (<c>SetZabbixRedactors</c>) renders it
 /// (a bare key keeps its name, a key's parameters are masked, a peer's text reads <c>[redacted]</c>). A composition that
 /// drifts from the SDK's fails here, not in an operator's log.
 /// </summary>
@@ -33,7 +34,11 @@ public sealed class ModuleRedactionTests
     public void The_sdk_s_policy_alone_renders_the_event_as_the_module_must()
     {
         using var logs = new ZabbixPowerShellLoggerProvider();
-        using ILoggerFactory loggers = LoggerFactory.Create(logging => logging.ClearProviders().SetMinimumLevel(LogLevel.Trace).AddZabbixRedaction().AddProvider(logs));
+        using ILoggerFactory loggers = LoggerFactory.Create(logging =>
+        {
+            logging.ClearProviders().SetMinimumLevel(LogLevel.Trace).EnableRedaction().AddProvider(logs);
+            logging.Services.AddRedaction(redaction => redaction.SetZabbixRedactors());
+        });
 
         Log(loggers);
 

@@ -62,7 +62,7 @@ public sealed class AdversarialErrorSurfaceTests
     [Theory]
     [InlineData("Get-ZbxQueue -Server 127.0.0.1:1")]
     [InlineData("Send-ZbxData web-01 agent.ping 1 -Server 127.0.0.1:1 -Confirm:$false")]
-    [InlineData("Test-ZbxItem -Data @{ key = 'k' } -Server 127.0.0.1:1")]
+    [InlineData("Test-ZbxItem -Data @{ item = @{ key = 'k' } } -Server 127.0.0.1:1")]
     public async Task A_trapper_that_refuses_the_connection_is_a_ConnectionError(string script)
     {
         // ZabbixErrors.CategoryOf maps the SocketException (or IOException over one) the server's own protocol throws to

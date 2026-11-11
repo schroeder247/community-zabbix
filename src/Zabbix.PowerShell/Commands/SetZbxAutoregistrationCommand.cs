@@ -44,7 +44,10 @@ public sealed class SetZbxAutoregistrationCommand : ZabbixSingletonSetCmdlet<Zab
 
     /// <inheritdoc/>
     protected override async Task<object?> UpdateAsync(ZabbixClient client, ZabbixAutoregistrationUpdateRequest request, CancellationToken cancellationToken)
-        => await client.Autoregistration.UpdateAsync(request, cancellationToken).ConfigureAwait(false);
+    {
+        await client.Autoregistration.UpdateAsync(request, cancellationToken).ConfigureAwait(false);
+        return null;
+    }
 
     /// <inheritdoc/>
     protected override async Task<object?> GetAsync(CancellationToken cancellationToken)

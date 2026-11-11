@@ -27,10 +27,17 @@ These are the known gaps and deliberate limits of the alpha, before 1.0.0.
   `DateTimeOffset.UnixEpoch`, not as `null`.
 - **Times round to 100 ns.** Zabbix stores nanoseconds and a `DateTimeOffset` holds 100 ns ticks, so a public time, a
   PowerShell `-Clock` and `-Ns` round to that. The SDK keeps the exact instant when it reads history, watches, and forwards a value.
-- **Fourteen fields are untyped JSON.** Fields whose shape Zabbix does not fix (for example free-form parameter bags and
+- **Sixteen fields are untyped JSON.** Fields whose shape Zabbix does not fix (for example free-form parameter bags and
   fields whose content depends on another field's value) are `JsonElement?`; they are the fields marked
-  `"kind": "json"` in `schema/zabbix-api.json`. `ZabbixWireClient.GetStatsAsync` and `GetStatusAsync` also answer
-  `JsonElement`.
+  `"kind": "json"` in `schema/zabbix-api.json`. Two of them hold an entity of `configuration.importcompare`'s answer
+  (`ZabbixConfigurationChange.Before` and `After`): it is a piece of the import format, not an API object.
+- **Some statistics stay as the server sent them.** `ZabbixServerStatistics` types what a server and a proxy of every
+  supported version answer alike. A server's HA nodes and proxies, its values-per-second limit and trend cache, and a
+  proxy's buffer are in its `AdditionalFields`, because they come whole from another component or change between
+  versions.
+- **The wire's requests number the API's enumerations.** `Community.Zabbix.Wire` doesn't reference the API's records, so
+  `ZabbixItemTestItem.ItemType`, `ZabbixReportTestRequest.Period` and their kind are the numbers Zabbix uses:
+  `(int)ZabbixItemType.Calculated`.
 - **Version gating is at run time.** A method or field that the connected server's version does not have throws
   `ZabbixVersionException` before the request is sent. There is no analyzer that reports such a call at compile time,
   and the exception is not counted in the API's metrics, because no request was made.
@@ -106,14 +113,13 @@ These are the known gaps and deliberate limits of the alpha, before 1.0.0.
   `error.type`) and `zabbix.proxy.values`. A dashboard on the counters sees all of them; the
   log shows each distinct problem.
 - **Item keys are kept out of logs by default.** A logged item key is `ZabbixDataClassifications.ItemKey`: a plain logger
-  drops it, and `AddZabbixRedaction` keeps its name and masks its parameters (`web.page.get[***]`) until the
-  application registers another redactor for that class (a pass-through on a trusted sink); a key's bare name (event
-  3211) is not classified. `AddZabbixRedaction` is in `Community.Zabbix.Sdk`; an application that takes only
-  `Community.Zabbix.Wire`, `Community.Zabbix.Agent` or `Community.Zabbix.Proxy` registers `ZabbixItemKeyRedactor` in its own `AddRedaction` call, with the
-  logger's discriminator off (`EnableRedaction(o => o.ApplyDiscriminator = false)`), which otherwise erases a bare key.
+  drops it, and the SDK's redactor (`SetZabbixRedactors`) keeps its name and masks its parameters (`web.page.get[***]`)
+  until the application sets another redactor for that class (a pass-through on a trusted sink); a key's bare name
+  (event 3211) is not classified. `SetZabbixRedactors` is in `Community.Zabbix.Abstractions`, so every package's
+  application sets it the same way, and it reads a value with the logger's discriminator on or off.
 - **A peer's text is marked, not shown.** A server's, proxy's or agent's own explanation (an API error's `data`, a
   refusal's `info`) is `ZabbixDataClassifications.PeerText`, because Zabbix echoes the request into it: under
-  `AddZabbixRedaction` it reads `[redacted]` (`ZabbixPeerTextRedactor`). A pass-through redactor for the class shows it
+  `SetZabbixRedactors` it reads `[redacted]` (`ZabbixPeerTextRedactor`). A pass-through redactor for the class shows it
   on a trusted sink.
 - **A listener refuses credentials it would not use.** A pre-shared key or certificate set on a listener whose `TlsAccept`
   does not include it fails validation at start, which upstream allows when `TLSAccept` is present.

@@ -6,10 +6,12 @@ using System.Text.Json.Serialization;
 namespace Community.Zabbix;
 
 /// <summary>
-/// What the server answers on its wire when it says <c>success</c>: the data, an <c>info</c> line, and a <c>total</c>
+/// Represents what the server answers on its wire when it says <c>success</c>, as
+/// <see cref="ZabbixWireClient.SendRequestAsync"/> hands it back: the data, an <c>info</c> line, and a <c>total</c>
 /// where the request counts (<c>queue.get</c> details). The shape is <c>zbx_send_response_json</c>'s
 /// (<c>src/libs/zbxcommshigh/commshigh.c</c>) and what <c>CZabbixServer::normalizeResponse</c> accepts; a
-/// <c>failed</c> reply never becomes one of these — it is a <see cref="ZabbixServerRefusedException"/>.
+/// <c>failed</c> reply never becomes one of these — it is a <see cref="ZabbixServerRefusedException"/>. The client's own
+/// methods read their replies into model types; this is the low-level path's.
 /// </summary>
 /// <param name="Response">Always <c>success</c>.</param>
 /// <param name="Data">The data, when the request has any.</param>

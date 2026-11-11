@@ -1,9 +1,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
-using System.Globalization;
 using System.Management.Automation;
 using System.Security;
-using System.Text.Json;
 
 namespace Community.Zabbix.PowerShell.Commands.Generated;
 
@@ -26,19 +24,18 @@ public sealed partial class NewTokenCommand
     {
         ArgumentNullException.ThrowIfNull(created);
         if (!Generate) return await base.CompleteAsync(ids, created, cancellationToken).ConfigureAwait(false);
-        JsonElement generated = await ZabbixClient.Tokens.GenerateAsync(ids, cancellationToken).ConfigureAwait(false);
-        // token.generate answers [{tokenid, token}], one entry per id.
-        var secrets = new Dictionary<string, SecureString>(StringComparer.Ordinal);
-        foreach (JsonElement entry in generated.EnumerateArray())
+        IReadOnlyList<ZabbixGeneratedToken> generated = await ZabbixClient.Tokens.GenerateAsync(ids, cancellationToken).ConfigureAwait(false);
+        // token.generate answers one token per id.
+        var secrets = new Dictionary<ulong, SecureString>();
+        foreach (ZabbixGeneratedToken entry in generated)
         {
-            if (entry.TryGetProperty("tokenid", out JsonElement id) && entry.TryGetProperty("token", out JsonElement token))
-                secrets[id.ToString()] = Secure(token);
+            if (entry is { TokenId: ulong id, Token: { } token }) secrets[id] = Secure(token);
         }
         var written = new List<object>(created.Count);
         foreach (ZabbixToken record in created)
         {
             var shell = new PSObject(record);
-            if (record.TokenId is { } tokenId && secrets.TryGetValue(tokenId.ToString(CultureInfo.InvariantCulture), out SecureString? secret))
+            if (record.TokenId is { } tokenId && secrets.TryGetValue(tokenId, out SecureString? secret))
                 shell.Properties.Add(new PSNoteProperty("Secret", secret));
             written.Add(shell);
         }
@@ -46,10 +43,10 @@ public sealed partial class NewTokenCommand
     }
 
     // The reply's string is the one plain copy of the secret, and nothing keeps it once the SecureString is filled.
-    private static SecureString Secure(JsonElement token)
+    private static SecureString Secure(string token)
     {
         var secret = new SecureString();
-        foreach (char c in token.GetString() ?? string.Empty) secret.AppendChar(c);
+        foreach (char c in token) secret.AppendChar(c);
         secret.MakeReadOnly();
         return secret;
     }

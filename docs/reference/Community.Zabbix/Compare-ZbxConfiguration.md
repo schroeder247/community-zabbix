@@ -174,7 +174,7 @@ This command supports the common parameters: `-Debug`, `-ErrorAction`, `-ErrorVa
 
 ## OUTPUTS
 
-- `Community.Zabbix.PowerShell.ConfigurationDifference`: The objects this command writes.
+- `ZabbixConfigurationComparison`: What configuration.importcompare answers: what importing the document would add, remove and update, by entity type.
 
 ## RELATED LINKS
 

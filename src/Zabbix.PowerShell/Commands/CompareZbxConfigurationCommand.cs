@@ -11,7 +11,7 @@ namespace Community.Zabbix.PowerShell.Commands;
 /// objects, so a diff with plaintext secrets is gated the same way <c>Export-ZbxConfiguration</c> is.</para>
 /// </summary>
 [Cmdlet(VerbsData.Compare, "ZbxConfiguration", DefaultParameterSetName = ParameterSets.Path)]
-[OutputType("Community.Zabbix.PowerShell.ConfigurationDifference")]
+[OutputType(typeof(ZabbixConfigurationComparison))]
 public sealed class CompareZbxConfigurationCommand : ZabbixServerCmdlet
 {
     private static class ParameterSets
@@ -77,18 +77,20 @@ public sealed class CompareZbxConfigurationCommand : ZabbixServerCmdlet
     private void Compare(string text, string target, ZabbixConfigurationFormat? format)
     {
         if (!TryRun(cancellationToken => ZabbixClient.Configuration.ImportCompareAsync(
-            new ZabbixConfigurationImportRequest { Format = format?.ToWire() ?? TestZbxConfigurationCommand.DetectFormat(text), Source = text, Rules = Rules! }, cancellationToken), out JsonElement diff, target))
+            new ZabbixConfigurationImportRequest { Format = format?.ToWire() ?? TestZbxConfigurationCommand.DetectFormat(text), Source = text, Rules = Rules! }, cancellationToken), out ZabbixConfigurationComparison? diff, target))
         {
             return;
         }
 
-        string raw = diff.GetRawText();
+        // The secrets are found in the diff's JSON, as they are in an exported document; the comparison is read back from
+        // the redacted text, so the written object never holds one the user didn't ask for.
+        System.Text.Json.Serialization.Metadata.JsonTypeInfo<ZabbixConfigurationComparison> contract = ZabbixContracts.Of<ZabbixConfigurationComparison>();
+        string raw = JsonSerializer.Serialize(diff, contract);
+        if (raw == "{}") return;                                         // in sync: nothing to write, as the server's [] is
         (string redacted, int count) = ZabbixConfigurationSecrets.Redact(raw, "json");
-        // The diff as ConvertFrom-Json shapes it (navigable: $diff.templates.added), enumerated — an
-        // unchanged document's [] writes nothing, not one JsonElement.
-        JsonElement shown = ZabbixSecretDisclosure.ShouldDisclose(this, count, Unredacted, "This diff")
-            ? diff
-            : JsonSerializer.Deserialize<JsonElement>(redacted);
-        WriteObject(ZabbixJsonShape.ToShell(shown, "Community.Zabbix.PowerShell.ConfigurationDifference"), enumerateCollection: true);
+        ZabbixConfigurationComparison shown = ZabbixSecretDisclosure.ShouldDisclose(this, count, Unredacted, "This diff")
+            ? diff!
+            : JsonSerializer.Deserialize(redacted, contract)!;
+        WriteObject(shown);
     }
 }
