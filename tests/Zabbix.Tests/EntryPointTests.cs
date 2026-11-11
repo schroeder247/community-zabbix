@@ -24,14 +24,14 @@ public sealed class EntryPointTests
     [InlineData("https://zabbix.example/zabbix/API_JSONRPC.PHP", "https://zabbix.example/zabbix/API_JSONRPC.PHP")]
     [InlineData("https://zabbix.example/gateway.php", "https://zabbix.example/gateway.php")]
     public void The_api_endpoint_is_the_frontend_s_api_jsonrpc_php_unless_a_script_is_named(string address, string endpoint)
-        => Assert.Equal(endpoint, ZabbixOptions.GetApiEndpoint(new Uri(address)).AbsoluteUri);
+        => Assert.Equal(endpoint, ZabbixClientOptions.GetApiEndpoint(new Uri(address)).AbsoluteUri);
 
     [Fact]
     public void A_relative_address_is_left_for_the_endpoint_s_own_validation()
     {
         var relative = new Uri("zabbix", UriKind.Relative);
 
-        Assert.Same(relative, ZabbixOptions.GetApiEndpoint(relative));
+        Assert.Same(relative, ZabbixClientOptions.GetApiEndpoint(relative));
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public sealed class EntryPointTests
     public void A_registered_client_reads_the_frontend_s_address_the_same_way()
     {
         var services = new ServiceCollection();
-        services.AddZabbix().Configure(options => options.Endpoint = new Uri("https://zabbix.example/zabbix/"));
+        services.AddZabbixClient().Configure(options => options.Endpoint = new Uri("https://zabbix.example/zabbix/"));
         using ServiceProvider provider = services.BuildValidated();
 
         Assert.Equal("https://zabbix.example/zabbix/api_jsonrpc.php", provider.GetRequiredService<ZabbixClient>().Endpoint.AbsoluteUri);

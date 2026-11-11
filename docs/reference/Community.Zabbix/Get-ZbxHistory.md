@@ -60,7 +60,7 @@ $filter = [Community.Zabbix.ZabbixHistoryGetParameters]@{
 Get-ZbxHistory -Filter $filter | Select-Object Clock, Value
 ```
 
--Filter takes history.get's own parameters: History picks the value type (Float, Character, Log, Unsigned, Text...), TimeFrom/TimeTill bound the window (Unix time). -ValueType, -From and -Till say the same without -Filter.
+-Filter takes history.get's own parameters: History picks the value type (Float, Character, Log, Unsigned, Text...), TimeFrom/TimeTo bound the window (Unix time). -ValueType, -From and -Till say the same without -Filter.
 
 ## PARAMETERS
 

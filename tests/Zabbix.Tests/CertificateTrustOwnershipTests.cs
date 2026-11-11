@@ -46,7 +46,7 @@ public sealed class CertificateTrustOwnershipTests : IDisposable
     [Fact]
     public async Task A_wire_client_releases_the_certificates_and_keys_it_read_when_disposed()
     {
-        var wire = new ZabbixWireClient(new ZabbixWireOptions { Server = $"127.0.0.1:{ClosedPort()}", Connection = new ZabbixConnectionOptions { Tls = _certificate } });
+        var wire = new ZabbixWireClient(new ZabbixWireClientOptions { Server = $"127.0.0.1:{ClosedPort()}", Connection = new ZabbixConnectionOptions { Tls = _certificate } });
         await Assert.ThrowsAsync<SocketException>(() => wire.PingAsync(TestContext.Current.CancellationToken));
         await Assert.ThrowsAsync<SocketException>(() => wire.GetAgentItemAsync($"127.0.0.1:{ClosedPort()}", "agent.ping", TestContext.Current.CancellationToken));
         ZabbixCertificateTrust[] trust = [.. wire.Links.Select(link => link.Trust!)];
@@ -62,7 +62,7 @@ public sealed class CertificateTrustOwnershipTests : IDisposable
     public async Task A_certificate_file_that_cannot_be_read_fails_a_wire_client_s_first_request_as_its_state()
     {
         var unreadable = new ZabbixTlsOptions { Mode = ZabbixTlsMode.Certificate, CaFile = Path.Combine(_directory, "absent.pem"), CertificateFile = _certificate.CertificateFile, KeyFile = _certificate.KeyFile };
-        using var wire = new ZabbixWireClient(new ZabbixWireOptions { Server = "127.0.0.1", Connection = new ZabbixConnectionOptions { Tls = unreadable } });
+        using var wire = new ZabbixWireClient(new ZabbixWireClientOptions { Server = "127.0.0.1", Connection = new ZabbixConnectionOptions { Tls = unreadable } });
 
         InvalidOperationException failed = await Assert.ThrowsAsync<InvalidOperationException>(() => wire.PingAsync(TestContext.Current.CancellationToken));
 

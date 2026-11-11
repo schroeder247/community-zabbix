@@ -4,8 +4,8 @@ using Microsoft.Extensions.Options;
 
 namespace Community.Zabbix;
 
-/// <summary>The generated validator for <see cref="ZabbixOptions"/>: a bad document fails at start, not at the first request.</summary>
+/// <summary>The generated validator for <see cref="ZabbixClientOptions"/>: a bad document fails at start, not at the first request.</summary>
 [OptionsValidator]
-internal sealed partial class ZabbixOptionsValidator : IValidateOptions<ZabbixOptions>
+internal sealed partial class ZabbixClientOptionsValidator : IValidateOptions<ZabbixClientOptions>
 {
 }

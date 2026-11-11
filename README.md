@@ -262,12 +262,12 @@ See [PowerShell](docs/guides/powershell.md) and the [command reference](docs/ref
 ### Register in a host
 
 In a worker service or an ASP.NET Core application, bind named clients and hosted agents from configuration, and add in code what
-a file can't hold. `AddZabbix` and `AddZabbixActiveAgent` take the verbs their classes' `CreateBuilder` takes:
+a file can't hold. `AddZabbixClient` and `AddZabbixActiveAgent` take the verbs their classes' `CreateBuilder` takes:
 
 ```csharp
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddZabbixClients(builder.Configuration);       // Zabbix:Servers:{name}
-builder.Services.AddZabbix("prod")                              // the server the file declares: what code adds
+builder.Services.AddZabbixClient("prod")                        // the server the file declares: what code adds
     .WithTimeout("configuration.import", TimeSpan.FromMinutes(5));
 builder.Services.AddZabbixAgents(builder.Configuration);        // Zabbix:ActiveAgents:{name} and the other agents
 builder.Services.AddZabbixActiveAgent("web-01")                 // the agent the file declares: its items

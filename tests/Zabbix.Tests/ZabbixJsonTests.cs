@@ -20,7 +20,7 @@ public sealed class ZabbixJsonTests
         Assert.Equal(both.GetHashCode(), ZabbixOutput.Of(ZabbixHostFields.HostId, ZabbixHostFields.VisibleName).GetHashCode());
         Assert.Equal(ZabbixOutput<ZabbixHost>.FromZabbixOutput(ZabbixOutput.Extend), (ZabbixOutput<ZabbixHost>)ZabbixOutput.Extend);
         Assert.NotEqual(both, ZabbixOutput.Of(ZabbixHostFields.VisibleName, ZabbixHostFields.HostId));
-        Assert.NotEqual((ZabbixOutput<ZabbixHost>)ZabbixOutput.Count, ZabbixOutput.Of(new ZabbixField<ZabbixHost>("count")));
+        Assert.NotEqual((ZabbixOutput<ZabbixHost>)ZabbixOutput.Extend, ZabbixOutput.Of(new ZabbixField<ZabbixHost>("extend")));
     }
 
     [Fact]

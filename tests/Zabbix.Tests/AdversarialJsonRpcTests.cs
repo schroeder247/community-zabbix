@@ -107,7 +107,7 @@ public sealed class AdversarialJsonRpcTests
         // frontend's address, which the SDK turns into its api_jsonrpc.php before anything is sent.)
         using var handler = new Echoing("\r\n<!DOCTYPE html><html><head><title>Zabbix</title></head></html>", "text/html");
         using Harness harness = TransportHarness.Build(handler, token: null, configure: services =>
-            services.Configure<ZabbixOptions>(options => options.Endpoint = new Uri(endpoint)));
+            services.Configure<ZabbixClientOptions>(options => options.Endpoint = new Uri(endpoint)));
         using var capture = new ApiTelemetryCapture(harness.Provider);
 
         InvalidDataException failure = await Assert.ThrowsAsync<InvalidDataException>(() => CallAsync(harness));
@@ -571,7 +571,7 @@ public sealed class AdversarialJsonRpcTests
     private static (ServiceProvider Provider, IZabbixTransport Transport, FakeLogCollector Logs) Real(Uri endpoint)
     {
         var services = new ServiceCollection();
-        services.AddZabbix().Configure(options =>
+        services.AddZabbixClient().Configure(options =>
         {
             options.Endpoint = endpoint;
             options.ApiToken = Token;

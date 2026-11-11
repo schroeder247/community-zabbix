@@ -14,7 +14,7 @@ public sealed class OptionsTests
     public void A_missing_endpoint_fails_at_start_not_at_the_first_request()
     {
         var services = new ServiceCollection();
-        services.AddZabbix();
+        services.AddZabbixClient();
         using ServiceProvider provider = services.BuildValidated();
 
         OptionsValidationException failure = Assert.Throws<OptionsValidationException>(() => provider.GetRequiredService<IStartupValidator>().Validate());
@@ -32,10 +32,10 @@ public sealed class OptionsTests
             ["Resilience:Retry:MaxRetryAttempts"] = "7",
         }).Build();
         var services = new ServiceCollection();
-        services.AddZabbix().Bind(section);
+        services.AddZabbixClient().Bind(section);
         using ServiceProvider provider = services.BuildValidated();
 
-        ZabbixOptions options = provider.GetRequiredService<IOptions<ZabbixOptions>>().Value;
+        ZabbixClientOptions options = provider.GetRequiredService<IOptions<ZabbixClientOptions>>().Value;
         HttpStandardResilienceOptions resilience = provider.GetRequiredService<IOptionsMonitor<HttpStandardResilienceOptions>>().Get(ZabbixHttp.GetResilienceName());
 
         Assert.Equal(new Uri("https://zbx.example/api_jsonrpc.php"), options.Endpoint);
@@ -47,7 +47,7 @@ public sealed class OptionsTests
     public void The_transport_is_one_singleton()
     {
         var services = new ServiceCollection();
-        services.AddZabbix().Configure(options => options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"));
+        services.AddZabbixClient().Configure(options => options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"));
         using ServiceProvider provider = services.BuildValidated();
 
         Assert.Same(provider.GetRequiredService<IZabbixTransport>(), provider.GetRequiredService<IZabbixTransport>());
@@ -57,9 +57,9 @@ public sealed class OptionsTests
     public void A_token_in_the_document_becomes_the_credential_and_none_means_anonymous()
     {
         var withToken = new ServiceCollection();
-        withToken.AddZabbix().Configure(options => { options.Endpoint = new Uri("https://zbx.example/"); options.ApiToken = "tok"; });
+        withToken.AddZabbixClient().Configure(options => { options.Endpoint = new Uri("https://zbx.example/"); options.ApiToken = "tok"; });
         var without = new ServiceCollection();
-        without.AddZabbix().Configure(options => options.Endpoint = new Uri("https://zbx.example/"));
+        without.AddZabbixClient().Configure(options => options.Endpoint = new Uri("https://zbx.example/"));
 
         using ServiceProvider first = withToken.BuildValidated();
         using ServiceProvider second = without.BuildValidated();
@@ -77,10 +77,10 @@ public sealed class OptionsTests
             ["Resilience:Retry:MaxRetryAttempts"] = "5",
         }).Build();
         var services = new ServiceCollection();
-        services.AddZabbix("prod").Bind(section);
+        services.AddZabbixClient("prod").Bind(section);
         using ServiceProvider provider = services.BuildValidated();
 
-        Assert.Equal(new Uri("https://zbx.example/api_jsonrpc.php"), provider.GetRequiredService<IOptionsMonitor<ZabbixOptions>>().Get("prod").Endpoint);
+        Assert.Equal(new Uri("https://zbx.example/api_jsonrpc.php"), provider.GetRequiredService<IOptionsMonitor<ZabbixClientOptions>>().Get("prod").Endpoint);
         Assert.Equal(5, provider.GetRequiredService<IOptionsMonitor<HttpStandardResilienceOptions>>().Get(ZabbixHttp.GetResilienceName("prod")).Retry.MaxRetryAttempts);
     }
 
@@ -98,13 +98,13 @@ public sealed class OptionsTests
             ["Timeouts:host.get"] = "00:00:00",
         }).Build();
         var goodServices = new ServiceCollection();
-        goodServices.AddZabbix().Bind(good);
+        goodServices.AddZabbixClient().Bind(good);
         var badServices = new ServiceCollection();
-        badServices.AddZabbix().Bind(bad);
+        badServices.AddZabbixClient().Bind(bad);
         using ServiceProvider goodProvider = goodServices.BuildValidated();
         using ServiceProvider badProvider = badServices.BuildValidated();
 
-        Assert.Equal(TimeSpan.FromMinutes(10), goodProvider.GetRequiredService<IOptions<ZabbixOptions>>().Value.Timeouts["configuration.import"]);
+        Assert.Equal(TimeSpan.FromMinutes(10), goodProvider.GetRequiredService<IOptions<ZabbixClientOptions>>().Value.Timeouts["configuration.import"]);
         OptionsValidationException failure = Assert.Throws<OptionsValidationException>(() => badProvider.GetRequiredService<IStartupValidator>().Validate());
         Assert.Contains("Timeouts:host.get", failure.Message, StringComparison.Ordinal);
     }

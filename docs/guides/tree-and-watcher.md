@@ -27,40 +27,43 @@ await foreach (ZabbixValue value in zabbix.Hosts["web-01"].GetLatestAsync())
 | --- | --- | --- |
 | `ZabbixClient` | The root | Every item on the server |
 | `ZabbixHostScope` | `zabbix.AllHosts`, `zabbix.HostGroups["Linux servers"].Hosts` | Every item of every host in the set |
-| `ZabbixHostGroupNode` | `zabbix.HostGroups["Linux servers"]` | Every item of every host in the group |
-| `ZabbixHostNode` | `zabbix.Hosts["web-01"]`, `zabbix.HostGroups["Linux servers"].Hosts["web-01"]`, `zabbix.AllHosts["web-01"]` | Every item of one host |
-| `ZabbixItemNode` | `host.Item("key")`, `host.Item(ZabbixItemKey)` | One item |
+| `ZabbixHostGroupNode` | `zabbix.HostGroups["Linux servers"]`, `zabbix.HostGroups[5]` | Every item of every host in the group |
+| `ZabbixHostNode` | `zabbix.Hosts["web-01"]`, `zabbix.Hosts[10084]`, `zabbix.HostGroups["Linux servers"].Hosts["web-01"]`, `zabbix.AllHosts["web-01"]` | Every item of one host |
+| `ZabbixItemNode` | `host.Items["system.uptime"]`, `host.Items[key]` | One item |
 
-- Name a host by its technical name (the API's `host` field), a group by its name, and an item by its key.
-  `Item(string)` throws `FormatException` for text that isn't an item key.
+- Name a host by its technical name (the API's `host` field) or its id, a group by its name or its id, and an item by its key's
+  text or a `ZabbixItemKey`. `Items[string]` throws `FormatException` for text that isn't an item key.
+- A host reached by id and one reached by name are the same node, with the same members. So are two groups. `Id` and `Name` hold
+  what the node was reached by.
 - Building a node makes no call.
 - A host reached through its group is read only while it's in the group.
 - A host's or a group's node reads its object with `GetAsync`, or `FindAsync` for `null` when there's none, changes it with
-  `UpdateAsync(h => h.Status = ZabbixHostStatus.Disabled)`, and deletes it with `DeleteAsync`. An item's node reads and changes
-  its item the same way.
+  `UpdateAsync(h => h.Status = ZabbixHostStatus.Disabled)`, and deletes it with `DeleteAsync`. A node reached by name reads the
+  id first. An item's node reads and changes its item the same way.
 - The level you call a read at is both the scope of the request and the size of its reply. `client.GetLatestAsync()` reads every item
   on the server.
 
 ## Read the latest values
 
 ```csharp
-ZabbixValue? uptime = await zabbix.Hosts["web-01"].Item("system.uptime").GetLastValueAsync();
+ZabbixValue uptime = await zabbix.Hosts["web-01"].Items["system.uptime"].GetLastValueAsync();
 ```
 
 - `GetLatestAsync` is one `item.get` with each item's last value, read whole and then yielded. An item that has never collected yields
   nothing.
-- `ZabbixItemNode.GetLastValueAsync` returns the item's last value, or `null` when the item exists and has never collected.
+- `ZabbixItemNode.GetLastValueAsync` returns the item's last value, and throws `ZabbixNotFoundException` when the item exists and has
+  never collected. `FindLastValueAsync` returns `null` instead.
 
 ## Read history
 
 ```csharp
-ZabbixItemNode load = zabbix.Hosts["web-01"].Item("system.cpu.load[all,avg1]");
+ZabbixItemNode load = zabbix.Hosts["web-01"].Items["system.cpu.load[all,avg1]"];
 
 await foreach (ZabbixValue value in load.GetHistoryAsync(DateTimeOffset.UtcNow.AddHours(-1)))
     Console.WriteLine(value);
 ```
 
-- `GetHistoryAsync(from, till)` reads `history.get` between two instants, both inclusive to the nanosecond. Omit `till` to read up to
+- `GetHistoryAsync(from, to)` reads `history.get` between two instants, both inclusive to the nanosecond. Omit `to` to read up to
   the current time.
 - Values come in clock order across all the items and value types beneath the node.
 - The read goes page by page, so a long history never sits in memory whole. A second that fills a page is read whole, so nothing is
@@ -79,14 +82,14 @@ List<ZabbixValue> values = await zabbix.Hosts["web-01"].GetLatestAsync().ToListA
 
 ```csharp
 await foreach (ZabbixHostNode host in zabbix.HostGroups["Linux servers"].Hosts)
-    await foreach (ZabbixItemNode item in host)
+    await foreach (ZabbixItemNode item in host.Items)
         Console.WriteLine($"{host.Name} {item.Key}");
 ```
 
 | What you call | On | What you get |
 | --- | --- | --- |
 | `await foreach` | A scope | Its hosts, from one `host.get` |
-| `await foreach` | A host | Its items |
+| `await foreach` | A host's `Items` | Its items |
 | `GetAsync` | A host or an item | The `ZabbixHost` or `ZabbixItem` as the API returns it at that moment |
 | `GetItemsAsync` | A scope, a host, or an item | The item records beneath it. For the whole server, call `client.AllHosts.GetItemsAsync()`. |
 
@@ -98,7 +101,9 @@ if (!await web.ExistsAsync()) return;
 ```
 
 - The first read of a node whose host, group, or item doesn't exist throws `ZabbixNotFoundException`, a `KeyNotFoundException`. Its
-  `ObjectType` (`host`, `hostgroup`, or `item`) and `Name` say what's missing. `ExistsAsync` asks first.
+  `ObjectType` (`host`, `hostgroup`, or `item`) and `Name` or `Id` say what's missing. `ExistsAsync` asks first.
+- Every `Get…Async` throws `ZabbixNotFoundException` when there's nothing to return, and its `Find…Async` returns `null`:
+  `GetAsync` and `FindAsync`, `GetLastAsync` and `FindLastAsync`, `GetLastValueAsync` and `FindLastValueAsync`.
 - A host that exists and has no items isn't missing. It yields nothing.
 - An item whose key the SDK can't read is left out and logged once (event 5005). The other items are answered.
 
@@ -172,9 +177,8 @@ The reads that mix items yield `ZabbixValue`, and its `As<T>` reads the value as
 
 ```csharp
 ZabbixItemKey key = ZabbixItemKey.Create("vfs.fs.size", "/", "pfree");   // vfs.fs.size[/,pfree]
-ZabbixValue? last = await zabbix.Hosts["web-01"].Item(key).GetLastValueAsync();
 
-if (last is not null)
+if (await zabbix.Hosts["web-01"].Items[key].FindLastValueAsync() is { } last)
     Console.WriteLine($"{key.Name}: {last.As<double>():0.0} % free at {last.Time:u}");
 ```
 
@@ -197,7 +201,7 @@ cancellationToken)`. `WithCancellation` on the sequence passes one too.
 | --- | --- |
 | Cancel a watcher's enumeration | The `await foreach` throws `OperationCanceledException` and that reader detaches. The watcher keeps running for its other readers. |
 | Dispose the watcher (`await using`, `DisposeAsync`) | The poll stops, and every reader's loop ends normally. |
-| Dispose the client | All of its watchers stop. After that, `Watch` on any of its nodes, and `Hosts["name"]`, `HostGroups["name"]`, and the reads on the client itself, throw `ObjectDisposedException`. |
+| Dispose the client | All of its watchers stop. After that, `Watch` on any of its nodes, the `Hosts` and `HostGroups` indexers, and the reads on the client itself, throw `ObjectDisposedException`. A client from a container is the container's: your dispose leaves it running, and the container's disposal stops it. |
 | Abandon an enumerator without disposing it | It keeps its buffer until the watcher is disposed. `await foreach` always disposes it. |
 
 ## Read what the tree doesn't cover
@@ -205,7 +209,7 @@ cancellationToken)`. `WithCancellation` on the sequence passes one too.
 The tree has no trends. Read them through the API client:
 
 ```csharp
-ZabbixItem cpu = await zabbix.Hosts["web-01"].Item("system.cpu.load[all,avg1]").GetAsync();
+ZabbixItem cpu = await zabbix.Hosts["web-01"].Items["system.cpu.load[all,avg1]"].GetAsync();
 
 var hours = await zabbix.Trends.GetAsync(q =>
 {
@@ -224,8 +228,8 @@ foreach (ZabbixTrendRecord hour in hours)
 
 ## In an application with a host
 
-A registered client has the same tree. Run a watch in a hosted service, and pass it the stopping token. The container disposes the
-client, which stops all of its watchers.
+A registered client has the same tree. Run a watch in a hosted service, and pass it the stopping token. The container shares the
+client and disposes it, which stops all of its watchers.
 
 ```csharp
 internal sealed class GroupWatch(IZabbixClientFactory clients) : BackgroundService

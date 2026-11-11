@@ -47,8 +47,9 @@ or `-CountOutput`) / `ByFilter` (`-Filter TParameters`, the typed `*GetParameter
 `-SortField`/`-SortOrder`, `-Search` and its switches, `-CountOutput`. A `.get` that takes a time window gets
 `-From`/`-Till` (`DateTimeOffset`: a date, Unix seconds or `clock.ns` text), and one that takes history's value type gets
 `-ValueType` (a piped item's `ValueType` binds), so `Get-ZbxItem | Get-ZbxHistory` reads each item's
-own table (`Get-ZbxHistory`, `-Trend`, `-Event`, `-Problem`, `-Alert`, `-AuditLog`). The generated class (simplified:
-the real one also emits the `-CountOutput` branch and the entity's reference filters):
+own table (`Get-ZbxHistory`, `-Trend`, `-Event`, `-Problem`, `-Alert`, `-AuditLog`). `-CountOutput` calls the client's
+`CountAsync` with the same parameters, which carry no `countOutput` of their own. The generated class (simplified: the real
+one also emits the `-CountOutput` branch and the entity's reference filters):
 
 ```csharp
 [Cmdlet(VerbsCommon.Get, "ZbxHostGroup", DefaultParameterSetName = ZabbixParameterSets.All)]
@@ -259,9 +260,9 @@ the command is decided by what failed, never by the command's mood; `SourceConfo
 
 The modules use the SDK as an application does, so whatever a script does, a C# program does with the same calls:
 
-- **A connection** is `AddZabbix(name).WithEndpoint(…).WithCredential(…)` in the connection's own container, with
-  `-SkipCertificateCheck`, `-TimeoutSec` and `-Proxy` applied through `ConfigureHttpClient` and `WithTimeout`.
-  The `sid` of `ZabbixWireClient` logs in through the keyed `IZabbixTransport` that `AddZabbix` registers under the name.
+- **A connection** is `AddZabbixClient(name).WithEndpoint(…).WithCredential(…)` in the connection's own container, with
+  `-SkipCertificateCheck`, `-TimeoutSec` and `-Proxy` applied through `ConfigureHttpClientBuilder` and `WithTimeout`.
+  The `sid` of `ZabbixWireClient` logs in through the keyed `IZabbixTransport` that `AddZabbixClient` registers under the name.
 - **A method no generated client names**, and a read-back by id after `New-` and `Set-`, go through
   `ZabbixClient.SendAsync` with the SDK's JSON contract (`ZabbixJson.Options`, which `ZabbixContracts` looks up; the
   generated commands do the same).
@@ -405,7 +406,7 @@ Measured on pwsh 7.6.6 (.NET 10.0.12):
 The designated seam (Microsoft Learn, "Resolving PowerShell module assembly dependency conflicts") is a custom
 `AssemblyLoadContext` behind a cmdlet assembly that references only `System.Management.Automation`. It cannot hide
 the conflict measured above by itself: `Microsoft.Extensions.Logging.Abstractions`, `…DependencyInjection.Abstractions`
-and `…Options` are in the SDK's public surface (`ZabbixClient.Loggers`, `AddZabbix`), and PowerShell hides types from
+and `…Options` are in the SDK's public surface (`ZabbixClient.Loggers`, `AddZabbixClient`), and PowerShell hides types from
 non-default contexts, so the records and the root must stay in the default context. What an ALC can isolate is the
 implementation-only set (Polly, `Microsoft.Extensions.Http.Resilience`, BouncyCastle, OpenTelemetry, the caching
 package): the next step is to move them behind a `Community.Zabbix.PowerShell.Engine` assembly resolved by the module's own

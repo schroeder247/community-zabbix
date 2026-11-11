@@ -56,7 +56,7 @@ var connection = new ZabbixConnectionOptions
         PeerCertificateSubject = "CN=zabbix-server,O=Example",            // the server's certificate
     },
 };
-using var wire = new ZabbixWireClient(new ZabbixWireOptions { Server = "zabbix.example", Connection = connection });
+using var wire = new ZabbixWireClient(new ZabbixWireClientOptions { Server = "zabbix.example", Connection = connection });
 ```
 
 - You must set `CaFile`, `CertificateFile`, and `KeyFile` together, because this end always presents its certificate.
@@ -78,7 +78,7 @@ await using ZabbixPushAgent agent = ZabbixPushAgent.CreateBuilder("edge-01")
 await agent.StartAsync();
 ```
 
-`ZabbixConnectionOptions` is the `Connection` option of `ZabbixWireOptions`, `ZabbixPushAgentOptions`, `ZabbixActiveAgentOptions`, and
+`ZabbixConnectionOptions` is the `Connection` option of `ZabbixWireClientOptions`, `ZabbixPushAgentOptions`, `ZabbixActiveAgentOptions`, and
 `ZabbixProxyOptions`.
 
 A proxy's builder takes the proxy's own key as bytes, as Zabbix's `TLSPSKIdentity` and `TLSPSKFile` hold it:

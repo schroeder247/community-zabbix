@@ -163,7 +163,7 @@ public sealed class ServerActiveTests
     public void Adding_a_zabbix_agent_registers_the_wire_s_telemetry_once_on_the_host_s_meter_factory()
     {
         var services = new ServiceCollection();
-        services.AddZabbix("prod").Configure(options => options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"));
+        services.AddZabbixClient("prod").Configure(options => options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"));
         services.AddZabbixPushAgent("edge").AddServer("zbx1");
         services.AddZabbixActiveAgent("active").AddServer("zbx1");
         using ServiceProvider provider = services.BuildValidated();

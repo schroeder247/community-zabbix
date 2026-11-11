@@ -155,7 +155,6 @@ public sealed class GetZbxHostCommand : ZabbixGetCmdlet<ZabbixHost, ZabbixHostGe
         if (StartSearch.IsPresent) parameters = parameters with { StartSearch = true };
         if (ExcludeSearch.IsPresent) parameters = parameters with { ExcludeSearch = true };
         if (SearchWildcardsEnabled.IsPresent) parameters = parameters with { SearchWildcardsEnabled = true };
-        if (CountOutput.IsPresent) parameters = parameters with { CountOutput = true };
         if (SelectHostGroups.IsPresent) parameters = parameters with { SelectHostGroups = ZabbixOutput.Extend };
         if (SelectParentTemplates.IsPresent) parameters = parameters with { SelectParentTemplates = ZabbixOutput.Extend };
         if (SelectItems.IsPresent) parameters = parameters with { SelectItems = ZabbixOutput.Extend };
@@ -179,7 +178,7 @@ public sealed class GetZbxHostCommand : ZabbixGetCmdlet<ZabbixHost, ZabbixHostGe
     /// <inheritdoc/>
     protected override void Query(ZabbixClient client, ZabbixHostGetParameters parameters)
     {
-        if (parameters.CountOutput == true) { if (TryRun(cancellationToken => client.Hosts.CountAsync(parameters, cancellationToken), out long count, parameters)) WriteObject(count); return; }
+        if (CountOutput.IsPresent) { if (TryRun(cancellationToken => client.Hosts.CountAsync(parameters, cancellationToken), out long count, parameters)) WriteObject(count); return; }
         WriteAll(cancellationToken => client.Hosts.GetAsync(parameters, cancellationToken), parameters);
     }
 

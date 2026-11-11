@@ -11,26 +11,12 @@ public partial class ZabbixHostInterfaceClient
     /// </summary>
     /// <param name="hostId">The host to add the interface to.</param>
     /// <param name="hostInterface">The interface, as <see cref="ZabbixInterface"/> makes one.</param>
-    /// <returns>The id the server answered in <c>interfaceids</c>: the interface the call created.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="hostInterface"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentException"><paramref name="hostInterface"/> has no type, port or way to connect.</exception>
-    /// <exception cref="ZabbixApiException">The server answered <c>hostinterface.create</c> with an error.</exception>
-    public Task<ulong> CreateAsync(ulong hostId, ZabbixHostInterfaceRequest hostInterface)
-        => CreateAsync(hostId, hostInterface, CancellationToken.None);
-
-    /// <summary>
-    /// <c>hostinterface.create</c> for one interface on a host that exists (writes):
-    /// <c>CreateAsync(hostId, ZabbixInterface.Snmp(address))</c>. An interface that leaves <c>Main</c> unset is the main one
-    /// of its type.
-    /// </summary>
-    /// <param name="hostId">The host to add the interface to.</param>
-    /// <param name="hostInterface">The interface, as <see cref="ZabbixInterface"/> makes one.</param>
     /// <param name="cancellationToken">Cancels the call.</param>
     /// <returns>The id the server answered in <c>interfaceids</c>: the interface the call created.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="hostInterface"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentException"><paramref name="hostInterface"/> has no type, port or way to connect.</exception>
     /// <exception cref="ZabbixApiException">The server answered <c>hostinterface.create</c> with an error.</exception>
-    public virtual Task<ulong> CreateAsync(ulong hostId, ZabbixHostInterfaceRequest hostInterface, CancellationToken cancellationToken)
+    public virtual Task<ulong> CreateAsync(ulong hostId, ZabbixHostInterfaceRequest hostInterface, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(hostInterface);
         // hostinterface.create takes the interface's own fields and the host's id, all of them required; an interface

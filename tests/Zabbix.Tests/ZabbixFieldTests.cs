@@ -34,7 +34,7 @@ public sealed class ZabbixFieldTests
             Output = [ZabbixHostFields.HostId, new ZabbixField<ZabbixHost>("a_new_field")],
             SelectInterfaces = [ZabbixHostInterfaceFields.InterfaceId, ZabbixHostInterfaceFields.Ip, ZabbixHostInterfaceFields.Port],
             SelectTags = ZabbixOutput.Extend,
-            SelectItems = ZabbixOutput.Count,
+            SelectItems = [ZabbixItemFields.ItemId],
         };
 
         using JsonDocument sent = JsonDocument.Parse(JsonSerializer.Serialize(parameters, ZabbixApiJson.Default.ZabbixHostGetParameters));
@@ -42,7 +42,7 @@ public sealed class ZabbixFieldTests
         Assert.Equal("""["hostid","a_new_field"]""", sent.RootElement.GetProperty("output").GetRawText());
         Assert.Equal("""["interfaceid","ip","port"]""", sent.RootElement.GetProperty("selectInterfaces").GetRawText());
         Assert.Equal("extend", sent.RootElement.GetProperty("selectTags").GetString());
-        Assert.Equal("count", sent.RootElement.GetProperty("selectItems").GetString());
+        Assert.Equal("""["itemid"]""", sent.RootElement.GetProperty("selectItems").GetRawText());
         Assert.Equal("hostid,a_new_field", parameters.Output!.ToString());
         Assert.Equal("extend", parameters.SelectTags!.ToString());
     }

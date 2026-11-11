@@ -41,19 +41,6 @@ namespace Community.Zabbix;
     Justification = "The groups are the catalogue's table of contents: ZabbixItemKeys.Disk.FreeBytes reads as one name, and each is a static class nobody constructs.")]
 public static class ZabbixItemKeys
 {
-    /// <summary>How far back an average over an agent's own samples reaches.</summary>
-    public enum SampleWindow
-    {
-        /// <summary>The last minute.</summary>
-        OneMinute,
-
-        /// <summary>The last five minutes.</summary>
-        FiveMinutes,
-
-        /// <summary>The last fifteen minutes.</summary>
-        FifteenMinutes,
-    }
-
     /// <summary>What an agent says about itself.</summary>
     public static class Agent
     {
@@ -76,31 +63,12 @@ public static class ZabbixItemKeys
     /// <summary>The machine as a whole: its names, how long it has run, its clock, its architecture and its operating system.</summary>
     public static class Host
     {
-        /// <summary>Which of a machine's names to read.</summary>
-        public enum HostNameKind
-        {
-            /// <summary>Whichever the key answers when not told: the NetBIOS name on Windows, the host name elsewhere.</summary>
-            Default,
-
-            /// <summary>The name the system calls itself.</summary>
-            HostName,
-
-            /// <summary>The name up to its first dot.</summary>
-            ShortHostName,
-
-            /// <summary>The name with its domain, from a name lookup.</summary>
-            FullyQualifiedName,
-
-            /// <summary>The NetBIOS name, which only Windows has.</summary>
-            NetBiosName,
-        }
-
         /// <summary>One of the machine's names: <c>system.hostname[type,transform]</c>.</summary>
         /// <param name="kind">Which of the machine's names to read.</param>
         /// <param name="lowercase">Whether the agent writes the name in lowercase.</param>
         /// <returns>The item for that name.</returns>
-        /// <remarks>Only Windows answers <see cref="HostNameKind.NetBiosName"/>.</remarks>
-        public static ZabbixItemKey<string> HostName(HostNameKind kind = HostNameKind.Default, bool lowercase = false)
+        /// <remarks>Only Windows answers <see cref="ZabbixHostNameKind.NetBiosName"/>.</remarks>
+        public static ZabbixItemKey<string> HostName(ZabbixHostNameKind kind = ZabbixHostNameKind.Default, bool lowercase = false)
             => Item<string>("system.hostname", Text(kind), lowercase ? "lower" : string.Empty);
 
         /// <summary>One line describing the operating system and the machine: <c>system.uname</c>.</summary>
@@ -140,13 +108,13 @@ public static class ZabbixItemKeys
         /// <remarks>Linux and Windows only.</remarks>
         public static ZabbixItemKey<string> OsDetails { get; } = Item<string>("system.sw.os.get");
 
-        private static string Text(HostNameKind kind) => kind switch
+        private static string Text(ZabbixHostNameKind kind) => kind switch
         {
-            HostNameKind.Default => string.Empty,
-            HostNameKind.HostName => "host",
-            HostNameKind.ShortHostName => "shorthost",
-            HostNameKind.FullyQualifiedName => "fqdn",
-            HostNameKind.NetBiosName => "netbios",
+            ZabbixHostNameKind.Default => string.Empty,
+            ZabbixHostNameKind.HostName => "host",
+            ZabbixHostNameKind.ShortHostName => "shorthost",
+            ZabbixHostNameKind.FullyQualifiedName => "fqdn",
+            ZabbixHostNameKind.NetBiosName => "netbios",
             _ => throw Undefined(kind),
         };
     }
@@ -154,29 +122,6 @@ public static class ZabbixItemKeys
     /// <summary>The processors: how many, how busy, and what they are.</summary>
     public static class Cpu
     {
-        /// <summary>What a load average is measured against.</summary>
-        public enum CpuLoadScope
-        {
-            /// <summary>The machine's whole load.</summary>
-            All,
-
-            /// <summary>The load divided by the processors online.</summary>
-            PerProcessor,
-        }
-
-        /// <summary>Which of the system's load averages to read.</summary>
-        public enum CpuLoadWindow
-        {
-            /// <summary>The average over one minute.</summary>
-            OneMinute,
-
-            /// <summary>The average over five minutes.</summary>
-            FiveMinutes,
-
-            /// <summary>The average over fifteen minutes.</summary>
-            FifteenMinutes,
-        }
-
         /// <summary>How many processors are online: <c>system.cpu.num</c>.</summary>
         public static ZabbixItemKey<long> Count { get; } = Item<long>("system.cpu.num");
 
@@ -192,7 +137,7 @@ public static class ZabbixItemKeys
         /// <param name="window">Which of the load averages to read.</param>
         /// <returns>The item for that load average.</returns>
         /// <remarks>Linux and macOS only.</remarks>
-        public static ZabbixItemKey<double> Load(CpuLoadScope scope = CpuLoadScope.All, CpuLoadWindow window = CpuLoadWindow.OneMinute)
+        public static ZabbixItemKey<double> Load(ZabbixCpuLoadScope scope = ZabbixCpuLoadScope.All, ZabbixAverageWindow window = ZabbixAverageWindow.OneMinute)
             => Item<double>("system.cpu.load", Text(scope), Text(window));
 
         /// <summary>The percentage of time spent running ordinary user code: <c>system.cpu.util[cpu,user,mode]</c>.</summary>
@@ -200,7 +145,7 @@ public static class ZabbixItemKeys
         /// <param name="window">How far back the average reaches.</param>
         /// <returns>The item for that processor and window.</returns>
         /// <remarks>Linux and macOS only.</remarks>
-        public static ZabbixItemKey<double> UserPercent(int? processor = null, SampleWindow window = SampleWindow.OneMinute)
+        public static ZabbixItemKey<double> UserPercent(int? processor = null, ZabbixAverageWindow window = ZabbixAverageWindow.OneMinute)
             => Utilization("user", processor, window);
 
         /// <summary>The percentage of time spent running user code at low priority: <c>system.cpu.util[cpu,nice,mode]</c>.</summary>
@@ -208,7 +153,7 @@ public static class ZabbixItemKeys
         /// <param name="window">How far back the average reaches.</param>
         /// <returns>The item for that processor and window.</returns>
         /// <remarks>Linux and macOS only.</remarks>
-        public static ZabbixItemKey<double> NicePercent(int? processor = null, SampleWindow window = SampleWindow.OneMinute)
+        public static ZabbixItemKey<double> NicePercent(int? processor = null, ZabbixAverageWindow window = ZabbixAverageWindow.OneMinute)
             => Utilization("nice", processor, window);
 
         /// <summary>The percentage of time spent running kernel code: <c>system.cpu.util[cpu,system,mode]</c>.</summary>
@@ -216,7 +161,7 @@ public static class ZabbixItemKeys
         /// <param name="window">How far back the average reaches.</param>
         /// <returns>The item for that processor and window.</returns>
         /// <remarks>On Windows, for all the processors together only, where it is their whole busy time.</remarks>
-        public static ZabbixItemKey<double> SystemPercent(int? processor = null, SampleWindow window = SampleWindow.OneMinute)
+        public static ZabbixItemKey<double> SystemPercent(int? processor = null, ZabbixAverageWindow window = ZabbixAverageWindow.OneMinute)
             => Utilization("system", processor, window);
 
         /// <summary>The percentage of time spent with nothing to run: <c>system.cpu.util[cpu,idle,mode]</c>.</summary>
@@ -224,7 +169,7 @@ public static class ZabbixItemKeys
         /// <param name="window">How far back the average reaches.</param>
         /// <returns>The item for that processor and window.</returns>
         /// <remarks>Linux and macOS only.</remarks>
-        public static ZabbixItemKey<double> IdlePercent(int? processor = null, SampleWindow window = SampleWindow.OneMinute)
+        public static ZabbixItemKey<double> IdlePercent(int? processor = null, ZabbixAverageWindow window = ZabbixAverageWindow.OneMinute)
             => Utilization("idle", processor, window);
 
         /// <summary>The percentage of time spent idle with disk or network input and output pending: <c>system.cpu.util[cpu,iowait,mode]</c>.</summary>
@@ -232,7 +177,7 @@ public static class ZabbixItemKeys
         /// <param name="window">How far back the average reaches.</param>
         /// <returns>The item for that processor and window.</returns>
         /// <remarks>Linux only.</remarks>
-        public static ZabbixItemKey<double> IoWaitPercent(int? processor = null, SampleWindow window = SampleWindow.OneMinute)
+        public static ZabbixItemKey<double> IoWaitPercent(int? processor = null, ZabbixAverageWindow window = ZabbixAverageWindow.OneMinute)
             => Utilization("iowait", processor, window);
 
         /// <summary>The percentage of time spent serving hardware interrupts: <c>system.cpu.util[cpu,interrupt,mode]</c>.</summary>
@@ -240,7 +185,7 @@ public static class ZabbixItemKeys
         /// <param name="window">How far back the average reaches.</param>
         /// <returns>The item for that processor and window.</returns>
         /// <remarks>Linux only.</remarks>
-        public static ZabbixItemKey<double> InterruptPercent(int? processor = null, SampleWindow window = SampleWindow.OneMinute)
+        public static ZabbixItemKey<double> InterruptPercent(int? processor = null, ZabbixAverageWindow window = ZabbixAverageWindow.OneMinute)
             => Utilization("interrupt", processor, window);
 
         /// <summary>The percentage of time spent serving software interrupts: <c>system.cpu.util[cpu,softirq,mode]</c>.</summary>
@@ -248,7 +193,7 @@ public static class ZabbixItemKeys
         /// <param name="window">How far back the average reaches.</param>
         /// <returns>The item for that processor and window.</returns>
         /// <remarks>Linux only.</remarks>
-        public static ZabbixItemKey<double> SoftIrqPercent(int? processor = null, SampleWindow window = SampleWindow.OneMinute)
+        public static ZabbixItemKey<double> SoftIrqPercent(int? processor = null, ZabbixAverageWindow window = ZabbixAverageWindow.OneMinute)
             => Utilization("softirq", processor, window);
 
         /// <summary>The percentage of time a hypervisor gave this machine's processors to another: <c>system.cpu.util[cpu,steal,mode]</c>.</summary>
@@ -256,7 +201,7 @@ public static class ZabbixItemKeys
         /// <param name="window">How far back the average reaches.</param>
         /// <returns>The item for that processor and window.</returns>
         /// <remarks>Linux only.</remarks>
-        public static ZabbixItemKey<double> StealPercent(int? processor = null, SampleWindow window = SampleWindow.OneMinute)
+        public static ZabbixItemKey<double> StealPercent(int? processor = null, ZabbixAverageWindow window = ZabbixAverageWindow.OneMinute)
             => Utilization("steal", processor, window);
 
         /// <summary>The percentage of time spent running virtual machines: <c>system.cpu.util[cpu,guest,mode]</c>.</summary>
@@ -264,7 +209,7 @@ public static class ZabbixItemKeys
         /// <param name="window">How far back the average reaches.</param>
         /// <returns>The item for that processor and window.</returns>
         /// <remarks>Linux only.</remarks>
-        public static ZabbixItemKey<double> GuestPercent(int? processor = null, SampleWindow window = SampleWindow.OneMinute)
+        public static ZabbixItemKey<double> GuestPercent(int? processor = null, ZabbixAverageWindow window = ZabbixAverageWindow.OneMinute)
             => Utilization("guest", processor, window);
 
         /// <summary>The percentage of time spent running virtual machines at low priority: <c>system.cpu.util[cpu,guest_nice,mode]</c>.</summary>
@@ -272,7 +217,7 @@ public static class ZabbixItemKeys
         /// <param name="window">How far back the average reaches.</param>
         /// <returns>The item for that processor and window.</returns>
         /// <remarks>Linux only.</remarks>
-        public static ZabbixItemKey<double> GuestNicePercent(int? processor = null, SampleWindow window = SampleWindow.OneMinute)
+        public static ZabbixItemKey<double> GuestNicePercent(int? processor = null, ZabbixAverageWindow window = ZabbixAverageWindow.OneMinute)
             => Utilization("guest_nice", processor, window);
 
         /// <summary>How many context switches there have been since the machine started: <c>system.cpu.switches</c>.</summary>
@@ -326,21 +271,21 @@ public static class ZabbixItemKeys
         public static ZabbixItemKey<long> CurrentFrequencyHertz(int processor)
             => Item<long>("system.hw.cpu", Whole(processor, 0), "curfreq");
 
-        private static ZabbixItemKey<double> Utilization(string state, int? processor, SampleWindow window)
+        private static ZabbixItemKey<double> Utilization(string state, int? processor, ZabbixAverageWindow window)
             => Item<double>("system.cpu.util", Whole(processor, 0), state, Window(window));
 
-        private static KeyPart Text(CpuLoadScope scope) => scope switch
+        private static KeyPart Text(ZabbixCpuLoadScope scope) => scope switch
         {
-            CpuLoadScope.All => "all",
-            CpuLoadScope.PerProcessor => "percpu",
+            ZabbixCpuLoadScope.All => "all",
+            ZabbixCpuLoadScope.PerProcessor => "percpu",
             _ => throw Undefined(scope),
         };
 
-        private static KeyPart Text(CpuLoadWindow window) => window switch
+        private static KeyPart Text(ZabbixAverageWindow window) => window switch
         {
-            CpuLoadWindow.OneMinute => "avg1",
-            CpuLoadWindow.FiveMinutes => "avg5",
-            CpuLoadWindow.FifteenMinutes => "avg15",
+            ZabbixAverageWindow.OneMinute => "avg1",
+            ZabbixAverageWindow.FiveMinutes => "avg5",
+            ZabbixAverageWindow.FifteenMinutes => "avg15",
             _ => throw Undefined(window),
         };
     }
@@ -544,7 +489,7 @@ public static class ZabbixItemKeys
         /// <param name="window">How far back the average reaches.</param>
         /// <returns>The item for that device and window.</returns>
         /// <remarks>Linux only.</remarks>
-        public static ZabbixItemKey<double> ReadSectorsPerSecond(string? device = null, SampleWindow window = SampleWindow.OneMinute)
+        public static ZabbixItemKey<double> ReadSectorsPerSecond(string? device = null, ZabbixAverageWindow window = ZabbixAverageWindow.OneMinute)
             => Item<double>("vfs.dev.read", device, "sps", Window(window));
 
         /// <summary>The average read operations per second: <c>vfs.dev.read[device,ops,mode]</c>.</summary>
@@ -552,7 +497,7 @@ public static class ZabbixItemKeys
         /// <param name="window">How far back the average reaches.</param>
         /// <returns>The item for that device and window.</returns>
         /// <remarks>Linux only.</remarks>
-        public static ZabbixItemKey<double> ReadOperationsPerSecond(string? device = null, SampleWindow window = SampleWindow.OneMinute)
+        public static ZabbixItemKey<double> ReadOperationsPerSecond(string? device = null, ZabbixAverageWindow window = ZabbixAverageWindow.OneMinute)
             => Item<double>("vfs.dev.read", device, "ops", Window(window));
 
         /// <summary>How many sectors have been read since the machine started: <c>vfs.dev.read[device,sectors]</c>.</summary>
@@ -572,7 +517,7 @@ public static class ZabbixItemKeys
         /// <param name="window">How far back the average reaches.</param>
         /// <returns>The item for that device and window.</returns>
         /// <remarks>Linux only.</remarks>
-        public static ZabbixItemKey<double> WriteSectorsPerSecond(string? device = null, SampleWindow window = SampleWindow.OneMinute)
+        public static ZabbixItemKey<double> WriteSectorsPerSecond(string? device = null, ZabbixAverageWindow window = ZabbixAverageWindow.OneMinute)
             => Item<double>("vfs.dev.write", device, "sps", Window(window));
 
         /// <summary>The average write operations per second: <c>vfs.dev.write[device,ops,mode]</c>.</summary>
@@ -580,7 +525,7 @@ public static class ZabbixItemKeys
         /// <param name="window">How far back the average reaches.</param>
         /// <returns>The item for that device and window.</returns>
         /// <remarks>Linux only.</remarks>
-        public static ZabbixItemKey<double> WriteOperationsPerSecond(string? device = null, SampleWindow window = SampleWindow.OneMinute)
+        public static ZabbixItemKey<double> WriteOperationsPerSecond(string? device = null, ZabbixAverageWindow window = ZabbixAverageWindow.OneMinute)
             => Item<double>("vfs.dev.write", device, "ops", Window(window));
 
         /// <summary>How many sectors have been written since the machine started: <c>vfs.dev.write[device,sectors]</c>.</summary>
@@ -599,58 +544,23 @@ public static class ZabbixItemKeys
     /// <summary>Single files and what a directory holds.</summary>
     public static class File
     {
-        private static readonly ImmutableArray<(FileTypes Type, string Text)> s_typeTexts =
+        private static readonly ImmutableArray<(ZabbixFileTypes Type, string Text)> s_typeTexts =
         [
-            (FileTypes.File, "file"),
-            (FileTypes.Directory, "dir"),
-            (FileTypes.SymbolicLink, "sym"),
-            (FileTypes.Socket, "sock"),
-            (FileTypes.BlockDevice, "bdev"),
-            (FileTypes.CharacterDevice, "cdev"),
-            (FileTypes.Fifo, "fifo"),
+            (ZabbixFileTypes.File, "file"),
+            (ZabbixFileTypes.Directory, "dir"),
+            (ZabbixFileTypes.SymbolicLink, "sym"),
+            (ZabbixFileTypes.Socket, "sock"),
+            (ZabbixFileTypes.BlockDevice, "bdev"),
+            (ZabbixFileTypes.CharacterDevice, "cdev"),
+            (ZabbixFileTypes.Fifo, "fifo"),
         ];
-
-        /// <summary>The kinds of file a key can filter on. Windows has only files, directories and symbolic links.</summary>
-        [Flags]
-        public enum FileTypes
-        {
-            /// <summary>No filter: leave the choice to the key.</summary>
-            None = 0,
-
-            /// <summary>A regular file.</summary>
-            File = 1 << 0,
-
-            /// <summary>A directory.</summary>
-            Directory = 1 << 1,
-
-            /// <summary>A symbolic link.</summary>
-            SymbolicLink = 1 << 2,
-
-            /// <summary>A socket.</summary>
-            Socket = 1 << 3,
-
-            /// <summary>A block device.</summary>
-            BlockDevice = 1 << 4,
-
-            /// <summary>A character device.</summary>
-            CharacterDevice = 1 << 5,
-
-            /// <summary>A named pipe.</summary>
-            Fifo = 1 << 6,
-
-            /// <summary>A block or character device.</summary>
-            Device = BlockDevice | CharacterDevice,
-
-            /// <summary>Every kind of file.</summary>
-            All = File | Directory | SymbolicLink | Socket | BlockDevice | CharacterDevice | Fifo,
-        }
 
         /// <summary>Whether a path exists and is of a kind asked for: <c>vfs.file.exists[path,types,excluded types]</c>.</summary>
         /// <param name="path">The path to look at.</param>
         /// <param name="include">The kinds that count; only regular files when this and the exclusion are both left out, otherwise every kind.</param>
         /// <param name="exclude">The kinds that make the answer <see langword="false"/>, whatever else the path is.</param>
         /// <returns>The item for that path.</returns>
-        public static ZabbixItemKey<bool> Exists(string path, FileTypes include = FileTypes.None, FileTypes exclude = FileTypes.None)
+        public static ZabbixItemKey<bool> Exists(string path, ZabbixFileTypes include = ZabbixFileTypes.None, ZabbixFileTypes exclude = ZabbixFileTypes.None)
             => Item<bool>("vfs.file.exists", Required(path), Text(include), Text(exclude));
 
         /// <summary>A file's size, in bytes: <c>vfs.file.size[path,bytes]</c>.</summary>
@@ -784,8 +694,8 @@ public static class ZabbixItemKeys
             string path,
             string? includePattern = null,
             string? excludePattern = null,
-            FileTypes includeTypes = FileTypes.None,
-            FileTypes excludeTypes = FileTypes.None,
+            ZabbixFileTypes includeTypes = ZabbixFileTypes.None,
+            ZabbixFileTypes excludeTypes = ZabbixFileTypes.None,
             int? maxDepth = null,
             long? minSize = null,
             long? maxSize = null,
@@ -816,8 +726,8 @@ public static class ZabbixItemKeys
             string path,
             string? includePattern = null,
             string? excludePattern = null,
-            FileTypes includeTypes = FileTypes.None,
-            FileTypes excludeTypes = FileTypes.None,
+            ZabbixFileTypes includeTypes = ZabbixFileTypes.None,
+            ZabbixFileTypes excludeTypes = ZabbixFileTypes.None,
             int? maxDepth = null,
             long? minSize = null,
             long? maxSize = null,
@@ -854,13 +764,13 @@ public static class ZabbixItemKeys
         public static ZabbixItemKey<long> DirectoryDiskBytes(string path, string? includePattern = null, string? excludePattern = null, int? maxDepth = null, string? excludeDirectoryPattern = null)
             => Item<long>("vfs.dir.size", Required(path), includePattern, excludePattern, "disk", Whole(maxDepth, 0), excludeDirectoryPattern);
 
-        private static string Text(FileTypes types, [CallerArgumentExpression(nameof(types))] string? parameterName = null)
+        private static string Text(ZabbixFileTypes types, [CallerArgumentExpression(nameof(types))] string? parameterName = null)
         {
-            if ((types & ~FileTypes.All) != 0) throw Undefined(types, parameterName);
+            if ((types & ~ZabbixFileTypes.All) != 0) throw Undefined(types, parameterName);
             return types switch
             {
-                FileTypes.All => "all",
-                FileTypes.Device => "dev",
+                ZabbixFileTypes.All => "all",
+                ZabbixFileTypes.Device => "dev",
                 _ => string.Join(',', s_typeTexts.Where(entry => (types & entry.Type) != 0).Select(entry => entry.Text)),
             };
         }
@@ -869,156 +779,6 @@ public static class ZabbixItemKeys
     /// <summary>The processes running: how many match, what they use, and their details.</summary>
     public static class Process
     {
-        /// <summary>Which state a process must be in to be counted.</summary>
-        public enum ProcessState
-        {
-            /// <summary>Any state.</summary>
-            All,
-
-            /// <summary>Running or ready to run.</summary>
-            Running,
-
-            /// <summary>Asleep, and able to be woken.</summary>
-            Sleeping,
-
-            /// <summary>Finished, and waiting for its parent to read its exit status.</summary>
-            Zombie,
-
-            /// <summary>Asleep and unable to be woken, usually waiting for a disk.</summary>
-            DiskSleep,
-
-            /// <summary>Stopped or being traced.</summary>
-            Traced,
-        }
-
-        /// <summary>How the matching processes' whole-number figures combine into one.</summary>
-        public enum ProcessMemoryStatistic
-        {
-            /// <summary>Their sum.</summary>
-            Sum,
-
-            /// <summary>The largest of them.</summary>
-            Maximum,
-
-            /// <summary>The smallest of them.</summary>
-            Minimum,
-        }
-
-        /// <summary>Which of a process's memory figures to read.</summary>
-        public enum ProcessMemoryType
-        {
-            /// <summary>The virtual memory it has mapped.</summary>
-            VirtualSize,
-
-            /// <summary>What it holds in physical memory now.</summary>
-            ResidentSet,
-
-            /// <summary>Its data, stack and code segments together.</summary>
-            DataStackAndCode,
-
-            /// <summary>The most virtual memory it has had mapped.</summary>
-            PeakVirtualSize,
-
-            /// <summary>What it has swapped out.</summary>
-            Swapped,
-
-            /// <summary>Its shared libraries' code.</summary>
-            SharedLibraries,
-
-            /// <summary>What it has locked into memory.</summary>
-            Locked,
-
-            /// <summary>What it has pinned in memory.</summary>
-            Pinned,
-
-            /// <summary>The most it has held in physical memory.</summary>
-            PeakResidentSet,
-
-            /// <summary>Its data segment.</summary>
-            Data,
-
-            /// <summary>Its stack segment.</summary>
-            Stack,
-
-            /// <summary>Its code segment.</summary>
-            Code,
-
-            /// <summary>Its page tables.</summary>
-            PageTables,
-        }
-
-        /// <summary>Which processor time of a process to read.</summary>
-        public enum ProcessCpuTime
-        {
-            /// <summary>All its time.</summary>
-            Total,
-
-            /// <summary>Its time running its own code.</summary>
-            User,
-
-            /// <summary>Its time running kernel code on its behalf.</summary>
-            Privileged,
-        }
-
-        /// <summary>Which counter of a Windows process to read.</summary>
-        public enum ProcessInfoCounter
-        {
-            /// <summary>The memory committed to it, in kilobytes.</summary>
-            VirtualSizeKilobytes,
-
-            /// <summary>Its working set, in kilobytes.</summary>
-            WorkingSetKilobytes,
-
-            /// <summary>How many page faults it has had.</summary>
-            PageFaults,
-
-            /// <summary>Its time running kernel code, in milliseconds.</summary>
-            KernelTimeMilliseconds,
-
-            /// <summary>Its time running its own code, in milliseconds.</summary>
-            UserTimeMilliseconds,
-
-            /// <summary>How many GDI objects it holds.</summary>
-            GdiObjects,
-
-            /// <summary>How many USER objects it holds.</summary>
-            UserObjects,
-
-            /// <summary>The bytes it has read.</summary>
-            IoReadBytes,
-
-            /// <summary>The read operations it has done.</summary>
-            IoReadOperations,
-
-            /// <summary>The bytes it has written.</summary>
-            IoWriteBytes,
-
-            /// <summary>The write operations it has done.</summary>
-            IoWriteOperations,
-
-            /// <summary>The bytes it has moved in operations other than reads and writes.</summary>
-            IoOtherBytes,
-
-            /// <summary>The operations it has done other than reads and writes.</summary>
-            IoOtherOperations,
-        }
-
-        /// <summary>How the counters of the Windows processes of one image combine into one figure.</summary>
-        public enum ProcessInfoStatistic
-        {
-            /// <summary>Their average.</summary>
-            Average,
-
-            /// <summary>The smallest of them.</summary>
-            Minimum,
-
-            /// <summary>The largest of them.</summary>
-            Maximum,
-
-            /// <summary>Their sum.</summary>
-            Sum,
-        }
-
         /// <summary>How many processes match: <c>proc.num[name,user,state,command line]</c>.</summary>
         /// <param name="name">The process name to match; every name when left out.</param>
         /// <param name="user">The account that must own the process; any account when left out.</param>
@@ -1026,7 +786,7 @@ public static class ZabbixItemKeys
         /// <param name="commandLine">A regular expression the command line must match; any command line when left out.</param>
         /// <returns>The item for that match.</returns>
         /// <remarks>Windows and macOS match by name only, and Windows matches the image name, such as <c>explorer.exe</c>.</remarks>
-        public static ZabbixItemKey<long> Count(string? name = null, string? user = null, ProcessState state = ProcessState.All, string? commandLine = null)
+        public static ZabbixItemKey<long> Count(string? name = null, string? user = null, ZabbixProcessState state = ZabbixProcessState.All, string? commandLine = null)
             => Item<long>("proc.num", name, user, Text(state), commandLine);
 
         /// <summary>The memory the matching processes use, in bytes: <c>proc.mem[name,user,statistic,command line,type]</c>.</summary>
@@ -1040,9 +800,9 @@ public static class ZabbixItemKeys
         public static ZabbixItemKey<long> MemoryBytes(
             string? name = null,
             string? user = null,
-            ProcessMemoryStatistic statistic = ProcessMemoryStatistic.Sum,
+            ZabbixProcessMemoryStatistic statistic = ZabbixProcessMemoryStatistic.Sum,
             string? commandLine = null,
-            ProcessMemoryType memoryType = ProcessMemoryType.VirtualSize)
+            ZabbixProcessMemoryType memoryType = ZabbixProcessMemoryType.VirtualSize)
             => Item<long>("proc.mem", name, user, Text(statistic), commandLine, Text(memoryType));
 
         /// <summary>
@@ -1055,7 +815,7 @@ public static class ZabbixItemKeys
         /// <param name="memoryType">Which memory figure to read.</param>
         /// <returns>The item for that match.</returns>
         /// <remarks>Windows and macOS match by name only, and read only the virtual size and the resident set.</remarks>
-        public static ZabbixItemKey<double> AverageMemoryBytes(string? name = null, string? user = null, string? commandLine = null, ProcessMemoryType memoryType = ProcessMemoryType.VirtualSize)
+        public static ZabbixItemKey<double> AverageMemoryBytes(string? name = null, string? user = null, string? commandLine = null, ZabbixProcessMemoryType memoryType = ZabbixProcessMemoryType.VirtualSize)
             => Item<double>("proc.mem", name, user, "avg", commandLine, Text(memoryType));
 
         /// <summary>
@@ -1068,7 +828,7 @@ public static class ZabbixItemKeys
         /// <param name="commandLine">A regular expression the command line must match; any command line when left out.</param>
         /// <returns>The item for that match.</returns>
         /// <remarks>Linux only.</remarks>
-        public static ZabbixItemKey<double> MemoryPercent(string? name = null, string? user = null, ProcessMemoryStatistic statistic = ProcessMemoryStatistic.Sum, string? commandLine = null)
+        public static ZabbixItemKey<double> MemoryPercent(string? name = null, string? user = null, ZabbixProcessMemoryStatistic statistic = ZabbixProcessMemoryStatistic.Sum, string? commandLine = null)
             => Item<double>("proc.mem", name, user, Text(statistic), commandLine, "pmem");
 
         /// <summary>
@@ -1097,9 +857,9 @@ public static class ZabbixItemKeys
         public static ZabbixItemKey<double> CpuPercent(
             string? name = null,
             string? user = null,
-            ProcessCpuTime time = ProcessCpuTime.Total,
+            ZabbixProcessCpuTime time = ZabbixProcessCpuTime.Total,
             string? commandLine = null,
-            SampleWindow window = SampleWindow.OneMinute)
+            ZabbixAverageWindow window = ZabbixAverageWindow.OneMinute)
             => Item<double>("proc.cpu.util", name, user, Text(time), commandLine, Window(window));
 
         /// <summary>Each matching process's details, as JSON: <c>proc.get[name,user,command line]</c>.</summary>
@@ -1137,78 +897,78 @@ public static class ZabbixItemKeys
         /// <param name="statistic">How the processes' counters combine into one.</param>
         /// <returns>The item for that image.</returns>
         /// <remarks>Windows only.</remarks>
-        public static ZabbixItemKey<double> Info(string name, ProcessInfoCounter counter = ProcessInfoCounter.VirtualSizeKilobytes, ProcessInfoStatistic statistic = ProcessInfoStatistic.Average)
+        public static ZabbixItemKey<double> Info(string name, ZabbixProcessInfoCounter counter = ZabbixProcessInfoCounter.VirtualSizeKilobytes, ZabbixProcessInfoStatistic statistic = ZabbixProcessInfoStatistic.Average)
             => Item<double>("proc_info", Required(name), Text(counter), Text(statistic));
 
-        private static KeyPart Text(ProcessState state) => state switch
+        private static KeyPart Text(ZabbixProcessState state) => state switch
         {
-            ProcessState.All => Default("all"),
-            ProcessState.Running => "run",
-            ProcessState.Sleeping => "sleep",
-            ProcessState.Zombie => "zomb",
-            ProcessState.DiskSleep => "disk",
-            ProcessState.Traced => "trace",
+            ZabbixProcessState.All => Default("all"),
+            ZabbixProcessState.Running => "run",
+            ZabbixProcessState.Sleeping => "sleep",
+            ZabbixProcessState.Zombie => "zomb",
+            ZabbixProcessState.DiskSleep => "disk",
+            ZabbixProcessState.Traced => "trace",
             _ => throw Undefined(state),
         };
 
-        private static KeyPart Text(ProcessMemoryStatistic statistic) => statistic switch
+        private static KeyPart Text(ZabbixProcessMemoryStatistic statistic) => statistic switch
         {
-            ProcessMemoryStatistic.Sum => Default("sum"),
-            ProcessMemoryStatistic.Maximum => "max",
-            ProcessMemoryStatistic.Minimum => "min",
+            ZabbixProcessMemoryStatistic.Sum => Default("sum"),
+            ZabbixProcessMemoryStatistic.Maximum => "max",
+            ZabbixProcessMemoryStatistic.Minimum => "min",
             _ => throw Undefined(statistic),
         };
 
-        private static KeyPart Text(ProcessMemoryType memoryType) => memoryType switch
+        private static KeyPart Text(ZabbixProcessMemoryType memoryType) => memoryType switch
         {
-            ProcessMemoryType.VirtualSize => Default("vsize"),
-            ProcessMemoryType.ResidentSet => "rss",
-            ProcessMemoryType.DataStackAndCode => "size",
-            ProcessMemoryType.PeakVirtualSize => "peak",
-            ProcessMemoryType.Swapped => "swap",
-            ProcessMemoryType.SharedLibraries => "lib",
-            ProcessMemoryType.Locked => "lck",
-            ProcessMemoryType.Pinned => "pin",
-            ProcessMemoryType.PeakResidentSet => "hwm",
-            ProcessMemoryType.Data => "data",
-            ProcessMemoryType.Stack => "stk",
-            ProcessMemoryType.Code => "exe",
-            ProcessMemoryType.PageTables => "pte",
+            ZabbixProcessMemoryType.VirtualSize => Default("vsize"),
+            ZabbixProcessMemoryType.ResidentSet => "rss",
+            ZabbixProcessMemoryType.DataStackAndCode => "size",
+            ZabbixProcessMemoryType.PeakVirtualSize => "peak",
+            ZabbixProcessMemoryType.Swapped => "swap",
+            ZabbixProcessMemoryType.SharedLibraries => "lib",
+            ZabbixProcessMemoryType.Locked => "lck",
+            ZabbixProcessMemoryType.Pinned => "pin",
+            ZabbixProcessMemoryType.PeakResidentSet => "hwm",
+            ZabbixProcessMemoryType.Data => "data",
+            ZabbixProcessMemoryType.Stack => "stk",
+            ZabbixProcessMemoryType.Code => "exe",
+            ZabbixProcessMemoryType.PageTables => "pte",
             _ => throw Undefined(memoryType),
         };
 
-        private static KeyPart Text(ProcessCpuTime time) => time switch
+        private static KeyPart Text(ZabbixProcessCpuTime time) => time switch
         {
-            ProcessCpuTime.Total => Default("total"),
-            ProcessCpuTime.User => "user",
-            ProcessCpuTime.Privileged => "system",
+            ZabbixProcessCpuTime.Total => Default("total"),
+            ZabbixProcessCpuTime.User => "user",
+            ZabbixProcessCpuTime.Privileged => "system",
             _ => throw Undefined(time),
         };
 
-        private static KeyPart Text(ProcessInfoCounter counter) => counter switch
+        private static KeyPart Text(ZabbixProcessInfoCounter counter) => counter switch
         {
-            ProcessInfoCounter.VirtualSizeKilobytes => Default("vmsize"),
-            ProcessInfoCounter.WorkingSetKilobytes => "wkset",
-            ProcessInfoCounter.PageFaults => "pf",
-            ProcessInfoCounter.KernelTimeMilliseconds => "ktime",
-            ProcessInfoCounter.UserTimeMilliseconds => "utime",
-            ProcessInfoCounter.GdiObjects => "gdiobj",
-            ProcessInfoCounter.UserObjects => "userobj",
-            ProcessInfoCounter.IoReadBytes => "io_read_b",
-            ProcessInfoCounter.IoReadOperations => "io_read_op",
-            ProcessInfoCounter.IoWriteBytes => "io_write_b",
-            ProcessInfoCounter.IoWriteOperations => "io_write_op",
-            ProcessInfoCounter.IoOtherBytes => "io_other_b",
-            ProcessInfoCounter.IoOtherOperations => "io_other_op",
+            ZabbixProcessInfoCounter.VirtualSizeKilobytes => Default("vmsize"),
+            ZabbixProcessInfoCounter.WorkingSetKilobytes => "wkset",
+            ZabbixProcessInfoCounter.PageFaults => "pf",
+            ZabbixProcessInfoCounter.KernelTimeMilliseconds => "ktime",
+            ZabbixProcessInfoCounter.UserTimeMilliseconds => "utime",
+            ZabbixProcessInfoCounter.GdiObjects => "gdiobj",
+            ZabbixProcessInfoCounter.UserObjects => "userobj",
+            ZabbixProcessInfoCounter.IoReadBytes => "io_read_b",
+            ZabbixProcessInfoCounter.IoReadOperations => "io_read_op",
+            ZabbixProcessInfoCounter.IoWriteBytes => "io_write_b",
+            ZabbixProcessInfoCounter.IoWriteOperations => "io_write_op",
+            ZabbixProcessInfoCounter.IoOtherBytes => "io_other_b",
+            ZabbixProcessInfoCounter.IoOtherOperations => "io_other_op",
             _ => throw Undefined(counter),
         };
 
-        private static KeyPart Text(ProcessInfoStatistic statistic) => statistic switch
+        private static KeyPart Text(ZabbixProcessInfoStatistic statistic) => statistic switch
         {
-            ProcessInfoStatistic.Average => Default("avg"),
-            ProcessInfoStatistic.Minimum => "min",
-            ProcessInfoStatistic.Maximum => "max",
-            ProcessInfoStatistic.Sum => "sum",
+            ZabbixProcessInfoStatistic.Average => Default("avg"),
+            ZabbixProcessInfoStatistic.Minimum => "min",
+            ZabbixProcessInfoStatistic.Maximum => "max",
+            ZabbixProcessInfoStatistic.Sum => "sum",
             _ => throw Undefined(statistic),
         };
     }
@@ -1232,117 +992,6 @@ public static class ZabbixItemKeys
     /// <summary>The network as an agent sees it: its interfaces and sockets, and whether the services and names it can reach answer.</summary>
     public static class Network
     {
-        /// <summary>A service an agent can check over TCP by speaking its protocol's greeting.</summary>
-        public enum TcpService
-        {
-            /// <summary>SSH, on port 22 unless told otherwise.</summary>
-            Ssh,
-
-            /// <summary>LDAP, on port 389 unless told otherwise. The SDK's own agents do not answer this check.</summary>
-            Ldap,
-
-            /// <summary>SMTP, on port 25 unless told otherwise.</summary>
-            Smtp,
-
-            /// <summary>FTP, on port 21 unless told otherwise.</summary>
-            Ftp,
-
-            /// <summary>HTTP, on port 80 unless told otherwise.</summary>
-            Http,
-
-            /// <summary>HTTPS, on port 443 unless told otherwise.</summary>
-            Https,
-
-            /// <summary>POP, on port 110 unless told otherwise.</summary>
-            Pop,
-
-            /// <summary>NNTP, on port 119 unless told otherwise.</summary>
-            Nntp,
-
-            /// <summary>IMAP, on port 143 unless told otherwise.</summary>
-            Imap,
-
-            /// <summary>Telnet, on port 23 unless told otherwise.</summary>
-            Telnet,
-
-            /// <summary>Whether a TCP connection can be made at all, on a port that must be given.</summary>
-            Tcp,
-        }
-
-        /// <summary>Which UDP sockets to count.</summary>
-        public enum UdpSocketState
-        {
-            /// <summary>Every UDP socket.</summary>
-            Any,
-
-            /// <summary>Only sockets connected to a remote end.</summary>
-            Established,
-
-            /// <summary>Only sockets with no remote end.</summary>
-            Unconnected,
-        }
-
-        /// <summary>The DNS record types an agent can ask for.</summary>
-        public enum DnsRecordType
-        {
-            /// <summary>The start of a zone's authority (<c>SOA</c>), which the key asks for when not told otherwise.</summary>
-            StartOfAuthority,
-
-            /// <summary>Every record the server will give (<c>ANY</c>).</summary>
-            Any,
-
-            /// <summary>An IPv4 address (<c>A</c>).</summary>
-            Address,
-
-            /// <summary>An IPv6 address (<c>AAAA</c>).</summary>
-            Ipv6Address,
-
-            /// <summary>An authoritative name server (<c>NS</c>).</summary>
-            NameServer,
-
-            /// <summary>A name this one is an alias of (<c>CNAME</c>).</summary>
-            CanonicalName,
-
-            /// <summary>A mailbox's domain (<c>MB</c>).</summary>
-            Mailbox,
-
-            /// <summary>A mail group member (<c>MG</c>).</summary>
-            MailGroup,
-
-            /// <summary>A mail rename (<c>MR</c>).</summary>
-            MailRename,
-
-            /// <summary>A mail destination (<c>MD</c>).</summary>
-            MailDestination,
-
-            /// <summary>A mail forwarder (<c>MF</c>).</summary>
-            MailForwarder,
-
-            /// <summary>An empty record (<c>NULL</c>).</summary>
-            Null,
-
-            /// <summary>A well-known service (<c>WKS</c>).</summary>
-            WellKnownService,
-
-            /// <summary>The name of an address (<c>PTR</c>); the key's name is then the address.</summary>
-            ReversePointer,
-
-            /// <summary>Host information (<c>HINFO</c>).</summary>
-            HostInformation,
-
-            /// <summary>Mailbox or mail list information (<c>MINFO</c>).</summary>
-            MailInformation,
-
-            /// <summary>A mail exchange (<c>MX</c>).</summary>
-            MailExchange,
-
-            /// <summary>Free text (<c>TXT</c>).</summary>
-            Text,
-
-            /// <summary>A service's host and port (<c>SRV</c>).</summary>
-            Service,
-        }
-
         /// <summary>The network interfaces, as low-level discovery JSON: <c>net.if.discovery</c>.</summary>
         public static ZabbixItemKey<string> InterfaceDiscovery { get; } = Item<string>("net.if.discovery");
 
@@ -1519,7 +1168,7 @@ public static class ZabbixItemKeys
         /// <param name="state">Whether a socket must be connected to count.</param>
         /// <returns>The item for those sockets.</returns>
         /// <remarks>Linux and Windows only.</remarks>
-        public static ZabbixItemKey<long> UdpSocketCount(string? localAddress = null, int? localPort = null, string? remoteAddress = null, int? remotePort = null, UdpSocketState state = UdpSocketState.Any)
+        public static ZabbixItemKey<long> UdpSocketCount(string? localAddress = null, int? localPort = null, string? remoteAddress = null, int? remotePort = null, ZabbixUdpSocketState state = ZabbixUdpSocketState.Any)
             => Item<long>("net.udp.socket.count", localAddress, Port(localPort), remoteAddress, Port(remotePort), Text(state));
 
         /// <summary>Whether a TCP connection to a port can be made: <c>net.tcp.port[address,port]</c>.</summary>
@@ -1533,8 +1182,8 @@ public static class ZabbixItemKeys
         /// <param name="address">The address to connect to; 127.0.0.1 when left out.</param>
         /// <param name="port">The TCP port to connect to; the service's usual port when left out.</param>
         /// <returns>The item for that service.</returns>
-        /// <exception cref="ArgumentException"><paramref name="service"/> is <see cref="TcpService.Tcp"/> and no port is given.</exception>
-        public static ZabbixItemKey<bool> IsTcpServiceUp(TcpService service, string? address = null, int? port = null)
+        /// <exception cref="ArgumentException"><paramref name="service"/> is <see cref="ZabbixTcpService.Tcp"/> and no port is given.</exception>
+        public static ZabbixItemKey<bool> IsTcpServiceUp(ZabbixTcpService service, string? address = null, int? port = null)
             => ServiceItem<bool>("net.tcp.service", service, address, port);
 
         /// <summary>
@@ -1545,8 +1194,8 @@ public static class ZabbixItemKeys
         /// <param name="address">The address to connect to; 127.0.0.1 when left out.</param>
         /// <param name="port">The TCP port to connect to; the service's usual port when left out.</param>
         /// <returns>The item for that service.</returns>
-        /// <exception cref="ArgumentException"><paramref name="service"/> is <see cref="TcpService.Tcp"/> and no port is given.</exception>
-        public static ZabbixItemKey<TimeSpan> TcpServiceResponseTime(TcpService service, string? address = null, int? port = null)
+        /// <exception cref="ArgumentException"><paramref name="service"/> is <see cref="ZabbixTcpService.Tcp"/> and no port is given.</exception>
+        public static ZabbixItemKey<TimeSpan> TcpServiceResponseTime(ZabbixTcpService service, string? address = null, int? port = null)
             => ServiceItem<TimeSpan>("net.tcp.service.perf", service, address, port);
 
         /// <summary>Whether an NTP server answers: <c>net.udp.service[ntp,address,port]</c>.</summary>
@@ -1569,7 +1218,7 @@ public static class ZabbixItemKeys
         /// <param name="attempts">How many times to try; at least one.</param>
         /// <param name="useTcp">Whether to ask over TCP rather than UDP.</param>
         /// <returns>The item for that query.</returns>
-        public static ZabbixItemKey<bool> DnsResolves(string name, string? server = null, DnsRecordType recordType = DnsRecordType.StartOfAuthority, TimeSpan? timeout = null, int? attempts = null, bool useTcp = false)
+        public static ZabbixItemKey<bool> DnsResolves(string name, string? server = null, ZabbixDnsRecordType recordType = ZabbixDnsRecordType.StartOfAuthority, TimeSpan? timeout = null, int? attempts = null, bool useTcp = false)
             => DnsItem<bool>("net.dns", name, server, recordType, timeout, attempts, useTcp);
 
         /// <summary>How long a DNS query takes, or zero when no answer comes: <c>net.dns.perf[server,name,type,timeout,count,protocol]</c>.</summary>
@@ -1580,7 +1229,7 @@ public static class ZabbixItemKeys
         /// <param name="attempts">How many times to try; at least one.</param>
         /// <param name="useTcp">Whether to ask over TCP rather than UDP.</param>
         /// <returns>The item for that query.</returns>
-        public static ZabbixItemKey<TimeSpan> DnsResponseTime(string name, string? server = null, DnsRecordType recordType = DnsRecordType.StartOfAuthority, TimeSpan? timeout = null, int? attempts = null, bool useTcp = false)
+        public static ZabbixItemKey<TimeSpan> DnsResponseTime(string name, string? server = null, ZabbixDnsRecordType recordType = ZabbixDnsRecordType.StartOfAuthority, TimeSpan? timeout = null, int? attempts = null, bool useTcp = false)
             => DnsItem<TimeSpan>("net.dns.perf", name, server, recordType, timeout, attempts, useTcp);
 
         /// <summary>The records a DNS query answers, as text: <c>net.dns.record[server,name,type,timeout,count,protocol]</c>.</summary>
@@ -1591,7 +1240,7 @@ public static class ZabbixItemKeys
         /// <param name="attempts">How many times to try; at least one.</param>
         /// <param name="useTcp">Whether to ask over TCP rather than UDP.</param>
         /// <returns>The item for that query.</returns>
-        public static ZabbixItemKey<string> DnsRecords(string name, string? server = null, DnsRecordType recordType = DnsRecordType.StartOfAuthority, TimeSpan? timeout = null, int? attempts = null, bool useTcp = false)
+        public static ZabbixItemKey<string> DnsRecords(string name, string? server = null, ZabbixDnsRecordType recordType = ZabbixDnsRecordType.StartOfAuthority, TimeSpan? timeout = null, int? attempts = null, bool useTcp = false)
             => DnsItem<string>("net.dns.record", name, server, recordType, timeout, attempts, useTcp);
 
         /// <summary>A Zabbix server's or proxy's internal statistics, as JSON: <c>zabbix.stats[address,port]</c>.</summary>
@@ -1611,14 +1260,14 @@ public static class ZabbixItemKeys
         public static ZabbixItemKey<string> ServerQueue(string? address = null, int? port = null, TimeSpan? minDelay = null, TimeSpan? maxDelay = null)
             => Item<string>("zabbix.stats", address, Port(port), "queue", Seconds(minDelay, 0), Seconds(maxDelay, 0));
 
-        private static ZabbixItemKey<T> ServiceItem<T>(string key, TcpService service, string? address, int? port)
+        private static ZabbixItemKey<T> ServiceItem<T>(string key, ZabbixTcpService service, string? address, int? port)
             where T : ISpanParsable<T>
         {
-            if (service == TcpService.Tcp && port is null) throw new ArgumentException("The plain TCP check has no usual port, so it needs one.", nameof(port));
+            if (service == ZabbixTcpService.Tcp && port is null) throw new ArgumentException("The plain TCP check has no usual port, so it needs one.", nameof(port));
             return Item<T>(key, Text(service), address, Port(port));
         }
 
-        private static ZabbixItemKey<T> DnsItem<T>(string key, string name, string? server, DnsRecordType recordType, TimeSpan? timeout, int? attempts, bool useTcp)
+        private static ZabbixItemKey<T> DnsItem<T>(string key, string name, string? server, ZabbixDnsRecordType recordType, TimeSpan? timeout, int? attempts, bool useTcp)
             where T : ISpanParsable<T>
             => Item<T>(key, server, Required(name), Text(recordType), Seconds(timeout, 1), Whole(attempts, 1), useTcp ? "tcp" : string.Empty);
 
@@ -1639,51 +1288,51 @@ public static class ZabbixItemKeys
             _ => throw new ArgumentOutOfRangeException(nameof(state), state, "Zabbix has no name for this TCP state."),
         };
 
-        private static string Text(UdpSocketState state) => state switch
+        private static string Text(ZabbixUdpSocketState state) => state switch
         {
-            UdpSocketState.Any => string.Empty,
-            UdpSocketState.Established => "established",
-            UdpSocketState.Unconnected => "unconn",
+            ZabbixUdpSocketState.Any => string.Empty,
+            ZabbixUdpSocketState.Established => "established",
+            ZabbixUdpSocketState.Unconnected => "unconn",
             _ => throw Undefined(state),
         };
 
-        private static string Text(TcpService service) => service switch
+        private static string Text(ZabbixTcpService service) => service switch
         {
-            TcpService.Ssh => "ssh",
-            TcpService.Ldap => "ldap",
-            TcpService.Smtp => "smtp",
-            TcpService.Ftp => "ftp",
-            TcpService.Http => "http",
-            TcpService.Https => "https",
-            TcpService.Pop => "pop",
-            TcpService.Nntp => "nntp",
-            TcpService.Imap => "imap",
-            TcpService.Telnet => "telnet",
-            TcpService.Tcp => "tcp",
+            ZabbixTcpService.Ssh => "ssh",
+            ZabbixTcpService.Ldap => "ldap",
+            ZabbixTcpService.Smtp => "smtp",
+            ZabbixTcpService.Ftp => "ftp",
+            ZabbixTcpService.Http => "http",
+            ZabbixTcpService.Https => "https",
+            ZabbixTcpService.Pop => "pop",
+            ZabbixTcpService.Nntp => "nntp",
+            ZabbixTcpService.Imap => "imap",
+            ZabbixTcpService.Telnet => "telnet",
+            ZabbixTcpService.Tcp => "tcp",
             _ => throw Undefined(service),
         };
 
-        private static KeyPart Text(DnsRecordType recordType) => recordType switch
+        private static KeyPart Text(ZabbixDnsRecordType recordType) => recordType switch
         {
-            DnsRecordType.StartOfAuthority => Default("SOA"),
-            DnsRecordType.Any => "ANY",
-            DnsRecordType.Address => "A",
-            DnsRecordType.Ipv6Address => "AAAA",
-            DnsRecordType.NameServer => "NS",
-            DnsRecordType.CanonicalName => "CNAME",
-            DnsRecordType.Mailbox => "MB",
-            DnsRecordType.MailGroup => "MG",
-            DnsRecordType.MailRename => "MR",
-            DnsRecordType.MailDestination => "MD",
-            DnsRecordType.MailForwarder => "MF",
-            DnsRecordType.Null => "NULL",
-            DnsRecordType.WellKnownService => "WKS",
-            DnsRecordType.ReversePointer => "PTR",
-            DnsRecordType.HostInformation => "HINFO",
-            DnsRecordType.MailInformation => "MINFO",
-            DnsRecordType.MailExchange => "MX",
-            DnsRecordType.Text => "TXT",
-            DnsRecordType.Service => "SRV",
+            ZabbixDnsRecordType.StartOfAuthority => Default("SOA"),
+            ZabbixDnsRecordType.Any => "ANY",
+            ZabbixDnsRecordType.Address => "A",
+            ZabbixDnsRecordType.Ipv6Address => "AAAA",
+            ZabbixDnsRecordType.NameServer => "NS",
+            ZabbixDnsRecordType.CanonicalName => "CNAME",
+            ZabbixDnsRecordType.Mailbox => "MB",
+            ZabbixDnsRecordType.MailGroup => "MG",
+            ZabbixDnsRecordType.MailRename => "MR",
+            ZabbixDnsRecordType.MailDestination => "MD",
+            ZabbixDnsRecordType.MailForwarder => "MF",
+            ZabbixDnsRecordType.Null => "NULL",
+            ZabbixDnsRecordType.WellKnownService => "WKS",
+            ZabbixDnsRecordType.ReversePointer => "PTR",
+            ZabbixDnsRecordType.HostInformation => "HINFO",
+            ZabbixDnsRecordType.MailInformation => "MINFO",
+            ZabbixDnsRecordType.MailExchange => "MX",
+            ZabbixDnsRecordType.Text => "TXT",
+            ZabbixDnsRecordType.Service => "SRV",
             _ => throw Undefined(recordType),
         };
     }
@@ -1752,11 +1401,11 @@ public static class ZabbixItemKeys
         return new ZabbixItemKey<T>(ZabbixItemKey.Create(name, text));
     }
 
-    private static KeyPart Window(SampleWindow window) => window switch
+    private static KeyPart Window(ZabbixAverageWindow window) => window switch
     {
-        SampleWindow.OneMinute => Default("avg1"),
-        SampleWindow.FiveMinutes => "avg5",
-        SampleWindow.FifteenMinutes => "avg15",
+        ZabbixAverageWindow.OneMinute => Default("avg1"),
+        ZabbixAverageWindow.FiveMinutes => "avg5",
+        ZabbixAverageWindow.FifteenMinutes => "avg15",
         _ => throw Undefined(window),
     };
 

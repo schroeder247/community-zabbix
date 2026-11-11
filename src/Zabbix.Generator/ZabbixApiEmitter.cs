@@ -26,7 +26,7 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         "AdditionalFields", "FilterableFields", "SearchableFields", "SortableFields", "ModelledWires",
     };
 
-    // The eleven options every queryable .get shares carry the interface's names, whatever the overlay calls them.
+    // The options every queryable .get shares carry the interface's names, whatever the overlay calls them.
     private static readonly Dictionary<string, string> s_commonGetOptions = new(StringComparer.Ordinal)
     {
         ["output"] = "Output",
@@ -39,10 +39,14 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         ["limit"] = "Limit",
         ["sortfield"] = "SortField",
         ["sortorder"] = "SortOrder",
-        ["countOutput"] = "CountOutput",
     };
 
     private const string SortDirections = "global::System.Collections.Generic.IReadOnlyList<global::System.ComponentModel.ListSortDirection>";
+
+    // The get options that change the shape of the reply, so a typed get couldn't read it: a count for its records, rows of
+    // counts, or its records keyed by id (ADR 0013, section 4). They aren't members of a get's parameters, and the bag refuses
+    // them (ZabbixExtensionDataGuard.ReplyShapes); CountAsync counts, adding countOutput to the parameters it sends.
+    private static readonly HashSet<string> s_replyShapes = new(StringComparer.Ordinal) { "countOutput", "groupCount", "groupBy", "preservekeys" };
 
     /// <summary>The generated files of one part, and what was refused.</summary>
     /// <param name="part">Which assembly is being built.</param>
@@ -346,7 +350,7 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
             EmitTupleConversion(code, t, name, members.Required);
         }
         if (shape.HasBag) EmitAdditionalFields(code, t, name, shape);
-        if (shape.SendableBag) EmitSerializingGuard(code, name, members.Wires);
+        if (shape.SendableBag) EmitSerializingGuard(code, name, members.Wires, t.Role == "get");
         EmitPrintMembers(code, members.Printed, shape.HasBag);
         EmitEquality(code, name, members.Compared, shape.HasBag);
         if (t.Role == "get") EmitFieldSets(code, t);
@@ -504,6 +508,7 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
                 _problems.Add(new(ZabbixDiagnostics.FieldCollision, $"field '{field.Wire}' would be named {member}, which another field of {t.Name} already is; name it at {OverlayField(t, field)}", t.Name, field.Wire));
                 continue;
             }
+            if (t.Role == "get" && s_replyShapes.Contains(field.Wire)) continue;
             // a typed sort is one member over the sortfield and sortorder lists the wire keeps in step
             FieldDescription? sortOrder = t.Role == "get" ? t.Fields.FirstOrDefault(f => f.Wire == "sortorder") : null;
             bool sorted = sortOrder is not null && t.Fields.Any(f => f.Wire == "sortfield" && f.Kind.StartsWith(ZabbixTypedFields.SortFields, StringComparison.Ordinal));
@@ -740,12 +745,14 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
     // which member a reader keeps is the reader's choice, not a contract this SDK can promise. IJsonOnSerializing runs
     // under the source generator (no reflection needed), so the collision is refused before anything is sent, rather
     // than shipped as silently ambiguous wire bytes.
-    private static void EmitSerializingGuard(StringBuilder code, string name, List<string> wires)
+    // A get's parameters also refuse what would change the shape of the reply (s_replyShapes).
+    private static void EmitSerializingGuard(StringBuilder code, string name, List<string> wires, bool get)
     {
         // the modelled wire names once per type, not a new set on every serialization (CA1861)
         code.Append("    private static readonly global::System.Collections.Frozen.FrozenSet<string> ModelledWires = ").Append(Set([.. wires])).Append(";\n\n");
         code.Append("    void global::System.Text.Json.Serialization.IJsonOnSerializing.OnSerializing()\n");
-        code.Append("        => global::Community.Zabbix.ZabbixExtensionDataGuard.Refuse(AdditionalFields, ").Append(Lit(name)).Append(", ModelledWires);\n\n");
+        code.Append("        => global::Community.Zabbix.ZabbixExtensionDataGuard.Refuse(AdditionalFields, ").Append(Lit(name)).Append(", ModelledWires")
+            .Append(get ? ", global::Community.Zabbix.ZabbixExtensionDataGuard.ReplyShapes" : string.Empty).Append(");\n\n");
     }
 
     // A get's parameters name the fields filter, search and sortfield accept, as the API validates them.
@@ -996,8 +1003,8 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         code.Append("    internal ").Append(client).Append("(global::Community.Zabbix.IZabbixTransport transport, global::System.Func<global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task<global::System.Version>> apiVersion)\n    {\n");
         code.Append("        global::System.ArgumentNullException.ThrowIfNull(transport);\n        global::System.ArgumentNullException.ThrowIfNull(apiVersion);\n        Transport = transport;\n        ApiVersion = apiVersion;\n    }\n\n");
         // the Azure SDK's shape for a client a caller's test substitutes: a protected parameterless constructor beside the
-        // internal one the API builds, every call virtual (dotnet-client-constructor-for-mocking), except an overload without a
-        // token, which calls the virtual one beside it: the Framework Design Guidelines make only the longest overload virtual
+        // internal one the API builds, every call virtual (dotnet-client-constructor-for-mocking), except a read of everything,
+        // which calls the parameters' overload beside it: the Framework Design Guidelines make only the longest overload virtual
         code.Append("    /// <summary>For a type that derives from this client to substitute it in a test; every call is virtual, or calls one that is. A client built\n");
         code.Append("    /// this way has no transport, so a call it does not override fails.</summary>\n");
         code.Append("    protected ").Append(client).Append("()\n    {\n        Transport = null!;\n        ApiVersion = null!;\n    }\n\n");
@@ -1112,11 +1119,8 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         if (required.Any(f => f.Kind == "string" && Member(f.Name).Contains("Url")))
             attributes += "    " + Suppress("Design", "CA1054:URI-like parameters should not be strings", "The API takes this field as text: it may hold a macro, which isn't a URI.") + "\n";
         string summary = "\n    /// <summary><c>" + m.Api + "</c> from the fields it requires" + Traits(m) + " To set more, pass a lambda that sets them, or a <see cref=\"" + request + "\"/>.</summary>\n" + fieldDocs;
-        code.Append(summary).Append(returns).Append(attributes);
-        code.Append("    public global::System.Threading.Tasks.Task<ulong> CreateAsync(").Append(fields).Append(")\n");
-        code.Append("        => CreateAsync(").Append(arguments).Append(", ").Append(Token).Append(".None);\n");
         code.Append(summary).Append(TokenDoc).Append(returns).Append(attributes);
-        code.Append("    public virtual global::System.Threading.Tasks.Task<ulong> CreateAsync(").Append(fields).Append(", ").Append(Token).Append(" cancellationToken)\n");
+        code.Append("    public virtual global::System.Threading.Tasks.Task<ulong> CreateAsync(").Append(fields).Append(", ").Append(Token).Append(" cancellationToken = default)\n");
         code.Append("        => CreateAsync(new ").Append(request).Append('(').Append(arguments).Append("), cancellationToken);\n");
         EmitConfiguredCreate(code, m, request, fieldDocs.ToString(), fields, arguments, names, returns, attributes);
     }
@@ -1125,7 +1129,7 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
     /// A create from the fields it requires and a lambda for the rest, <c>CreateAsync("web-02", [groupId], h =&gt; h.Status =
     /// …)</c>, as a read takes one for its parameters: the request is built from the required values, the lambda sets the
     /// others, and the request's own overload sends it, so a test double that overrides that one serves this too. Its
-    /// <see cref="CancellationToken"/> is last, beside an overload without it (ADR 0013, section 6).
+    /// <see cref="CancellationToken"/> is last and optional (ADR 0013, section 6).
     /// </summary>
     private static void EmitConfiguredCreate(StringBuilder code, MethodDescription m, string request, string fieldDocs, string fields, string arguments, List<string> names, string returns, string attributes)
     {
@@ -1136,11 +1140,8 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         // the request's local can't be named as a required field's parameter is (task.create requires a request)
         string local = "request";
         while (names.Contains("@" + local)) local = "configured" + local[0].ToString().ToUpperInvariant() + local[1..];
-        code.Append(summary).Append(returns).Append(NullConfigure).Append(attributes);
-        code.Append("    public global::System.Threading.Tasks.Task<ulong> CreateAsync(").Append(fields).Append(", ").Append(action).Append(" configure)\n");
-        code.Append("        => CreateAsync(").Append(arguments).Append(", configure, ").Append(Token).Append(".None);\n");
         code.Append(summary).Append(TokenDoc).Append(returns).Append(NullConfigure).Append(attributes);
-        code.Append("    public virtual global::System.Threading.Tasks.Task<ulong> CreateAsync(").Append(fields).Append(", ").Append(action).Append(" configure, ").Append(Token).Append(" cancellationToken)\n    {\n");
+        code.Append("    public virtual global::System.Threading.Tasks.Task<ulong> CreateAsync(").Append(fields).Append(", ").Append(action).Append(" configure, ").Append(Token).Append(" cancellationToken = default)\n    {\n");
         code.Append("        global::System.ArgumentNullException.ThrowIfNull(configure);\n");
         code.Append("        var ").Append(local).Append(" = new ").Append(request).Append('(').Append(arguments).Append(");\n");
         code.Append("        configure(").Append(local).Append(");\n");
@@ -1190,19 +1191,13 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         // several's list and a short create's first field among them, so the one request's overloads go first: the
         // compiler's tie-break for an overload added beside others (OverloadResolutionPriorityAttribute).
         if (overloaded && parameterName == "request") details += "    [global::System.Runtime.CompilerServices.OverloadResolutionPriority(1)]\n";
-        // One, several and the one-id delete overload one verb, so each takes its CancellationToken as a required last
-        // parameter, and an overload without it calls it (ADR 0013, section 6). A verb of one overload keeps the token optional.
-        if (overloaded)
-        {
-            code.Append(summary).Append(parameterDoc).Append(details);
-            code.Append("    public ").Append(result.ReturnType).Append(' ').Append(name).Append('(').Append(parameterType).Append(' ').Append(parameterName).Append(")\n        => ")
-                .Append(name).Append('(').Append(parameterName).Append(", ").Append(Token).Append(".None);\n");
-        }
+        // One, several and the one-id delete overload one verb, and each takes an optional CancellationToken last (ADR 0013,
+        // section 6).
         code.Append(summary).Append(parameterDoc).Append(TokenDoc).Append(details);
         code.Append("    public virtual async ").Append(result.ReturnType).Append(' ').Append(name).Append('(');
         if (parameterType is not null)
             code.Append(parameterType).Append(optional ? "? " : " ").Append(parameterName).Append(optional ? " = null" : string.Empty).Append(", ");
-        code.Append(Token).Append(" cancellationToken").Append(overloaded ? string.Empty : " = default").Append(")\n    {\n");
+        code.Append(Token).Append(" cancellationToken = default)\n    {\n");
         if (parameterType is not null && !optional && !parameterType.EndsWith("JsonElement", StringComparison.Ordinal) && parameterType != "ulong")
             code.Append("        global::System.ArgumentNullException.ThrowIfNull(").Append(parameterName).Append(");\n");
         ImmutableArray<FieldDescription> refused = gatedFields;
@@ -1285,7 +1280,7 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
     /// Why a list read is one reply and not a pageable sequence: the <c>.get</c> grammar has <c>limit</c> but no offset
     /// and no comparison operator, so no cursor can be built over it (decisions.md, "A list read is one reply").
     /// </summary>
-    internal const string OnePage = "The reply is read whole, bounded by <see cref=\"global::Community.Zabbix.ZabbixOptions.MaxResponseContentBytes\"/>; "
+    internal const string OnePage = "The reply is read whole, bounded by <see cref=\"global::Community.Zabbix.ZabbixClientOptions.MaxResponseContentBytes\"/>; "
         + "there is no paged form, because the API's <c>.get</c> has a <c>limit</c> but no offset or cursor to continue from. "
         + "Narrow a large read with the parameters.";
 
@@ -1321,7 +1316,8 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         {
             var count = new StringBuilder(gate);
             EmitFieldGate(count, m.Api, refused, "parameters", null, null, nullable: false);
-            count.Append("        return global::Community.Zabbix.ZabbixApiResults.ReadCount(await Transport.SendAsync(").Append(Lit(m.Api)).Append(", parameters with { CountOutput = true }, ").Append(Root(parameters)).Append(", cancellationToken).ConfigureAwait(false), ").Append(Lit(m.Api)).Append(");\n");
+            count.Append("        return global::Community.Zabbix.ZabbixApiResults.ReadCount(await Transport.SendAsync(").Append(Lit(m.Api)).Append(", global::Community.Zabbix.ZabbixApiResults.Counting(parameters, ").Append(Root(parameters)).Append("), ")
+                .Append(Root("global::System.Text.Json.Nodes.JsonNode")).Append(", cancellationToken).ConfigureAwait(false), ").Append(Lit(m.Api)).Append(");\n");
             EmitReads(code, new Reads(
                 "CountAsync", parameters, "global::System.Threading.Tasks.Task<long>", required,
                 Everything: "<c>" + m.Api + "</c> with <c>countOutput</c>: how many objects there are.",
@@ -1347,18 +1343,17 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
     private const string TokenDoc = "    /// <param name=\"cancellationToken\">Cancels the call.</param>\n";
 
     /// <summary>
-    /// A read verb's overloads, as the task-based asynchronous pattern has them (ADR 0013, section 6): each takes a
-    /// <see cref="CancellationToken"/> last, and one without it calls the one with it. A verb whose parameters are required is
-    /// one overload, so its token is optional, as RS0026 allows. Otherwise the verb takes nothing, for everything; the
-    /// parameters; or a lambda that fills them, <c>GetAsync(q =&gt; q.Search.VisibleName = "web")</c>, as Graph's
-    /// <c>GetAsync(config =&gt; config.QueryParameters.Select = [...])</c> does. The parameters' overload with the token does
-    /// the work, and a test double overrides it.
+    /// A read verb's overloads (ADR 0013, section 6): each takes an optional <see cref="CancellationToken"/> last. A verb whose
+    /// parameters are required is the one overload. Otherwise the verb takes nothing, for everything; the parameters; or a
+    /// lambda that fills them, <c>GetAsync(q =&gt; q.Search.VisibleName = "web")</c>, as Graph's
+    /// <c>GetAsync(config =&gt; config.QueryParameters.Select = [...])</c> does. The parameters' overload does the work, and a
+    /// test double overrides it.
     /// </summary>
     private static void EmitReads(StringBuilder code, Reads r, string body)
     {
         string parameters = "    /// <param name=\"parameters\">" + r.ParametersDoc + "</param>\n";
         string nullParameters = "    /// <exception cref=\"global::System.ArgumentNullException\"><paramref name=\"parameters\"/> is <see langword=\"null\"/>.</exception>\n";
-        string core = "    public virtual async " + r.ReturnType + " " + r.Verb + "(" + r.Parameters + " parameters, " + Token + " cancellationToken" + (r.Required ? " = default" : string.Empty) + ")\n    {\n"
+        string core = "    public virtual async " + r.ReturnType + " " + r.Verb + "(" + r.Parameters + " parameters, " + Token + " cancellationToken = default)\n    {\n"
             + "        global::System.ArgumentNullException.ThrowIfNull(parameters);\n" + body + "    }\n";
         if (r.Required)
         {
@@ -1367,26 +1362,18 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
             return;
         }
 
-        ReadDoc(code, r.Everything, string.Empty, r.EverythingReturns, r.Details, r.Attributes);
-        code.Append("    public ").Append(r.ReturnType).Append(' ').Append(r.Verb).Append("()\n        => ").Append(r.Verb).Append('(').Append(Token).Append(".None);\n");
         ReadDoc(code, r.Everything, TokenDoc, r.EverythingReturns, r.Details, r.Attributes);
-        code.Append("    public ").Append(r.ReturnType).Append(' ').Append(r.Verb).Append('(').Append(Token).Append(" cancellationToken)\n        => ")
+        code.Append("    public ").Append(r.ReturnType).Append(' ').Append(r.Verb).Append('(').Append(Token).Append(" cancellationToken = default)\n        => ")
             .Append(r.Verb).Append("(new ").Append(r.Parameters).Append("(), cancellationToken);\n");
 
-        ReadDoc(code, r.Selecting, parameters, r.Returns, nullParameters + r.Details, r.Attributes);
-        code.Append("    public ").Append(r.ReturnType).Append(' ').Append(r.Verb).Append('(').Append(r.Parameters).Append(" parameters)\n        => ")
-            .Append(r.Verb).Append("(parameters, ").Append(Token).Append(".None);\n");
         ReadDoc(code, r.Selecting, parameters + TokenDoc, r.Returns, nullParameters + r.Details, r.Attributes);
         code.Append(core);
 
         string configure = "    /// <param name=\"configure\">Fills the parameters: " + char.ToLowerInvariant(r.ParametersDoc[0]) + r.ParametersDoc[1..] + "</param>\n";
         string nullConfigure = "    /// <exception cref=\"global::System.ArgumentNullException\"><paramref name=\"configure\"/> is <see langword=\"null\"/>.</exception>\n";
         string action = "global::System.Action<" + r.Parameters + ">";
-        ReadDoc(code, r.Configured, configure, r.Returns, nullConfigure + r.Details, r.Attributes);
-        code.Append("    public ").Append(r.ReturnType).Append(' ').Append(r.Verb).Append('(').Append(action).Append(" configure)\n        => ")
-            .Append(r.Verb).Append("(configure, ").Append(Token).Append(".None);\n");
         ReadDoc(code, r.Configured, configure + TokenDoc, r.Returns, nullConfigure + r.Details, r.Attributes);
-        code.Append("    public virtual ").Append(r.ReturnType).Append(' ').Append(r.Verb).Append('(').Append(action).Append(" configure, ").Append(Token).Append(" cancellationToken)\n    {\n");
+        code.Append("    public virtual ").Append(r.ReturnType).Append(' ').Append(r.Verb).Append('(').Append(action).Append(" configure, ").Append(Token).Append(" cancellationToken = default)\n    {\n");
         code.Append("        global::System.ArgumentNullException.ThrowIfNull(configure);\n");
         code.Append("        var parameters = new ").Append(r.Parameters).Append("();\n        configure(parameters);\n");
         code.Append("        return ").Append(r.Verb).Append("(parameters, cancellationToken);\n    }\n");
@@ -1413,16 +1400,22 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         code.Append("    public virtual async global::System.Threading.Tasks.Task<").Append(element).Append("?> FindAsync(ulong id, global::System.Threading.CancellationToken cancellationToken = default)\n    {\n");
         code.Append("        ").Append(result).Append(" found = await GetAsync(new ").Append(parameters).Append(" { ").Append(Member(ids.Name)).Append(" = [id] }, cancellationToken).ConfigureAwait(false);\n");
         code.Append("        return found.Count > 0 ? found[0] : null;\n    }\n");
+        // A host's and a host group's id indexer is written beside the client (src/Zabbix.Sdk, ZabbixHostClient.Names.cs): it
+        // returns the node the name indexer does, which reaches the items and their history too (ADR 0013, section 4).
+        if (s_namedNodes.Contains(service.Object)) return;
         bool deletes = service.Methods.Any(d => d.Name == "DeleteAsync" && d.Parameters == "list:id" && d.Result.StartsWith("ids:", StringComparison.Ordinal));
         string? update = deletes ? UpdateById(service) : null;
-        string node = "global::Community.Zabbix." + (update is not null ? "ZabbixUpdatableObjectNode<" + element + ", " + update + ">" : deletes ? "ZabbixDeletableObjectNode<" + element + ">" : "ZabbixObjectNode<" + element + ">");
+        string node = "global::Community.Zabbix." + (update is not null ? "ZabbixUpdatableObjectNode<" + element + ", " + update + ">" : "ZabbixObjectNode<" + element + ">");
         code.Append("\n    /// <summary>One <c>").Append(service.Object).Append("</c>, by its id; no call is made until it's asked.</summary>\n");
         code.Append("    /// <param name=\"id\">The object's id.</param>\n    /// <returns>The object's node.</returns>\n");
-        code.Append("    public virtual ").Append(node).Append(" this[ulong id] => new(id, ").Append(Lit(service.Object)).Append(", FindAsync").Append(deletes ? ", DeleteAsync" : string.Empty);
+        code.Append("    public virtual ").Append(node).Append(" this[ulong id] => new(id, ").Append(Lit(service.Object)).Append(", FindAsync");
         // the node fills in its id and sends the request through UpdateAsync, so a test double that overrides it serves the node too
-        if (update is not null) code.Append(", static objectId => new ").Append(update).Append("(objectId), UpdateAsync");
+        if (update is not null) code.Append(", DeleteAsync, static objectId => new ").Append(update).Append("(objectId), UpdateAsync");
         code.Append(");\n");
     }
+
+    // The objects whose nodes are written by hand, a host's and a host group's: one node type whether reached by id or by name.
+    private static readonly HashSet<string> s_namedNodes = new(StringComparer.Ordinal) { "host", "hostgroup" };
 
     // The request a node of this client updates its object with, when the update takes several and requires only the
     // object's id: the node's UpdateAsync builds it from the id and a lambda sets the rest.

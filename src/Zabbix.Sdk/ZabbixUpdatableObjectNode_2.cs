@@ -8,10 +8,11 @@ namespace Community.Zabbix;
 /// </summary>
 /// <typeparam name="T">The record the API reads the object as.</typeparam>
 /// <typeparam name="TUpdate">The request that changes the object.</typeparam>
-public class ZabbixUpdatableObjectNode<T, TUpdate> : ZabbixDeletableObjectNode<T>
+public class ZabbixUpdatableObjectNode<T, TUpdate> : ZabbixObjectNode<T>
     where T : class
     where TUpdate : class
 {
+    private readonly Func<ulong, CancellationToken, Task>? _delete;
     private readonly Func<ulong, TUpdate>? _request;
     private readonly Func<TUpdate, CancellationToken, Task>? _update;
 
@@ -22,8 +23,9 @@ public class ZabbixUpdatableObjectNode<T, TUpdate> : ZabbixDeletableObjectNode<T
 
     internal ZabbixUpdatableObjectNode(ulong id, string objectType, Func<ulong, CancellationToken, Task<T?>> find, Func<ulong, CancellationToken, Task> delete,
         Func<ulong, TUpdate> request, Func<TUpdate, CancellationToken, Task> update)
-        : base(id, objectType, find, delete)
+        : base(id, objectType, find)
     {
+        _delete = delete;
         _request = request;
         _update = update;
     }
@@ -45,4 +47,11 @@ public class ZabbixUpdatableObjectNode<T, TUpdate> : ZabbixDeletableObjectNode<T
         configure(request);
         return _update(request, cancellationToken);
     }
+
+    /// <summary>Deletes the object.</summary>
+    /// <param name="cancellationToken">A token that cancels the call.</param>
+    /// <returns>A task that completes when the server has deleted it.</returns>
+    /// <exception cref="ZabbixApiException">The server refused, or has no object with this id that the caller may delete.</exception>
+    public virtual Task DeleteAsync(CancellationToken cancellationToken = default)
+        => (_delete ?? throw new InvalidOperationException("The node was built for mocking, and this member is not overridden."))(Id, cancellationToken);
 }

@@ -29,7 +29,7 @@ public sealed class GeneratedApiTests
     private static (ZabbixClient Server, ScriptedApi Api) Build(ScriptedApi api)
     {
         var services = new ServiceCollection();
-        services.AddZabbix().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
+        services.AddZabbixClient().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
         services.AddHttpClient(ZabbixHttp.GetClientName()).ConfigurePrimaryHttpMessageHandler(() => api);
         ServiceProvider provider = services.BuildValidated();
         return (provider.GetRequiredService<ZabbixClient>(), api);
@@ -75,7 +75,7 @@ public sealed class GeneratedApiTests
 
         Assert.True(reads.Count > 50, $"{reads.Count} list reads");
         Assert.All(reads, read => Assert.Contains("there is no paged form", read.Element("remarks")?.Value ?? "", StringComparison.Ordinal));
-        Assert.Contains(reads, read => read.Element("remarks")!.Descendants("see").Any(see => (string?)see.Attribute("cref") == "P:Community.Zabbix.ZabbixOptions.MaxResponseContentBytes"));
+        Assert.Contains(reads, read => read.Element("remarks")!.Descendants("see").Any(see => (string?)see.Attribute("cref") == "P:Community.Zabbix.ZabbixClientOptions.MaxResponseContentBytes"));
     }
 
     [Fact]
@@ -440,7 +440,7 @@ public sealed class GeneratedApiTests
     {
         JsonTypeInfo<ZabbixHostGetParameters> info = ZabbixApiJson.Default.ZabbixHostGetParameters;
 
-        Assert.Equal("""{"output":"count"}""", JsonSerializer.Serialize(new ZabbixHostGetParameters { Output = ZabbixOutput.Count }, info));
+        Assert.Equal("""{"output":"extend"}""", JsonSerializer.Serialize(new ZabbixHostGetParameters { Output = ZabbixOutput.Extend }, info));
         Assert.Equal("""{"output":["hostid","host"]}""", JsonSerializer.Serialize(new ZabbixHostGetParameters { Output = [ZabbixHostFields.HostId, ZabbixHostFields.TechnicalName] }, info));
         Assert.Equal("""{"filter":{"status":1,"host":"a","flags":[0,4]}}""", JsonSerializer.Serialize(new ZabbixHostGetParameters { Filter = new() { ["status"] = 1L, ["host"] = "a", ["flags"] = new long[] { 0, 4 } } }, info));
     }
@@ -620,10 +620,11 @@ public sealed class GeneratedApiTests
             typeof(ZabbixServerInfoClient).GetMethod(nameof(ZabbixServerInfoClient.GetAsync))!], method => Assert.False(method.GetParameters()[0].IsOptional));
         Assert.All([typeof(ZabbixHostDashboardClient).GetMethod(nameof(ZabbixHostDashboardClient.GetAsync))!, typeof(ZabbixServerInfoClient).GetMethod(nameof(ZabbixServerInfoClient.GetAsync))!],
             method => Assert.True(method.GetParameters()[^1].IsOptional));
-        // The others take everything, the parameters or a lambda, each with a token and without one.
-        Assert.NotNull(typeof(ZabbixHostClient).GetMethod(nameof(ZabbixHostClient.GetAsync), System.Type.EmptyTypes));
-        Assert.NotNull(typeof(ZabbixHostClient).GetMethod(nameof(ZabbixHostClient.GetAsync), [typeof(CancellationToken)]));
+        // The others take everything, the parameters or a lambda, each with an optional token (ADR 0013, section 6).
+        Assert.Null(typeof(ZabbixHostClient).GetMethod(nameof(ZabbixHostClient.GetAsync), System.Type.EmptyTypes));
+        Assert.True(typeof(ZabbixHostClient).GetMethod(nameof(ZabbixHostClient.GetAsync), [typeof(CancellationToken)])!.GetParameters()[0].IsOptional);
         Assert.False(typeof(ZabbixHostClient).GetMethod(nameof(ZabbixHostClient.GetAsync), [typeof(ZabbixHostGetParameters), typeof(CancellationToken)])!.GetParameters()[0].IsOptional);
+        Assert.True(typeof(ZabbixHostClient).GetMethod(nameof(ZabbixHostClient.GetAsync), [typeof(Action<ZabbixHostGetParameters>), typeof(CancellationToken)])!.GetParameters()[^1].IsOptional);
     }
 
     [Fact]

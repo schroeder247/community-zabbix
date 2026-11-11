@@ -121,10 +121,11 @@ These are the known gaps and deliberate limits of the alpha, before 1.0.0.
   acknowledgement removes rows the other still holds: a store owns its table.
 - **A memory store's cap counts what is not yet leased.** `ZabbixMemoryStore<T>`'s bound is its channel's, so a leased page
   that is not yet acknowledged is held on top of `MaxItems`; a durable store counts it.
-- **A login session ends on `LogOutAsync` or an asynchronous disposal.** A `ZabbixClient` with a
-  `ZabbixSessionCredential` sends `user.logout` from `LogOutAsync` (a failure is thrown) and from `DisposeAsync` (best
+- **A login session ends on `LogOffAsync` or an asynchronous disposal.** A `ZabbixClient` with a
+  `ZabbixSessionCredential` sends `user.logout` from `LogOffAsync` (a failure is thrown) and from `DisposeAsync` (best
   effort: a failure is logged at Debug, event 4007). The synchronous `Dispose` sends nothing, and the session stays on
-  the server until its idle timeout ends it.
+  the server until its idle timeout ends it. A client from a container is the container's: its session ends when the
+  container is disposed.
 - **Proxy and agent sessions are in memory.** The proxy answers every `active checks` request in full instead of
   tracking each agent's configuration revision (upstream answers an unchanged revision with an empty reply), and the
   agent sessions of the proxy and of the active agent do not survive a restart: each `ZabbixActiveAgent` starts a
@@ -136,7 +137,7 @@ These are the known gaps and deliberate limits of the alpha, before 1.0.0.
   are answered with `lastlogsize` and `mtime` 0, so an agent that reconnects reads its log from the start), and a log
   value's metadata (its source, severity and event id) is not forwarded.
 - **No rate limiter, and one interval per watch.** Nothing in front of the API limits the request rate per endpoint;
-  an application that needs one adds it to the server's pipeline (`AddZabbix(...).ConfigureHttpClient(...)`). The
+  an application that needs one adds it to the server's pipeline (`AddZabbixClient(...).ConfigureHttpClientBuilder(...)`). The
   standard resilience handler's concurrency limiter admits 1,000 calls at once and queues none: the next call fails at
   once with an `HttpRequestException` whose inner exception is Polly's `RateLimiterRejectedException`
   (`ConfigureResilience(r => r.RateLimiter.DefaultRateLimiterOptions.QueueLimit = …)` changes it). A watch

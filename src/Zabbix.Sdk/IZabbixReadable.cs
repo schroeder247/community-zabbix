@@ -23,8 +23,10 @@ public interface IZabbixReadable
     /// (<c>history.get</c>, paged; a second that fills a page is read whole, so nothing is truncated).
     /// </summary>
     /// <param name="from">The start, inclusive.</param>
-    /// <param name="till">The end, inclusive; now when <see langword="null"/>.</param>
+    /// <param name="to">The end, inclusive; now when <see langword="null"/>.</param>
     /// <param name="cancellationToken">A cancellation token, which reaches the socket.</param>
     /// <returns>The values collected in the window, in clock order across every item beneath this node.</returns>
-    IAsyncEnumerable<ZabbixValue> GetHistoryAsync(DateTimeOffset from, DateTimeOffset? till = null, CancellationToken cancellationToken = default);
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1716:Identifiers should not match keywords",
+        Justification = "The window is from and to, as the history.get parameters' TimeFrom and TimeTo are; a Visual Basic caller writes [to].")]
+    IAsyncEnumerable<ZabbixValue> GetHistoryAsync(DateTimeOffset from, DateTimeOffset? to = null, CancellationToken cancellationToken = default);
 }

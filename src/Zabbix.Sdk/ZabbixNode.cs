@@ -44,15 +44,16 @@ public abstract class ZabbixNode : IZabbixNode
     /// <exception cref="ZabbixNotFoundException">This node's host, group or item does not exist.</exception>
     public virtual async IAsyncEnumerable<ZabbixItem> GetItemsAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        bool any = false;
+        IReadOnlyList<ZabbixItem> items = await ReadItemsAsync(cancellationToken).ConfigureAwait(false);
+        if (items.Count == 0) await ThrowIfAbsentAsync(cancellationToken).ConfigureAwait(false);
+        foreach (ZabbixItem item in items) yield return item;
+    }
+
+    /// <summary>The items this node selects, as <c>item.get</c> returns them; empty when there are none, whatever the reason.</summary>
+    internal async Task<IReadOnlyList<ZabbixItem>> ReadItemsAsync(CancellationToken cancellationToken)
+    {
         IReadOnlyList<ZabbixItem> items = await Client.Items.GetAsync(Selection.ToItemGet(), cancellationToken).ConfigureAwait(false);
-        if (items.Count == 0 && Selection.Key is { Parameters.Count: > 0 } key) items = await SameKeyAsync(key, cancellationToken).ConfigureAwait(false);
-        foreach (ZabbixItem item in items)
-        {
-            any = true;
-            yield return item;
-        }
-        if (!any) await ThrowIfAbsentAsync(cancellationToken).ConfigureAwait(false);
+        return items.Count == 0 && Selection.Key is { Parameters.Count: > 0 } key ? await SameKeyAsync(key, cancellationToken).ConfigureAwait(false) : items;
     }
 
     // A key's text is what the API filters on, and a template may quote what a caller doesn't: net.if.in["eth0"] and
@@ -77,8 +78,8 @@ public abstract class ZabbixNode : IZabbixNode
                 return true;
             return itemKey.Parameters.Count > 0 && (await SameKeyAsync(itemKey, cancellationToken).ConfigureAwait(false)).Count > 0;
         }
-        if (Selection.Host is { } host) return await HostExistsAsync(host, cancellationToken).ConfigureAwait(false);
-        if (Selection.Group is { } group) return await GroupExistsAsync(group, cancellationToken).ConfigureAwait(false);
+        if (Selection.HasHost) return await HostExistsAsync(cancellationToken).ConfigureAwait(false);
+        if (Selection.HasGroup) return (await GroupIdsAsync(cancellationToken).ConfigureAwait(false)).Count > 0;
         return true;
     }
 
@@ -89,44 +90,32 @@ public abstract class ZabbixNode : IZabbixNode
     /// </summary>
     private async Task ThrowIfAbsentAsync(CancellationToken cancellationToken)
     {
-        if (Selection.Host is { } host && !await HostExistsAsync(host, cancellationToken).ConfigureAwait(false))
-            throw new ZabbixNotFoundException("host", host);
-        if (Selection.Group is { } group && !await GroupExistsAsync(group, cancellationToken).ConfigureAwait(false))
-            throw new ZabbixNotFoundException("hostgroup", group);
-        if (Selection is { Key: { } key, Host: { } owner })
-            throw new ZabbixNotFoundException(owner, key);
+        if (Selection.HasHost && !await HostExistsAsync(cancellationToken).ConfigureAwait(false))
+            throw Selection.AbsentHost();
+        if (Selection.HasGroup && (await GroupIdsAsync(cancellationToken).ConfigureAwait(false)).Count == 0)
+            throw Selection.AbsentGroup();
+        if (Selection is { Key: { } key, HasHost: true })
+            throw ZabbixNotFoundException.NoItem(Selection.HostText, key);
     }
 
-    private async Task<bool> HostExistsAsync(string host, CancellationToken cancellationToken)
+    // The selection's host, whichever way it was asked for: its technical name, its id, or both.
+    private async Task<bool> HostExistsAsync(CancellationToken cancellationToken)
     {
-        foreach (ZabbixHost _ in await Client.Hosts.GetAsync(new ZabbixHostGetParameters
-        {
-            Output = s_hostIdField,
-            Filter = new() { ["host"] = host },
-            Limit = 1,
-        }, cancellationToken).ConfigureAwait(false))
-        {
+        foreach (ZabbixHost _ in await Client.Hosts.GetAsync(Selection.ToHostGet() with { Output = s_hostIdField }, cancellationToken).ConfigureAwait(false))
             return true;
-        }
         return false;
     }
 
-    internal async Task<IReadOnlyList<ulong>> GroupIdsAsync(string group, CancellationToken cancellationToken)
+    /// <summary>The ids of the selection's group, by its name or its id: empty when there is none.</summary>
+    internal async Task<IReadOnlyList<ulong>> GroupIdsAsync(CancellationToken cancellationToken)
     {
         List<ulong> ids = [];
-        foreach (ZabbixHostGroup found in await Client.HostGroups.GetAsync(new ZabbixHostGroupGetParameters
-        {
-            Output = s_groupIdField,
-            Filter = new() { ["name"] = group },
-        }, cancellationToken).ConfigureAwait(false))
+        foreach (ZabbixHostGroup found in await Client.HostGroups.GetAsync(Selection.ToGroupGet() with { Output = s_groupIdField }, cancellationToken).ConfigureAwait(false))
         {
             if (found.GroupId is { } id) ids.Add(id);
         }
         return ids;
     }
-
-    private async Task<bool> GroupExistsAsync(string group, CancellationToken cancellationToken)
-        => (await GroupIdsAsync(group, cancellationToken).ConfigureAwait(false)).Count > 0;
 
     /// <inheritdoc/>
     /// <exception cref="ZabbixNotFoundException">This node's host, group or item does not exist.</exception>
@@ -140,11 +129,13 @@ public abstract class ZabbixNode : IZabbixNode
     /// <inheritdoc/>
     /// <remarks>
     /// One <c>history.get</c> cursor per value type the items have, merged into one time line in clock order; each cursor
-    /// reads a saturated second whole, so nothing is truncated. Rows outside <c>[from, till]</c> to the nanosecond are
+    /// reads a saturated second whole, so nothing is truncated. Rows outside <c>[from, to]</c> to the nanosecond are
     /// left out (the API's bounds are whole seconds).
     /// </remarks>
     /// <exception cref="ZabbixNotFoundException">This node's host, group or item does not exist.</exception>
-    public virtual async IAsyncEnumerable<ZabbixValue> GetHistoryAsync(DateTimeOffset from, DateTimeOffset? till = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1716:Identifiers should not match keywords",
+        Justification = "The window is from and to, as the history.get parameters' TimeFrom and TimeTo are; a Visual Basic caller writes [to].")]
+    public virtual async IAsyncEnumerable<ZabbixValue> GetHistoryAsync(DateTimeOffset from, DateTimeOffset? to = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var keys = new ZabbixItemKeyReport(Logger);
         Dictionary<ulong, (string Host, ZabbixItemKey Key, ZabbixItemValueType Type)> items = [];
@@ -152,19 +143,19 @@ public abstract class ZabbixNode : IZabbixNode
             if (item is { ItemId: { } id, ValueType: { } type, HostName: { } host } && keys.TryRead(item, out ZabbixItemKey key)) items[id] = (host, key, type);
 
         ZabbixClock start = from;
-        ZabbixClock? end = till is { } t ? t : null;
+        ZabbixClock? end = to is { } t ? t : null;
         await foreach (ZabbixValue value in ReadHistoryAsync(items, start.Seconds, end?.Seconds, cancellationToken).ConfigureAwait(false))
             if (value.Clock >= start && (end is not { } last || value.Clock <= last)) yield return value;
     }
 
     /// <summary>The history of <paramref name="items"/> from second <paramref name="from"/>, one cursor per value type, merged in clock order.</summary>
-    internal IAsyncEnumerable<ZabbixValue> ReadHistoryAsync(IReadOnlyDictionary<ulong, (string Host, ZabbixItemKey Key, ZabbixItemValueType Type)> items, long from, long? till, CancellationToken cancellationToken)
+    internal IAsyncEnumerable<ZabbixValue> ReadHistoryAsync(IReadOnlyDictionary<ulong, (string Host, ZabbixItemKey Key, ZabbixItemValueType Type)> items, long from, long? to, CancellationToken cancellationToken)
     {
         ILogger logger = Logger;
         List<IAsyncEnumerable<ZabbixValue>> cursors = [.. items
             .GroupBy(item => item.Value.Type)
             .OrderBy(group => group.Key)
-            .Select(group => ZabbixHistoryRead.ReadAsync(Client, Client.GetApiVersionAsync, Client.TreeTelemetry, logger, group.Key, [.. group.Select(item => item.Key)], from, till, cancellationToken)
+            .Select(group => ZabbixHistoryRead.ReadAsync(Client, Client.GetApiVersionAsync, Client.TreeTelemetry, logger, group.Key, [.. group.Select(item => item.Key)], from, to, cancellationToken)
                 .Select(row => ToValue(items, row)))];
         return ZabbixHistoryRead.MergeAsync(cursors, static value => value.Clock, cancellationToken);
 

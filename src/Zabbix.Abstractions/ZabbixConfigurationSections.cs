@@ -5,7 +5,7 @@ namespace Community.Zabbix;
 /// <summary>
 /// Names the sections of the <c>Zabbix</c> configuration document: servers, push agents, active agents, passive agents and
 /// proxies, each a map from name to its options, so declaring a name twice continues configuring that row. A fluent chain
-/// (<c>AddZabbix("prod")</c> and its verbs), a configuration file (JSON, or any other <c>IConfiguration</c> source) and a hashtable
+/// (<c>AddZabbixClient("prod")</c> and its verbs), a configuration file (JSON, or any other <c>IConfiguration</c> source) and a hashtable
 /// all bind to the same named options through the same verbs, so the forms cannot drift.
 /// </summary>
 /// <remarks>

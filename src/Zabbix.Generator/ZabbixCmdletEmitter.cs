@@ -470,7 +470,7 @@ internal sealed partial class ZabbixCmdletEmitter(ApiDescription api)
     }
 
     // ApplyEntityFilters always overrides (not just when the entity has its own -Select*/-Editable): folding
-    // the sort (-SortField and -SortOrder)/Search/SearchByAny/StartSearch/ExcludeSearch/SearchWildcardsEnabled/CountOutput onto an
+    // the sort (-SortField and -SortOrder)/Search/SearchByAny/StartSearch/ExcludeSearch/SearchWildcardsEnabled onto an
     // existing parameters instance needs `with`, which only compiles against the concrete record type this generated
     // class knows (TParameters is generic in the base — see ZabbixGetCmdlet's doc comment on ApplyEntityFilters).
     // SortWire()/SearchDictionary() are the base's plain helpers.
@@ -484,7 +484,6 @@ internal sealed partial class ZabbixCmdletEmitter(ApiDescription api)
         code.Append("        if (StartSearch.IsPresent) parameters = parameters with { StartSearch = true };\n");
         code.Append("        if (ExcludeSearch.IsPresent) parameters = parameters with { ExcludeSearch = true };\n");
         code.Append("        if (SearchWildcardsEnabled.IsPresent) parameters = parameters with { SearchWildcardsEnabled = true };\n");
-        code.Append("        if (CountOutput.IsPresent) parameters = parameters with { CountOutput = true };\n");
         foreach (FieldDescription field in get.Selects)
             Obsolete(code, field).Append("        if (").Append(field.Name).Append(".IsPresent) parameters = parameters with { ").Append(field.Name).Append(" = global::Community.Zabbix.ZabbixOutput.Extend };\n").Append(Restored(field));
         foreach ((GetSwitch option, FieldDescription field) in get.Switches)
@@ -509,7 +508,7 @@ internal sealed partial class ZabbixCmdletEmitter(ApiDescription api)
         ServiceDescription service = get.Service;
         code.Append("    /// <inheritdoc/>\n");
         code.Append("    protected override void Query(ZabbixClient client, ").Append(parametersType).Append(" parameters)\n    {\n");
-        code.Append("        if (parameters.CountOutput == true) { if (TryRun(cancellationToken => client.").Append(service.Property)
+        code.Append("        if (CountOutput.IsPresent) { if (TryRun(cancellationToken => client.").Append(service.Property)
             .Append(".CountAsync(parameters, cancellationToken), out long count, parameters)) WriteObject(count); return; }\n");
         code.Append("        WriteAll(cancellationToken => client.").Append(service.Property).Append(".GetAsync(parameters, cancellationToken), parameters);\n    }\n\n");
         code.Append("    /// <inheritdoc/>\n");

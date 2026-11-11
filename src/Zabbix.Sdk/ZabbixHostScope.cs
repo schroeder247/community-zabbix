@@ -20,9 +20,6 @@ public class ZabbixHostScope : ZabbixNode, IAsyncEnumerable<ZabbixHostNode>
     {
     }
 
-    /// <summary>The group this scope is, when it is one.</summary>
-    public virtual string? Group => Selection.Group;
-
     /// <summary>
     /// Gets one host of this set, by technical name: <c>Hosts["web-01"]</c>. A group's host is read only while it's in the group.
     /// No call is made until it's asked.
@@ -45,14 +42,14 @@ public class ZabbixHostScope : ZabbixNode, IAsyncEnumerable<ZabbixHostNode>
     public virtual async IAsyncEnumerator<ZabbixHostNode> GetAsyncEnumerator(CancellationToken cancellationToken = default)
     {
         IReadOnlyList<ulong>? groups = null;
-        if (Selection.Group is { } group)
+        if (Selection.HasGroup)
         {
-            groups = await GroupIdsAsync(group, cancellationToken).ConfigureAwait(false);
-            if (groups.Count == 0) throw new ZabbixNotFoundException("hostgroup", group);
+            groups = await GroupIdsAsync(cancellationToken).ConfigureAwait(false);
+            if (groups.Count == 0) throw Selection.AbsentGroup();
         }
         foreach (ZabbixHost host in await Client.Hosts.GetAsync(new ZabbixHostGetParameters { Output = s_hostFields, GroupIds = groups }, cancellationToken).ConfigureAwait(false))
         {
-            if (host.TechnicalName is { } name) yield return new ZabbixHostNode(Client, Selection with { Host = name });
+            if (host.TechnicalName is { } name) yield return new ZabbixHostNode(Client, Selection with { Host = name, HostId = host.HostId });
         }
     }
 }

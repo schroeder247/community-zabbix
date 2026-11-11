@@ -34,47 +34,13 @@ namespace Community.Zabbix.Hosting;
 /// </remarks>
 public static class ZabbixSendLoop
 {
-    /// <summary>Runs until <paramref name="source"/> ends, with the default options.</summary>
-    /// <typeparam name="T">The record.</typeparam>
-    /// <param name="source">The values.</param>
-    /// <param name="deliver">The destination.</param>
-    /// <returns>How many values were delivered or rejected: every value that reached a final answer.</returns>
-    public static Task<long> RunAsync<T>(IAsyncEnumerable<T> source, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixSendOutcome>> deliver)
-        => RunAsync(source, deliver, CancellationToken.None);
-
-    /// <summary>Runs until <paramref name="source"/> ends.</summary>
-    /// <typeparam name="T">The record.</typeparam>
-    /// <param name="source">The values.</param>
-    /// <param name="deliver">The destination.</param>
-    /// <param name="options">The batching, the backoff, the drain window, the clock, the logger, and where progress goes.</param>
-    /// <returns>How many values were delivered or rejected: every value that reached a final answer.</returns>
-    public static Task<long> RunAsync<T>(IAsyncEnumerable<T> source, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixSendOutcome>> deliver, ZabbixSendLoopOptions options)
-        => RunAsync(source, deliver, options, CancellationToken.None);
-
-    /// <summary>Runs until <paramref name="store"/> is complete and empty, with the default options.</summary>
-    /// <typeparam name="T">The record.</typeparam>
-    /// <param name="store">The store, read through its acknowledged face.</param>
-    /// <param name="deliver">The destination.</param>
-    /// <returns>How many values were delivered or rejected: every value that reached a final answer.</returns>
-    public static Task<long> RunAsync<T>(ZabbixStore<T> store, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixSendOutcome>> deliver)
-        => RunAsync(store, deliver, CancellationToken.None);
-
-    /// <summary>Runs until <paramref name="store"/> is complete and empty.</summary>
-    /// <typeparam name="T">The record.</typeparam>
-    /// <param name="store">The store, read through its acknowledged face.</param>
-    /// <param name="deliver">The destination.</param>
-    /// <param name="options">The batching, the backoff, the drain window, the clock, the logger, and where progress goes.</param>
-    /// <returns>How many values were delivered or rejected: every value that reached a final answer.</returns>
-    public static Task<long> RunAsync<T>(ZabbixStore<T> store, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixSendOutcome>> deliver, ZabbixSendLoopOptions options)
-        => RunAsync(store, deliver, options, CancellationToken.None);
-
     /// <summary>Runs until <paramref name="source"/> ends, or until <paramref name="cancellationToken"/> stops it and the drain is over, with the default options.</summary>
     /// <typeparam name="T">The record.</typeparam>
     /// <param name="source">The values.</param>
     /// <param name="deliver">The destination.</param>
     /// <param name="cancellationToken">Stops waiting for values; the drain follows.</param>
     /// <returns>How many values were delivered or rejected: every value that reached a final answer.</returns>
-    public static Task<long> RunAsync<T>(IAsyncEnumerable<T> source, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixSendOutcome>> deliver, CancellationToken cancellationToken)
+    public static Task<long> RunAsync<T>(IAsyncEnumerable<T> source, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixSendOutcome>> deliver, CancellationToken cancellationToken = default)
         => RunAsync(source, deliver, new ZabbixSendLoopOptions(), cancellationToken);
 
     /// <summary>Runs until <paramref name="source"/> ends, or until <paramref name="cancellationToken"/> stops it and the drain is over.</summary>
@@ -85,7 +51,7 @@ public static class ZabbixSendLoop
     /// <param name="cancellationToken">Stops waiting for values; the drain follows.</param>
     /// <returns>How many values were delivered or rejected: every value that reached a final answer.</returns>
     /// <remarks>A source that faults ends the run with its exception, rethrown once everything it yielded before the fault has been delivered.</remarks>
-    public static Task<long> RunAsync<T>(IAsyncEnumerable<T> source, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixSendOutcome>> deliver, ZabbixSendLoopOptions options, CancellationToken cancellationToken)
+    public static Task<long> RunAsync<T>(IAsyncEnumerable<T> source, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixSendOutcome>> deliver, ZabbixSendLoopOptions options, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(deliver);
@@ -101,7 +67,7 @@ public static class ZabbixSendLoop
     /// <param name="deliver">The destination.</param>
     /// <param name="cancellationToken">Stops waiting for values; the drain follows.</param>
     /// <returns>How many values were delivered or rejected: every value that reached a final answer.</returns>
-    public static Task<long> RunAsync<T>(ZabbixStore<T> store, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixSendOutcome>> deliver, CancellationToken cancellationToken)
+    public static Task<long> RunAsync<T>(ZabbixStore<T> store, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixSendOutcome>> deliver, CancellationToken cancellationToken = default)
         => RunAsync(store, deliver, new ZabbixSendLoopOptions(), cancellationToken, CancellationToken.None);
 
     /// <summary>
@@ -117,7 +83,7 @@ public static class ZabbixSendLoop
     /// <param name="cancellationToken">Stops waiting for values; the drain follows.</param>
     /// <returns>How many values were delivered or rejected: every value that reached a final answer.</returns>
     /// <remarks>A lease wait that faults (the store completed with an error, a backend that cannot load) ends the run with its exception, once what was leased before it has been delivered.</remarks>
-    public static Task<long> RunAsync<T>(ZabbixStore<T> store, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixSendOutcome>> deliver, ZabbixSendLoopOptions options, CancellationToken cancellationToken)
+    public static Task<long> RunAsync<T>(ZabbixStore<T> store, Func<IReadOnlyList<T>, CancellationToken, ValueTask<ZabbixSendOutcome>> deliver, ZabbixSendLoopOptions options, CancellationToken cancellationToken = default)
         => RunAsync(store, deliver, options, cancellationToken, CancellationToken.None);
 
     /// <summary>The store form a host stops with: <paramref name="abandoning"/> closes the drain window at once (a disposal, or a host that gave up waiting).</summary>

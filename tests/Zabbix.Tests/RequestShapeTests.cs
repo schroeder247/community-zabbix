@@ -28,7 +28,7 @@ public sealed class RequestShapeTests
     {
         var services = new ServiceCollection();
         services.AddSingleton(_ => script(new ScriptedApi()));
-        services.AddZabbix().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
+        services.AddZabbixClient().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
         services.AddHttpClient(ZabbixHttp.GetClientName()).ConfigurePrimaryHttpMessageHandler(provider => provider.GetRequiredService<ScriptedApi>());
         ServiceProvider provider = services.BuildValidated();
         return new Api(provider.GetRequiredService<ZabbixClient>(), provider.GetRequiredService<ScriptedApi>(), provider);
@@ -162,7 +162,7 @@ public sealed class RequestShapeTests
             .On("item.get", """[{"itemid":"23","key_":"agent.ping","hostid":"10084"}]""")
             .On("item.update", """{"itemids":["23"]}"""));
 
-        await api.Zabbix.Hosts["web-01"].Item("agent.ping").UpdateAsync(i => i.Status = ZabbixItemStatus.Disabled, TestContext.Current.CancellationToken);
+        await api.Zabbix.Hosts["web-01"].Items["agent.ping"].UpdateAsync(i => i.Status = ZabbixItemStatus.Disabled, TestContext.Current.CancellationToken);
 
         Assert.Equal("""{"itemid":"23","status":1}""", api.Script.ParamsOf("item.update").Single().GetRawText());
     }
@@ -416,9 +416,12 @@ public sealed class RequestShapeTests
         DesignConformanceTests.AssertNone(offenders);
     }
 
-    /// <summary>A create from the fields it requires also takes a lambda for the rest, with a token and without one.</summary>
+    /// <summary>
+    /// A create from the fields it requires also takes a lambda for the rest, virtual, with its token optional last as every
+    /// overload's is (ADR 0013, section 6).
+    /// </summary>
     [Fact]
-    public void Every_short_create_has_a_lambda_form_with_a_token_and_without_one()
+    public void Every_short_create_has_a_lambda_form()
     {
         List<string> offenders = [];
         int shortCreates = 0;
@@ -432,8 +435,10 @@ public sealed class RequestShapeTests
             {
                 shortCreates++;
                 Type[] fields = [.. create.GetParameters()[..^1].Select(parameter => parameter.ParameterType)];
-                if (client.GetMethod("CreateAsync", [.. fields, action]) is null) offenders.Add($"{client.Name}.CreateAsync({string.Join(", ", fields.Select(field => field.Name))}): no lambda form");
-                if (client.GetMethod("CreateAsync", [.. fields, action, typeof(CancellationToken)]) is not { IsVirtual: true }) offenders.Add($"{client.Name}.CreateAsync({string.Join(", ", fields.Select(field => field.Name))}): no virtual lambda form with a token");
+                if (client.GetMethod("CreateAsync", [.. fields, action, typeof(CancellationToken)]) is not { IsVirtual: true } configured)
+                    offenders.Add($"{client.Name}.CreateAsync({string.Join(", ", fields.Select(field => field.Name))}): no virtual lambda form");
+                else if (!configured.GetParameters()[^1].HasDefaultValue)
+                    offenders.Add($"{client.Name}.CreateAsync({string.Join(", ", fields.Select(field => field.Name))}): the lambda form's token isn't optional");
             }
         }
 
@@ -441,7 +446,10 @@ public sealed class RequestShapeTests
         DesignConformanceTests.AssertNone(offenders);
     }
 
-    /// <summary>A node by id of a client that updates its objects updates its object, with the client's own update request.</summary>
+    /// <summary>
+    /// A node by id of a client that updates its objects updates its object, with the client's own update request: an
+    /// updatable node, or a host's or a host group's own node, which their names reach too (ADR 0013, section 4).
+    /// </summary>
     [Fact]
     public void Every_node_by_id_of_a_client_that_updates_updates()
     {
@@ -454,8 +462,10 @@ public sealed class RequestShapeTests
             updatable++;
             Type request = update.GetParameters()[0].ParameterType.GetGenericArguments()[0];
             Type node = indexer.PropertyType;
-            if (!node.IsGenericType || node.GetGenericTypeDefinition() != typeof(ZabbixUpdatableObjectNode<,>) || node.GetGenericArguments()[1] != request)
-                offenders.Add($"{client.Name}[ulong] is a {node.Name}, not an updatable node of {request.Name}");
+            if (node.GetMethod("UpdateAsync", [typeof(Action<>).MakeGenericType(request), typeof(CancellationToken)]) is null)
+                offenders.Add($"{client.Name}[ulong] is a {node.Name}, which doesn't update with {request.Name}");
+            if (client.GetProperty("Item", [typeof(string)]) is { } byName && byName.PropertyType != node)
+                offenders.Add($"{client.Name}[ulong] is a {node.Name}, and {client.Name}[string] a {byName.PropertyType.Name}");
         }
 
         Assert.True(updatable > 40, $"only {updatable} clients update by id");

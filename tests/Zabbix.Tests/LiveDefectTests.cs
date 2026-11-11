@@ -105,10 +105,10 @@ public sealed class LiveDefectTests
 
         var gate = new ItemGetGate();
         var services = new ServiceCollection();
-        services.AddZabbix().Configure(options => { options.Endpoint = target.Endpoint; options.ApiToken = target.Token; });
+        services.AddZabbixClient().Configure(options => { options.Endpoint = target.Endpoint; options.ApiToken = target.Token; });
         services.AddHttpClient(ZabbixHttp.GetClientName()).AddHttpMessageHandler(() => new ItemGetGate.Handler(gate));
         await using ServiceProvider provider = services.BuildServiceProvider();
-        await using IZabbixWatcher watcher = provider.GetRequiredService<ZabbixClient>().Hosts[host.Host].Item("zbxtest.src").Watch(new ZabbixWatchPlan(TimeSpan.FromSeconds(1)));
+        await using IZabbixWatcher watcher = provider.GetRequiredService<ZabbixClient>().Hosts[host.Host].Items["zbxtest.src"].Watch(new ZabbixWatchPlan(TimeSpan.FromSeconds(1)));
         await using IAsyncEnumerator<ZabbixValue> reader = watcher.GetAsyncEnumerator(cancel);         // attached before anything is sent
         await gate.Held.Task.WaitAsync(cancel);                                                          // the first poll's item.get is in flight
 

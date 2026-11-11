@@ -82,7 +82,7 @@ public sealed class ZabbixWireClientTests
     public async Task A_client_keeps_its_own_copy_of_the_options_it_was_given()
     {
         (int port, Task<int> received) = MockTrapper.Collect(1);
-        var options = new ZabbixWireOptions { Server = $"127.0.0.1:{port}", Connection = { Timeout = TimeSpan.FromSeconds(10) } };
+        var options = new ZabbixWireClientOptions { Server = $"127.0.0.1:{port}", Connection = { Timeout = TimeSpan.FromSeconds(10) } };
         await using var wire = new ZabbixWireClient(options);
         options.Server = "a b";                                                            // a change after the client was built doesn't reach it
         options.Connection.Timeout = TimeSpan.Zero;
@@ -97,8 +97,8 @@ public sealed class ZabbixWireClientTests
     [Fact]
     public async Task Options_that_cannot_be_used_fail_the_first_request_as_the_client_s_state()
     {
-        using var unparsable = new ZabbixWireClient(new ZabbixWireOptions { Server = "a b" });
-        using var badConnection = new ZabbixWireClient(new ZabbixWireOptions { Server = "127.0.0.1", Connection = new ZabbixConnectionOptions { Timeout = TimeSpan.Zero } });
+        using var unparsable = new ZabbixWireClient(new ZabbixWireClientOptions { Server = "a b" });
+        using var badConnection = new ZabbixWireClient(new ZabbixWireClientOptions { Server = "127.0.0.1", Connection = new ZabbixConnectionOptions { Timeout = TimeSpan.Zero } });
 
         InvalidOperationException server = await Assert.ThrowsAsync<InvalidOperationException>(() => unparsable.PingAsync(TestContext.Current.CancellationToken));
         InvalidOperationException connection = await Assert.ThrowsAsync<InvalidOperationException>(() => badConnection.PingAsync(TestContext.Current.CancellationToken));
@@ -114,7 +114,7 @@ public sealed class ZabbixWireClientTests
     public async Task The_session_goes_with_the_server_s_requests()
     {
         var sent = new List<JsonElement>();
-        using var wire = new ZabbixWireClient(Answering(Pong, sent), new ZabbixWireOptions { SessionId = "the-session" }, null, null);
+        using var wire = new ZabbixWireClient(Answering(Pong, sent), new ZabbixWireClientOptions { SessionId = "the-session" }, null, null);
 
         await wire.PingAsync(TestContext.Current.CancellationToken);
 
@@ -139,7 +139,7 @@ public sealed class ZabbixWireClientTests
             frames.Add(values);
             return ValueTask.FromResult<ReadOnlyMemory<byte>>(Encoding.UTF8.GetBytes(Processed(values)));
         };
-        using var wire = new ZabbixWireClient(exchange, new ZabbixWireOptions { BatchSize = 2 }, null, null);
+        using var wire = new ZabbixWireClient(exchange, new ZabbixWireClientOptions { BatchSize = 2 }, null, null);
 
         ZabbixSenderResponse sent = await wire.SendAsync(Enumerable.Repeat(Value, 5).ToArray(), TestContext.Current.CancellationToken);
 
@@ -151,7 +151,7 @@ public sealed class ZabbixWireClientTests
     public async Task The_check_timeout_goes_with_an_agent_read()
     {
         var sent = new List<JsonElement>();
-        using var wire = new ZabbixWireClient(Answering(AgentAnswer, sent), new ZabbixWireOptions { CheckTimeout = TimeSpan.FromSeconds(7) }, null, null);
+        using var wire = new ZabbixWireClient(Answering(AgentAnswer, sent), new ZabbixWireClientOptions { CheckTimeout = TimeSpan.FromSeconds(7) }, null, null);
 
         await wire.GetAgentItemAsync("web-01", "agent.ping", TestContext.Current.CancellationToken);
 
@@ -159,15 +159,15 @@ public sealed class ZabbixWireClientTests
     }
 
     [Theory]
-    [InlineData(0, ZabbixWireOptions.DefaultMaxBatchBytes, 3)]
+    [InlineData(0, ZabbixWireClientOptions.DefaultMaxBatchBytes, 3)]
     [InlineData(1, 35, 3)]
-    [InlineData(1, ZabbixWireOptions.DefaultMaxBatchBytes + 1, 3)]
-    [InlineData(1, ZabbixWireOptions.DefaultMaxBatchBytes, 0)]
-    [InlineData(1, ZabbixWireOptions.DefaultMaxBatchBytes, 601)]
-    [InlineData(1, ZabbixWireOptions.DefaultMaxBatchBytes, 1.5)]
+    [InlineData(1, ZabbixWireClientOptions.DefaultMaxBatchBytes + 1, 3)]
+    [InlineData(1, ZabbixWireClientOptions.DefaultMaxBatchBytes, 0)]
+    [InlineData(1, ZabbixWireClientOptions.DefaultMaxBatchBytes, 601)]
+    [InlineData(1, ZabbixWireClientOptions.DefaultMaxBatchBytes, 1.5)]
     public async Task A_setting_outside_what_the_protocol_takes_is_refused_at_the_first_request(int batchSize, long maxBatchBytes, double checkTimeout)
     {
-        ZabbixWireOptions options = new() { BatchSize = batchSize, MaxBatchBytes = maxBatchBytes, CheckTimeout = TimeSpan.FromSeconds(checkTimeout) };
+        ZabbixWireClientOptions options = new() { BatchSize = batchSize, MaxBatchBytes = maxBatchBytes, CheckTimeout = TimeSpan.FromSeconds(checkTimeout) };
         using var sending = new ZabbixWireClient(Answering(Processed(1)), options, null, null);
         using var reading = new ZabbixWireClient(Answering(AgentAnswer), options, null, null);
 
@@ -318,7 +318,7 @@ public sealed class ZabbixWireClientTests
         using var loggers = new LoggerFactory([provider]);
         ZabbixExchangeCallback exchange = (request, _) => ValueTask.FromResult<ReadOnlyMemory<byte>>(Encoding.UTF8.GetBytes(
             request.Span.IndexOf("sender data"u8) >= 0 ? Processed(1) : request.Span.IndexOf("status.get"u8) >= 0 ? Pong : AgentAnswer));
-        using var wire = new ZabbixWireClient(exchange, new ZabbixWireOptions(), loggers, null);
+        using var wire = new ZabbixWireClient(exchange, new ZabbixWireClientOptions(), loggers, null);
 
         await wire.SendAsync([Value], TestContext.Current.CancellationToken);
         await wire.PingAsync(TestContext.Current.CancellationToken);
@@ -334,13 +334,13 @@ public sealed class ZabbixWireClientTests
     {
         public List<string> Calls { get; } = [];
 
-        public override Task<ZabbixSenderResponse> SendAsync(IReadOnlyCollection<ZabbixValue> values, CancellationToken cancellationToken)
+        public override Task<ZabbixSenderResponse> SendAsync(IReadOnlyCollection<ZabbixValue> values, CancellationToken cancellationToken = default)
         {
             Calls.Add("send");
             return Task.FromResult(new ZabbixSenderResponse(values.Count, 0, values.Count, TimeSpan.Zero, "scripted"));
         }
 
-        public override Task<ZabbixAgentAnswer> GetAgentItemAsync(string agent, ZabbixItemKey key, CancellationToken cancellationToken)
+        public override Task<ZabbixAgentAnswer> GetAgentItemAsync(string agent, ZabbixItemKey key, CancellationToken cancellationToken = default)
         {
             Calls.Add(agent);
             return Task.FromResult(ZabbixAgentAnswer.Supported(key, "stood in"));
@@ -354,11 +354,11 @@ public sealed class ZabbixWireClientTests
     }
 
     [Fact]
-    public async Task A_test_stands_in_for_the_client_by_overriding_the_longest_overloads()
+    public async Task A_test_stands_in_for_the_client_by_overriding_its_virtual_members()
     {
         using var stand = new Stand();
 
-#pragma warning disable xUnit1051 // the overloads without a token are what this pins
+#pragma warning disable xUnit1051 // a call that leaves the optional token out is what this pins
         ZabbixSenderResponse sent = await stand.SendAsync([Value]);
         ZabbixAgentAnswer read = await stand.GetAgentItemAsync("web-01", "agent.ping");
 #pragma warning restore xUnit1051

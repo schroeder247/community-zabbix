@@ -8,14 +8,14 @@ using System.Text.Json.Serialization;
 namespace Community.Zabbix;
 
 /// <summary>
-/// Represents what a get returns of <typeparamref name="TRecord"/>: every field, a count, or the fields a list names. A
-/// get's <c>output</c> and its <c>select</c> options each take one, typed by the record they return, so
-/// <c>q.Output = [ZabbixHostFields.HostId]</c> compiles in a host's query and not in an item's. A keyword converts from
-/// <see cref="ZabbixOutput.Extend"/> or <see cref="ZabbixOutput.Count"/>, and a list is a collection expression of
-/// <see cref="ZabbixField{TRecord}"/> values. Equal when the keyword is, or the fields in order are.
+/// Represents what a get returns of <typeparamref name="TRecord"/>: every field, or the fields a list names. A get's
+/// <c>output</c> and its <c>select</c> options each take one, typed by the record they return, so
+/// <c>q.Output = [ZabbixHostFields.HostId]</c> compiles in a host's query and not in an item's. The keyword converts from
+/// <see cref="ZabbixOutput.Extend"/>, and a list is a collection expression of <see cref="ZabbixField{TRecord}"/> values.
+/// Equal when the keyword is, or the fields in order are.
 /// </summary>
 /// <remarks>
-/// Owned: the grammar is <c>"extend" | "count" | [field, ...]</c>, a keyword-or-list union no BCL type spells. Equality is
+/// Owned: the grammar is <c>"extend" | [field, ...]</c>, a keyword-or-list union no BCL type spells. Equality is
 /// written over the fields, since a record's synthesized equality compares an <see cref="IReadOnlyList{T}"/> by
 /// reference.
 /// </remarks>
@@ -29,20 +29,20 @@ public sealed record ZabbixOutput<TRecord>
         Fields = fields;
     }
 
-    /// <summary>Gets the keyword, <c>extend</c> or <c>count</c>, when the output is one.</summary>
+    /// <summary>Gets the keyword, <c>extend</c>, when the output is one.</summary>
     public string? Keyword { get; }
 
     /// <summary>Gets the fields, in the order they're sent, when the output is a list.</summary>
     public IReadOnlyList<ZabbixField<TRecord>>? Fields { get; }
 
     /// <summary>Converts a keyword to the output of <typeparamref name="TRecord"/> that sends it.</summary>
-    /// <param name="keyword">The keyword: <see cref="ZabbixOutput.Extend"/> or <see cref="ZabbixOutput.Count"/>.</param>
+    /// <param name="keyword">The keyword: <see cref="ZabbixOutput.Extend"/>.</param>
     /// <returns>The output, or <see langword="null"/> when <paramref name="keyword"/> is.</returns>
     [return: NotNullIfNotNull(nameof(keyword))]
     public static implicit operator ZabbixOutput<TRecord>?(ZabbixOutput? keyword) => FromZabbixOutput(keyword);
 
     /// <summary>Creates the output of <typeparamref name="TRecord"/> that sends a keyword: the named form of the implicit conversion.</summary>
-    /// <param name="keyword">The keyword: <see cref="ZabbixOutput.Extend"/> or <see cref="ZabbixOutput.Count"/>.</param>
+    /// <param name="keyword">The keyword: <see cref="ZabbixOutput.Extend"/>.</param>
     /// <returns>The output, or <see langword="null"/> when <paramref name="keyword"/> is.</returns>
     [return: NotNullIfNotNull(nameof(keyword))]
     [SuppressMessage("Design", "CA1000:Do not declare static members on generic types", Justification = "The named form of the implicit conversion, as ZabbixOptional<T>.FromNullable is; the type argument is inferred from the target.")]
@@ -94,8 +94,8 @@ public sealed record ZabbixOutput<TRecord>
 
 /// <summary>
 /// Writes a <see cref="ZabbixOutput{TRecord}"/> as its keyword or its list of names, and reads either, or one name as a
-/// list of it. Owned because the value is a union no platform converter writes, and generic, so each generated member
-/// names this converter for its record.
+/// list of it. It refuses <c>count</c>, which would change the shape of the reply (ADR 0013, section 4). Owned because the
+/// value is a union no platform converter writes, and generic, so each generated member names this converter for its record.
 /// </summary>
 /// <typeparam name="TRecord">The record whose fields the output names.</typeparam>
 internal sealed class ZabbixOutputConverter<TRecord> : JsonConverter<ZabbixOutput<TRecord>>
@@ -106,7 +106,8 @@ internal sealed class ZabbixOutputConverter<TRecord> : JsonConverter<ZabbixOutpu
         if (reader.TokenType == JsonTokenType.String)
         {
             string word = reader.GetString() ?? string.Empty;
-            return word is "extend" or "count" ? ZabbixOutput<TRecord>.FromJson(word, null) : ZabbixOutput<TRecord>.FromJson(null, [Field(word)]);
+            if (word == "count") throw new JsonException("The output keyword 'count' makes the field a number, which a typed get can't read: CountAsync counts a get's records.");
+            return word == "extend" ? ZabbixOutput<TRecord>.FromJson(word, null) : ZabbixOutput<TRecord>.FromJson(null, [Field(word)]);
         }
         if (reader.TokenType != JsonTokenType.StartArray) throw new JsonException("An output is a keyword or a list of fields.");
         var fields = new List<ZabbixField<TRecord>>();

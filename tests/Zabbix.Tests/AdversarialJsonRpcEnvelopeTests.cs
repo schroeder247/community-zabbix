@@ -71,7 +71,7 @@ public sealed class AdversarialJsonRpcEnvelopeTests
         string body = prefix + new string('x', size - prefix.Length - suffix.Length) + suffix;
         Assert.Equal(size, Encoding.UTF8.GetByteCount(body));
         using var handler = new Replying(body);
-        using Harness harness = TransportHarness.Build(handler, configure: services => services.Configure<ZabbixOptions>(Options.DefaultName, options => options.MaxResponseContentBytes = 4096));
+        using Harness harness = TransportHarness.Build(handler, configure: services => services.Configure<ZabbixClientOptions>(Options.DefaultName, options => options.MaxResponseContentBytes = 4096));
 
         Exception? failure = await Record.ExceptionAsync(() => CallAsync(harness));
 
@@ -105,8 +105,8 @@ public sealed class AdversarialJsonRpcEnvelopeTests
         ArgumentException refused = Assert.Throws<ArgumentException>(() => new ZabbixApiTokenCredential(token));
         Assert.DoesNotContain("s3cr3t", refused.Message, StringComparison.Ordinal);                   // the secret is never in the message
 
-        var options = new ZabbixOptions { Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"), ApiToken = token };
-        Assert.Contains(options.Validate(new System.ComponentModel.DataAnnotations.ValidationContext(options)), result => result.MemberNames.Contains(nameof(ZabbixOptions.ApiToken)));
+        var options = new ZabbixClientOptions { Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"), ApiToken = token };
+        Assert.Contains(options.Validate(new System.ComponentModel.DataAnnotations.ValidationContext(options)), result => result.MemberNames.Contains(nameof(ZabbixClientOptions.ApiToken)));
     }
 
     [Theory]

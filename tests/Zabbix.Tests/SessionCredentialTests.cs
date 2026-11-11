@@ -6,6 +6,8 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Testing;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Time.Testing;
 
@@ -105,20 +107,49 @@ public sealed class SessionCredentialTests
 
     private static ZabbixClient ServerOf(Harness harness) => harness.Provider.GetRequiredKeyedService<ZabbixClient>(Options.DefaultName);
 
+    // A client the caller builds, and so disposes: one a container shares leaves its session to the container.
+    private static ZabbixClient Owned(SessionServer server, ZabbixCredential credential, ILoggerFactory loggers) => ZabbixClient.CreateBuilder()
+        .WithEndpoint("https://zbx.example/api_jsonrpc.php")
+        .WithCredential(credential)
+        .ConfigureHttpClientBuilder(http => http.ConfigurePrimaryHttpMessageHandler(() => server))
+        .UseLogging(loggers)
+        .Build();
+
     [Fact]
     public async Task Disposing_a_server_asynchronously_logs_its_session_out()
     {
         using var server = new SessionServer();
         var credential = new ZabbixSessionCredential("Admin", "zabbix");
-        using Harness harness = Build(server, credential);
-        await HostGet(harness, TestContext.Current.CancellationToken);
+        var logger = new FakeLogger();
+        using var loggers = new SingleLoggerFactory(logger);
+        ZabbixClient zabbix = Owned(server, credential, loggers);
+        await zabbix.Hosts.GetAsync(TestContext.Current.CancellationToken);
 
-        await ServerOf(harness).DisposeAsync();
+        await zabbix.DisposeAsync();
 
         Assert.Equal(["user.login", "host.get", "user.logout"], server.Methods);
         Assert.Equal(["session-1", "session-1"], server.Bearers);                                 // the session it ends is its own
         Assert.Null(credential.Session);                                                          // the next request logs in again
-        Assert.Contains(harness.Logs.GetSnapshot(), record => record.Id.Id == 4006 && record.Level == Microsoft.Extensions.Logging.LogLevel.Debug);
+        Assert.Contains(logger.Collector.GetSnapshot(), record => record.Id.Id == 4006 && record.Level == Microsoft.Extensions.Logging.LogLevel.Debug);
+    }
+
+    [Fact]
+    public async Task Disposing_a_shared_server_leaves_its_session_and_the_container_ends_it()
+    {
+        using var server = new SessionServer();
+        var credential = new ZabbixSessionCredential("Admin", "zabbix");
+        using Harness harness = Build(server, credential);
+        ZabbixClient zabbix = ServerOf(harness);
+        await HostGet(harness, TestContext.Current.CancellationToken);
+
+        await zabbix.DisposeAsync();
+        await zabbix.Hosts.GetAsync(TestContext.Current.CancellationToken);                       // still running, on the same session
+
+        Assert.Equal(["user.login", "host.get", "host.get"], server.Methods);
+        await harness.Provider.DisposeAsync();
+        Assert.Equal("user.logout", server.Methods.Last());
+        Assert.Null(credential.Session);
+        Assert.Throws<ObjectDisposedException>(() => zabbix.AllHosts);
     }
 
     [Fact]
@@ -149,14 +180,15 @@ public sealed class SessionCredentialTests
     public async Task A_refused_logout_is_logged_and_the_disposal_completes()
     {
         using var server = new SessionServer { Call = _ => "\"error\":{\"code\":-32500,\"message\":\"Application error.\",\"data\":\"Not authorized.\"}" };
-        using Harness harness = Build(server, new ZabbixSessionCredential("Admin", "zabbix"));
-        await Assert.ThrowsAsync<ZabbixApiException>(() => HostGet(harness, TestContext.Current.CancellationToken));
-        ZabbixClient zabbix = ServerOf(harness);
+        var logger = new FakeLogger();
+        using var loggers = new SingleLoggerFactory(logger);
+        ZabbixClient zabbix = Owned(server, new ZabbixSessionCredential("Admin", "zabbix"), loggers);
+        await Assert.ThrowsAsync<ZabbixApiException>(() => zabbix.Hosts.GetAsync(TestContext.Current.CancellationToken));
 
         await zabbix.DisposeAsync();                                                              // never throws
 
         Assert.Equal("user.logout", server.Methods.Last());
-        Assert.Contains(harness.Logs.GetSnapshot(), record => record.Id.Id == 4007 && record.Exception is ZabbixApiException);
+        Assert.Contains(logger.Collector.GetSnapshot(), record => record.Id.Id == 4007 && record.Exception is ZabbixApiException);
         Assert.Throws<ObjectDisposedException>(() => zabbix.AllHosts);
     }
 
@@ -168,7 +200,7 @@ public sealed class SessionCredentialTests
         using Harness harness = Build(server, credential);
         await HostGet(harness, TestContext.Current.CancellationToken);
 
-        await ServerOf(harness).LogOutAsync(TestContext.Current.CancellationToken);
+        await ServerOf(harness).LogOffAsync(TestContext.Current.CancellationToken);
         Assert.Null(credential.Session);
         await HostGet(harness, TestContext.Current.CancellationToken);
 
@@ -182,7 +214,7 @@ public sealed class SessionCredentialTests
         using var server = new SessionServer();
         using Harness harness = Build(server, new ZabbixSessionCredential("Admin", "zabbix"));
 
-        await ServerOf(harness).LogOutAsync(TestContext.Current.CancellationToken);
+        await ServerOf(harness).LogOffAsync(TestContext.Current.CancellationToken);
 
         Assert.Empty(server.Methods);
     }
@@ -195,7 +227,7 @@ public sealed class SessionCredentialTests
         using Harness refused = Build(failing, credential);
         await Assert.ThrowsAsync<ZabbixApiException>(() => HostGet(refused, TestContext.Current.CancellationToken));
 
-        await Assert.ThrowsAsync<ZabbixApiException>(() => ServerOf(refused).LogOutAsync(TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ZabbixApiException>(() => ServerOf(refused).LogOffAsync(TestContext.Current.CancellationToken));
         Assert.Equal("user.logout", failing.Methods.Last());
     }
 

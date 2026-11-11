@@ -187,7 +187,7 @@ public sealed class ResilienceTests
         }
     }
 
-    private static Action<IServiceCollection> OnFakeTime(FakeTimeProvider time, Action<ZabbixOptions>? options = null) => services =>
+    private static Action<IServiceCollection> OnFakeTime(FakeTimeProvider time, Action<ZabbixClientOptions>? options = null) => services =>
     {
         services.AddSingleton<TimeProvider>(time);
         services.Configure<HttpStandardResilienceOptions>(ZabbixHttp.GetResilienceName(), resilience =>
@@ -259,7 +259,7 @@ public sealed class ResilienceTests
         // is refused at the bound, whether the server declares its length or streams it; it is not a transient failure, so
         // the read is not sent again.
         using var huge = new HugeBody(3 * 1024 * 1024, declareLength);
-        using Harness harness = TransportHarness.Build(huge, configure: services => services.Configure<ZabbixOptions>(options => options.MaxResponseContentBytes = 1024 * 1024));
+        using Harness harness = TransportHarness.Build(huge, configure: services => services.Configure<ZabbixClientOptions>(options => options.MaxResponseContentBytes = 1024 * 1024));
         using var capture = new ApiTelemetryCapture(harness.Provider);
 
         InvalidDataException refused = await Assert.ThrowsAsync<InvalidDataException>(() => harness.Transport.SendAsync("host.get", new OutputParameters("extend"), TestJson.Default.OutputParameters, TestContext.Current.CancellationToken));
@@ -272,12 +272,12 @@ public sealed class ResilienceTests
     [Fact]
     public void The_reply_bound_defaults_to_the_wire_s_one_gibibyte_and_must_be_positive()
     {
-        Assert.Equal(1L << 30, new ZabbixOptions().MaxResponseContentBytes);
+        Assert.Equal(1L << 30, new ZabbixClientOptions().MaxResponseContentBytes);
         var services = new ServiceCollection();
-        services.AddZabbix().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.MaxResponseContentBytes = 0; });
+        services.AddZabbixClient().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.MaxResponseContentBytes = 0; });
         using ServiceProvider provider = services.BuildServiceProvider();
 
-        Assert.Throws<OptionsValidationException>(() => provider.GetRequiredService<IOptionsMonitor<ZabbixOptions>>().Get(Options.DefaultName));
+        Assert.Throws<OptionsValidationException>(() => provider.GetRequiredService<IOptionsMonitor<ZabbixClientOptions>>().Get(Options.DefaultName));
     }
 
     [Fact]
@@ -309,7 +309,7 @@ public sealed class ResilienceTests
         };
         IConfigurationRoot configuration = new ConfigurationBuilder().AddInMemoryCollection(source).Build();
         var services = new ServiceCollection();
-        services.AddZabbix().Bind(configuration);
+        services.AddZabbixClient().Bind(configuration);
         services.AddHttpClient(ZabbixHttp.GetClientName()).ConfigurePrimaryHttpMessageHandler(() => flaky);
         using ServiceProvider provider = services.BuildValidated();
         IZabbixTransport transport = provider.GetRequiredService<IZabbixTransport>();

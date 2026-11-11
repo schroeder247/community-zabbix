@@ -175,7 +175,7 @@ internal sealed class JsonRpcTransport(
     // The API answers every call with a JSON object. A body that opens with anything else is not the API's: an endpoint
     // that names another of the frontend's scripts (index.php, zabbix.php) reaches its pages, which answer 200 with HTML,
     // and the reader's "'<' is an invalid start of a value" would name neither the endpoint nor the cause. (A folder is
-    // the frontend's address, and ZabbixOptions.GetApiEndpoint has already made it api_jsonrpc.php.)
+    // the frontend's address, and ZabbixClientOptions.GetApiEndpoint has already made it api_jsonrpc.php.)
     private static bool OpensAnObject(ReadOnlySequence<byte> body)
     {
         var reader = new SequenceReader<byte>(body);
@@ -189,9 +189,9 @@ internal sealed class JsonRpcTransport(
     {
         string path = endpoint.AbsolutePath;
         string address = endpoint.GetLeftPart(UriPartial.Path);
-        string cause = path.EndsWith("/" + ZabbixOptions.ApiScript, StringComparison.OrdinalIgnoreCase)
+        string cause = path.EndsWith("/" + ZabbixClientOptions.ApiScript, StringComparison.OrdinalIgnoreCase)
             ? "the endpoint names api_jsonrpc.php, so something other than the frontend's API answered it"
-            : $"the API is the frontend's api_jsonrpc.php, such as {new UriBuilder(address) { Path = path[..(path.LastIndexOf('/') + 1)] + ZabbixOptions.ApiScript }.Uri}";
+            : $"the API is the frontend's api_jsonrpc.php, such as {new UriBuilder(address) { Path = path[..(path.LastIndexOf('/') + 1)] + ZabbixClientOptions.ApiScript }.Uri}";
         return new(string.Create(CultureInfo.InvariantCulture, $"The reply to {method} #{id} from {address} is not JSON-RPC ({mediaType ?? "no content type"}): {cause}."));
     }
 

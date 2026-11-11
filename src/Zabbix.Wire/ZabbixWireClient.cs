@@ -17,7 +17,7 @@ namespace Community.Zabbix;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The client belongs to one server or proxy, <see cref="ZabbixWireOptions.Server"/>, and a read from an agent names the
+/// The client belongs to one server or proxy, <see cref="ZabbixWireClientOptions.Server"/>, and a read from an agent names the
 /// agent, so the same client reads from many. Each request connects, sends one message, reads the reply and closes; methods
 /// are safe to call at the same time.
 /// </para>
@@ -69,7 +69,7 @@ public class ZabbixWireClient : IDisposable, IAsyncDisposable
 
     /// <summary>A client with the default options, which reads from agents: it has no server to send to.</summary>
     public ZabbixWireClient()
-        : this(new ZabbixWireOptions())
+        : this(new ZabbixWireClientOptions())
     {
     }
 
@@ -85,7 +85,7 @@ public class ZabbixWireClient : IDisposable, IAsyncDisposable
     /// <summary>A client as <paramref name="options"/> says.</summary>
     /// <param name="options">The client's options, copied: a later change to them doesn't reach the client.</param>
     /// <exception cref="ArgumentNullException"><paramref name="options"/> is <see langword="null"/>.</exception>
-    public ZabbixWireClient(ZabbixWireOptions options)
+    public ZabbixWireClient(ZabbixWireClientOptions options)
         : this(options, null, null)
     {
     }
@@ -95,7 +95,7 @@ public class ZabbixWireClient : IDisposable, IAsyncDisposable
     /// <param name="loggers">Where to log; nowhere when <see langword="null"/>. The caller keeps owning it.</param>
     /// <param name="time">The clock the deadlines run on; the system's when <see langword="null"/>.</param>
     /// <exception cref="ArgumentNullException"><paramref name="options"/> is <see langword="null"/>.</exception>
-    public ZabbixWireClient(ZabbixWireOptions options, ILoggerFactory? loggers, TimeProvider? time)
+    public ZabbixWireClient(ZabbixWireClientOptions options, ILoggerFactory? loggers, TimeProvider? time)
     {
         ArgumentNullException.ThrowIfNull(options);
         Options = options.Clone();
@@ -110,17 +110,17 @@ public class ZabbixWireClient : IDisposable, IAsyncDisposable
     /// <param name="exchange">The transport. It decides where a request goes, and the caller keeps owning it.</param>
     /// <exception cref="ArgumentNullException"><paramref name="exchange"/> is <see langword="null"/>.</exception>
     public ZabbixWireClient(ZabbixExchangeCallback exchange)
-        : this(exchange, new ZabbixWireOptions(), null, null)
+        : this(exchange, new ZabbixWireClientOptions(), null, null)
     {
     }
 
     /// <summary>A client whose every request goes over <paramref name="exchange"/>, with the application's options, logging and clock.</summary>
     /// <param name="exchange">The transport. It decides where a request goes, and the caller keeps owning it.</param>
-    /// <param name="options">The client's options, copied. <see cref="ZabbixWireOptions.Connection"/> doesn't apply, because the transport has its own, and <see cref="ZabbixWireOptions.Server"/> only names the other end in logs and failures.</param>
+    /// <param name="options">The client's options, copied. <see cref="ZabbixWireClientOptions.Connection"/> doesn't apply, because the transport has its own, and <see cref="ZabbixWireClientOptions.Server"/> only names the other end in logs and failures.</param>
     /// <param name="loggers">Where to log; nowhere when <see langword="null"/>. The caller keeps owning it.</param>
     /// <param name="time">The clock the deadlines run on; the system's when <see langword="null"/>.</param>
     /// <exception cref="ArgumentNullException"><paramref name="exchange"/> or <paramref name="options"/> is <see langword="null"/>.</exception>
-    public ZabbixWireClient(ZabbixExchangeCallback exchange, ZabbixWireOptions options, ILoggerFactory? loggers, TimeProvider? time)
+    public ZabbixWireClient(ZabbixExchangeCallback exchange, ZabbixWireClientOptions options, ILoggerFactory? loggers, TimeProvider? time)
         : this(options, loggers, time)
     {
         ArgumentNullException.ThrowIfNull(exchange);
@@ -128,7 +128,7 @@ public class ZabbixWireClient : IDisposable, IAsyncDisposable
     }
 
     /// <summary>The client's own copy of its options, fixed when it was built.</summary>
-    internal ZabbixWireOptions Options { get; }
+    internal ZabbixWireClientOptions Options { get; }
 
     /// <summary>
     /// Starts a builder for a client with more than a server to set: more nodes, TLS, a token, deadlines, or logging.
@@ -159,15 +159,9 @@ public class ZabbixWireClient : IDisposable, IAsyncDisposable
 
     private ZabbixServerWire ServerWire => Connect().ServerWire;
 
-    /// <summary>Sends values to the server or proxy, as <c>zabbix_sender</c> does, and returns what it answered.</summary>
-    /// <param name="values">The values to send, each with its host, key, value and clock.</param>
-    /// <returns>The trapper's counted answer, summed over the frames the values took.</returns>
-    /// <inheritdoc cref="SendAsync(IReadOnlyCollection{ZabbixValue}, CancellationToken)" path="/exception"/>
-    public Task<ZabbixSenderResponse> SendAsync(IReadOnlyCollection<ZabbixValue> values) => SendAsync(values, CancellationToken.None);
-
     /// <summary>
-    /// Sends values and returns the server's answer. The values go in frames of at most <see cref="ZabbixWireOptions.BatchSize"/> values
-    /// and <see cref="ZabbixWireOptions.MaxBatchBytes"/> bytes, in order, each sent when the one before was answered, as
+    /// Sends values and returns the server's answer. The values go in frames of at most <see cref="ZabbixWireClientOptions.BatchSize"/> values
+    /// and <see cref="ZabbixWireClientOptions.MaxBatchBytes"/> bytes, in order, each sent when the one before was answered, as
     /// <c>zabbix_sender</c> sends its batches. A returned answer is a success: every frame was taken, and
     /// <see cref="ZabbixSenderResponse.Failed"/> counts the values the server refused inside them.
     /// </summary>
@@ -182,7 +176,7 @@ public class ZabbixWireClient : IDisposable, IAsyncDisposable
     /// <param name="values">The values to send, each with its host, key, value and clock.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The trapper's counted answer, summed over the frames the values took.</returns>
-    /// <exception cref="ArgumentException">One item alone is larger than <see cref="ZabbixWireOptions.MaxBatchBytes"/> allows; nothing was sent.</exception>
+    /// <exception cref="ArgumentException">One item alone is larger than <see cref="ZabbixWireClientOptions.MaxBatchBytes"/> allows; nothing was sent.</exception>
     /// <exception cref="System.Net.Sockets.SocketException">No node could be reached.</exception>
     /// <exception cref="IOException">The connection was lost mid-exchange (a standby HA node resets it), or a proxy group
     /// redirected the values and the redirect could not be followed (nothing was taken).</exception>
@@ -194,18 +188,8 @@ public class ZabbixWireClient : IDisposable, IAsyncDisposable
     /// <exception cref="ObjectDisposedException">The client was disposed.</exception>
     /// <exception cref="ZabbixSenderCanceledException">The token was cancelled after earlier frames of the call were taken.</exception>
     /// <exception cref="OperationCanceledException">The token was cancelled before the first frame was taken.</exception>
-    /// <exception cref="InvalidOperationException"><see cref="ZabbixWireOptions.Server"/> is not set, or does not parse.</exception>
-    public virtual Task<ZabbixSenderResponse> SendAsync(IReadOnlyCollection<ZabbixValue> values, CancellationToken cancellationToken) => Sender.SendAsync(values, cancellationToken);
-
-    /// <summary>Sends one value of a typed item to the server or proxy, collected now.</summary>
-    /// <typeparam name="T">The item's value type.</typeparam>
-    /// <param name="host">The host the value belongs to, as Zabbix knows it.</param>
-    /// <param name="item">The item the value belongs to.</param>
-    /// <param name="value">The value to send.</param>
-    /// <returns>The trapper's counted answer.</returns>
-    public Task<ZabbixSenderResponse> SendAsync<T>(string host, ZabbixItemKey<T> item, T value)
-        where T : ISpanParsable<T>
-        => SendAsync(host, item, value, CancellationToken.None);
+    /// <exception cref="InvalidOperationException"><see cref="ZabbixWireClientOptions.Server"/> is not set, or does not parse.</exception>
+    public virtual Task<ZabbixSenderResponse> SendAsync(IReadOnlyCollection<ZabbixValue> values, CancellationToken cancellationToken = default) => Sender.SendAsync(values, cancellationToken);
 
     /// <summary>Sends one value of a typed item to the server or proxy, collected now.</summary>
     /// <typeparam name="T">The item's value type.</typeparam>
@@ -214,20 +198,15 @@ public class ZabbixWireClient : IDisposable, IAsyncDisposable
     /// <param name="value">The value to send.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The trapper's counted answer.</returns>
-    public virtual Task<ZabbixSenderResponse> SendAsync<T>(string host, ZabbixItemKey<T> item, T value, CancellationToken cancellationToken)
+    public virtual Task<ZabbixSenderResponse> SendAsync<T>(string host, ZabbixItemKey<T> item, T value, CancellationToken cancellationToken = default)
         where T : ISpanParsable<T>
         => SendAsync([ZabbixValue.From(host, item, value, _time.GetUtcNow())], cancellationToken);
 
-    /// <summary>Sends several values together, in the frames <see cref="ZabbixWireOptions.BatchSize"/> allows.</summary>
-    /// <param name="build">What adds the values to the batch.</param>
-    /// <returns>The trapper's counted answer, summed over the frames.</returns>
-    public Task<ZabbixSenderResponse> SendAsync(Action<ZabbixSendBatch> build) => SendAsync(build, CancellationToken.None);
-
-    /// <summary>Sends several values together, in the frames <see cref="ZabbixWireOptions.BatchSize"/> allows.</summary>
+    /// <summary>Sends several values together, in the frames <see cref="ZabbixWireClientOptions.BatchSize"/> allows.</summary>
     /// <param name="build">What adds the values to the batch.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The trapper's counted answer, summed over the frames.</returns>
-    public virtual Task<ZabbixSenderResponse> SendAsync(Action<ZabbixSendBatch> build, CancellationToken cancellationToken)
+    public virtual Task<ZabbixSenderResponse> SendAsync(Action<ZabbixSendBatch> build, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(build);
         var batch = new ZabbixSendBatch(_time);
@@ -239,22 +218,11 @@ public class ZabbixWireClient : IDisposable, IAsyncDisposable
     /// <typeparam name="T">The item's value type.</typeparam>
     /// <param name="agent">The agent: <c>host</c> or <c>host:port</c> (port <see cref="DefaultAgentPort"/> when omitted).</param>
     /// <param name="item">The item to read.</param>
-    /// <returns>The value.</returns>
-    /// <exception cref="ZabbixItemNotSupportedException">The agent doesn't support the item.</exception>
-    /// <exception cref="FormatException">The value isn't a <typeparamref name="T"/>.</exception>
-    public Task<T> GetAgentItemAsync<T>(string agent, ZabbixItemKey<T> item)
-        where T : ISpanParsable<T>
-        => GetAgentItemAsync(agent, item, CancellationToken.None);
-
-    /// <summary>Reads a typed item from an agent, as <c>zabbix_get</c> does.</summary>
-    /// <typeparam name="T">The item's value type.</typeparam>
-    /// <param name="agent">The agent: <c>host</c> or <c>host:port</c> (port <see cref="DefaultAgentPort"/> when omitted).</param>
-    /// <param name="item">The item to read.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The value.</returns>
     /// <exception cref="ZabbixItemNotSupportedException">The agent doesn't support the item.</exception>
     /// <exception cref="FormatException">The value isn't a <typeparamref name="T"/>.</exception>
-    public virtual async Task<T> GetAgentItemAsync<T>(string agent, ZabbixItemKey<T> item, CancellationToken cancellationToken)
+    public virtual async Task<T> GetAgentItemAsync<T>(string agent, ZabbixItemKey<T> item, CancellationToken cancellationToken = default)
         where T : ISpanParsable<T>
     {
         ZabbixAgentAnswer answer = await GetAgentItemAsync(agent, item.Key, cancellationToken).ConfigureAwait(false);
@@ -264,24 +232,10 @@ public class ZabbixWireClient : IDisposable, IAsyncDisposable
     /// <summary>Reads an item from an agent, as <c>zabbix_get</c> does.</summary>
     /// <param name="agent">The agent: <c>host</c> or <c>host:port</c> (port <see cref="DefaultAgentPort"/> when omitted).</param>
     /// <param name="key">The item key, with its parameters: <c>vfs.fs.size[/,pfree]</c>.</param>
-    /// <returns>The value, or why the agent does not support the key.</returns>
-    /// <inheritdoc cref="GetAgentItemAsync(string, ZabbixItemKey, CancellationToken)" path="/exception"/>
-    public Task<ZabbixAgentAnswer> GetAgentItemAsync(string agent, string key) => GetAgentItemAsync(agent, key, CancellationToken.None);
-
-    /// <summary>Reads an item from an agent, as <c>zabbix_get</c> does.</summary>
-    /// <param name="agent">The agent: <c>host</c> or <c>host:port</c> (port <see cref="DefaultAgentPort"/> when omitted).</param>
-    /// <param name="key">The item key, with its parameters: <c>vfs.fs.size[/,pfree]</c>.</param>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The value, or why the agent does not support the key.</returns>
     /// <inheritdoc cref="GetAgentItemAsync(string, ZabbixItemKey, CancellationToken)" path="/exception"/>
-    public Task<ZabbixAgentAnswer> GetAgentItemAsync(string agent, string key, CancellationToken cancellationToken) => GetAgentItemAsync(agent, ZabbixItemKey.Parse(key), cancellationToken);
-
-    /// <summary>Reads an item from an agent, as <c>zabbix_get</c> does.</summary>
-    /// <param name="agent">The agent: <c>host</c> or <c>host:port</c> (port <see cref="DefaultAgentPort"/> when omitted).</param>
-    /// <param name="key">The item key, with its parameters.</param>
-    /// <returns>The value, or why the agent does not support the key.</returns>
-    /// <inheritdoc cref="GetAgentItemAsync(string, ZabbixItemKey, CancellationToken)" path="/exception"/>
-    public Task<ZabbixAgentAnswer> GetAgentItemAsync(string agent, ZabbixItemKey key) => GetAgentItemAsync(agent, key, CancellationToken.None);
+    public Task<ZabbixAgentAnswer> GetAgentItemAsync(string agent, string key, CancellationToken cancellationToken = default) => GetAgentItemAsync(agent, ZabbixItemKey.Parse(key), cancellationToken);
 
     /// <summary>Reads an item from an agent, as <c>zabbix_get</c> does.</summary>
     /// <param name="agent">The agent: <c>host</c> or <c>host:port</c> (port <see cref="DefaultAgentPort"/> when omitted).</param>
@@ -292,7 +246,7 @@ public class ZabbixWireClient : IDisposable, IAsyncDisposable
     /// <exception cref="ArgumentNullException"><paramref name="agent"/> is <see langword="null"/>.</exception>
     /// <exception cref="ZabbixAgentRefusedException">The agent refused the request.</exception>
     /// <exception cref="ObjectDisposedException">The client was disposed.</exception>
-    public virtual Task<ZabbixAgentAnswer> GetAgentItemAsync(string agent, ZabbixItemKey key, CancellationToken cancellationToken) => Getter(agent).GetAsync(key, cancellationToken);
+    public virtual Task<ZabbixAgentAnswer> GetAgentItemAsync(string agent, ZabbixItemKey key, CancellationToken cancellationToken = default) => Getter(agent).GetAsync(key, cancellationToken);
 
     /// <summary><c>zabbix.stats</c>: the server's internal statistics (<c>StatsAllowedIP</c> must admit this address).</summary>
     /// <param name="cancellationToken">A cancellation token.</param>
@@ -479,18 +433,18 @@ public class ZabbixWireClient : IDisposable, IAsyncDisposable
         }
     }
 
-    private static ZabbixWireOptions ForServer(string server)
+    private static ZabbixWireClientOptions ForServer(string server)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(server);
-        if (!ZabbixWireOptions.TryParseServer(server, out _, out string? reason)) throw new ArgumentException(reason, nameof(server));
-        return new ZabbixWireOptions { Server = server };
+        if (!ZabbixWireClientOptions.TryParseServer(server, out _, out string? reason)) throw new ArgumentException(reason, nameof(server));
+        return new ZabbixWireClientOptions { Server = server };
     }
 
     // The options are read here, at the first request: what is wrong by then is the client's state, not an argument.
     private void CheckOptions()
     {
         if (_checked) return;
-        ZabbixOptionsCheck.RequireValid(nameof(ZabbixWireClient), Options, new ZabbixWireOptionsValidator());
+        ZabbixOptionsCheck.RequireValid(nameof(ZabbixWireClient), Options, new ZabbixWireClientOptionsValidator());
         _checked = true;
     }
 
@@ -498,7 +452,7 @@ public class ZabbixWireClient : IDisposable, IAsyncDisposable
     {
         if (string.IsNullOrWhiteSpace(Options.Server))
             throw new InvalidOperationException("This request goes to a server or proxy, and none is set. You must give the client one: pass it to the constructor, or set it with WithServer.");
-        return ZabbixWireOptions.TryParseServer(Options.Server, out IReadOnlyList<ZabbixServerNode>? nodes, out string? reason) ? nodes : throw new InvalidOperationException(reason);
+        return ZabbixWireClientOptions.TryParseServer(Options.Server, out IReadOnlyList<ZabbixServerNode>? nodes, out string? reason) ? nodes : throw new InvalidOperationException(reason);
     }
 
     // Thrown at the call, as a usage error is (TAP): a file the options name is what is wrong, not the request that read it.

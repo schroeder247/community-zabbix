@@ -187,7 +187,7 @@ member and that the overlay does not name takes its name followed by `Value`, a 
 
 ### A list read is one reply
 
-A list `GetAsync` answers `Task<IReadOnlyList<T>>`, read whole and bounded by `ZabbixOptions.MaxResponseContentBytes`;
+A list `GetAsync` answers `Task<IReadOnlyList<T>>`, read whole and bounded by `ZabbixClientOptions.MaxResponseContentBytes`;
 there is no `IAsyncEnumerable<T>` or pageable form. *Why:* paging needs a cursor, and the `.get` grammar has `limit` but
 no offset and no comparison operator, so neither an offset nor an id cursor (`id > last`) can be built over it; a pager
 that re-reads with a growing `limit` costs the square of the result. History, the one unbounded read, is paged by the
@@ -195,11 +195,13 @@ tree already (by time, `time_from`/`time_till`). *Consequence:* every generated 
 (`GeneratedApiTests.Every_list_read_says_it_is_one_reply_and_why`); the reason to re-open is the API gaining an offset
 or a comparison filter.
 
-### Method sub-clients, not indexers
+### Indexers mint sub-clients without a call
 
-`client.Hosts["web-01"]` and `host.Item(key)` mint sub-clients (the Azure `GetBlobContainerClient` shape). An indexer must
-not do I/O, and minting costs no call. *Consequence:* the first read of a missing name throws
-`ZabbixNotFoundException : KeyNotFoundException`, and `ExistsAsync` is the Tester-Doer beside it, at every depth.
+`client.Hosts["web-01"]`, `client.Hosts[10084]` and `host.Items[key]` mint sub-clients (the Azure `GetBlobContainerClient`
+shape), one node type whether an id or a name reached it. An indexer must not do I/O, and minting costs no call.
+*Consequence:* the first read of a missing name or id throws `ZabbixNotFoundException : KeyNotFoundException`, and
+`ExistsAsync` is the Tester-Doer beside it, at every depth. Every `Get…Async` that finds nothing throws it, and its
+`Find…Async` returns `null` (ADR 0013, section 4).
 
 ### One raw door; the plumbing under it is internal
 
@@ -208,7 +210,7 @@ the scalar-result readers the generated clients call and the API-error classifie
 implementation details", [type design](https://learn.microsoft.com/dotnet/standard/design-guidelines/type)); a test
 substitutes a client through its protected constructor and virtual calls, never by handing it a transport.
 `ZabbixHttp` stays public: its request-option keys and `IsIdempotent` are what a handler added through
-`ConfigureHttpClient` reads to tell a read from a write and see a deadline, the extension point the HTTP pipeline offers.
+`ConfigureHttpClientBuilder` reads to tell a read from a write and see a deadline, the extension point the HTTP pipeline offers.
 *Consequence:* `DesignConformanceTests.No_public_member_of_the_api_client_exposes_the_transport`.
 
 ### A store is a channel, not a Dataflow block
@@ -311,7 +313,7 @@ handed owns nothing. *Why:* the key's handle otherwise lives until the collector
 
 ### One host per name
 
-`AddZabbix(name)`, `AddZabbixPushAgent(name)` and their siblings are `(Name, Services)` builders whose verbs write named
+`AddZabbixClient(name)`, `AddZabbixPushAgent(name)` and their siblings are `(Name, Services)` builders whose verbs write named
 options, with one instance of the class, a keyed service, and a hosted service per name. *Why:* registering an unnamed singleton makes a second agent silently run the
 first one's registration.
 
@@ -338,7 +340,7 @@ and the position, never the text.
 ### A credential never crosses the network in clear
 
 A credential given to a server (an `ApiToken`, a `ZabbixCredential` given to the builder or the constructor) and a
-plain `http` endpoint on another host fail validation unless `ZabbixOptions.AllowUnencryptedCredentials` is set; a
+plain `http` endpoint on another host fail validation unless `ZabbixClientOptions.AllowUnencryptedCredentials` is set; a
 loopback endpoint is allowed, as the W3C Secure Contexts specification treats it as trustworthy, and an anonymous client
 may use `http`. *Why:* the token or the `user.login` password would cross the network in clear on every call; the
 Azure SDK's bearer policy refuses the same. One credential per client: options that carry an `ApiToken` beside a
@@ -692,7 +694,7 @@ Shapes that do not fit this SDK, each with the reason and what is used instead, 
 | Shape rejected | Why | Instead |
 | --- | --- | --- |
 | an own logger façade (`IZabbixLogger` with console, null and ring-buffer implementations) | a third-party façade in a library; strings, not structure; no event ids | `ILogger<T>` + `[LoggerMessage]` per layer; one `ILoggerProvider` in the module |
-| sync twins on every service; `Dispose()` doing a network logout | a second body per verb; a blocking dispose | async only; one bridge in the cmdlet base; `LogOutAsync` ends a login session in view, `DisposeAsync` ends it as a best effort, `Dispose` leaves it to expire |
+| sync twins on every service; `Dispose()` doing a network logout | a second body per verb; a blocking dispose | async only; one bridge in the cmdlet base; `LogOffAsync` ends a login session in view, `DisposeAsync` ends it as a best effort, `Dispose` leaves it to expire |
 | a hand-composed `HttpClient` with own retry and auth handlers | `Microsoft.Extensions.Http.Resilience` answers this exact chain | `AddHttpClient` + `SetHandlerLifetime(Infinite)` + `AddStandardResilienceHandler` |
 | configuration mutated by a builder's `With*` and validated at `Build()`; positional DI overloads | configuration a file binds belongs to the options pattern: a builder's state is not bindable, reloadable or named ([options pattern](https://learn.microsoft.com/dotnet/core/extensions/options)) | one options graph, `[OptionsValidator]`, `ValidateOnStart`, named options. A builder whose product is an **object** stays a Microsoft shape: `ChatClientBuilder.Use(...).Build()`, `HostApplicationBuilder.Build()`, and the DI registration builder's `WithName`/`WithCredential` in `Microsoft.Extensions.Azure` ([`ChatClientBuilder`](https://learn.microsoft.com/dotnet/api/microsoft.extensions.ai.chatclientbuilder), [`WithName`](https://learn.microsoft.com/dotnet/api/microsoft.extensions.azure.azureclientbuilderextensions.withname)); a store is built by its constructor from the policy record and the services |
 | mutable model classes with public `List<>`/`Dictionary<>` properties and an active-record back-reference | a mutation surface on a read model | records, `IReadOnlyList<T>`, no back-reference |

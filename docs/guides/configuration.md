@@ -61,7 +61,7 @@ Every section is a map from a name to one row of options. A row's keys are the o
 
 | Section | Bound by | Options of a row |
 | --- | --- | --- |
-| `Zabbix:Servers:{name}` | `AddZabbixClients` | `ZabbixOptions`, with a `Resilience` subsection in the shape of `HttpStandardResilienceOptions` |
+| `Zabbix:Servers:{name}` | `AddZabbixClients` | `ZabbixClientOptions`, with a `Resilience` subsection in the shape of `HttpStandardResilienceOptions` |
 | `Zabbix:PushAgents:{name}` | `AddZabbixAgents`, `AddZabbixProxies` | `ZabbixPushAgentOptions` |
 | `Zabbix:PushAgents:{name}:Trapper` | `AddZabbixProxies` only | `ZabbixListenerOptions`: the agent's trapper listener |
 | `Zabbix:ActiveAgents:{name}` | `AddZabbixAgents` only | `ZabbixActiveAgentOptions` |
@@ -72,7 +72,7 @@ Every section is a map from a name to one row of options. A row's keys are the o
 - A root binds only its own sections and leaves the rest alone, so one document can serve several processes.
 - A process that hosts active agents and listeners calls both hosting roots. One that also calls the API adds `AddZabbixClients`.
 - Each root reads the names once, when you call it. A name that a configuration reload adds isn't registered.
-- A wire client has no section in the document. Its builder's `Bind` reads a section you name, with the names of `ZabbixWireOptions`.
+- A wire client has no section in the document. Its builder's `Bind` reads a section you name, with the names of `ZabbixWireClientOptions`.
   See [Register it in a host](wire-client.md#register-it-in-a-host).
 
 ## Configure a server
@@ -153,7 +153,7 @@ builder.Services.AddZabbixProxies(builder.Configuration);   // PushAgents with t
 
 ## Combine a document with code
 
-A row's name is the name of its options, the same name code registers: `AddZabbixClients` calls `AddZabbix(name).Bind(row)` for each
+A row's name is the name of its options, the same name code registers: `AddZabbixClients` calls `AddZabbixClient(name).Bind(row)` for each
 server row. Register the name again to add what a file can't hold, such as a credential built in code, a delegating HTTP handler, an agent's
 polls and item handlers ([Items](items.md)), or a store.
 
@@ -162,7 +162,7 @@ string password = builder.Configuration["ZabbixLogin:Password"]
     ?? throw new InvalidOperationException("ZabbixLogin:Password is not set.");
 
 builder.Services.AddZabbixClients(builder.Configuration);              // prod: endpoint, resilience
-builder.Services.AddZabbix("prod")                                     // the same client, continued
+builder.Services.AddZabbixClient("prod")                               // the same client, continued
     .WithCredential(ZabbixCredential.FromLogin("api-reader", password));
 
 builder.Services.AddZabbixAgents(builder.Configuration);               // edge-01: where to send, batching
@@ -175,7 +175,7 @@ builder.Services.AddZabbixPushAgent("edge-01")                         // edge-0
   the later step wins. A row's name is the agent's host name unless a step sets `HostName`.
 - A credential given in code and an `ApiToken` in the row are two credentials for one client, and validation refuses the pair.
 - The document registers named clients only. For the unnamed client, which is also injected as plain `ZabbixClient`, bind one row
-  directly: `builder.Services.AddZabbix().Bind(builder.Configuration.GetSection("Zabbix:Servers:prod"))`.
+  directly: `builder.Services.AddZabbixClient().Bind(builder.Configuration.GetSection("Zabbix:Servers:prod"))`.
 
 ## Keep secrets out of the document
 
@@ -190,7 +190,7 @@ dotnet user-secrets set "Zabbix:Servers:prod:ApiToken" "<token>"           # use
 - `Host.CreateApplicationBuilder` reads environment variables after `appsettings.json`, so the variable wins. It reads user secrets in
   the Development environment when the project has a `UserSecretsId`.
 - A token is one word. A token read from a file keeps its line end, and validation refuses whitespace, so trim it.
-- The secret members (`ZabbixOptions.ApiToken`, `ZabbixTlsOptions.Psk`, and the session password) are marked `[ZabbixSecret]`, the
+- The secret members (`ZabbixClientOptions.ApiToken`, `ZabbixTlsOptions.Psk`, and the session password) are marked `[ZabbixSecret]`, the
   `ZabbixDataClassifications.Secret` class. The SDK's own events never write their values.
 - Call `builder.Logging.AddZabbixRedaction()`, in `Community.Zabbix.Sdk`, to erase any logged value of that class in every environment.
   An application without that package registers its own redactors ([known limitations](../KNOWN-LIMITATIONS.md#behaviour)).

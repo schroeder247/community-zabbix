@@ -1010,6 +1010,12 @@
   "user.resettotp": {
    "name": "ResetTotpAsync"
   },
+  "user.login": {
+   "name": "LogOnAsync"
+  },
+  "user.logout": {
+   "name": "LogOffAsync"
+  },
   "user.checkauthentication": {
    "name": "CheckAuthenticationAsync",
    "idempotent": true,
@@ -1395,7 +1401,7 @@
      "summary": "Return only alerts generated strictly after the given Unix timestamp."
     },
     "time_till": {
-     "name": "TimeTill",
+     "name": "TimeTo",
      "summary": "Return only alerts generated strictly before the given Unix timestamp."
     },
     "selectHosts": {
@@ -1484,7 +1490,7 @@
      "summary": "Keeps records whose creation time, a Unix timestamp, is not earlier than this value."
     },
     "time_till": {
-     "name": "TimeTill",
+     "name": "TimeTo",
      "summary": "Keeps records whose creation time is no later than this Unix timestamp."
     },
     "auditids": {
@@ -3570,7 +3576,7 @@
      "summary": "Keeps events whose creation time is no earlier than this Unix time."
     },
     "time_till": {
-     "name": "TimeTill",
+     "name": "TimeTo",
      "summary": "Keeps events whose creation time is no later than the given Unix time."
     },
     "trigger_severities": {
@@ -3590,7 +3596,7 @@
      "summary": "Return only events whose ID is greater than or equal to the given ID."
     },
     "eventid_till": {
-     "name": "EventIdTill",
+     "name": "EventIdTo",
      "summary": "Return only events whose ID is less than or equal to the given ID."
     },
     "problem_time_from": {
@@ -3598,7 +3604,7 @@
      "summary": "Return only events that were in the problem state at some point from the given Unix time on, regardless of their current state; applies to trigger events and requires problem_time_till."
     },
     "problem_time_till": {
-     "name": "ProblemTimeTill",
+     "name": "ProblemTimeTo",
      "summary": "Return only events that were in the problem state at some point up to the given Unix time, regardless of their current state; applies to trigger events and requires problem_time_from."
     },
     "selectAcknowledges": {
@@ -4370,7 +4376,7 @@
      "summary": "Return only values received at or after the given Unix timestamp."
     },
     "time_till": {
-     "name": "TimeTill",
+     "name": "TimeTo",
      "summary": "Return only values received at or before the given Unix timestamp."
     },
     "output": {
@@ -9455,7 +9461,7 @@
      "summary": "Keeps problems whose creation time is no earlier than this Unix time."
     },
     "time_till": {
-     "name": "TimeTill",
+     "name": "TimeTo",
      "summary": "Keeps problems whose creation time is no later than the given Unix time."
     },
     "recent": {
@@ -9467,7 +9473,7 @@
      "summary": "Return only problems whose event ID is greater than or equal to the given ID."
     },
     "eventid_till": {
-     "name": "EventIdTill",
+     "name": "EventIdTo",
      "summary": "Return only problems whose event ID is less than or equal to the given ID."
     },
     "selectAcknowledges": {
@@ -12379,7 +12385,7 @@
      "summary": "Return only trends for hours starting at or after the given Unix time."
     },
     "time_till": {
-     "name": "TimeTill",
+     "name": "TimeTo",
      "summary": "Return only trends for hours starting at or before the given Unix time."
     },
     "output": {
@@ -24126,6 +24132,7 @@
      "summary": "Return only log records at or after the given Unix time. Required."
     },
     "time_till": {
+     "name": "TimeTo",
      "summary": "Return only log records before the given Unix time. Required."
     },
     "filter": {
@@ -24425,6 +24432,7 @@
      "summary": "Keeps spans starting no earlier than the given Unix time. Required."
     },
     "time_till": {
+     "name": "TimeTo",
      "summary": "Return only spans before the given Unix time. Required."
     },
     "filter": {
@@ -24499,6 +24507,7 @@
      "summary": "Return only traces at or after the given Unix time. Required."
     },
     "time_till": {
+     "name": "TimeTo",
      "summary": "Return only traces before the given Unix time. Required."
     },
     "filter": {
@@ -24741,6 +24750,7 @@
      "summary": "Return only data points at or after the given Unix time. Required."
     },
     "time_till": {
+     "name": "TimeTo",
      "summary": "Return only data points before the given Unix time. Required."
     },
     "filter": {

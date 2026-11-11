@@ -13,8 +13,8 @@
 # Zabbix and Zabbix.Proxy, which do not compile (both attributes require a message). `--diagnostics RS0016` alone
 # (no RS0017) does nothing ("Formatted 0 of N files") — RS0016's add-fix and RS0017's remove-fix are requested
 # together or dotnet-format skips the file. RS0026 (overload ambiguity) and RS0027
-# (optional-parameter overload must have the most parameters) have no code fix and must be fixed in source, the generated
-# clients included (see Directory.Build.targets).
+# (optional-parameter overload must have the most parameters) have no code fix: they are fixed in source, the generated
+# clients included, except for the optional CancellationToken the libraries suppress them for (see Directory.Build.targets).
 #
 # PublicAPI.Shipped.txt is never touched by this script: the shipped file moves from empty to populated only at the
 # first release, through tools/promote-public-api.sh, in that release's own commit.

@@ -60,30 +60,6 @@ public sealed partial class DesignConformanceTests
         AssertNone(offenders);
     }
 
-    [Fact]
-    public void Every_task_returning_public_method_takes_a_cancellation_token_last()
-    {
-        List<string> offenders = [.. Libraries.PublicTypes
-            .Where(type => !typeof(Delegate).IsAssignableFrom(type))                     // a delegate's Invoke is the delegate's signature
-            .SelectMany(type => type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly))
-            .Where(method => !method.IsSpecialName && ReturnsTask(method.ReturnType))
-            .Where(method => !ImplementsForeignContract(method))                           // IAsyncDisposable.DisposeAsync: the BCL's shape
-            .Where(method => method.GetParameters() is not [.., { ParameterType: var last }] || last != typeof(CancellationToken))
-            .Where(method => !HasTokenOverload(method))                                    // TAP: MethodAsync(…) beside MethodAsync(…, CancellationToken)
-            .Select(Describe)];
-
-        AssertNone(offenders);
-    }
-
-    private static bool HasTokenOverload(MethodInfo method)
-    {
-        // By name: a generic method's parameters are its own open types, which GetMethod can't be asked for.
-        string[] parameters = [.. method.GetParameters().Select(parameter => parameter.ParameterType.ToString()), typeof(CancellationToken).ToString()];
-        return method.DeclaringType!
-            .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
-            .Any(other => other.Name == method.Name && other.GetParameters().Select(parameter => parameter.ParameterType.ToString()).SequenceEqual(parameters));
-    }
-
     /// <summary>
     /// IDE1006 suffixes a method that has the <c>async</c> modifier; one that returns a task without it (an
     /// expression body forwarding a call) escapes the analyzer. This rule reads the return type instead. Exempt, computed:

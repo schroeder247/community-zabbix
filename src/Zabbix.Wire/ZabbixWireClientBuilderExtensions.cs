@@ -44,7 +44,7 @@ public static class ZabbixWireClientBuilderExtensions
         {
             ArgumentNullException.ThrowIfNull(builder);
             string text = ZabbixServerActiveText.Server(server, nameof(server));
-            builder.Services.Configure<ZabbixWireOptions>(builder.Name, options => options.Server = text);
+            builder.Services.Configure<ZabbixWireClientOptions>(builder.Name, options => options.Server = text);
             return builder;
         }
 
@@ -64,7 +64,7 @@ public static class ZabbixWireClientBuilderExtensions
         {
             ArgumentNullException.ThrowIfNull(builder);
             string text = ZabbixServerActiveText.Destination(nodes, nameof(nodes));
-            builder.Services.Configure<ZabbixWireOptions>(builder.Name, options => options.Server = text);
+            builder.Services.Configure<ZabbixWireClientOptions>(builder.Name, options => options.Server = text);
             return builder;
         }
 
@@ -80,7 +80,7 @@ public static class ZabbixWireClientBuilderExtensions
         {
             ArgumentNullException.ThrowIfNull(builder);
             ArgumentException.ThrowIfNullOrWhiteSpace(token);
-            builder.Services.Configure<ZabbixWireOptions>(builder.Name, options => options.SessionId = token);
+            builder.Services.Configure<ZabbixWireClientOptions>(builder.Name, options => options.SessionId = token);
             return builder;
         }
 
@@ -102,7 +102,7 @@ public static class ZabbixWireClientBuilderExtensions
             if (key.Length is < MinPskBytes or > MaxPskBytes)
                 throw new ArgumentException($"A pre-shared key is {MinPskBytes} to {MaxPskBytes} bytes, as Zabbix reads it.", nameof(key));
             string hex = Convert.ToHexStringLower(key);
-            builder.Services.Configure<ZabbixWireOptions>(builder.Name, options =>
+            builder.Services.Configure<ZabbixWireClientOptions>(builder.Name, options =>
                 options.Connection.Tls = new ZabbixTlsOptions { Mode = ZabbixTlsMode.PreSharedKey, PskIdentity = identity, Psk = hex });
             return builder;
         }
@@ -123,7 +123,7 @@ public static class ZabbixWireClientBuilderExtensions
             ArgumentException.ThrowIfNullOrWhiteSpace(certificateFile);
             ArgumentException.ThrowIfNullOrWhiteSpace(keyFile);
             ArgumentException.ThrowIfNullOrWhiteSpace(caFile);
-            builder.Services.Configure<ZabbixWireOptions>(builder.Name, options => options.Connection.Tls = new ZabbixTlsOptions
+            builder.Services.Configure<ZabbixWireClientOptions>(builder.Name, options => options.Connection.Tls = new ZabbixTlsOptions
             {
                 Mode = ZabbixTlsMode.Certificate,
                 CertificateFile = certificateFile,
@@ -139,7 +139,7 @@ public static class ZabbixWireClientBuilderExtensions
         public TBuilder WithTimeout(TimeSpan timeout)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.Services.Configure<ZabbixWireOptions>(builder.Name, options => options.Connection.Timeout = timeout);
+            builder.Services.Configure<ZabbixWireClientOptions>(builder.Name, options => options.Connection.Timeout = timeout);
             return builder;
         }
 
@@ -149,17 +149,17 @@ public static class ZabbixWireClientBuilderExtensions
         public TBuilder WithCompression(bool enabled = true)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.Services.Configure<ZabbixWireOptions>(builder.Name, options => options.Connection.Compress = enabled);
+            builder.Services.Configure<ZabbixWireClientOptions>(builder.Name, options => options.Connection.Compress = enabled);
             return builder;
         }
 
         /// <summary>Sets how many values one frame carries at most.</summary>
-        /// <param name="batchSize">The most values in one frame; <see cref="ZabbixWireOptions.DefaultBatchSize"/> unless set.</param>
+        /// <param name="batchSize">The most values in one frame; <see cref="ZabbixWireClientOptions.DefaultBatchSize"/> unless set.</param>
         /// <returns>The builder.</returns>
         public TBuilder WithBatchSize(int batchSize)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.Services.Configure<ZabbixWireOptions>(builder.Name, options => options.BatchSize = batchSize);
+            builder.Services.Configure<ZabbixWireClientOptions>(builder.Name, options => options.BatchSize = batchSize);
             return builder;
         }
 
@@ -169,7 +169,7 @@ public static class ZabbixWireClientBuilderExtensions
         public TBuilder WithCheckTimeout(TimeSpan timeout)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.Services.Configure<ZabbixWireOptions>(builder.Name, options => options.CheckTimeout = timeout);
+            builder.Services.Configure<ZabbixWireClientOptions>(builder.Name, options => options.CheckTimeout = timeout);
             return builder;
         }
 
@@ -181,7 +181,7 @@ public static class ZabbixWireClientBuilderExtensions
         /// builder.Configure(options => options.MaxBatchBytes = 16 * 1024 * 1024);
         /// </code>
         /// </example>
-        public TBuilder Configure(Action<ZabbixWireOptions> configure)
+        public TBuilder Configure(Action<ZabbixWireClientOptions> configure)
         {
             ArgumentNullException.ThrowIfNull(builder);
             ArgumentNullException.ThrowIfNull(configure);
@@ -192,7 +192,7 @@ public static class ZabbixWireClientBuilderExtensions
         /// <summary>
         /// Binds the client's options to a configuration section, in order with the other verbs: <c>Server</c>,
         /// <c>SessionId</c>, <c>BatchSize</c>, <c>MaxBatchBytes</c>, <c>CheckTimeout</c>, and a <c>Connection</c> subsection, as
-        /// <see cref="ZabbixWireOptions"/> names them. The section is read when the client is built.
+        /// <see cref="ZabbixWireClientOptions"/> names them. The section is read when the client is built.
         /// </summary>
         /// <param name="section">The client's section.</param>
         /// <returns>The builder.</returns>
@@ -200,7 +200,7 @@ public static class ZabbixWireClientBuilderExtensions
         {
             ArgumentNullException.ThrowIfNull(builder);
             ArgumentNullException.ThrowIfNull(section);
-            builder.Services.AddOptions<ZabbixWireOptions>(builder.Name).Bind(section);
+            builder.Services.AddOptions<ZabbixWireClientOptions>(builder.Name).Bind(section);
             return builder;
         }
     }

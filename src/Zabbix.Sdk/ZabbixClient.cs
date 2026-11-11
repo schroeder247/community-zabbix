@@ -13,10 +13,16 @@ namespace Community.Zabbix;
 /// Represents a client of one Zabbix server, reached by one endpoint with one credential: the root of the SDK. It follows
 /// the Azure client shape: immutable, thread-safe, a singleton per name, and mockable (a protected constructor and virtual
 /// members). Its constructors take an address and a credential; <see cref="CreateBuilder"/> builds a client with more to set,
-/// and <see cref="ZabbixServiceCollectionExtensions.AddZabbix(IServiceCollection, string)"/> registers one in an application's
-/// container, with the same verbs. All three build it through the same registration, so it has the same HTTP pipeline and
-/// resilience whichever way it's made.
+/// and <see cref="ZabbixClientServiceCollectionExtensions.AddZabbixClient(IServiceCollection, string)"/> registers one in an
+/// application's container, with the same verbs. All three build it through the same registration, so it has the same HTTP
+/// pipeline and resilience whichever way it's made.
 /// </summary>
+/// <remarks>
+/// A client from a container, injected or returned by <see cref="IZabbixClientFactory"/>, is shared: the container owns it
+/// and disposes it when it's disposed, and a caller's <see cref="Dispose()"/> or <see cref="DisposeAsync"/> leaves it
+/// running, as disposing an <c>HttpClient</c> from <c>IHttpClientFactory</c> leaves its handler. A client you construct, or
+/// build with <see cref="CreateBuilder"/>, is yours to dispose.
+/// </remarks>
 /// <example>
 /// <code language="csharp">
 /// await using var zabbix = new ZabbixClient("https://zabbix.example/", token);
@@ -52,6 +58,8 @@ public partial class ZabbixClient : IZabbixNode, IDisposable, IAsyncDisposable
     private ServiceProvider? _container;
     private VersionRead? _apiVersion;
     private int _disposedFlag;
+    private bool _shared;                                                // the container's: a caller's dispose leaves it running
+    private bool _released;                                              // the container's owner let it go
 
     private static ZabbixSessionCredential FromLogin(NetworkCredential login)
     {
@@ -77,7 +85,7 @@ public partial class ZabbixClient : IZabbixNode, IDisposable, IAsyncDisposable
     /// <exception cref="ArgumentException"><paramref name="token"/> is empty.</exception>
     /// <exception cref="ArgumentNullException"><paramref name="endpoint"/> or <paramref name="token"/> is <see langword="null"/>.</exception>
     /// <exception cref="UriFormatException"><paramref name="endpoint"/> isn't an absolute URL.</exception>
-    /// <exception cref="OptionsValidationException">The endpoint is plain <c>http</c> to another host (<see cref="ZabbixOptions.AllowUnencryptedCredentials"/>).</exception>
+    /// <exception cref="OptionsValidationException">The endpoint is plain <c>http</c> to another host (<see cref="ZabbixClientOptions.AllowUnencryptedCredentials"/>).</exception>
     public ZabbixClient(string endpoint, [ZabbixSecret] string token)
         : this(AbsoluteUri(endpoint), ZabbixCredential.FromApiToken(token))
     {
@@ -88,7 +96,7 @@ public partial class ZabbixClient : IZabbixNode, IDisposable, IAsyncDisposable
     /// <param name="token">The API token to send with every call.</param>
     /// <exception cref="ArgumentException"><paramref name="token"/> is empty, or <paramref name="endpoint"/> isn't an absolute address.</exception>
     /// <exception cref="ArgumentNullException"><paramref name="endpoint"/> or <paramref name="token"/> is <see langword="null"/>.</exception>
-    /// <exception cref="OptionsValidationException">The endpoint is plain <c>http</c> to another host (<see cref="ZabbixOptions.AllowUnencryptedCredentials"/>).</exception>
+    /// <exception cref="OptionsValidationException">The endpoint is plain <c>http</c> to another host (<see cref="ZabbixClientOptions.AllowUnencryptedCredentials"/>).</exception>
     public ZabbixClient(Uri endpoint, [ZabbixSecret] string token)
         : this(endpoint, ZabbixCredential.FromApiToken(token))
     {
@@ -100,7 +108,7 @@ public partial class ZabbixClient : IZabbixNode, IDisposable, IAsyncDisposable
     /// <exception cref="ArgumentException">The user's name or password is empty.</exception>
     /// <exception cref="ArgumentNullException"><paramref name="endpoint"/> or <paramref name="login"/> is <see langword="null"/>.</exception>
     /// <exception cref="UriFormatException"><paramref name="endpoint"/> isn't an absolute URL.</exception>
-    /// <exception cref="OptionsValidationException">The endpoint is plain <c>http</c> to another host (<see cref="ZabbixOptions.AllowUnencryptedCredentials"/>).</exception>
+    /// <exception cref="OptionsValidationException">The endpoint is plain <c>http</c> to another host (<see cref="ZabbixClientOptions.AllowUnencryptedCredentials"/>).</exception>
     public ZabbixClient(string endpoint, NetworkCredential login)
         : this(AbsoluteUri(endpoint), FromLogin(login))
     {
@@ -111,7 +119,7 @@ public partial class ZabbixClient : IZabbixNode, IDisposable, IAsyncDisposable
     /// <param name="login">The user's name and password; only those two are read.</param>
     /// <exception cref="ArgumentException">The user's name or password is empty, or <paramref name="endpoint"/> isn't an absolute address.</exception>
     /// <exception cref="ArgumentNullException"><paramref name="endpoint"/> or <paramref name="login"/> is <see langword="null"/>.</exception>
-    /// <exception cref="OptionsValidationException">The endpoint is plain <c>http</c> to another host (<see cref="ZabbixOptions.AllowUnencryptedCredentials"/>).</exception>
+    /// <exception cref="OptionsValidationException">The endpoint is plain <c>http</c> to another host (<see cref="ZabbixClientOptions.AllowUnencryptedCredentials"/>).</exception>
     public ZabbixClient(Uri endpoint, NetworkCredential login)
         : this(endpoint, FromLogin(login))
     {
@@ -122,14 +130,14 @@ public partial class ZabbixClient : IZabbixNode, IDisposable, IAsyncDisposable
     /// <param name="credential">How requests prove who they are: your own, <see cref="ZabbixCredential.FromApiToken"/>, <see cref="ZabbixCredential.FromLogin"/>, or <see cref="ZabbixCredential.Anonymous"/> for the methods that need no authentication.</param>
     /// <exception cref="ArgumentNullException"><paramref name="endpoint"/> or <paramref name="credential"/> is <see langword="null"/>.</exception>
     /// <exception cref="UriFormatException"><paramref name="endpoint"/> isn't an absolute URL.</exception>
-    /// <exception cref="OptionsValidationException">The endpoint is plain <c>http</c> to another host and the credential isn't anonymous (<see cref="ZabbixOptions.AllowUnencryptedCredentials"/>).</exception>
+    /// <exception cref="OptionsValidationException">The endpoint is plain <c>http</c> to another host and the credential isn't anonymous (<see cref="ZabbixClientOptions.AllowUnencryptedCredentials"/>).</exception>
     public ZabbixClient(string endpoint, ZabbixCredential credential)
         : this(AbsoluteUri(endpoint), credential)
     {
     }
 
     /// <summary>Initializes a client at <paramref name="endpoint"/>, spoken to with <paramref name="credential"/>, such as one that reads a vault.</summary>
-    /// <param name="endpoint">The frontend's address, e.g. <c>https://zabbix.example/</c>, or the JSON-RPC endpoint, <c>https://zabbix.example/api_jsonrpc.php</c> (<see cref="ZabbixOptions.GetApiEndpoint"/>).</param>
+    /// <param name="endpoint">The frontend's address, e.g. <c>https://zabbix.example/</c>, or the JSON-RPC endpoint, <c>https://zabbix.example/api_jsonrpc.php</c> (<see cref="ZabbixClientOptions.GetApiEndpoint"/>).</param>
     /// <param name="credential">How requests prove who they are: your own, <see cref="ZabbixCredential.FromApiToken"/>, <see cref="ZabbixCredential.FromLogin"/>, or <see cref="ZabbixCredential.Anonymous"/> for the methods that need no authentication.</param>
     /// <remarks>
     /// It's the client <c>ZabbixClient.CreateBuilder().WithEndpoint(endpoint).WithCredential(credential).Build()</c> builds, in a
@@ -137,7 +145,7 @@ public partial class ZabbixClient : IZabbixNode, IDisposable, IAsyncDisposable
     /// </remarks>
     /// <exception cref="ArgumentException"><paramref name="endpoint"/> isn't an absolute address.</exception>
     /// <exception cref="ArgumentNullException"><paramref name="endpoint"/> or <paramref name="credential"/> is <see langword="null"/>.</exception>
-    /// <exception cref="OptionsValidationException">The endpoint is plain <c>http</c> to another host and the credential isn't anonymous (<see cref="ZabbixOptions.AllowUnencryptedCredentials"/>).</exception>
+    /// <exception cref="OptionsValidationException">The endpoint is plain <c>http</c> to another host and the credential isn't anonymous (<see cref="ZabbixClientOptions.AllowUnencryptedCredentials"/>).</exception>
     public ZabbixClient(Uri endpoint, ZabbixCredential credential)
         : this(ZabbixClientBuilder.Compose(endpoint, credential))
     {
@@ -162,10 +170,10 @@ public partial class ZabbixClient : IZabbixNode, IDisposable, IAsyncDisposable
         Name = name;
         try
         {
-            ZabbixOptions options = services.GetRequiredService<IOptionsMonitor<ZabbixOptions>>().Get(name);
+            ZabbixClientOptions options = services.GetRequiredService<IOptionsMonitor<ZabbixClientOptions>>().Get(name);
             _credential = services.GetRequiredKeyedService<ZabbixCredential>(name);
             _transport = services.GetRequiredKeyedService<IZabbixTransport>(name);
-            _endpoint = ZabbixHttp.WithoutUserInfo(ZabbixOptions.GetApiEndpoint(options.Endpoint ?? throw new OptionsValidationException(name, typeof(ZabbixOptions), ["Endpoint is required"])));
+            _endpoint = ZabbixHttp.WithoutUserInfo(ZabbixClientOptions.GetApiEndpoint(options.Endpoint ?? throw new OptionsValidationException(name, typeof(ZabbixClientOptions), ["Endpoint is required"])));
             _frontendUri = ZabbixFrontend.BaseOf(_endpoint, options.FrontendUri);
             Time = services.GetRequiredService<TimeProvider>();
             Loggers = services.GetRequiredService<ILoggerFactory>();
@@ -203,9 +211,45 @@ public partial class ZabbixClient : IZabbixNode, IDisposable, IAsyncDisposable
     /// </example>
     public static ZabbixClientBuilder CreateBuilder() => new();
 
-    /// <summary>Gives the client the container a <see cref="ZabbixClientBuilder"/> built it in, to dispose with itself.</summary>
+    /// <summary>
+    /// Gives the client the container a <see cref="ZabbixClientBuilder"/> built it in, to dispose with itself. The client is
+    /// the caller's from then on, not shared.
+    /// </summary>
     /// <param name="container">The builder's container, which built this client.</param>
-    internal void OwnContainer(ServiceProvider container) => Volatile.Write(ref _container, container);
+    internal void OwnContainer(ServiceProvider container)
+    {
+        lock (_gate) _shared = false;
+        Volatile.Write(ref _container, container);
+    }
+
+    /// <summary>Makes the client the container's, which <see cref="ZabbixClientOwner"/> releases when the container is disposed.</summary>
+    /// <returns>This client.</returns>
+    internal ZabbixClient Share()
+    {
+        lock (_gate) _shared = true;
+        return this;
+    }
+
+    /// <summary>Releases the client, shared or not, at once: the container's synchronous disposal, through <see cref="ZabbixClientOwner"/>.</summary>
+    internal void Release()
+    {
+        lock (_gate) _released = true;
+        Dispose();
+    }
+
+    /// <summary>Releases the client, shared or not, ending its login session first: the container's disposal, through <see cref="ZabbixClientOwner"/>.</summary>
+    /// <returns>A task that completes when the client is released.</returns>
+    internal ValueTask ReleaseAsync()
+    {
+        lock (_gate) _released = true;
+        return DisposeAsync();
+    }
+
+    /// <summary>Whether a container shares the client: it owns it, and a caller's dispose leaves it running.</summary>
+    internal bool IsShared
+    {
+        get { lock (_gate) return _shared && !_released; }
+    }
 
     /// <summary>The pull plane's telemetry: history pages, watcher ticks.</summary>
     internal Diagnostics.ZabbixTreeTelemetry TreeTelemetry => Built(_treeTelemetry);
@@ -240,10 +284,12 @@ public partial class ZabbixClient : IZabbixNode, IDisposable, IAsyncDisposable
     }
 
     /// <inheritdoc/>
-    public virtual IAsyncEnumerable<ZabbixValue> GetHistoryAsync(DateTimeOffset from, DateTimeOffset? till = null, CancellationToken cancellationToken = default)
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1716:Identifiers should not match keywords",
+        Justification = "The window is from and to, as the history.get parameters' TimeFrom and TimeTo are; a Visual Basic caller writes [to].")]
+    public virtual IAsyncEnumerable<ZabbixValue> GetHistoryAsync(DateTimeOffset from, DateTimeOffset? to = null, CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        return Built(_all).GetHistoryAsync(from, till, cancellationToken);
+        return Built(_all).GetHistoryAsync(from, to, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -260,7 +306,7 @@ public partial class ZabbixClient : IZabbixNode, IDisposable, IAsyncDisposable
     public virtual Uri Endpoint => Built(_endpoint);
 
     /// <summary>
-    /// Where the web frontend is: <see cref="ZabbixOptions.FrontendUri"/> when set, else the folder of
+    /// Where the web frontend is: <see cref="ZabbixClientOptions.FrontendUri"/> when set, else the folder of
     /// <see cref="Endpoint"/> (<c>https://zabbix.example/api_jsonrpc.php</c> gives <c>https://zabbix.example/</c>).
     /// </summary>
     public virtual Uri FrontendUri => Built(_frontendUri);
@@ -291,40 +337,13 @@ public partial class ZabbixClient : IZabbixNode, IDisposable, IAsyncDisposable
         return Transport.SendAsync(method, parameters, parametersInfo, resultInfo, cancellationToken);
     }
 
-    /// <summary>
-    /// Calls <paramref name="method"/> with typed parameters and returns its raw <c>result</c>, as
-    /// <see cref="SendAsync{TParameters}(string, TParameters, JsonTypeInfo{TParameters}, CancellationToken)"/> does.
-    /// </summary>
-    /// <typeparam name="TParameters">The type of the method's parameters.</typeparam>
-    /// <param name="method">The API method, e.g. <c>host.get</c>.</param>
-    /// <param name="parameters">The method's parameters.</param>
-    /// <param name="parametersInfo">How to write the parameters as JSON.</param>
-    /// <returns>The call's <c>result</c>, as the server answered it.</returns>
-    /// <exception cref="ZabbixApiException">The API answered with an error object.</exception>
-    /// <exception cref="ObjectDisposedException">The client was disposed.</exception>
-    public Task<JsonElement> SendAsync<TParameters>(string method, TParameters parameters, JsonTypeInfo<TParameters> parametersInfo)
-        => SendAsync(method, parameters, parametersInfo, CancellationToken.None);
-
     /// <inheritdoc cref="IZabbixTransport.SendAsync{TParameters}"/>
     public virtual Task<JsonElement> SendAsync<TParameters>(
-        string method, TParameters parameters, JsonTypeInfo<TParameters> parametersInfo, CancellationToken cancellationToken)
+        string method, TParameters parameters, JsonTypeInfo<TParameters> parametersInfo, CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
         return Transport.SendAsync(method, parameters, parametersInfo, cancellationToken);
     }
-
-    /// <summary>
-    /// Calls <paramref name="method"/> with <paramref name="parameters"/> as its <c>params</c> and returns its raw <c>result</c>,
-    /// as <see cref="SendAsync(string, JsonElement, CancellationToken)"/> does.
-    /// </summary>
-    /// <param name="method">The API method, e.g. <c>host.get</c>.</param>
-    /// <param name="parameters">The method's parameters, as JSON.</param>
-    /// <returns>The call's <c>result</c>, as the server answered it.</returns>
-    /// <exception cref="ArgumentException"><paramref name="method"/> is empty.</exception>
-    /// <exception cref="ZabbixApiException">The API answered with an error object.</exception>
-    /// <exception cref="ObjectDisposedException">The client was disposed.</exception>
-    public Task<JsonElement> SendAsync(string method, JsonElement parameters)
-        => SendAsync(method, parameters, CancellationToken.None);
 
     /// <summary>
     /// Calls <paramref name="method"/> with <paramref name="parameters"/> as its <c>params</c> and returns its raw
@@ -339,7 +358,7 @@ public partial class ZabbixClient : IZabbixNode, IDisposable, IAsyncDisposable
     /// <exception cref="ArgumentException"><paramref name="method"/> is empty.</exception>
     /// <exception cref="ZabbixApiException">The API answered with an error object.</exception>
     /// <exception cref="ObjectDisposedException">The client was disposed.</exception>
-    public virtual Task<JsonElement> SendAsync(string method, JsonElement parameters, CancellationToken cancellationToken)
+    public virtual Task<JsonElement> SendAsync(string method, JsonElement parameters, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(method);
         ThrowIfDisposed();
@@ -355,7 +374,7 @@ public partial class ZabbixClient : IZabbixNode, IDisposable, IAsyncDisposable
     /// <returns>A task that completes when the session was ended.</returns>
     /// <exception cref="ZabbixApiException">The server refused the logout.</exception>
     /// <exception cref="ObjectDisposedException">The client was disposed.</exception>
-    public virtual Task LogOutAsync(CancellationToken cancellationToken = default)
+    public virtual Task LogOffAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
         return _credential is ZabbixSessionCredential { Session: { } session } login ? EndSessionAsync(login, session, cancellationToken) : Task.CompletedTask;
@@ -363,7 +382,7 @@ public partial class ZabbixClient : IZabbixNode, IDisposable, IAsyncDisposable
 
     private async Task EndSessionAsync(ZabbixSessionCredential login, [ZabbixSecret] string session, CancellationToken cancellationToken)
     {
-        await Users.LogoutAsync(cancellationToken).ConfigureAwait(false);
+        await Users.LogOffAsync(cancellationToken).ConfigureAwait(false);
         login.Forget(session);
         ApiLog.LoggedOut(_logger, Name);
     }
@@ -466,10 +485,10 @@ public partial class ZabbixClient : IZabbixNode, IDisposable, IAsyncDisposable
 
     /// <summary>
     /// Stops this client's watchers (their readers end) and, for a client its constructor or a <see cref="ZabbixClientBuilder"/>
-    /// built, releases the container it was built in. A client from an application's container is disposed by that container.
-    /// Safe to call more than once, from any thread. A login session (<see cref="ZabbixSessionCredential"/>) is not ended,
-    /// because ending it is a request: the server expires it after its idle time. <see cref="DisposeAsync"/> and
-    /// <see cref="LogOutAsync"/> end it.
+    /// built, releases the container it was built in. A shared client, one a container handed out, is left running: the
+    /// container disposes it. Safe to call more than once, from any thread. A login session
+    /// (<see cref="ZabbixSessionCredential"/>) is not ended, because ending it is a request: the server expires it after its
+    /// idle time. <see cref="DisposeAsync"/> and <see cref="LogOffAsync"/> end it.
     /// </summary>
     public void Dispose()
     {
@@ -477,11 +496,11 @@ public partial class ZabbixClient : IZabbixNode, IDisposable, IAsyncDisposable
         GC.SuppressFinalize(this);
     }
 
-    /// <summary>Releases what the client holds; see <see cref="Dispose()"/>.</summary>
+    /// <summary>Releases what the client holds; see <see cref="Dispose()"/>. A shared client is released only by its container.</summary>
     /// <param name="disposing">Whether this is <see cref="Dispose()"/>.</param>
     protected virtual void Dispose(bool disposing)
     {
-        if (!disposing || Interlocked.Exchange(ref _disposedFlag, 1) != 0) return;
+        if (!disposing || IsShared || Interlocked.Exchange(ref _disposedFlag, 1) != 0) return;
         _disposed.Cancel();
         _disposed.Dispose();
         lock (_gate) _apiVersion?.Dispose();                                         // cancelled through the link above
@@ -492,8 +511,9 @@ public partial class ZabbixClient : IZabbixNode, IDisposable, IAsyncDisposable
     /// <summary>
     /// Ends a login session the client's <see cref="ZabbixSessionCredential"/> holds (<c>user.logout</c>, best effort: a
     /// failure is logged at Debug and the session is left to expire), then stops this client's watchers and, for a client its
-    /// constructor or a <see cref="ZabbixClientBuilder"/> built, releases the container it was built in. A client from an
-    /// application's container is disposed by that container. Safe to call more than once, from any thread; it never throws.
+    /// constructor or a <see cref="ZabbixClientBuilder"/> built, releases the container it was built in. A shared client, one
+    /// a container handed out, is left running: the container disposes it. Safe to call more than once, from any thread; it
+    /// never throws.
     /// </summary>
     /// <returns>When released.</returns>
     public async ValueTask DisposeAsync()
@@ -502,13 +522,16 @@ public partial class ZabbixClient : IZabbixNode, IDisposable, IAsyncDisposable
         GC.SuppressFinalize(this);
     }
 
-    /// <summary>Ends the login session and releases what the client holds; see <see cref="DisposeAsync"/>.</summary>
+    /// <summary>
+    /// Ends the login session and releases what the client holds; see <see cref="DisposeAsync"/>. A shared client is
+    /// released only by its container.
+    /// </summary>
     /// <returns>When released.</returns>
-    protected virtual ValueTask DisposeAsyncCore() => ReleaseAsync();
+    protected virtual ValueTask DisposeAsyncCore() => ReleaseHeldAsync();
 
-    private async ValueTask ReleaseAsync()
+    private async ValueTask ReleaseHeldAsync()
     {
-        if (Interlocked.Exchange(ref _disposedFlag, 1) != 0) return;
+        if (IsShared || Interlocked.Exchange(ref _disposedFlag, 1) != 0) return;
         if (_credential is ZabbixSessionCredential { Session: { } session } login) await LogOutQuietlyAsync(login, session).ConfigureAwait(false);
         await _disposed.CancelAsync().ConfigureAwait(false);
         _disposed.Dispose();

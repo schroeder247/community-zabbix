@@ -10,8 +10,8 @@ namespace Community.Zabbix.Tests;
 /// <summary>
 /// What the compiler makes of a write as a caller types it (ADR 0013, section 4): an initializer that leaves out a required
 /// field doesn't compile, a constructor stands in for the required fields, a node's lambda can't change the id, and each
-/// create and update binds the overload a reader expects, with a statement lambda, an expression lambda, a target-typed
-/// request and a list of them.
+/// read, create and update binds the overload a reader expects (ADR 0013, section 6), with and without a token: nothing, a
+/// statement lambda, an expression lambda, the parameters, a target-typed request and a list of them.
 /// </summary>
 /// <remarks>Compiling allocates, so these run in the probes' collection, as the documents' samples do.</remarks>
 [Collection(nameof(ChannelsProbeTests))]
@@ -31,6 +31,7 @@ public sealed class RequestCompileTests
         ZabbixClient zabbix = null!;
         ulong linux = 42;
         ulong itemId = 7;
+        ZabbixHostGetParameters parameters = new() { Limit = 10 };
         CancellationToken cancellationToken = default;
 
         """;
@@ -83,7 +84,7 @@ public sealed class RequestCompileTests
                 Output = [ZabbixHostFields.HostId, ZabbixHostFields.VisibleName, new ZabbixField<ZabbixHost>("a_new_field")],
                 SelectInterfaces = ZabbixOutput.Extend,
                 SelectTags = [ZabbixTagFields.Tag, ZabbixTagFields.Value],
-                SelectItems = ZabbixOutput.Count,
+                SelectItems = [ZabbixItemFields.ItemId, ZabbixItemFields.Key],
                 Sort = [ZabbixHostFields.VisibleName.Descending(), ZabbixHostFields.HostId],
             };
             NewestFirst(hosts, ZabbixHostFields.HostId);
@@ -118,8 +119,20 @@ public sealed class RequestCompileTests
     public void A_field_of_another_record_or_text_where_a_typed_value_goes_does_not_compile(string statement)
         => Assert.Equal("CS0029", Assert.Single(Errors(statement)).Id);
 
-    public static TheoryData<string, string> Writes => new()
+    // Every overload takes an optional token last (ADR 0013, section 6): a call with the token and one without bind the same
+    // overload, and a read takes nothing, a lambda or the parameters.
+    public static TheoryData<string, string> Calls => new()
     {
+        { """await zabbix.Hosts.GetAsync();""", "ZabbixHostClient.GetAsync(CancellationToken)" },
+        { """await zabbix.Hosts.GetAsync(cancellationToken);""", "ZabbixHostClient.GetAsync(CancellationToken)" },
+        { """await zabbix.Hosts.GetAsync(q => q.Search.VisibleName = "web");""", "ZabbixHostClient.GetAsync(Action<ZabbixHostGetParameters>, CancellationToken)" },
+        { """await zabbix.Hosts.GetAsync(q => { q.Limit = 10; q.Filter.Status = [ZabbixHostStatus.Enabled]; }, cancellationToken);""", "ZabbixHostClient.GetAsync(Action<ZabbixHostGetParameters>, CancellationToken)" },
+        { """await zabbix.Hosts.GetAsync(parameters);""", "ZabbixHostClient.GetAsync(ZabbixHostGetParameters, CancellationToken)" },
+        { """await zabbix.Hosts.GetAsync(parameters, cancellationToken);""", "ZabbixHostClient.GetAsync(ZabbixHostGetParameters, CancellationToken)" },
+        { """await zabbix.Hosts.GetAsync(new ZabbixHostGetParameters { Limit = 10 });""", "ZabbixHostClient.GetAsync(ZabbixHostGetParameters, CancellationToken)" },
+        { """await zabbix.Hosts.CountAsync();""", "ZabbixHostClient.CountAsync(CancellationToken)" },
+        { """await zabbix.Hosts.CountAsync(q => q.Search.VisibleName = "web", cancellationToken);""", "ZabbixHostClient.CountAsync(Action<ZabbixHostGetParameters>, CancellationToken)" },
+        { """await zabbix.Hosts.CountAsync(parameters);""", "ZabbixHostClient.CountAsync(ZabbixHostGetParameters, CancellationToken)" },
         {
             """
             ulong id = await zabbix.Hosts.CreateAsync("web-02", [linux], h =>
@@ -128,37 +141,39 @@ public sealed class RequestCompileTests
                 h.Tags = [("env", "prod")];
             });
             """,
-            "ZabbixHostClient.CreateAsync(string, IReadOnlyList<ZabbixHostGroupRequest>, Action<ZabbixHostCreateRequest>)"
+            "ZabbixHostClient.CreateAsync(string, IReadOnlyList<ZabbixHostGroupRequest>, Action<ZabbixHostCreateRequest>, CancellationToken)"
         },
-        { """await zabbix.Hosts.CreateAsync("web-02", [linux], h => h.Status = ZabbixHostStatus.Disabled);""", "ZabbixHostClient.CreateAsync(string, IReadOnlyList<ZabbixHostGroupRequest>, Action<ZabbixHostCreateRequest>)" },
+        { """await zabbix.Hosts.CreateAsync("web-02", [linux], h => h.Status = ZabbixHostStatus.Disabled);""", "ZabbixHostClient.CreateAsync(string, IReadOnlyList<ZabbixHostGroupRequest>, Action<ZabbixHostCreateRequest>, CancellationToken)" },
         { """await zabbix.Hosts.CreateAsync("web-02", [linux], h => h.Status = ZabbixHostStatus.Disabled, cancellationToken);""", "ZabbixHostClient.CreateAsync(string, IReadOnlyList<ZabbixHostGroupRequest>, Action<ZabbixHostCreateRequest>, CancellationToken)" },
-        { """await zabbix.Hosts.CreateAsync("web-02", [linux]);""", "ZabbixHostClient.CreateAsync(string, IReadOnlyList<ZabbixHostGroupRequest>)" },
+        { """await zabbix.Hosts.CreateAsync("web-02", [linux]);""", "ZabbixHostClient.CreateAsync(string, IReadOnlyList<ZabbixHostGroupRequest>, CancellationToken)" },
         { """await zabbix.Hosts.CreateAsync("web-02", [linux], cancellationToken);""", "ZabbixHostClient.CreateAsync(string, IReadOnlyList<ZabbixHostGroupRequest>, CancellationToken)" },
-        { """await zabbix.Hosts.CreateAsync(new("web-02", [linux]) { Tags = [("env", "prod")] });""", "ZabbixHostClient.CreateAsync(ZabbixHostCreateRequest)" },
+        { """await zabbix.Hosts.CreateAsync(new("web-02", [linux]) { Tags = [("env", "prod")] });""", "ZabbixHostClient.CreateAsync(ZabbixHostCreateRequest, CancellationToken)" },
         { """await zabbix.Hosts.CreateAsync(new("web-02", [linux]) { Tags = [("env", "prod")] }, cancellationToken);""", "ZabbixHostClient.CreateAsync(ZabbixHostCreateRequest, CancellationToken)" },
-        { """await zabbix.Hosts.CreateAsync([new("web-02", [linux]), new("web-03", [linux])]);""", "ZabbixHostClient.CreateAsync(IEnumerable<ZabbixHostCreateRequest>)" },
-        { """await zabbix.HostGroups.CreateAsync(new("Linux servers") { Uuid = "6f1ed29f0b1a4b4e8c3a8c4b2e5d7a90" });""", "ZabbixHostGroupClient.CreateAsync(ZabbixHostGroupCreateRequest)" },
-        { """await zabbix.HostGroups.CreateAsync("Linux servers", g => g.Uuid = "6f1ed29f0b1a4b4e8c3a8c4b2e5d7a90");""", "ZabbixHostGroupClient.CreateAsync(string, Action<ZabbixHostGroupCreateRequest>)" },
-        { """await zabbix.Items.CreateAsync(1UL, "Requests", ZabbixItemType.Trapper, "app.requests", ZabbixItemValueType.Unsigned, i => { i.TrapperHosts = [IPNetwork.Parse("10.0.0.0/8"), IPAddress.IPv6Loopback]; i.Delay = TimeSpan.Zero; });""", "ZabbixItemClient.CreateAsync(ulong, string, ZabbixItemType, string, ZabbixItemValueType, Action<ZabbixItemCreateRequest>)" },
-        { """await zabbix.Hosts.UpdateAsync(new(10084) { Status = ZabbixHostStatus.Disabled });""", "ZabbixHostClient.UpdateAsync(ZabbixHostUpdateRequest)" },
+        { """await zabbix.Hosts.CreateAsync([new("web-02", [linux]), new("web-03", [linux])]);""", "ZabbixHostClient.CreateAsync(IEnumerable<ZabbixHostCreateRequest>, CancellationToken)" },
+        { """await zabbix.HostGroups.CreateAsync(new("Linux servers") { Uuid = "6f1ed29f0b1a4b4e8c3a8c4b2e5d7a90" });""", "ZabbixHostGroupClient.CreateAsync(ZabbixHostGroupCreateRequest, CancellationToken)" },
+        { """await zabbix.HostGroups.CreateAsync("Linux servers");""", "ZabbixHostGroupClient.CreateAsync(string, CancellationToken)" },
+        { """await zabbix.HostGroups.CreateAsync("Linux servers", g => g.Uuid = "6f1ed29f0b1a4b4e8c3a8c4b2e5d7a90");""", "ZabbixHostGroupClient.CreateAsync(string, Action<ZabbixHostGroupCreateRequest>, CancellationToken)" },
+        { """await zabbix.Items.CreateAsync(1UL, "Requests", ZabbixItemType.Trapper, "app.requests", ZabbixItemValueType.Unsigned, i => { i.TrapperHosts = [IPNetwork.Parse("10.0.0.0/8"), IPAddress.IPv6Loopback]; i.Delay = TimeSpan.Zero; });""", "ZabbixItemClient.CreateAsync(ulong, string, ZabbixItemType, string, ZabbixItemValueType, Action<ZabbixItemCreateRequest>, CancellationToken)" },
+        { """await zabbix.Hosts.UpdateAsync(new(10084) { Status = ZabbixHostStatus.Disabled });""", "ZabbixHostClient.UpdateAsync(ZabbixHostUpdateRequest, CancellationToken)" },
         { """await zabbix.Hosts["web-02"].UpdateAsync(h => h.Status = ZabbixHostStatus.Disabled);""", "ZabbixHostNode.UpdateAsync(Action<ZabbixHostUpdateRequest>, CancellationToken)" },
-        { """await zabbix.Hosts[10084UL].UpdateAsync(h => { h.Status = ZabbixHostStatus.Disabled; h.Tags = [("env", "prod")]; });""", "ZabbixUpdatableObjectNode<ZabbixHost, ZabbixHostUpdateRequest>.UpdateAsync(Action<ZabbixHostUpdateRequest>, CancellationToken)" },
+        { """await zabbix.Hosts[10084].UpdateAsync(h => { h.Status = ZabbixHostStatus.Disabled; h.Tags = [("env", "prod")]; });""", "ZabbixHostNode.UpdateAsync(Action<ZabbixHostUpdateRequest>, CancellationToken)" },
         { """await zabbix.Items[itemId].UpdateAsync(i => i.Delay = TimeSpan.FromMinutes(5));""", "ZabbixUpdatableObjectNode<ZabbixItem, ZabbixItemUpdateRequest>.UpdateAsync(Action<ZabbixItemUpdateRequest>, CancellationToken)" },
         { """await zabbix.HostGroups["Linux"].UpdateAsync(g => g.Name = "Linux servers");""", "ZabbixHostGroupNode.UpdateAsync(Action<ZabbixHostGroupUpdateRequest>, CancellationToken)" },
-        { """await zabbix.Hosts["web-01"].Item("agent.ping").UpdateAsync(i => i.Status = ZabbixItemStatus.Disabled);""", "ZabbixItemNode.UpdateAsync(Action<ZabbixItemUpdateRequest>, CancellationToken)" },
-        { """await zabbix.HostInterfaces.CreateAsync(10084, ZabbixInterface.Snmp(IPAddress.Parse("10.0.0.2")));""", "ZabbixHostInterfaceClient.CreateAsync(ulong, ZabbixHostInterfaceRequest)" },
+        { """await zabbix.HostGroups[5].UpdateAsync(g => g.Name = "Linux servers", cancellationToken);""", "ZabbixHostGroupNode.UpdateAsync(Action<ZabbixHostGroupUpdateRequest>, CancellationToken)" },
+        { """await zabbix.Hosts["web-01"].Items["agent.ping"].UpdateAsync(i => i.Status = ZabbixItemStatus.Disabled);""", "ZabbixItemNode.UpdateAsync(Action<ZabbixItemUpdateRequest>, CancellationToken)" },
+        { """await zabbix.HostInterfaces.CreateAsync(10084, ZabbixInterface.Snmp(IPAddress.Parse("10.0.0.2")));""", "ZabbixHostInterfaceClient.CreateAsync(ulong, ZabbixHostInterfaceRequest, CancellationToken)" },
     };
 
     [Theory]
-    [MemberData(nameof(Writes))]
-    public void A_write_binds_the_overload_a_reader_expects(string write, string overload)
+    [MemberData(nameof(Calls))]
+    public void A_call_binds_the_overload_a_reader_expects(string call, string overload)
     {
-        (CSharpCompilation compilation, SyntaxTree tree) = Compile(Declarations + write);
+        (CSharpCompilation compilation, SyntaxTree tree) = Compile(Declarations + call);
 
         Assert.Empty(Errors(compilation));
-        InvocationExpressionSyntax call = tree.GetRoot(TestContext.Current.CancellationToken).DescendantNodes().OfType<InvocationExpressionSyntax>()
-            .First(invocation => invocation.Expression is MemberAccessExpressionSyntax { Name.Identifier.ValueText: "CreateAsync" or "UpdateAsync" });
-        var bound = (IMethodSymbol)compilation.GetSemanticModel(tree).GetSymbolInfo(call, TestContext.Current.CancellationToken).Symbol!;
+        InvocationExpressionSyntax invocation = tree.GetRoot(TestContext.Current.CancellationToken).DescendantNodes().OfType<InvocationExpressionSyntax>()
+            .First(candidate => candidate.Expression is MemberAccessExpressionSyntax { Name.Identifier.ValueText: "GetAsync" or "CountAsync" or "CreateAsync" or "UpdateAsync" });
+        var bound = (IMethodSymbol)compilation.GetSemanticModel(tree).GetSymbolInfo(invocation, TestContext.Current.CancellationToken).Symbol!;
         Assert.Equal(overload, bound.ToDisplayString(Signature));
     }
 

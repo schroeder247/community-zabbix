@@ -26,7 +26,7 @@ public sealed class FluentApiTests
     {
         var services = new ServiceCollection();
         services.AddSingleton(_ => script(new ScriptedApi()));
-        services.AddZabbix().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
+        services.AddZabbixClient().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
         services.AddHttpClient(ZabbixHttp.GetClientName()).ConfigurePrimaryHttpMessageHandler(provider => provider.GetRequiredService<ScriptedApi>());
         ServiceProvider provider = services.BuildValidated();
         return new Fluent(provider.GetRequiredService<ZabbixClient>(), provider.GetRequiredService<ScriptedApi>(), provider);
@@ -120,7 +120,7 @@ public sealed class FluentApiTests
             .On("item.get", """[{"itemid":"7","name":"CPU"}]""")
             .On("item.delete", """{"itemids":["7"]}"""));
 
-        ZabbixDeletableObjectNode<ZabbixItem> node = fluent.Zabbix.Items[7];
+        ZabbixUpdatableObjectNode<ZabbixItem, ZabbixItemUpdateRequest> node = fluent.Zabbix.Items[7];
         Assert.Empty(fluent.Api.ParamsOf("item.get"));
 
         ZabbixItem item = await node.GetAsync(TestContext.Current.CancellationToken);
@@ -310,7 +310,7 @@ public sealed class FluentApiTests
 
         InvalidOperationException refused = Assert.Throws<InvalidOperationException>(() => builder.Build().Dispose());
 
-        Assert.Contains(nameof(ZabbixWireOptions.BatchSize), refused.Message, StringComparison.Ordinal);
+        Assert.Contains(nameof(ZabbixWireClientOptions.BatchSize), refused.Message, StringComparison.Ordinal);
         Assert.IsType<OptionsValidationException>(refused.InnerException);
     }
 
@@ -1004,15 +1004,15 @@ public sealed class FluentApiTests
 
     // ----- the API client's builder: one set of verbs, on its own container or the application's ------------------------
 
-    // Every verb of an API client's builder, written once over IZabbixBuilder: one chain sets up a client of its own and a
+    // Every verb of an API client's builder, written once over IZabbixClientBuilder: one chain sets up a client of its own and a
     // registered one.
-    private static TBuilder SetUpClient<TBuilder>(TBuilder builder) where TBuilder : IZabbixBuilder
+    private static TBuilder SetUpClient<TBuilder>(TBuilder builder) where TBuilder : IZabbixClientBuilder
         => builder
             .WithEndpoint("https://zabbix.example/")
             .WithToken("token")
             .WithFrontend(new Uri("https://frontend.example/"))
-            .WithMaxConnections(20)
-            .WithMaxResponseSize(1024)
+            .WithMaxConnectionsPerServer(20)
+            .WithMaxResponseContentBytes(1024)
             .WithTimeout(TimeSpan.FromMinutes(1))
             .WithTimeout("history.get", TimeSpan.FromMinutes(2))
             .Configure(options => options.Timeouts["configuration.import"] = TimeSpan.FromMinutes(5))
@@ -1023,14 +1023,14 @@ public sealed class FluentApiTests
     {
         ZabbixClientBuilder standalone = SetUpClient(ZabbixClient.CreateBuilder());
         var services = new ServiceCollection();
-        IZabbixBuilder registered = SetUpClient(services.AddZabbix("prod"));
+        IZabbixClientBuilder registered = SetUpClient(services.AddZabbixClient("prod"));
         using ServiceProvider own = standalone.Services.BuildServiceProvider();
         using ServiceProvider application = services.BuildValidated();
 
         // What the verbs wrote, read as the client reads it: the same registrations in both containers.
         foreach ((ServiceProvider provider, string name) in new[] { (own, Options.DefaultName), (application, "prod") })
         {
-            ZabbixOptions options = provider.GetRequiredService<IOptionsMonitor<ZabbixOptions>>().Get(name);
+            ZabbixClientOptions options = provider.GetRequiredService<IOptionsMonitor<ZabbixClientOptions>>().Get(name);
             HttpStandardResilienceOptions resilience = provider.GetRequiredService<IOptionsMonitor<HttpStandardResilienceOptions>>().Get(ZabbixHttp.GetResilienceName(name));
             Assert.Equal((new Uri("https://zabbix.example/"), new Uri("https://frontend.example/"), 20, 1024L), (options.Endpoint, options.FrontendUri, options.MaxConnectionsPerServer, options.MaxResponseContentBytes));
             Assert.Equal((TimeSpan.FromMinutes(2), TimeSpan.FromMinutes(5)), (options.Timeouts["history.get"], options.Timeouts["configuration.import"]));
@@ -1063,12 +1063,12 @@ public sealed class FluentApiTests
     public void A_client_builder_checks_the_options_with_the_rules_a_host_checks_at_start()
     {
         InvalidOperationException nowhere = Assert.Throws<InvalidOperationException>(() => ZabbixClient.CreateBuilder().WithToken("token").Build().Dispose());
-        InvalidOperationException capped = Assert.Throws<InvalidOperationException>(() => ZabbixClient.CreateBuilder().WithEndpoint("https://zabbix.example/").WithMaxConnections(-1).Build().Dispose());
+        InvalidOperationException capped = Assert.Throws<InvalidOperationException>(() => ZabbixClient.CreateBuilder().WithEndpoint("https://zabbix.example/").WithMaxConnectionsPerServer(-1).Build().Dispose());
         InvalidOperationException clear = Assert.Throws<InvalidOperationException>(() => ZabbixClient.CreateBuilder().WithEndpoint("http://zabbix.example/").WithToken("token").Build().Dispose());
 
-        Assert.Contains(nameof(ZabbixOptions.Endpoint), nowhere.Message, StringComparison.Ordinal);
-        Assert.Contains(nameof(ZabbixOptions.MaxConnectionsPerServer), capped.Message, StringComparison.Ordinal);
-        Assert.Contains(nameof(ZabbixOptions.AllowUnencryptedCredentials), clear.Message, StringComparison.Ordinal);
+        Assert.Contains(nameof(ZabbixClientOptions.Endpoint), nowhere.Message, StringComparison.Ordinal);
+        Assert.Contains(nameof(ZabbixClientOptions.MaxConnectionsPerServer), capped.Message, StringComparison.Ordinal);
+        Assert.Contains(nameof(ZabbixClientOptions.AllowUnencryptedCredentials), clear.Message, StringComparison.Ordinal);
         Assert.All([nowhere, capped, clear], refused => Assert.IsType<OptionsValidationException>(refused.InnerException));
     }
 
@@ -1105,17 +1105,17 @@ public sealed class FluentApiTests
     public void Configure_sets_any_option_of_a_registered_client_in_order_with_the_other_verbs()
     {
         var services = new ServiceCollection();
-        IZabbixBuilder prod = services.AddZabbix("prod")
+        IZabbixClientBuilder prod = services.AddZabbixClient("prod")
             .Configure(options =>
             {
                 options.Endpoint = new Uri("https://other.example/");
                 options.MaxConnectionsPerServer = 7;
             })
             .WithEndpoint("https://zabbix.example/");
-        services.AddZabbix("prod").Configure(options => options.AllowUnencryptedCredentials = true);   // the same client, continued
+        services.AddZabbixClient("prod").Configure(options => options.AllowUnencryptedCredentials = true);   // the same client, continued
         using ServiceProvider provider = services.BuildValidated();
 
-        ZabbixOptions options = provider.GetRequiredService<IOptionsMonitor<ZabbixOptions>>().Get("prod");
+        ZabbixClientOptions options = provider.GetRequiredService<IOptionsMonitor<ZabbixClientOptions>>().Get("prod");
 
         Assert.Equal("prod", prod.Name);
         Assert.Equal((new Uri("https://zabbix.example/"), 7, true), (options.Endpoint, options.MaxConnectionsPerServer, options.AllowUnencryptedCredentials));
@@ -1134,7 +1134,7 @@ public sealed class FluentApiTests
                 resilience.Retry.Delay = TimeSpan.FromMilliseconds(1);
                 resilience.CircuitBreaker.MinimumThroughput = 1000;
             })
-            .ConfigureHttpClient(http => http.ConfigurePrimaryHttpMessageHandler(() => failing))
+            .ConfigureHttpClientBuilder(http => http.ConfigurePrimaryHttpMessageHandler(() => failing))
             .Build();
 
         await Assert.ThrowsAsync<HttpRequestException>(() => zabbix.Hosts.GetAsync(TestContext.Current.CancellationToken));
@@ -1151,14 +1151,14 @@ public sealed class FluentApiTests
             .WithEndpoint("https://zabbix.example/")
             .WithToken("first")
             .WithToken("second")
-            .ConfigureHttpClient(http => http.ConfigurePrimaryHttpMessageHandler(() => bearers))
+            .ConfigureHttpClientBuilder(http => http.ConfigurePrimaryHttpMessageHandler(() => bearers))
             .Build();
         // Plain http to another host takes no credential; the anonymous one given last is the client's, so it builds.
         await using ZabbixClient anonymous = ZabbixClient.CreateBuilder()
             .WithEndpoint("http://zabbix.example/")
             .WithToken("first")
             .WithCredential(ZabbixCredential.Anonymous)
-            .ConfigureHttpClient(http => http.ConfigurePrimaryHttpMessageHandler(() => bearers))
+            .ConfigureHttpClientBuilder(http => http.ConfigurePrimaryHttpMessageHandler(() => bearers))
             .Build();
 
         await second.Hosts.GetAsync(TestContext.Current.CancellationToken);
@@ -1303,7 +1303,7 @@ public sealed class FluentApiTests
     }
 
     [Fact]
-    public void Every_async_member_of_the_api_client_takes_its_token_last_and_optional_only_when_alone()
+    public void Every_async_member_of_the_api_client_takes_an_optional_token_last()
     {
         static bool Async(Type type) => DesignConformanceTests.ReturnsTask(type) || (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IAsyncEnumerable<>));
         static string[] Shape(MethodInfo method) => [.. method.GetParameters().Select(parameter => parameter.ParameterType.ToString())];
@@ -1311,21 +1311,13 @@ public sealed class FluentApiTests
             .SelectMany(type => type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly))
             .Where(method => !method.IsSpecialName && Async(method.ReturnType) && method.Name != nameof(IAsyncEnumerable<int>.GetAsyncEnumerator) && method.Name != nameof(IAsyncDisposable.DisposeAsync))];
 
-        // A member without a token has one beside it that takes the token last; one with a token takes it last, optional only
-        // when no other overload of its name has an optional parameter (RS0026).
+        // Every overload takes the token last and optional, so none forwards to another without it (ADR 0013, section 6).
         IEnumerable<string> untokened = members
-            .Where(method => method.GetParameters() is not [.., { ParameterType: var last }] || last != typeof(CancellationToken))
-            .Where(method => !members.Any(other => other.DeclaringType == method.DeclaringType && other.Name == method.Name
-                && Shape(other).SequenceEqual([.. Shape(method), typeof(CancellationToken).ToString()])))
-            .Select(method => $"{method.DeclaringType!.Name}.{method.Name}({string.Join(", ", Shape(method))})");
-        IEnumerable<string> optionalBesideOthers = members
-            .Where(method => method.GetParameters().Any(parameter => parameter.IsOptional))
-            .Where(method => members.Any(other => other != method && other.DeclaringType == method.DeclaringType && other.Name == method.Name
-                && other.GetParameters().Any(parameter => parameter.IsOptional)))
+            .Where(method => method.GetParameters() is not [.., { ParameterType: var last, HasDefaultValue: true }] || last != typeof(CancellationToken))
             .Select(method => $"{method.DeclaringType!.Name}.{method.Name}({string.Join(", ", Shape(method))})");
 
         Assert.True(members.Length > 500, $"{members.Length} async members found");
-        DesignConformanceTests.AssertNone(untokened.Concat(optionalBesideOthers));
+        DesignConformanceTests.AssertNone(untokened);
     }
 
     [Fact]
@@ -1337,7 +1329,7 @@ public sealed class FluentApiTests
         ZabbixHostNode web = fluent.Zabbix.Hosts["web-01"];
 
         List<ZabbixSample<double>> windowed = await web.GetHistoryAsync(ZabbixItemKeys.Cpu.Load(), TimeSpan.FromHours(1), TestContext.Current.CancellationToken).ToListAsync(TestContext.Current.CancellationToken);
-#pragma warning disable xUnit1051 // the overloads without a token are what this pins
+#pragma warning disable xUnit1051 // a call that leaves the optional token out is what this pins
         List<ZabbixSample<double>> bare = await web.GetHistoryAsync(ZabbixItemKeys.Cpu.Load(), TimeSpan.FromHours(1)).ToListAsync(TestContext.Current.CancellationToken);
         List<ZabbixSample<double>> ranged = await web.GetHistoryAsync(ZabbixItemKeys.Cpu.Load(), DateTimeOffset.UnixEpoch, null).ToListAsync(TestContext.Current.CancellationToken);
 #pragma warning restore xUnit1051

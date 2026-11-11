@@ -431,7 +431,7 @@ None.
 
 ## OUTPUTS
 
-- `ZabbixConnection`: Represents one server the session is connected to: the SDK's ZabbixClient and the container that composed it through AddZabbix — logging to the host's streams, the shell's telemetry, and OTLP export when the module was imported with OTEL_EXPORTER_OTLP_ENDPOINT set.
+- `ZabbixConnection`: Represents one server the session is connected to: the SDK's ZabbixClient and the container that composed it through AddZabbixClient — logging to the host's streams, the shell's telemetry, and OTLP export when the module was imported with OTEL_EXPORTER_OTLP_ENDPOINT set.
 
 ## RELATED LINKS
 

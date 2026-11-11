@@ -3,25 +3,27 @@
 namespace Community.Zabbix;
 
 /// <summary>
-/// Represents the leaf of the tree: one item on one host. Its definition is the schema; its latest value and history are the function's
-/// slice at this host and key.
+/// Represents the leaf of the tree: one item on one host, <c>host.Items["system.uptime"]</c>. Its definition is the schema;
+/// its latest value and history are the function's slice at this host and key.
 /// </summary>
 public class ZabbixItemNode : ZabbixNode
 {
+    // Null only in a node built for mocking, whose members are overridden.
+    private readonly ZabbixHostNode? _host;
+
     /// <summary>Initializes an item node for mocking; every member of a node built this way is to be overridden.</summary>
     protected ZabbixItemNode()
     {
-        HostName = string.Empty;
     }
 
-    internal ZabbixItemNode(ZabbixClient client, ZabbixSelection selection) : base(client, selection)
+    internal ZabbixItemNode(ZabbixClient client, ZabbixSelection selection, ZabbixHostNode host) : base(client, selection)
     {
-        HostName = selection.Host ?? throw new ArgumentException("An item node is selected by its host.", nameof(selection));
         Key = selection.Key ?? throw new ArgumentException("An item node is selected by its key.", nameof(selection));
+        _host = host;
     }
 
-    /// <summary>The technical name of the item's host.</summary>
-    public virtual string HostName { get; }
+    /// <summary>The item's host: the node it was reached from.</summary>
+    public virtual ZabbixHostNode Host => _host ?? throw new InvalidOperationException("The node was built for mocking, and this member is not overridden.");
 
     /// <summary>The item's key.</summary>
     public virtual ZabbixItemKey Key { get; }
@@ -33,8 +35,14 @@ public class ZabbixItemNode : ZabbixNode
     public virtual async Task<ZabbixItem> GetAsync(CancellationToken cancellationToken = default)
     {
         await foreach (ZabbixItem item in GetItemsAsync(cancellationToken).ConfigureAwait(false)) return item;
-        throw new ZabbixNotFoundException(HostName, Key);
+        throw ZabbixNotFoundException.NoItem(Selection.HostText, Key);
     }
+
+    /// <summary>What <c>item.get</c> says about the item now, if there is one.</summary>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>The item, or <see langword="null"/> when the host, or the item, does not exist.</returns>
+    public virtual async Task<ZabbixItem?> FindAsync(CancellationToken cancellationToken = default)
+        => await ReadItemsAsync(cancellationToken).ConfigureAwait(false) is [var item, ..] ? item : null;
 
     /// <summary>
     /// Changes the item: reads its id, names it in an <c>item.update</c> request, and lets <paramref name="configure"/> set
@@ -54,19 +62,26 @@ public class ZabbixItemNode : ZabbixNode
     private async Task UpdateCoreAsync(Action<ZabbixItemUpdateRequest> configure, CancellationToken cancellationToken)
     {
         ZabbixItem item = await GetAsync(cancellationToken).ConfigureAwait(false);
-        var request = new ZabbixItemUpdateRequest(item.ItemId ?? throw new ZabbixNotFoundException(HostName, Key));
+        var request = new ZabbixItemUpdateRequest(item.ItemId ?? throw ZabbixNotFoundException.NoItem(Selection.HostText, Key));
         configure(request);
         await Client.Items.UpdateAsync(request, cancellationToken).ConfigureAwait(false);
     }
 
+    /// <summary>The item's last value (<c>lastvalue</c>).</summary>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns>The value.</returns>
+    /// <exception cref="ZabbixNotFoundException">The host, or the item, does not exist, or the item has never collected a value.</exception>
+    public virtual async Task<ZabbixValue> GetLastValueAsync(CancellationToken cancellationToken = default)
+        => await FindLastValueAsync(cancellationToken).ConfigureAwait(false) ?? throw ZabbixNotFoundException.NoValue(Selection.HostText, Key);
+
     /// <summary>
-    /// The item's last value (<c>lastvalue</c>), or <see langword="null"/> when the item exists and has never collected.
-    /// An item that does not exist is not a missing value, so it throws.
+    /// The item's last value (<c>lastvalue</c>), or <see langword="null"/> when the item exists and has never collected. An item
+    /// that does not exist is not a missing value, so it throws.
     /// </summary>
     /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns>The value, or <see langword="null"/> when the item has never collected.</returns>
     /// <exception cref="ZabbixNotFoundException">The host, or the item, does not exist.</exception>
-    public virtual async Task<ZabbixValue?> GetLastValueAsync(CancellationToken cancellationToken = default)
+    public virtual async Task<ZabbixValue?> FindLastValueAsync(CancellationToken cancellationToken = default)
     {
         await foreach (ZabbixValue value in GetLatestAsync(cancellationToken).ConfigureAwait(false)) return value;
         return null;

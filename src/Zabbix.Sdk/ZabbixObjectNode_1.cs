@@ -33,7 +33,7 @@ public class ZabbixObjectNode<T>
     /// <exception cref="ZabbixNotFoundException">The server has no object with this id that the caller may read.</exception>
     public virtual async Task<T> GetAsync(CancellationToken cancellationToken = default)
         => await FindAsync(cancellationToken).ConfigureAwait(false)
-            ?? throw new ZabbixNotFoundException(string.Create(System.Globalization.CultureInfo.InvariantCulture, $"The Zabbix server has no {_objectType} with the id {Id}."));
+            ?? throw new ZabbixNotFoundException(_objectType ?? "object", Id);
 
     /// <summary>Reads the object, if there is one.</summary>
     /// <param name="cancellationToken">A token that cancels the call.</param>

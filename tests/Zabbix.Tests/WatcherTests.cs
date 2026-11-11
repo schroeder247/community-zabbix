@@ -74,7 +74,7 @@ public sealed class WatcherTests
         var services = new ServiceCollection();
         services.AddSingleton<TimeProvider>(time);
         services.AddFakeLogging().AddLogging(logging => logging.SetMinimumLevel(LogLevel.Trace));
-        services.AddZabbix().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
+        services.AddZabbixClient().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
         services.AddHttpClient(ZabbixHttp.GetClientName()).ConfigurePrimaryHttpMessageHandler(() => primary?.Invoke(api) ?? api);
         ServiceProvider provider = services.BuildValidated();
         IMeterFactory meters = provider.GetRequiredService<IMeterFactory>();
@@ -214,7 +214,7 @@ public sealed class WatcherTests
     {
         using Watched w = Build(new ScriptedApi().On("apiinfo.version", "\"7.0.0\"").On("item.get", "[]"));
         ZabbixClient client = w.Server;
-        await client.DisposeAsync();
+        await w.Provider.DisposeAsync();                                                              // the container that shares the client
 
         await Assert.ThrowsAsync<ObjectDisposedException>(() => client.GetApiVersionAsync(TestContext.Current.CancellationToken));
         await Assert.ThrowsAsync<ObjectDisposedException>(() => client.GetFrontendAsync(TestContext.Current.CancellationToken));
@@ -247,7 +247,7 @@ public sealed class WatcherTests
         await using IAsyncEnumerator<ZabbixValue> reading = watcher.GetAsyncEnumerator(TestContext.Current.CancellationToken);
         ValueTask<bool> pending = reading.MoveNextAsync();
 
-        await client.DisposeAsync();                                                                  // the server's end is its watchers' end
+        await w.Provider.DisposeAsync();                                                              // the server's end, by its container, is its watchers' end
 
         Assert.False(await pending.AsTask().WaitAsync(Wait, TestContext.Current.CancellationToken));
         await watcher.DisposeAsync();
@@ -341,7 +341,7 @@ public sealed class WatcherTests
     {
         using var capture = new TelemetryCapture(ZabbixTelemetryNames.Tree, span => span.OperationName == ZabbixTreeTelemetry.WatcherTickSpan && span.GetTagItem(ZabbixTreeTelemetry.ScopeTag) is "item");
         using Watched w = Build(new ScriptedApi().On("item.get", $"[{Item()}]").On("history.get", "[]"));
-        await using IZabbixWatcher watcher = w.Server.Hosts["web-01"].Item("cpu").Watch(new ZabbixWatchPlan(TimeSpan.FromSeconds(30)));
+        await using IZabbixWatcher watcher = w.Server.Hosts["web-01"].Items["cpu"].Watch(new ZabbixWatchPlan(TimeSpan.FromSeconds(30)));
         await w.TicksAsync(1);
         w.Time.Advance(TimeSpan.FromSeconds(30));
         await w.TicksAsync(2);

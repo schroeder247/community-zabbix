@@ -19,7 +19,7 @@ using Community.Zabbix.Listening;
 // Nothing listens on port 9, so each call ends in a connection failure, which proves the code ran to the socket under
 // Native AOT.
 var services = new ServiceCollection();
-services.AddZabbix("smoke").WithEndpoint("http://127.0.0.1:9/api_jsonrpc.php");
+services.AddZabbixClient("smoke").WithEndpoint("http://127.0.0.1:9/api_jsonrpc.php");
 services.AddZabbixPushAgent("relay").AddTrapper(10099, o => o.AllowedPeers.Add("127.0.0.1")).AddServer("127.0.0.1:9");
 services.AddZabbixWireClient("smoke").WithServer("127.0.0.1:9").WithTimeout(TimeSpan.FromSeconds(5));
 await using ServiceProvider provider = services.BuildServiceProvider();
@@ -65,6 +65,34 @@ try
 catch (HttpRequestException e)
 {
     Console.WriteLine($"update: {e.GetType().Name}");
+}
+
+// A count adds countOutput to the parameters it sends, a host's node is one type by id and by name with its items an indexer,
+// and the client the container shares survives a caller's dispose.
+try
+{
+    long count = await client.Hosts.CountAsync(q => q.Search.VisibleName = "smoke").ConfigureAwait(false);
+    Console.WriteLine($"count: {count}");
+}
+catch (HttpRequestException e)
+{
+    Console.WriteLine($"count: {e.GetType().Name}");
+}
+ZabbixHostNode byId = client.Hosts[10084];
+if (byId.GetType() != client.Hosts["smoke"].GetType() || byId.Items["agent.ping"].Key.ToString() != "agent.ping")
+{
+    Console.WriteLine("aot smoke: a host's node by id isn't the node its name reaches");
+    return 1;
+}
+await client.DisposeAsync().ConfigureAwait(false);                       // the container's: it keeps running
+try
+{
+    ZabbixValue? last = await byId.Items["agent.ping"].FindLastValueAsync().ConfigureAwait(false);
+    Console.WriteLine($"node: {last}");
+}
+catch (HttpRequestException e)
+{
+    Console.WriteLine($"node: {e.GetType().Name}");
 }
 
 // The typed values as the generated JSON context writes and reads them: a get's fields and its sort, an item's interval, its
@@ -144,7 +172,7 @@ var bindings = new ServiceCollection();
 bindings.AddZabbixWireClient("bound").Bind(wireSection);
 await using (ServiceProvider bound = bindings.BuildServiceProvider())
 {
-    ZabbixWireOptions boundOptions = bound.GetRequiredService<Microsoft.Extensions.Options.IOptionsMonitor<ZabbixWireOptions>>().Get("bound");
+    ZabbixWireClientOptions boundOptions = bound.GetRequiredService<Microsoft.Extensions.Options.IOptionsMonitor<ZabbixWireClientOptions>>().Get("bound");
     if (boundOptions is not { Server: "127.0.0.1:9", BatchSize: 10 })
     {
         Console.WriteLine($"aot smoke: the builder bound Server '{boundOptions.Server}' and BatchSize {boundOptions.BatchSize}");

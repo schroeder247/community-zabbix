@@ -66,9 +66,9 @@ public sealed class ZabbixClientTests
         var authorizations = new List<string?>();
         using var recording = new Recording(api, authorizations);
         var services = new ServiceCollection();
-        services.AddZabbix().Configure(options => options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"))
+        services.AddZabbixClient().Configure(options => options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"))
             .WithCredential(new ZabbixApiTokenCredential("given-in-code"))
-            .ConfigureHttpClient(http => http.ConfigurePrimaryHttpMessageHandler(() => recording));
+            .ConfigureHttpClientBuilder(http => http.ConfigurePrimaryHttpMessageHandler(() => recording));
         await using ServiceProvider provider = services.BuildValidated();
         ZabbixClient client = provider.GetRequiredService<ZabbixClient>();
 
@@ -83,14 +83,14 @@ public sealed class ZabbixClientTests
     public void A_credential_given_in_code_beside_a_token_in_the_options_fails_validation()
     {
         var services = new ServiceCollection();
-        services.AddZabbix().Configure(options =>
+        services.AddZabbixClient().Configure(options =>
         {
             options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php");
             options.ApiToken = "from-a-file";
         }).WithCredential(new ZabbixApiTokenCredential("given-in-code"));
         using ServiceProvider provider = services.BuildServiceProvider();
 
-        OptionsValidationException refused = Assert.Throws<OptionsValidationException>(() => provider.GetRequiredService<IOptionsMonitor<ZabbixOptions>>().Get(Options.DefaultName));
+        OptionsValidationException refused = Assert.Throws<OptionsValidationException>(() => provider.GetRequiredService<IOptionsMonitor<ZabbixClientOptions>>().Get(Options.DefaultName));
 
         Assert.Contains("ApiToken", refused.Message, StringComparison.Ordinal);
     }
@@ -99,7 +99,7 @@ public sealed class ZabbixClientTests
     public void The_resilience_verb_writes_the_server_s_own_resilience_options()
     {
         var services = new ServiceCollection();
-        services.AddZabbix("prod").Configure(options => options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"))
+        services.AddZabbixClient("prod").Configure(options => options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"))
             .ConfigureResilience(resilience => resilience.Retry.MaxRetryAttempts = 7);
         using ServiceProvider provider = services.BuildServiceProvider();
         IOptionsMonitor<HttpStandardResilienceOptions> resilience = provider.GetRequiredService<IOptionsMonitor<HttpStandardResilienceOptions>>();
@@ -144,11 +144,11 @@ public sealed class ZabbixClientTests
     [Fact]
     public void A_token_in_a_document_to_a_plain_http_endpoint_fails_validation()
     {
-        var options = new ZabbixOptions { Endpoint = new Uri("http://zbx.example/api_jsonrpc.php"), ApiToken = "tok" };
+        var options = new ZabbixClientOptions { Endpoint = new Uri("http://zbx.example/api_jsonrpc.php"), ApiToken = "tok" };
 
         List<System.ComponentModel.DataAnnotations.ValidationResult> results = [.. options.Validate(new System.ComponentModel.DataAnnotations.ValidationContext(options))];
 
-        Assert.Contains(results, result => result.MemberNames.Contains(nameof(ZabbixOptions.ApiToken)) && result.ErrorMessage!.Contains("in clear", StringComparison.Ordinal));
+        Assert.Contains(results, result => result.MemberNames.Contains(nameof(ZabbixClientOptions.ApiToken)) && result.ErrorMessage!.Contains("in clear", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -156,9 +156,9 @@ public sealed class ZabbixClientTests
     {
         using ZabbixClient client = new StandIn();
 
-        ZabbixValue? value = await client.Hosts["web-01"].Item("agent.ping").GetLastValueAsync(TestContext.Current.CancellationToken);
+        ZabbixValue value = await client.Hosts["web-01"].Items["agent.ping"].GetLastValueAsync(TestContext.Current.CancellationToken);
 
-        Assert.Equal("1", value?.Value);
+        Assert.Equal("1", value.Value);
         Assert.Equal("stand-in", client.Name);
     }
 
@@ -176,13 +176,18 @@ public sealed class ZabbixClientTests
 
     private sealed class StandInHost : ZabbixHostNode
     {
-        public override ZabbixItemNode Item(string key) => new StandInItem();
+        public override ZabbixItemScope Items { get; } = new StandInItems();
+    }
+
+    private sealed class StandInItems : ZabbixItemScope
+    {
+        public override ZabbixItemNode this[string key] => new StandInItem();
     }
 
     private sealed class StandInItem : ZabbixItemNode
     {
-        public override Task<ZabbixValue?> GetLastValueAsync(CancellationToken cancellationToken = default)
-            => Task.FromResult<ZabbixValue?>(new ZabbixValue("web-01", "agent.ping", "1", DateTimeOffset.UnixEpoch));
+        public override Task<ZabbixValue> GetLastValueAsync(CancellationToken cancellationToken = default)
+            => Task.FromResult(new ZabbixValue("web-01", "agent.ping", "1", DateTimeOffset.UnixEpoch));
     }
 
     [Fact]
@@ -264,7 +269,7 @@ public sealed class ZabbixClientTests
         spans.ActivityStopped = activity => { foreach (KeyValuePair<string, string?> tag in activity.Tags) tags.Add(tag.Value ?? string.Empty); };
         System.Diagnostics.ActivitySource.AddActivityListener(spans);
         using Harness harness = TransportHarness.Build(recording, configure: services =>
-            services.Configure<ZabbixOptions>(options => options.Endpoint = new Uri($"https://admin:{Secret}@zbx.example/api_jsonrpc.php")));
+            services.Configure<ZabbixClientOptions>(options => options.Endpoint = new Uri($"https://admin:{Secret}@zbx.example/api_jsonrpc.php")));
         ZabbixClient client = harness.Provider.GetRequiredService<ZabbixClient>();
 
         await client.GetApiVersionAsync(TestContext.Current.CancellationToken);

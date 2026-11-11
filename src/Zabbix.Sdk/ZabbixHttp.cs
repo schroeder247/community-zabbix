@@ -6,7 +6,7 @@ namespace Community.Zabbix;
 
 /// <summary>
 /// Provides the request options the SDK's HTTP pipeline reads, so a handler added through
-/// <see cref="ZabbixBuilderExtensions.ConfigureHttpClient"/> can tell a read from a write and see a request's deadline.
+/// <see cref="ZabbixClientBuilderExtensions.ConfigureHttpClientBuilder"/> can tell a read from a write and see a request's deadline.
 /// </summary>
 public static class ZabbixHttp
 {
@@ -24,7 +24,7 @@ public static class ZabbixHttp
     internal static Uri WithoutUserInfo(Uri endpoint)
         => !endpoint.IsAbsoluteUri || endpoint.UserInfo.Length == 0 ? endpoint : new UriBuilder(endpoint) { UserName = string.Empty, Password = string.Empty }.Uri;
 
-    /// <summary>The name of the <c>HttpStandardResilienceOptions</c> the client's resilience handler reads (<see cref="ZabbixBuilderExtensions.ConfigureResilience"/> writes them).</summary>
+    /// <summary>The name of the <c>HttpStandardResilienceOptions</c> the client's resilience handler reads (<see cref="ZabbixClientBuilderExtensions.ConfigureResilience"/> writes them).</summary>
     /// <param name="name">The server's name.</param>
     /// <returns>The name of the client's resilience options.</returns>
     internal static string GetResilienceName(string name = "") => GetClientName(name) + "-standard";
@@ -32,7 +32,7 @@ public static class ZabbixHttp
     /// <summary>The JSON-RPC method a request carries, so the retry gate can tell a read from a write.</summary>
     public static HttpRequestOptionsKey<string> Method { get; } = new("Zabbix.Method");
 
-    /// <summary>The deadline a request carries when <see cref="ZabbixOptions.Timeouts"/> names its method: it replaces the attempt and total timeouts.</summary>
+    /// <summary>The deadline a request carries when <see cref="ZabbixClientOptions.Timeouts"/> names its method: it replaces the attempt and total timeouts.</summary>
     public static HttpRequestOptionsKey<TimeSpan> Deadline { get; } = new("Zabbix.Deadline");
 
     // Every method is a POST, so the HTTP verb says nothing about safety; the JSON-RPC method does, and the generated

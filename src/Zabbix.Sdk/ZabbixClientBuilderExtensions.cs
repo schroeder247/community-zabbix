@@ -11,7 +11,7 @@ namespace Community.Zabbix;
 
 /// <summary>
 /// Provides the verbs of an API client's builder, the same on the builder <see cref="ZabbixClient.CreateBuilder"/> returns and
-/// on the one <see cref="ZabbixServiceCollectionExtensions.AddZabbix(IServiceCollection, string)"/> returns. Each verb writes
+/// on the one <see cref="ZabbixClientServiceCollectionExtensions.AddZabbixClient(IServiceCollection, string)"/> returns. Each verb writes
 /// the client's named registrations, which apply in the order of the calls, and returns the builder it was called on.
 /// </summary>
 /// <remarks>
@@ -20,14 +20,14 @@ namespace Community.Zabbix;
 /// </remarks>
 [SuppressMessage("Design", "CA1034:Nested types should not be visible",
     Justification = "The extension block is C# 14 syntax for extension members; the type the compiler emits for it is not one a caller names.")]
-public static class ZabbixBuilderExtensions
+public static class ZabbixClientBuilderExtensions
 {
-    extension<TBuilder>(TBuilder builder) where TBuilder : IZabbixBuilder
+    extension<TBuilder>(TBuilder builder) where TBuilder : IZabbixClientBuilder
     {
         /// <summary>Sets where the server is: the web frontend's address, or the API's JSON-RPC endpoint.</summary>
         /// <param name="endpoint">
         /// The frontend's address, such as <c>https://zabbix.example/</c>, or the endpoint, <c>https://zabbix.example/api_jsonrpc.php</c>
-        /// (<see cref="ZabbixOptions.GetApiEndpoint"/>).
+        /// (<see cref="ZabbixClientOptions.GetApiEndpoint"/>).
         /// </param>
         /// <returns>The builder.</returns>
         /// <exception cref="ArgumentException"><paramref name="endpoint"/> isn't an absolute address.</exception>
@@ -37,14 +37,14 @@ public static class ZabbixBuilderExtensions
             ArgumentNullException.ThrowIfNull(builder);
             ArgumentNullException.ThrowIfNull(endpoint);
             if (!endpoint.IsAbsoluteUri) throw new ArgumentException("The endpoint is an absolute address, such as https://zabbix.example/.", nameof(endpoint));
-            builder.Services.Configure<ZabbixOptions>(builder.Name, options => options.Endpoint = endpoint);
+            builder.Services.Configure<ZabbixClientOptions>(builder.Name, options => options.Endpoint = endpoint);
             return builder;
         }
 
         /// <summary>Sets where the server is: the web frontend's address, or the API's JSON-RPC endpoint.</summary>
         /// <param name="endpoint">
         /// The frontend's address, such as <c>https://zabbix.example/</c>, or the endpoint, <c>https://zabbix.example/api_jsonrpc.php</c>
-        /// (<see cref="ZabbixOptions.GetApiEndpoint"/>).
+        /// (<see cref="ZabbixClientOptions.GetApiEndpoint"/>).
         /// </param>
         /// <returns>The builder.</returns>
         /// <exception cref="ArgumentException"><paramref name="endpoint"/> is empty.</exception>
@@ -87,7 +87,7 @@ public static class ZabbixBuilderExtensions
         /// Gives the client <paramref name="credential"/>: your own, such as one that reads a vault, or
         /// <see cref="ZabbixCredential.Anonymous"/>, which sends no token. A later <see cref="WithToken"/>,
         /// <see cref="WithLogin"/> or <c>WithCredential</c> replaces it. Giving the options'
-        /// <see cref="ZabbixOptions.ApiToken"/> too fails validation: they're two credentials for one client.
+        /// <see cref="ZabbixClientOptions.ApiToken"/> too fails validation: they're two credentials for one client.
         /// </summary>
         /// <param name="credential">How the client's requests prove who they are.</param>
         /// <returns>The builder.</returns>
@@ -103,7 +103,7 @@ public static class ZabbixBuilderExtensions
         /// <summary>
         /// Gives the client the credential <paramref name="credential"/> builds from the container, such as a session whose
         /// password comes from a secret store the container holds. A later credential verb replaces it, and giving the options'
-        /// <see cref="ZabbixOptions.ApiToken"/> too fails validation.
+        /// <see cref="ZabbixClientOptions.ApiToken"/> too fails validation.
         /// </summary>
         /// <param name="credential">Builds the credential, once, when the client is first resolved.</param>
         /// <returns>The builder.</returns>
@@ -118,17 +118,17 @@ public static class ZabbixBuilderExtensions
 
         /// <summary>
         /// Lets the credential go over plain <c>http</c> to a host that isn't a loopback host, where it crosses the network in clear
-        /// on every call (<see cref="ZabbixOptions.AllowUnencryptedCredentials"/>). Without it, such a client doesn't validate.
+        /// on every call (<see cref="ZabbixClientOptions.AllowUnencryptedCredentials"/>). Without it, such a client doesn't validate.
         /// </summary>
         /// <returns>The builder.</returns>
         public TBuilder AllowUnencryptedCredentials()
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.Services.Configure<ZabbixOptions>(builder.Name, options => options.AllowUnencryptedCredentials = true);
+            builder.Services.Configure<ZabbixClientOptions>(builder.Name, options => options.AllowUnencryptedCredentials = true);
             return builder;
         }
 
-        /// <summary>Sets where the web frontend is, when it isn't at the endpoint's folder: where its page links open (<see cref="ZabbixOptions.FrontendUri"/>).</summary>
+        /// <summary>Sets where the web frontend is, when it isn't at the endpoint's folder: where its page links open (<see cref="ZabbixClientOptions.FrontendUri"/>).</summary>
         /// <param name="frontend">The folder that holds <c>zabbix.php</c>, such as <c>https://zabbix.example/</c>: absolute, <c>http</c> or <c>https</c>.</param>
         /// <returns>The builder.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="frontend"/> is <see langword="null"/>.</exception>
@@ -136,27 +136,27 @@ public static class ZabbixBuilderExtensions
         {
             ArgumentNullException.ThrowIfNull(builder);
             ArgumentNullException.ThrowIfNull(frontend);
-            builder.Services.Configure<ZabbixOptions>(builder.Name, options => options.FrontendUri = frontend);
+            builder.Services.Configure<ZabbixClientOptions>(builder.Name, options => options.FrontendUri = frontend);
             return builder;
         }
 
-        /// <summary>Sets how many connections the client holds open to the server at most (<see cref="ZabbixOptions.MaxConnectionsPerServer"/>).</summary>
-        /// <param name="maxConnections">The most connections; 100 unless set, and 0 for the platform's default.</param>
+        /// <summary>Sets how many connections the client holds open to the server at most (<see cref="ZabbixClientOptions.MaxConnectionsPerServer"/>).</summary>
+        /// <param name="maxConnectionsPerServer">The most connections; 100 unless set, and 0 for the platform's default.</param>
         /// <returns>The builder.</returns>
-        public TBuilder WithMaxConnections(int maxConnections)
+        public TBuilder WithMaxConnectionsPerServer(int maxConnectionsPerServer)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.Services.Configure<ZabbixOptions>(builder.Name, options => options.MaxConnectionsPerServer = maxConnections);
+            builder.Services.Configure<ZabbixClientOptions>(builder.Name, options => options.MaxConnectionsPerServer = maxConnectionsPerServer);
             return builder;
         }
 
-        /// <summary>Sets the largest reply the client reads, in bytes: a larger one fails its call (<see cref="ZabbixOptions.MaxResponseContentBytes"/>).</summary>
-        /// <param name="maxBytes">The most bytes one reply may hold; 1 GiB unless set.</param>
+        /// <summary>Sets the largest reply the client reads, in bytes: a larger one fails its call (<see cref="ZabbixClientOptions.MaxResponseContentBytes"/>).</summary>
+        /// <param name="maxResponseContentBytes">The most bytes one reply may hold; 1 GiB unless set.</param>
         /// <returns>The builder.</returns>
-        public TBuilder WithMaxResponseSize(long maxBytes)
+        public TBuilder WithMaxResponseContentBytes(long maxResponseContentBytes)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.Services.Configure<ZabbixOptions>(builder.Name, options => options.MaxResponseContentBytes = maxBytes);
+            builder.Services.Configure<ZabbixClientOptions>(builder.Name, options => options.MaxResponseContentBytes = maxResponseContentBytes);
             return builder;
         }
 
@@ -182,7 +182,7 @@ public static class ZabbixBuilderExtensions
 
         /// <summary>
         /// Sets how long a call to <paramref name="method"/> may take, in place of the attempt and total timeouts: for a call the
-        /// others don't fit, such as <c>configuration.import</c> of a large template (<see cref="ZabbixOptions.Timeouts"/>).
+        /// others don't fit, such as <c>configuration.import</c> of a large template (<see cref="ZabbixClientOptions.Timeouts"/>).
         /// </summary>
         /// <param name="method">The API method, such as <c>history.get</c>, matched without regard to case.</param>
         /// <param name="timeout">The longest a call to the method may take.</param>
@@ -193,7 +193,7 @@ public static class ZabbixBuilderExtensions
         {
             ArgumentNullException.ThrowIfNull(builder);
             ArgumentException.ThrowIfNullOrWhiteSpace(method);
-            builder.Services.Configure<ZabbixOptions>(builder.Name, options => options.Timeouts[method] = timeout);
+            builder.Services.Configure<ZabbixClientOptions>(builder.Name, options => options.Timeouts[method] = timeout);
             return builder;
         }
 
@@ -206,7 +206,7 @@ public static class ZabbixBuilderExtensions
         /// builder.Configure(options => options.Timeouts["configuration.import"] = TimeSpan.FromMinutes(5));
         /// </code>
         /// </example>
-        public TBuilder Configure(Action<ZabbixOptions> configure)
+        public TBuilder Configure(Action<ZabbixClientOptions> configure)
         {
             ArgumentNullException.ThrowIfNull(builder);
             ArgumentNullException.ThrowIfNull(configure);
@@ -216,10 +216,10 @@ public static class ZabbixBuilderExtensions
 
         /// <summary>
         /// Binds the client's options to a configuration section, in order with the other verbs: the words of
-        /// <see cref="ZabbixOptions"/> (<c>Endpoint</c>, <c>FrontendUri</c>, <c>ApiToken</c>, <c>AllowUnencryptedCredentials</c>,
+        /// <see cref="ZabbixClientOptions"/> (<c>Endpoint</c>, <c>FrontendUri</c>, <c>ApiToken</c>, <c>AllowUnencryptedCredentials</c>,
         /// <c>MaxConnectionsPerServer</c>, <c>MaxResponseContentBytes</c>, <c>Timeouts</c>), and a <c>Resilience</c> subsection in
         /// the shape of <see cref="HttpStandardResilienceOptions"/>. The section is bound, not copied; what a reload changes is
-        /// documented on <see cref="ZabbixOptions"/>.
+        /// documented on <see cref="ZabbixClientOptions"/>.
         /// </summary>
         /// <param name="section">The client's section.</param>
         /// <returns>The builder.</returns>
@@ -228,21 +228,22 @@ public static class ZabbixBuilderExtensions
         {
             ArgumentNullException.ThrowIfNull(builder);
             ArgumentNullException.ThrowIfNull(section);
-            builder.Services.AddOptions<ZabbixOptions>(builder.Name).Bind(section);
+            builder.Services.AddOptions<ZabbixClientOptions>(builder.Name).Bind(section);
             builder.Services.AddOptions<HttpStandardResilienceOptions>(ZabbixHttp.GetResilienceName(builder.Name)).Bind(section.GetSection("Resilience"));
             return builder;
         }
 
         /// <summary>
-        /// Configures the client's named <see cref="HttpClient"/>: a delegating handler (<c>AddHttpMessageHandler</c>), a proxy
-        /// or a client certificate on the primary handler (<c>ConfigurePrimaryHttpMessageHandler</c>). The SDK's own pipeline
+        /// Configures the builder of the client's named <see cref="HttpClient"/>, as <c>ConfigureHttpClientDefaults</c> takes one: a
+        /// delegating handler (<c>AddHttpMessageHandler</c>), a proxy or a client certificate on the primary handler
+        /// (<c>ConfigurePrimaryHttpMessageHandler</c>). The SDK's own pipeline
         /// (one long-lived <see cref="SocketsHttpHandler"/>, the standard resilience handler, the response buffering handler)
         /// is already in place; a handler added here runs inside it, and a primary handler given here replaces the SDK's.
         /// </summary>
         /// <param name="configure">Configures the client's <see cref="IHttpClientBuilder"/>.</param>
         /// <returns>The builder.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="configure"/> is <see langword="null"/>.</exception>
-        public TBuilder ConfigureHttpClient(Action<IHttpClientBuilder> configure)
+        public TBuilder ConfigureHttpClientBuilder(Action<IHttpClientBuilder> configure)
         {
             ArgumentNullException.ThrowIfNull(builder);
             ArgumentNullException.ThrowIfNull(configure);
@@ -269,7 +270,7 @@ public static class ZabbixBuilderExtensions
 
     // The one credential of a client: the last verb's, which the container builds once. The record beside it tells the options'
     // validation (ZabbixCredentialValidator) that a credential was given in code, and which, when it's an instance.
-    private static void Give(IZabbixBuilder builder, ZabbixCredentialInCode given, Func<IServiceProvider, ZabbixCredential> credential)
+    private static void Give(IZabbixClientBuilder builder, ZabbixCredentialInCode given, Func<IServiceProvider, ZabbixCredential> credential)
     {
         builder.Services.RemoveAllKeyed<ZabbixCredential>(builder.Name);
         builder.Services.AddKeyedSingleton(builder.Name, (provider, _) => credential(provider));

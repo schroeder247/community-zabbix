@@ -56,7 +56,7 @@ public sealed class GetZbxTrendCommand : ZabbixServerCmdlet
             {
                 ItemIds = ids is null ? null : [.. ids],
                 TimeFrom = From,
-                TimeTill = Till,
+                TimeTo = Till,
                 Limit = Limit,
             };
             return await ZabbixClient.Trends.GetAsync(parameters, cancellationToken).ConfigureAwait(false);

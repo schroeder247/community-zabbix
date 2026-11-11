@@ -50,8 +50,8 @@ public static class ZabbixWireClientServiceCollectionExtensions
         if (services.Any(descriptor => descriptor.IsKeyedService && descriptor.ServiceType == typeof(ZabbixWireClient) && Equals(descriptor.ServiceKey, name)))
             return builder;
 
-        services.AddOptions<ZabbixWireOptions>(name).ValidateOnStart();
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<ZabbixWireOptions>, ZabbixWireOptionsValidator>());
+        services.AddOptions<ZabbixWireClientOptions>(name).ValidateOnStart();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<ZabbixWireClientOptions>, ZabbixWireClientOptionsValidator>());
         services.TryAddSingleton<IZabbixWireClientFactory, ZabbixWireClientFactory>();
 
         // The client's own constructor, from the named options. The container's logging and clock are used when it has them,
@@ -59,7 +59,7 @@ public static class ZabbixWireClientServiceCollectionExtensions
         // its owner, which releases it when the container is disposed; the client it hands out is shared, so a caller's
         // dispose leaves it running.
         services.TryAddKeyedSingleton(name, static (provider, key) => new ZabbixWireClientOwner(new ZabbixWireClient(
-            provider.GetRequiredService<IOptionsMonitor<ZabbixWireOptions>>().Get(NameOf(key)),
+            provider.GetRequiredService<IOptionsMonitor<ZabbixWireClientOptions>>().Get(NameOf(key)),
             provider.GetService<ILoggerFactory>(),
             provider.GetService<TimeProvider>())));
         services.TryAddKeyedSingleton(name, static (provider, key) => provider.GetRequiredKeyedService<ZabbixWireClientOwner>(key).Client);

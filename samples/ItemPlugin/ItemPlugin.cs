@@ -26,7 +26,7 @@ public sealed class UptimeItems(TimeProvider time) : ZabbixItemProvider
         [new("app.uptime", "Seconds since the plugin loaded")];
 
     /// <inheritdoc/>
-    public override ValueTask<ZabbixAgentAnswer> GetValueAsync(ZabbixItemKey key, CancellationToken cancellationToken)
+    public override ValueTask<ZabbixAgentAnswer> GetValueAsync(ZabbixItemKey key, CancellationToken cancellationToken = default)
     {
         double seconds = (time.GetUtcNow() - _started).TotalSeconds;
         return ValueTask.FromResult(ZabbixAgentAnswer.Supported(key, seconds.ToString("0", CultureInfo.InvariantCulture)));

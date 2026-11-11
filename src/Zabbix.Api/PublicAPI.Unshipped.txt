@@ -145,8 +145,6 @@ Community.Zabbix.ZabbixActionGetParameters.ActionIds.get -> System.Collections.G
 Community.Zabbix.ZabbixActionGetParameters.ActionIds.set -> void
 Community.Zabbix.ZabbixActionGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixActionGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixActionGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixActionGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixActionGetParameters.Equals(Community.Zabbix.ZabbixActionGetParameters? other) -> bool
 Community.Zabbix.ZabbixActionGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixActionGetParameters.ExcludeSearch.set -> void
@@ -162,8 +160,6 @@ Community.Zabbix.ZabbixActionGetParameters.MediaTypeIds.get -> System.Collection
 Community.Zabbix.ZabbixActionGetParameters.MediaTypeIds.set -> void
 Community.Zabbix.ZabbixActionGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixAction!>?
 Community.Zabbix.ZabbixActionGetParameters.Output.set -> void
-Community.Zabbix.ZabbixActionGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixActionGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixActionGetParameters.ScriptIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixActionGetParameters.ScriptIds.set -> void
 Community.Zabbix.ZabbixActionGetParameters.Search.get -> Community.Zabbix.ZabbixActionGetSearch!
@@ -756,8 +752,6 @@ Community.Zabbix.ZabbixAlertGetParameters.AdditionalFields.get -> System.Collect
 Community.Zabbix.ZabbixAlertGetParameters.AdditionalFields.set -> void
 Community.Zabbix.ZabbixAlertGetParameters.AlertIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixAlertGetParameters.AlertIds.set -> void
-Community.Zabbix.ZabbixAlertGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixAlertGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixAlertGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixAlertGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixAlertGetParameters.Equals(Community.Zabbix.ZabbixAlertGetParameters? other) -> bool
@@ -771,8 +765,6 @@ Community.Zabbix.ZabbixAlertGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixAlertGetParameters.ExcludeSearch.set -> void
 Community.Zabbix.ZabbixAlertGetParameters.Filter.get -> Community.Zabbix.ZabbixAlertGetFilter!
 Community.Zabbix.ZabbixAlertGetParameters.Filter.set -> void
-Community.Zabbix.ZabbixAlertGetParameters.GroupCount.get -> bool?
-Community.Zabbix.ZabbixAlertGetParameters.GroupCount.set -> void
 Community.Zabbix.ZabbixAlertGetParameters.GroupIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixAlertGetParameters.GroupIds.set -> void
 Community.Zabbix.ZabbixAlertGetParameters.HostIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
@@ -785,8 +777,6 @@ Community.Zabbix.ZabbixAlertGetParameters.ObjectIds.get -> System.Collections.Ge
 Community.Zabbix.ZabbixAlertGetParameters.ObjectIds.set -> void
 Community.Zabbix.ZabbixAlertGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixAlert!>?
 Community.Zabbix.ZabbixAlertGetParameters.Output.set -> void
-Community.Zabbix.ZabbixAlertGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixAlertGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixAlertGetParameters.Search.get -> Community.Zabbix.ZabbixAlertGetSearch!
 Community.Zabbix.ZabbixAlertGetParameters.Search.set -> void
 Community.Zabbix.ZabbixAlertGetParameters.SearchByAny.get -> bool?
@@ -805,8 +795,6 @@ Community.Zabbix.ZabbixAlertGetParameters.StartSearch.get -> bool?
 Community.Zabbix.ZabbixAlertGetParameters.StartSearch.set -> void
 Community.Zabbix.ZabbixAlertGetParameters.TimeFrom.get -> System.DateTimeOffset?
 Community.Zabbix.ZabbixAlertGetParameters.TimeFrom.set -> void
-Community.Zabbix.ZabbixAlertGetParameters.TimeTill.get -> System.DateTimeOffset?
-Community.Zabbix.ZabbixAlertGetParameters.TimeTill.set -> void
 Community.Zabbix.ZabbixAlertGetParameters.UserIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixAlertGetParameters.UserIds.set -> void
 Community.Zabbix.ZabbixAlertGetParameters.ZabbixAlertGetParameters() -> void
@@ -951,8 +939,6 @@ Community.Zabbix.ZabbixApmLogGetParameters
 Community.Zabbix.ZabbixApmLogGetParameters.<Clone>$() -> Community.Zabbix.ZabbixApmLogGetParameters!
 Community.Zabbix.ZabbixApmLogGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixApmLogGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixApmLogGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixApmLogGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixApmLogGetParameters.Equals(Community.Zabbix.ZabbixApmLogGetParameters? other) -> bool
 Community.Zabbix.ZabbixApmLogGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixApmLogGetParameters.ExcludeSearch.set -> void
@@ -992,8 +978,6 @@ Community.Zabbix.ZabbixApmLogGetParameters.StartSearch.get -> bool?
 Community.Zabbix.ZabbixApmLogGetParameters.StartSearch.set -> void
 Community.Zabbix.ZabbixApmLogGetParameters.TimeFrom.get -> System.DateTimeOffset
 Community.Zabbix.ZabbixApmLogGetParameters.TimeFrom.set -> void
-Community.Zabbix.ZabbixApmLogGetParameters.TimeTill.get -> System.DateTimeOffset
-Community.Zabbix.ZabbixApmLogGetParameters.TimeTill.set -> void
 Community.Zabbix.ZabbixApmLogGetParameters.TraceIds.get -> System.Collections.Generic.IReadOnlyList<string!>?
 Community.Zabbix.ZabbixApmLogGetParameters.TraceIds.set -> void
 Community.Zabbix.ZabbixApmLogGetParameters.WithFlagsOff.get -> int?
@@ -1001,7 +985,6 @@ Community.Zabbix.ZabbixApmLogGetParameters.WithFlagsOff.set -> void
 Community.Zabbix.ZabbixApmLogGetParameters.WithFlagsOn.get -> int?
 Community.Zabbix.ZabbixApmLogGetParameters.WithFlagsOn.set -> void
 Community.Zabbix.ZabbixApmLogGetParameters.ZabbixApmLogGetParameters() -> void
-Community.Zabbix.ZabbixApmLogGetParameters.ZabbixApmLogGetParameters(System.DateTimeOffset timeFrom, System.DateTimeOffset timeTill) -> void
 Community.Zabbix.ZabbixApmLogGetSearch
 Community.Zabbix.ZabbixApmLogGetSearch.Body.get -> string?
 Community.Zabbix.ZabbixApmLogGetSearch.Body.set -> void
@@ -1164,8 +1147,6 @@ Community.Zabbix.ZabbixApmMetricGetParameters.Attributes.get -> System.Collectio
 Community.Zabbix.ZabbixApmMetricGetParameters.Attributes.set -> void
 Community.Zabbix.ZabbixApmMetricGetParameters.AttributesEvalType.get -> Community.Zabbix.ZabbixConditionEvalType?
 Community.Zabbix.ZabbixApmMetricGetParameters.AttributesEvalType.set -> void
-Community.Zabbix.ZabbixApmMetricGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixApmMetricGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixApmMetricGetParameters.Equals(Community.Zabbix.ZabbixApmMetricGetParameters? other) -> bool
 Community.Zabbix.ZabbixApmMetricGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixApmMetricGetParameters.ExcludeSearch.set -> void
@@ -1197,8 +1178,6 @@ Community.Zabbix.ZabbixApmMetricGetParameters.StartSearch.get -> bool?
 Community.Zabbix.ZabbixApmMetricGetParameters.StartSearch.set -> void
 Community.Zabbix.ZabbixApmMetricGetParameters.TimeFrom.get -> System.DateTimeOffset
 Community.Zabbix.ZabbixApmMetricGetParameters.TimeFrom.set -> void
-Community.Zabbix.ZabbixApmMetricGetParameters.TimeTill.get -> System.DateTimeOffset
-Community.Zabbix.ZabbixApmMetricGetParameters.TimeTill.set -> void
 Community.Zabbix.ZabbixApmMetricGetParameters.Types.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixApmMetricType>?
 Community.Zabbix.ZabbixApmMetricGetParameters.Types.set -> void
 Community.Zabbix.ZabbixApmMetricGetParameters.WithFlagsOff.get -> int?
@@ -1206,7 +1185,6 @@ Community.Zabbix.ZabbixApmMetricGetParameters.WithFlagsOff.set -> void
 Community.Zabbix.ZabbixApmMetricGetParameters.WithFlagsOn.get -> int?
 Community.Zabbix.ZabbixApmMetricGetParameters.WithFlagsOn.set -> void
 Community.Zabbix.ZabbixApmMetricGetParameters.ZabbixApmMetricGetParameters() -> void
-Community.Zabbix.ZabbixApmMetricGetParameters.ZabbixApmMetricGetParameters(System.DateTimeOffset timeFrom, System.DateTimeOffset timeTill) -> void
 Community.Zabbix.ZabbixApmMetricGetSearch
 Community.Zabbix.ZabbixApmMetricGetSearch.Equals(Community.Zabbix.ZabbixApmMetricGetSearch? other) -> bool
 Community.Zabbix.ZabbixApmMetricGetSearch.MetricDescription.get -> string?
@@ -1344,8 +1322,6 @@ Community.Zabbix.ZabbixApmSpanGetParameters
 Community.Zabbix.ZabbixApmSpanGetParameters.<Clone>$() -> Community.Zabbix.ZabbixApmSpanGetParameters!
 Community.Zabbix.ZabbixApmSpanGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixApmSpanGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixApmSpanGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixApmSpanGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixApmSpanGetParameters.Equals(Community.Zabbix.ZabbixApmSpanGetParameters? other) -> bool
 Community.Zabbix.ZabbixApmSpanGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixApmSpanGetParameters.ExcludeSearch.set -> void
@@ -1385,12 +1361,9 @@ Community.Zabbix.ZabbixApmSpanGetParameters.StartSearch.get -> bool?
 Community.Zabbix.ZabbixApmSpanGetParameters.StartSearch.set -> void
 Community.Zabbix.ZabbixApmSpanGetParameters.TimeFrom.get -> System.DateTimeOffset
 Community.Zabbix.ZabbixApmSpanGetParameters.TimeFrom.set -> void
-Community.Zabbix.ZabbixApmSpanGetParameters.TimeTill.get -> System.DateTimeOffset
-Community.Zabbix.ZabbixApmSpanGetParameters.TimeTill.set -> void
 Community.Zabbix.ZabbixApmSpanGetParameters.TraceIds.get -> System.Collections.Generic.IReadOnlyList<string!>?
 Community.Zabbix.ZabbixApmSpanGetParameters.TraceIds.set -> void
 Community.Zabbix.ZabbixApmSpanGetParameters.ZabbixApmSpanGetParameters() -> void
-Community.Zabbix.ZabbixApmSpanGetParameters.ZabbixApmSpanGetParameters(System.DateTimeOffset timeFrom, System.DateTimeOffset timeTill) -> void
 Community.Zabbix.ZabbixApmSpanGetSearch
 Community.Zabbix.ZabbixApmSpanGetSearch.Equals(Community.Zabbix.ZabbixApmSpanGetSearch? other) -> bool
 Community.Zabbix.ZabbixApmSpanGetSearch.ScopeName.get -> string?
@@ -1509,8 +1482,6 @@ Community.Zabbix.ZabbixApmTraceGetParameters
 Community.Zabbix.ZabbixApmTraceGetParameters.<Clone>$() -> Community.Zabbix.ZabbixApmTraceGetParameters!
 Community.Zabbix.ZabbixApmTraceGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixApmTraceGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixApmTraceGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixApmTraceGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixApmTraceGetParameters.Equals(Community.Zabbix.ZabbixApmTraceGetParameters? other) -> bool
 Community.Zabbix.ZabbixApmTraceGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixApmTraceGetParameters.ExcludeSearch.set -> void
@@ -1546,12 +1517,9 @@ Community.Zabbix.ZabbixApmTraceGetParameters.StartSearch.get -> bool?
 Community.Zabbix.ZabbixApmTraceGetParameters.StartSearch.set -> void
 Community.Zabbix.ZabbixApmTraceGetParameters.TimeFrom.get -> System.DateTimeOffset
 Community.Zabbix.ZabbixApmTraceGetParameters.TimeFrom.set -> void
-Community.Zabbix.ZabbixApmTraceGetParameters.TimeTill.get -> System.DateTimeOffset
-Community.Zabbix.ZabbixApmTraceGetParameters.TimeTill.set -> void
 Community.Zabbix.ZabbixApmTraceGetParameters.TraceIds.get -> System.Collections.Generic.IReadOnlyList<string!>?
 Community.Zabbix.ZabbixApmTraceGetParameters.TraceIds.set -> void
 Community.Zabbix.ZabbixApmTraceGetParameters.ZabbixApmTraceGetParameters() -> void
-Community.Zabbix.ZabbixApmTraceGetParameters.ZabbixApmTraceGetParameters(System.DateTimeOffset timeFrom, System.DateTimeOffset timeTill) -> void
 Community.Zabbix.ZabbixApmTraceGetSearch
 Community.Zabbix.ZabbixApmTraceGetSearch.Equals(Community.Zabbix.ZabbixApmTraceGetSearch? other) -> bool
 Community.Zabbix.ZabbixApmTraceGetSearch.ScopeName.get -> string?
@@ -1643,8 +1611,6 @@ Community.Zabbix.ZabbixAuditLogGetParameters.AdditionalFields.get -> System.Coll
 Community.Zabbix.ZabbixAuditLogGetParameters.AdditionalFields.set -> void
 Community.Zabbix.ZabbixAuditLogGetParameters.AuditIds.get -> System.Collections.Generic.IReadOnlyList<string!>?
 Community.Zabbix.ZabbixAuditLogGetParameters.AuditIds.set -> void
-Community.Zabbix.ZabbixAuditLogGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixAuditLogGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixAuditLogGetParameters.Equals(Community.Zabbix.ZabbixAuditLogGetParameters? other) -> bool
 Community.Zabbix.ZabbixAuditLogGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixAuditLogGetParameters.ExcludeSearch.set -> void
@@ -1654,8 +1620,6 @@ Community.Zabbix.ZabbixAuditLogGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixAuditLogGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixAuditLogGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixAuditLogRecord!>?
 Community.Zabbix.ZabbixAuditLogGetParameters.Output.set -> void
-Community.Zabbix.ZabbixAuditLogGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixAuditLogGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixAuditLogGetParameters.Search.get -> Community.Zabbix.ZabbixAuditLogGetSearch!
 Community.Zabbix.ZabbixAuditLogGetParameters.Search.set -> void
 Community.Zabbix.ZabbixAuditLogGetParameters.SearchByAny.get -> bool?
@@ -1668,8 +1632,6 @@ Community.Zabbix.ZabbixAuditLogGetParameters.StartSearch.get -> bool?
 Community.Zabbix.ZabbixAuditLogGetParameters.StartSearch.set -> void
 Community.Zabbix.ZabbixAuditLogGetParameters.TimeFrom.get -> System.DateTimeOffset?
 Community.Zabbix.ZabbixAuditLogGetParameters.TimeFrom.set -> void
-Community.Zabbix.ZabbixAuditLogGetParameters.TimeTill.get -> System.DateTimeOffset?
-Community.Zabbix.ZabbixAuditLogGetParameters.TimeTill.set -> void
 Community.Zabbix.ZabbixAuditLogGetParameters.UserIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixAuditLogGetParameters.UserIds.set -> void
 Community.Zabbix.ZabbixAuditLogGetParameters.ZabbixAuditLogGetParameters() -> void
@@ -2030,8 +1992,6 @@ Community.Zabbix.ZabbixCepRuleGetParameters.AdditionalFields.get -> System.Colle
 Community.Zabbix.ZabbixCepRuleGetParameters.AdditionalFields.set -> void
 Community.Zabbix.ZabbixCepRuleGetParameters.CepRuleIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixCepRuleGetParameters.CepRuleIds.set -> void
-Community.Zabbix.ZabbixCepRuleGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixCepRuleGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixCepRuleGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixCepRuleGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixCepRuleGetParameters.Equals(Community.Zabbix.ZabbixCepRuleGetParameters? other) -> bool
@@ -2043,8 +2003,6 @@ Community.Zabbix.ZabbixCepRuleGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixCepRuleGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixCepRuleGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixCepRule!>?
 Community.Zabbix.ZabbixCepRuleGetParameters.Output.set -> void
-Community.Zabbix.ZabbixCepRuleGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixCepRuleGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixCepRuleGetParameters.Search.get -> Community.Zabbix.ZabbixCepRuleGetSearch!
 Community.Zabbix.ZabbixCepRuleGetParameters.Search.set -> void
 Community.Zabbix.ZabbixCepRuleGetParameters.SearchByAny.get -> bool?
@@ -2655,8 +2613,6 @@ Community.Zabbix.ZabbixConnectorGetParameters.AdditionalFields.get -> System.Col
 Community.Zabbix.ZabbixConnectorGetParameters.AdditionalFields.set -> void
 Community.Zabbix.ZabbixConnectorGetParameters.ConnectorIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixConnectorGetParameters.ConnectorIds.set -> void
-Community.Zabbix.ZabbixConnectorGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixConnectorGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixConnectorGetParameters.Equals(Community.Zabbix.ZabbixConnectorGetParameters? other) -> bool
 Community.Zabbix.ZabbixConnectorGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixConnectorGetParameters.ExcludeSearch.set -> void
@@ -2666,8 +2622,6 @@ Community.Zabbix.ZabbixConnectorGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixConnectorGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixConnectorGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixConnector!>?
 Community.Zabbix.ZabbixConnectorGetParameters.Output.set -> void
-Community.Zabbix.ZabbixConnectorGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixConnectorGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixConnectorGetParameters.Search.get -> Community.Zabbix.ZabbixConnectorGetSearch!
 Community.Zabbix.ZabbixConnectorGetParameters.Search.set -> void
 Community.Zabbix.ZabbixConnectorGetParameters.SearchByAny.get -> bool?
@@ -2861,8 +2815,6 @@ Community.Zabbix.ZabbixCorrelationGetParameters.AdditionalFields.get -> System.C
 Community.Zabbix.ZabbixCorrelationGetParameters.AdditionalFields.set -> void
 Community.Zabbix.ZabbixCorrelationGetParameters.CorrelationIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixCorrelationGetParameters.CorrelationIds.set -> void
-Community.Zabbix.ZabbixCorrelationGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixCorrelationGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixCorrelationGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixCorrelationGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixCorrelationGetParameters.Equals(Community.Zabbix.ZabbixCorrelationGetParameters? other) -> bool
@@ -2870,14 +2822,10 @@ Community.Zabbix.ZabbixCorrelationGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixCorrelationGetParameters.ExcludeSearch.set -> void
 Community.Zabbix.ZabbixCorrelationGetParameters.Filter.get -> Community.Zabbix.ZabbixCorrelationGetFilter!
 Community.Zabbix.ZabbixCorrelationGetParameters.Filter.set -> void
-Community.Zabbix.ZabbixCorrelationGetParameters.GroupCount.get -> bool?
-Community.Zabbix.ZabbixCorrelationGetParameters.GroupCount.set -> void
 Community.Zabbix.ZabbixCorrelationGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixCorrelationGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixCorrelationGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixCorrelationRecord!>?
 Community.Zabbix.ZabbixCorrelationGetParameters.Output.set -> void
-Community.Zabbix.ZabbixCorrelationGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixCorrelationGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixCorrelationGetParameters.Search.get -> Community.Zabbix.ZabbixCorrelationGetSearch!
 Community.Zabbix.ZabbixCorrelationGetParameters.Search.set -> void
 Community.Zabbix.ZabbixCorrelationGetParameters.SearchByAny.get -> bool?
@@ -3063,8 +3011,6 @@ Community.Zabbix.ZabbixDashboardGetParameters
 Community.Zabbix.ZabbixDashboardGetParameters.<Clone>$() -> Community.Zabbix.ZabbixDashboardGetParameters!
 Community.Zabbix.ZabbixDashboardGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixDashboardGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixDashboardGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixDashboardGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixDashboardGetParameters.DashboardIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixDashboardGetParameters.DashboardIds.set -> void
 Community.Zabbix.ZabbixDashboardGetParameters.Editable.get -> bool?
@@ -3078,8 +3024,6 @@ Community.Zabbix.ZabbixDashboardGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixDashboardGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixDashboardGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixDashboard!>?
 Community.Zabbix.ZabbixDashboardGetParameters.Output.set -> void
-Community.Zabbix.ZabbixDashboardGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixDashboardGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixDashboardGetParameters.Search.get -> Community.Zabbix.ZabbixDashboardGetSearch!
 Community.Zabbix.ZabbixDashboardGetParameters.Search.set -> void
 Community.Zabbix.ZabbixDashboardGetParameters.SearchByAny.get -> bool?
@@ -3310,8 +3254,6 @@ Community.Zabbix.ZabbixDeviceGetParameters
 Community.Zabbix.ZabbixDeviceGetParameters.<Clone>$() -> Community.Zabbix.ZabbixDeviceGetParameters!
 Community.Zabbix.ZabbixDeviceGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixDeviceGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixDeviceGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixDeviceGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixDeviceGetParameters.DeviceIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixDeviceGetParameters.DeviceIds.set -> void
 Community.Zabbix.ZabbixDeviceGetParameters.Equals(Community.Zabbix.ZabbixDeviceGetParameters? other) -> bool
@@ -3323,8 +3265,6 @@ Community.Zabbix.ZabbixDeviceGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixDeviceGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixDeviceGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixDevice!>?
 Community.Zabbix.ZabbixDeviceGetParameters.Output.set -> void
-Community.Zabbix.ZabbixDeviceGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixDeviceGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixDeviceGetParameters.RoleIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixDeviceGetParameters.RoleIds.set -> void
 Community.Zabbix.ZabbixDeviceGetParameters.Search.get -> Community.Zabbix.ZabbixDeviceGetSearch!
@@ -3483,8 +3423,6 @@ Community.Zabbix.ZabbixDiscoveredHostGetFilter.ZabbixDiscoveredHostGetFilter(Sys
 Community.Zabbix.ZabbixDiscoveredHostGetParameters
 Community.Zabbix.ZabbixDiscoveredHostGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixDiscoveredHostGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixDiscoveredHostGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixDiscoveredHostGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixDiscoveredHostGetParameters.DiscoveredHostIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixDiscoveredHostGetParameters.DiscoveredHostIds.set -> void
 Community.Zabbix.ZabbixDiscoveredHostGetParameters.DiscoveredServiceIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
@@ -3496,8 +3434,6 @@ Community.Zabbix.ZabbixDiscoveredHostGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixDiscoveredHostGetParameters.ExcludeSearch.set -> void
 Community.Zabbix.ZabbixDiscoveredHostGetParameters.Filter.get -> Community.Zabbix.ZabbixDiscoveredHostGetFilter!
 Community.Zabbix.ZabbixDiscoveredHostGetParameters.Filter.set -> void
-Community.Zabbix.ZabbixDiscoveredHostGetParameters.GroupCount.get -> bool?
-Community.Zabbix.ZabbixDiscoveredHostGetParameters.GroupCount.set -> void
 Community.Zabbix.ZabbixDiscoveredHostGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixDiscoveredHostGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixDiscoveredHostGetParameters.LimitSelects.get -> int?
@@ -3505,8 +3441,6 @@ Community.Zabbix.ZabbixDiscoveredHostGetParameters.LimitSelects.set -> void
 Community.Zabbix.ZabbixDiscoveredHostGetParameters.NetworkDiscoveryRuleIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixDiscoveredHostGetParameters.NetworkDiscoveryRuleIds.set -> void
 Community.Zabbix.ZabbixDiscoveredHostGetParameters.Output.set -> void
-Community.Zabbix.ZabbixDiscoveredHostGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixDiscoveredHostGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixDiscoveredHostGetParameters.Search.get -> Community.Zabbix.ZabbixGetFields!
 Community.Zabbix.ZabbixDiscoveredHostGetParameters.Search.set -> void
 Community.Zabbix.ZabbixDiscoveredHostGetParameters.SearchByAny.get -> bool?
@@ -3579,8 +3513,6 @@ Community.Zabbix.ZabbixDiscoveredServiceGetFilter.ZabbixDiscoveredServiceGetFilt
 Community.Zabbix.ZabbixDiscoveredServiceGetParameters
 Community.Zabbix.ZabbixDiscoveredServiceGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixDiscoveredServiceGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixDiscoveredServiceGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixDiscoveredServiceGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixDiscoveredServiceGetParameters.DiscoveredHostIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixDiscoveredServiceGetParameters.DiscoveredHostIds.set -> void
 Community.Zabbix.ZabbixDiscoveredServiceGetParameters.DiscoveredServiceIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
@@ -3592,8 +3524,6 @@ Community.Zabbix.ZabbixDiscoveredServiceGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixDiscoveredServiceGetParameters.ExcludeSearch.set -> void
 Community.Zabbix.ZabbixDiscoveredServiceGetParameters.Filter.get -> Community.Zabbix.ZabbixDiscoveredServiceGetFilter!
 Community.Zabbix.ZabbixDiscoveredServiceGetParameters.Filter.set -> void
-Community.Zabbix.ZabbixDiscoveredServiceGetParameters.GroupCount.get -> bool?
-Community.Zabbix.ZabbixDiscoveredServiceGetParameters.GroupCount.set -> void
 Community.Zabbix.ZabbixDiscoveredServiceGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixDiscoveredServiceGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixDiscoveredServiceGetParameters.LimitSelects.get -> int?
@@ -3603,8 +3533,6 @@ Community.Zabbix.ZabbixDiscoveredServiceGetParameters.NetworkDiscoveryCheckIds.s
 Community.Zabbix.ZabbixDiscoveredServiceGetParameters.NetworkDiscoveryRuleIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixDiscoveredServiceGetParameters.NetworkDiscoveryRuleIds.set -> void
 Community.Zabbix.ZabbixDiscoveredServiceGetParameters.Output.set -> void
-Community.Zabbix.ZabbixDiscoveredServiceGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixDiscoveredServiceGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixDiscoveredServiceGetParameters.Search.get -> Community.Zabbix.ZabbixDiscoveredServiceGetSearch!
 Community.Zabbix.ZabbixDiscoveredServiceGetParameters.Search.set -> void
 Community.Zabbix.ZabbixDiscoveredServiceGetParameters.SearchByAny.get -> bool?
@@ -3994,8 +3922,6 @@ Community.Zabbix.ZabbixDiscoveryRuleGetParameters
 Community.Zabbix.ZabbixDiscoveryRuleGetParameters.<Clone>$() -> Community.Zabbix.ZabbixDiscoveryRuleGetParameters!
 Community.Zabbix.ZabbixDiscoveryRuleGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixDiscoveryRuleGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixDiscoveryRuleGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixDiscoveryRuleGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixDiscoveryRuleGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixDiscoveryRuleGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixDiscoveryRuleGetParameters.Equals(Community.Zabbix.ZabbixDiscoveryRuleGetParameters? other) -> bool
@@ -4003,8 +3929,6 @@ Community.Zabbix.ZabbixDiscoveryRuleGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixDiscoveryRuleGetParameters.ExcludeSearch.set -> void
 Community.Zabbix.ZabbixDiscoveryRuleGetParameters.Filter.get -> Community.Zabbix.ZabbixDiscoveryRuleGetFilter!
 Community.Zabbix.ZabbixDiscoveryRuleGetParameters.Filter.set -> void
-Community.Zabbix.ZabbixDiscoveryRuleGetParameters.GroupCount.get -> bool?
-Community.Zabbix.ZabbixDiscoveryRuleGetParameters.GroupCount.set -> void
 Community.Zabbix.ZabbixDiscoveryRuleGetParameters.GroupIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixDiscoveryRuleGetParameters.GroupIds.set -> void
 Community.Zabbix.ZabbixDiscoveryRuleGetParameters.HostIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
@@ -4023,8 +3947,6 @@ Community.Zabbix.ZabbixDiscoveryRuleGetParameters.Monitored.get -> bool?
 Community.Zabbix.ZabbixDiscoveryRuleGetParameters.Monitored.set -> void
 Community.Zabbix.ZabbixDiscoveryRuleGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixDiscoveryRule!>?
 Community.Zabbix.ZabbixDiscoveryRuleGetParameters.Output.set -> void
-Community.Zabbix.ZabbixDiscoveryRuleGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixDiscoveryRuleGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixDiscoveryRuleGetParameters.Search.get -> Community.Zabbix.ZabbixDiscoveryRuleGetSearch!
 Community.Zabbix.ZabbixDiscoveryRuleGetParameters.Search.set -> void
 Community.Zabbix.ZabbixDiscoveryRuleGetParameters.SearchByAny.get -> bool?
@@ -4662,8 +4584,6 @@ Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters
 Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.<Clone>$() -> Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters!
 Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.DiscoveryIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.DiscoveryIds.set -> void
 Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.Editable.get -> bool?
@@ -4673,8 +4593,6 @@ Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.ExcludeSearch.get -> 
 Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.ExcludeSearch.set -> void
 Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.Filter.get -> Community.Zabbix.ZabbixDiscoveryRulePrototypeGetFilter!
 Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.Filter.set -> void
-Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.GroupCount.get -> bool?
-Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.GroupCount.set -> void
 Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.GroupIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.GroupIds.set -> void
 Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.HostIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
@@ -4693,8 +4611,6 @@ Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.Monitored.get -> bool
 Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.Monitored.set -> void
 Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixDiscoveryRulePrototype!>?
 Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.Output.set -> void
-Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.Search.get -> Community.Zabbix.ZabbixDiscoveryRulePrototypeGetSearch!
 Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.Search.set -> void
 Community.Zabbix.ZabbixDiscoveryRulePrototypeGetParameters.SearchByAny.get -> bool?
@@ -5393,8 +5309,6 @@ Community.Zabbix.ZabbixEventGetParameters.ActionUserIds.get -> System.Collection
 Community.Zabbix.ZabbixEventGetParameters.ActionUserIds.set -> void
 Community.Zabbix.ZabbixEventGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixEventGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixEventGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixEventGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixEventGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixEventGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixEventGetParameters.Equals(Community.Zabbix.ZabbixEventGetParameters? other) -> bool
@@ -5402,16 +5316,12 @@ Community.Zabbix.ZabbixEventGetParameters.EvalType.get -> Community.Zabbix.Zabbi
 Community.Zabbix.ZabbixEventGetParameters.EvalType.set -> void
 Community.Zabbix.ZabbixEventGetParameters.EventIdFrom.get -> ulong?
 Community.Zabbix.ZabbixEventGetParameters.EventIdFrom.set -> void
-Community.Zabbix.ZabbixEventGetParameters.EventIdTill.get -> ulong?
-Community.Zabbix.ZabbixEventGetParameters.EventIdTill.set -> void
 Community.Zabbix.ZabbixEventGetParameters.EventIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixEventGetParameters.EventIds.set -> void
 Community.Zabbix.ZabbixEventGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixEventGetParameters.ExcludeSearch.set -> void
 Community.Zabbix.ZabbixEventGetParameters.Filter.get -> Community.Zabbix.ZabbixEventGetFilter!
 Community.Zabbix.ZabbixEventGetParameters.Filter.set -> void
-Community.Zabbix.ZabbixEventGetParameters.GroupBy.get -> System.Collections.Generic.IReadOnlyList<string!>?
-Community.Zabbix.ZabbixEventGetParameters.GroupBy.set -> void
 Community.Zabbix.ZabbixEventGetParameters.GroupIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixEventGetParameters.GroupIds.set -> void
 Community.Zabbix.ZabbixEventGetParameters.HostIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
@@ -5424,12 +5334,8 @@ Community.Zabbix.ZabbixEventGetParameters.ObjectType.get -> Community.Zabbix.Zab
 Community.Zabbix.ZabbixEventGetParameters.ObjectType.set -> void
 Community.Zabbix.ZabbixEventGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixEvent!>?
 Community.Zabbix.ZabbixEventGetParameters.Output.set -> void
-Community.Zabbix.ZabbixEventGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixEventGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixEventGetParameters.ProblemTimeFrom.get -> System.DateTimeOffset?
 Community.Zabbix.ZabbixEventGetParameters.ProblemTimeFrom.set -> void
-Community.Zabbix.ZabbixEventGetParameters.ProblemTimeTill.get -> System.DateTimeOffset?
-Community.Zabbix.ZabbixEventGetParameters.ProblemTimeTill.set -> void
 Community.Zabbix.ZabbixEventGetParameters.Search.get -> Community.Zabbix.ZabbixEventGetSearch!
 Community.Zabbix.ZabbixEventGetParameters.Search.set -> void
 Community.Zabbix.ZabbixEventGetParameters.SearchByAny.get -> bool?
@@ -5468,8 +5374,6 @@ Community.Zabbix.ZabbixEventGetParameters.Tags.get -> System.Collections.Generic
 Community.Zabbix.ZabbixEventGetParameters.Tags.set -> void
 Community.Zabbix.ZabbixEventGetParameters.TimeFrom.get -> System.DateTimeOffset?
 Community.Zabbix.ZabbixEventGetParameters.TimeFrom.set -> void
-Community.Zabbix.ZabbixEventGetParameters.TimeTill.get -> System.DateTimeOffset?
-Community.Zabbix.ZabbixEventGetParameters.TimeTill.set -> void
 Community.Zabbix.ZabbixEventGetParameters.TriggerSeverities.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixSeverity>?
 Community.Zabbix.ZabbixEventGetParameters.TriggerSeverities.set -> void
 Community.Zabbix.ZabbixEventGetParameters.Value.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixTriggerValue>?
@@ -5710,8 +5614,6 @@ Community.Zabbix.ZabbixGraphGetParameters
 Community.Zabbix.ZabbixGraphGetParameters.<Clone>$() -> Community.Zabbix.ZabbixGraphGetParameters!
 Community.Zabbix.ZabbixGraphGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixGraphGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixGraphGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixGraphGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixGraphGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixGraphGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixGraphGetParameters.Equals(Community.Zabbix.ZabbixGraphGetParameters? other) -> bool
@@ -5721,8 +5623,6 @@ Community.Zabbix.ZabbixGraphGetParameters.Filter.get -> Community.Zabbix.ZabbixG
 Community.Zabbix.ZabbixGraphGetParameters.Filter.set -> void
 Community.Zabbix.ZabbixGraphGetParameters.GraphIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixGraphGetParameters.GraphIds.set -> void
-Community.Zabbix.ZabbixGraphGetParameters.GroupCount.get -> bool?
-Community.Zabbix.ZabbixGraphGetParameters.GroupCount.set -> void
 Community.Zabbix.ZabbixGraphGetParameters.GroupIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixGraphGetParameters.GroupIds.set -> void
 Community.Zabbix.ZabbixGraphGetParameters.HostIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
@@ -5735,8 +5635,6 @@ Community.Zabbix.ZabbixGraphGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixGraphGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixGraphGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixGraph!>?
 Community.Zabbix.ZabbixGraphGetParameters.Output.set -> void
-Community.Zabbix.ZabbixGraphGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixGraphGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixGraphGetParameters.Search.get -> Community.Zabbix.ZabbixGraphGetSearch!
 Community.Zabbix.ZabbixGraphGetParameters.Search.set -> void
 Community.Zabbix.ZabbixGraphGetParameters.SearchByAny.get -> bool?
@@ -5815,8 +5713,6 @@ Community.Zabbix.ZabbixGraphItemGetParameters
 Community.Zabbix.ZabbixGraphItemGetParameters.<Clone>$() -> Community.Zabbix.ZabbixGraphItemGetParameters!
 Community.Zabbix.ZabbixGraphItemGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixGraphItemGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixGraphItemGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixGraphItemGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixGraphItemGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixGraphItemGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixGraphItemGetParameters.Equals(Community.Zabbix.ZabbixGraphItemGetParameters? other) -> bool
@@ -5828,8 +5724,6 @@ Community.Zabbix.ZabbixGraphItemGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixGraphItemGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixGraphItemGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixGraphItem!>?
 Community.Zabbix.ZabbixGraphItemGetParameters.Output.set -> void
-Community.Zabbix.ZabbixGraphItemGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixGraphItemGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixGraphItemGetParameters.SelectGraphs.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixGraph!>?
 Community.Zabbix.ZabbixGraphItemGetParameters.SelectGraphs.set -> void
 Community.Zabbix.ZabbixGraphItemGetParameters.Sort.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixSort<Community.Zabbix.ZabbixGraphItem!>>?
@@ -6021,8 +5915,6 @@ Community.Zabbix.ZabbixGraphPrototypeGetParameters
 Community.Zabbix.ZabbixGraphPrototypeGetParameters.<Clone>$() -> Community.Zabbix.ZabbixGraphPrototypeGetParameters!
 Community.Zabbix.ZabbixGraphPrototypeGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixGraphPrototypeGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixGraphPrototypeGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixGraphPrototypeGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixGraphPrototypeGetParameters.DiscoveryIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixGraphPrototypeGetParameters.DiscoveryIds.set -> void
 Community.Zabbix.ZabbixGraphPrototypeGetParameters.Editable.get -> bool?
@@ -6034,8 +5926,6 @@ Community.Zabbix.ZabbixGraphPrototypeGetParameters.Filter.get -> Community.Zabbi
 Community.Zabbix.ZabbixGraphPrototypeGetParameters.Filter.set -> void
 Community.Zabbix.ZabbixGraphPrototypeGetParameters.GraphIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixGraphPrototypeGetParameters.GraphIds.set -> void
-Community.Zabbix.ZabbixGraphPrototypeGetParameters.GroupCount.get -> bool?
-Community.Zabbix.ZabbixGraphPrototypeGetParameters.GroupCount.set -> void
 Community.Zabbix.ZabbixGraphPrototypeGetParameters.GroupIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixGraphPrototypeGetParameters.GroupIds.set -> void
 Community.Zabbix.ZabbixGraphPrototypeGetParameters.HostIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
@@ -6048,8 +5938,6 @@ Community.Zabbix.ZabbixGraphPrototypeGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixGraphPrototypeGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixGraphPrototypeGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixGraphPrototype!>?
 Community.Zabbix.ZabbixGraphPrototypeGetParameters.Output.set -> void
-Community.Zabbix.ZabbixGraphPrototypeGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixGraphPrototypeGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixGraphPrototypeGetParameters.Search.get -> Community.Zabbix.ZabbixGraphPrototypeGetSearch!
 Community.Zabbix.ZabbixGraphPrototypeGetParameters.Search.set -> void
 Community.Zabbix.ZabbixGraphPrototypeGetParameters.SearchByAny.get -> bool?
@@ -6291,8 +6179,6 @@ Community.Zabbix.ZabbixHaNodeGetParameters
 Community.Zabbix.ZabbixHaNodeGetParameters.<Clone>$() -> Community.Zabbix.ZabbixHaNodeGetParameters!
 Community.Zabbix.ZabbixHaNodeGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixHaNodeGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixHaNodeGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixHaNodeGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixHaNodeGetParameters.Equals(Community.Zabbix.ZabbixHaNodeGetParameters? other) -> bool
 Community.Zabbix.ZabbixHaNodeGetParameters.Filter.get -> Community.Zabbix.ZabbixGetFields!
 Community.Zabbix.ZabbixHaNodeGetParameters.Filter.set -> void
@@ -6302,8 +6188,6 @@ Community.Zabbix.ZabbixHaNodeGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixHaNodeGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixHaNodeGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixHaNode!>?
 Community.Zabbix.ZabbixHaNodeGetParameters.Output.set -> void
-Community.Zabbix.ZabbixHaNodeGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixHaNodeGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixHaNodeGetParameters.Sort.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixSort<Community.Zabbix.ZabbixHaNode!>>?
 Community.Zabbix.ZabbixHaNodeGetParameters.Sort.set -> void
 Community.Zabbix.ZabbixHaNodeGetParameters.ZabbixHaNodeGetParameters() -> void
@@ -6334,8 +6218,6 @@ Community.Zabbix.ZabbixHistoryGetParameters
 Community.Zabbix.ZabbixHistoryGetParameters.<Clone>$() -> Community.Zabbix.ZabbixHistoryGetParameters!
 Community.Zabbix.ZabbixHistoryGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixHistoryGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixHistoryGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixHistoryGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixHistoryGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixHistoryGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixHistoryGetParameters.Equals(Community.Zabbix.ZabbixHistoryGetParameters? other) -> bool
@@ -6367,8 +6249,6 @@ Community.Zabbix.ZabbixHistoryGetParameters.StartSearch.get -> bool?
 Community.Zabbix.ZabbixHistoryGetParameters.StartSearch.set -> void
 Community.Zabbix.ZabbixHistoryGetParameters.TimeFrom.get -> System.DateTimeOffset?
 Community.Zabbix.ZabbixHistoryGetParameters.TimeFrom.set -> void
-Community.Zabbix.ZabbixHistoryGetParameters.TimeTill.get -> System.DateTimeOffset?
-Community.Zabbix.ZabbixHistoryGetParameters.TimeTill.set -> void
 Community.Zabbix.ZabbixHistoryGetParameters.ZabbixHistoryGetParameters() -> void
 Community.Zabbix.ZabbixHistoryGetSearch
 Community.Zabbix.ZabbixHistoryGetSearch.Equals(Community.Zabbix.ZabbixHistoryGetSearch? other) -> bool
@@ -6610,8 +6490,6 @@ Community.Zabbix.ZabbixHostDashboardGetParameters
 Community.Zabbix.ZabbixHostDashboardGetParameters.<Clone>$() -> Community.Zabbix.ZabbixHostDashboardGetParameters!
 Community.Zabbix.ZabbixHostDashboardGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixHostDashboardGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixHostDashboardGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixHostDashboardGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixHostDashboardGetParameters.DashboardIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixHostDashboardGetParameters.DashboardIds.set -> void
 Community.Zabbix.ZabbixHostDashboardGetParameters.Editable.get -> bool?
@@ -6621,8 +6499,6 @@ Community.Zabbix.ZabbixHostDashboardGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixHostDashboardGetParameters.ExcludeSearch.set -> void
 Community.Zabbix.ZabbixHostDashboardGetParameters.Filter.get -> Community.Zabbix.ZabbixHostDashboardGetFilter!
 Community.Zabbix.ZabbixHostDashboardGetParameters.Filter.set -> void
-Community.Zabbix.ZabbixHostDashboardGetParameters.GroupCount.get -> bool?
-Community.Zabbix.ZabbixHostDashboardGetParameters.GroupCount.set -> void
 Community.Zabbix.ZabbixHostDashboardGetParameters.HostIds.get -> System.Collections.Generic.IReadOnlyList<ulong>!
 Community.Zabbix.ZabbixHostDashboardGetParameters.HostIds.set -> void
 Community.Zabbix.ZabbixHostDashboardGetParameters.Limit.get -> int?
@@ -6799,8 +6675,6 @@ Community.Zabbix.ZabbixHostGetParameters
 Community.Zabbix.ZabbixHostGetParameters.<Clone>$() -> Community.Zabbix.ZabbixHostGetParameters!
 Community.Zabbix.ZabbixHostGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixHostGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixHostGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixHostGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixHostGetParameters.DiscoveredServiceIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixHostGetParameters.DiscoveredServiceIds.set -> void
 Community.Zabbix.ZabbixHostGetParameters.Editable.get -> bool?
@@ -6814,8 +6688,6 @@ Community.Zabbix.ZabbixHostGetParameters.Filter.get -> Community.Zabbix.ZabbixHo
 Community.Zabbix.ZabbixHostGetParameters.Filter.set -> void
 Community.Zabbix.ZabbixHostGetParameters.GraphIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixHostGetParameters.GraphIds.set -> void
-Community.Zabbix.ZabbixHostGetParameters.GroupCount.get -> bool?
-Community.Zabbix.ZabbixHostGetParameters.GroupCount.set -> void
 Community.Zabbix.ZabbixHostGetParameters.GroupIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixHostGetParameters.GroupIds.set -> void
 Community.Zabbix.ZabbixHostGetParameters.HostIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
@@ -6838,8 +6710,6 @@ Community.Zabbix.ZabbixHostGetParameters.MonitoredHosts.get -> bool?
 Community.Zabbix.ZabbixHostGetParameters.MonitoredHosts.set -> void
 Community.Zabbix.ZabbixHostGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixHost!>?
 Community.Zabbix.ZabbixHostGetParameters.Output.set -> void
-Community.Zabbix.ZabbixHostGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixHostGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixHostGetParameters.ProxyGroupIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixHostGetParameters.ProxyGroupIds.set -> void
 Community.Zabbix.ZabbixHostGetParameters.ProxyIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
@@ -7027,8 +6897,6 @@ Community.Zabbix.ZabbixHostGroupGetParameters
 Community.Zabbix.ZabbixHostGroupGetParameters.<Clone>$() -> Community.Zabbix.ZabbixHostGroupGetParameters!
 Community.Zabbix.ZabbixHostGroupGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixHostGroupGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixHostGroupGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixHostGroupGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixHostGroupGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixHostGroupGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixHostGroupGetParameters.Equals(Community.Zabbix.ZabbixHostGroupGetParameters? other) -> bool
@@ -7052,8 +6920,6 @@ Community.Zabbix.ZabbixHostGroupGetParameters.MonitoredHosts.get -> bool?
 Community.Zabbix.ZabbixHostGroupGetParameters.MonitoredHosts.set -> void
 Community.Zabbix.ZabbixHostGroupGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixHostGroup!>?
 Community.Zabbix.ZabbixHostGroupGetParameters.Output.set -> void
-Community.Zabbix.ZabbixHostGroupGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixHostGroupGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixHostGroupGetParameters.RealHosts.get -> bool?
 Community.Zabbix.ZabbixHostGroupGetParameters.RealHosts.set -> void
 Community.Zabbix.ZabbixHostGroupGetParameters.Search.get -> Community.Zabbix.ZabbixHostGroupGetSearch!
@@ -7362,8 +7228,6 @@ Community.Zabbix.ZabbixHostInterfaceGetParameters
 Community.Zabbix.ZabbixHostInterfaceGetParameters.<Clone>$() -> Community.Zabbix.ZabbixHostInterfaceGetParameters!
 Community.Zabbix.ZabbixHostInterfaceGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixHostInterfaceGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixHostInterfaceGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixHostInterfaceGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixHostInterfaceGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixHostInterfaceGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixHostInterfaceGetParameters.Equals(Community.Zabbix.ZabbixHostInterfaceGetParameters? other) -> bool
@@ -7371,8 +7235,6 @@ Community.Zabbix.ZabbixHostInterfaceGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixHostInterfaceGetParameters.ExcludeSearch.set -> void
 Community.Zabbix.ZabbixHostInterfaceGetParameters.Filter.get -> Community.Zabbix.ZabbixHostInterfaceGetFilter!
 Community.Zabbix.ZabbixHostInterfaceGetParameters.Filter.set -> void
-Community.Zabbix.ZabbixHostInterfaceGetParameters.GroupCount.get -> bool?
-Community.Zabbix.ZabbixHostInterfaceGetParameters.GroupCount.set -> void
 Community.Zabbix.ZabbixHostInterfaceGetParameters.HostIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixHostInterfaceGetParameters.HostIds.set -> void
 Community.Zabbix.ZabbixHostInterfaceGetParameters.InterfaceIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
@@ -7385,8 +7247,6 @@ Community.Zabbix.ZabbixHostInterfaceGetParameters.LimitSelects.get -> int?
 Community.Zabbix.ZabbixHostInterfaceGetParameters.LimitSelects.set -> void
 Community.Zabbix.ZabbixHostInterfaceGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixHostInterface!>?
 Community.Zabbix.ZabbixHostInterfaceGetParameters.Output.set -> void
-Community.Zabbix.ZabbixHostInterfaceGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixHostInterfaceGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixHostInterfaceGetParameters.Search.get -> Community.Zabbix.ZabbixHostInterfaceGetSearch!
 Community.Zabbix.ZabbixHostInterfaceGetParameters.Search.set -> void
 Community.Zabbix.ZabbixHostInterfaceGetParameters.SearchByAny.get -> bool?
@@ -8054,8 +7914,6 @@ Community.Zabbix.ZabbixHostPrototypeGetParameters
 Community.Zabbix.ZabbixHostPrototypeGetParameters.<Clone>$() -> Community.Zabbix.ZabbixHostPrototypeGetParameters!
 Community.Zabbix.ZabbixHostPrototypeGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixHostPrototypeGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixHostPrototypeGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixHostPrototypeGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixHostPrototypeGetParameters.DiscoveryIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixHostPrototypeGetParameters.DiscoveryIds.set -> void
 Community.Zabbix.ZabbixHostPrototypeGetParameters.Editable.get -> bool?
@@ -8065,8 +7923,6 @@ Community.Zabbix.ZabbixHostPrototypeGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixHostPrototypeGetParameters.ExcludeSearch.set -> void
 Community.Zabbix.ZabbixHostPrototypeGetParameters.Filter.get -> Community.Zabbix.ZabbixHostPrototypeGetFilter!
 Community.Zabbix.ZabbixHostPrototypeGetParameters.Filter.set -> void
-Community.Zabbix.ZabbixHostPrototypeGetParameters.GroupCount.get -> bool?
-Community.Zabbix.ZabbixHostPrototypeGetParameters.GroupCount.set -> void
 Community.Zabbix.ZabbixHostPrototypeGetParameters.HostIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixHostPrototypeGetParameters.HostIds.set -> void
 Community.Zabbix.ZabbixHostPrototypeGetParameters.Inherited.get -> bool?
@@ -8075,8 +7931,6 @@ Community.Zabbix.ZabbixHostPrototypeGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixHostPrototypeGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixHostPrototypeGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixHostPrototype!>?
 Community.Zabbix.ZabbixHostPrototypeGetParameters.Output.set -> void
-Community.Zabbix.ZabbixHostPrototypeGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixHostPrototypeGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixHostPrototypeGetParameters.Search.get -> Community.Zabbix.ZabbixHostPrototypeGetSearch!
 Community.Zabbix.ZabbixHostPrototypeGetParameters.Search.set -> void
 Community.Zabbix.ZabbixHostPrototypeGetParameters.SearchByAny.get -> bool?
@@ -8609,8 +8463,6 @@ Community.Zabbix.ZabbixHttpTestGetParameters
 Community.Zabbix.ZabbixHttpTestGetParameters.<Clone>$() -> Community.Zabbix.ZabbixHttpTestGetParameters!
 Community.Zabbix.ZabbixHttpTestGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixHttpTestGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixHttpTestGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixHttpTestGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixHttpTestGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixHttpTestGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixHttpTestGetParameters.Equals(Community.Zabbix.ZabbixHttpTestGetParameters? other) -> bool
@@ -8624,8 +8476,6 @@ Community.Zabbix.ZabbixHttpTestGetParameters.ExpandStepName.get -> bool?
 Community.Zabbix.ZabbixHttpTestGetParameters.ExpandStepName.set -> void
 Community.Zabbix.ZabbixHttpTestGetParameters.Filter.get -> Community.Zabbix.ZabbixGetFields!
 Community.Zabbix.ZabbixHttpTestGetParameters.Filter.set -> void
-Community.Zabbix.ZabbixHttpTestGetParameters.GroupCount.get -> bool?
-Community.Zabbix.ZabbixHttpTestGetParameters.GroupCount.set -> void
 Community.Zabbix.ZabbixHttpTestGetParameters.GroupIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixHttpTestGetParameters.GroupIds.set -> void
 Community.Zabbix.ZabbixHttpTestGetParameters.HostIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
@@ -8642,8 +8492,6 @@ Community.Zabbix.ZabbixHttpTestGetParameters.Monitored.get -> bool?
 Community.Zabbix.ZabbixHttpTestGetParameters.Monitored.set -> void
 Community.Zabbix.ZabbixHttpTestGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixHttpTest!>?
 Community.Zabbix.ZabbixHttpTestGetParameters.Output.set -> void
-Community.Zabbix.ZabbixHttpTestGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixHttpTestGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixHttpTestGetParameters.Search.get -> Community.Zabbix.ZabbixGetFields!
 Community.Zabbix.ZabbixHttpTestGetParameters.Search.set -> void
 Community.Zabbix.ZabbixHttpTestGetParameters.SearchByAny.get -> bool?
@@ -8894,8 +8742,6 @@ Community.Zabbix.ZabbixIconMapGetParameters
 Community.Zabbix.ZabbixIconMapGetParameters.<Clone>$() -> Community.Zabbix.ZabbixIconMapGetParameters!
 Community.Zabbix.ZabbixIconMapGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixIconMapGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixIconMapGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixIconMapGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixIconMapGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixIconMapGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixIconMapGetParameters.Equals(Community.Zabbix.ZabbixIconMapGetParameters? other) -> bool
@@ -8911,8 +8757,6 @@ Community.Zabbix.ZabbixIconMapGetParameters.MapIds.get -> System.Collections.Gen
 Community.Zabbix.ZabbixIconMapGetParameters.MapIds.set -> void
 Community.Zabbix.ZabbixIconMapGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixIconMap!>?
 Community.Zabbix.ZabbixIconMapGetParameters.Output.set -> void
-Community.Zabbix.ZabbixIconMapGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixIconMapGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixIconMapGetParameters.Search.get -> Community.Zabbix.ZabbixIconMapGetSearch!
 Community.Zabbix.ZabbixIconMapGetParameters.Search.set -> void
 Community.Zabbix.ZabbixIconMapGetParameters.SearchByAny.get -> bool?
@@ -9020,8 +8864,6 @@ Community.Zabbix.ZabbixImageGetParameters
 Community.Zabbix.ZabbixImageGetParameters.<Clone>$() -> Community.Zabbix.ZabbixImageGetParameters!
 Community.Zabbix.ZabbixImageGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixImageGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixImageGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixImageGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixImageGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixImageGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixImageGetParameters.Equals(Community.Zabbix.ZabbixImageGetParameters? other) -> bool
@@ -9037,8 +8879,6 @@ Community.Zabbix.ZabbixImageGetParameters.MapIds.get -> System.Collections.Gener
 Community.Zabbix.ZabbixImageGetParameters.MapIds.set -> void
 Community.Zabbix.ZabbixImageGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixImage!>?
 Community.Zabbix.ZabbixImageGetParameters.Output.set -> void
-Community.Zabbix.ZabbixImageGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixImageGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixImageGetParameters.Search.get -> Community.Zabbix.ZabbixImageGetSearch!
 Community.Zabbix.ZabbixImageGetParameters.Search.set -> void
 Community.Zabbix.ZabbixImageGetParameters.SearchByAny.get -> bool?
@@ -9526,8 +9366,6 @@ Community.Zabbix.ZabbixItemGetParameters
 Community.Zabbix.ZabbixItemGetParameters.<Clone>$() -> Community.Zabbix.ZabbixItemGetParameters!
 Community.Zabbix.ZabbixItemGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixItemGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixItemGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixItemGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixItemGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixItemGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixItemGetParameters.Equals(Community.Zabbix.ZabbixItemGetParameters? other) -> bool
@@ -9541,8 +9379,6 @@ Community.Zabbix.ZabbixItemGetParameters.GraphIds.get -> System.Collections.Gene
 Community.Zabbix.ZabbixItemGetParameters.GraphIds.set -> void
 Community.Zabbix.ZabbixItemGetParameters.Group.get -> string?
 Community.Zabbix.ZabbixItemGetParameters.Group.set -> void
-Community.Zabbix.ZabbixItemGetParameters.GroupCount.get -> bool?
-Community.Zabbix.ZabbixItemGetParameters.GroupCount.set -> void
 Community.Zabbix.ZabbixItemGetParameters.GroupIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixItemGetParameters.GroupIds.set -> void
 Community.Zabbix.ZabbixItemGetParameters.Host.get -> string?
@@ -9565,8 +9401,6 @@ Community.Zabbix.ZabbixItemGetParameters.Monitored.get -> bool?
 Community.Zabbix.ZabbixItemGetParameters.Monitored.set -> void
 Community.Zabbix.ZabbixItemGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixItem!>?
 Community.Zabbix.ZabbixItemGetParameters.Output.set -> void
-Community.Zabbix.ZabbixItemGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixItemGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixItemGetParameters.ProxyIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixItemGetParameters.ProxyIds.set -> void
 Community.Zabbix.ZabbixItemGetParameters.Search.get -> Community.Zabbix.ZabbixItemGetSearch!
@@ -10068,8 +9902,6 @@ Community.Zabbix.ZabbixItemPrototypeGetParameters
 Community.Zabbix.ZabbixItemPrototypeGetParameters.<Clone>$() -> Community.Zabbix.ZabbixItemPrototypeGetParameters!
 Community.Zabbix.ZabbixItemPrototypeGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixItemPrototypeGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixItemPrototypeGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixItemPrototypeGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixItemPrototypeGetParameters.DiscoveryIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixItemPrototypeGetParameters.DiscoveryIds.set -> void
 Community.Zabbix.ZabbixItemPrototypeGetParameters.Editable.get -> bool?
@@ -10081,8 +9913,6 @@ Community.Zabbix.ZabbixItemPrototypeGetParameters.Filter.get -> Community.Zabbix
 Community.Zabbix.ZabbixItemPrototypeGetParameters.Filter.set -> void
 Community.Zabbix.ZabbixItemPrototypeGetParameters.GraphIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixItemPrototypeGetParameters.GraphIds.set -> void
-Community.Zabbix.ZabbixItemPrototypeGetParameters.GroupCount.get -> bool?
-Community.Zabbix.ZabbixItemPrototypeGetParameters.GroupCount.set -> void
 Community.Zabbix.ZabbixItemPrototypeGetParameters.HostIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixItemPrototypeGetParameters.HostIds.set -> void
 Community.Zabbix.ZabbixItemPrototypeGetParameters.Inherited.get -> bool?
@@ -10097,8 +9927,6 @@ Community.Zabbix.ZabbixItemPrototypeGetParameters.Monitored.get -> bool?
 Community.Zabbix.ZabbixItemPrototypeGetParameters.Monitored.set -> void
 Community.Zabbix.ZabbixItemPrototypeGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixItemPrototype!>?
 Community.Zabbix.ZabbixItemPrototypeGetParameters.Output.set -> void
-Community.Zabbix.ZabbixItemPrototypeGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixItemPrototypeGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixItemPrototypeGetParameters.Search.get -> Community.Zabbix.ZabbixItemPrototypeGetSearch!
 Community.Zabbix.ZabbixItemPrototypeGetParameters.Search.set -> void
 Community.Zabbix.ZabbixItemPrototypeGetParameters.SearchByAny.get -> bool?
@@ -10941,8 +10769,6 @@ Community.Zabbix.ZabbixMaintenanceGetParameters
 Community.Zabbix.ZabbixMaintenanceGetParameters.<Clone>$() -> Community.Zabbix.ZabbixMaintenanceGetParameters!
 Community.Zabbix.ZabbixMaintenanceGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixMaintenanceGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixMaintenanceGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixMaintenanceGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixMaintenanceGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixMaintenanceGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixMaintenanceGetParameters.Equals(Community.Zabbix.ZabbixMaintenanceGetParameters? other) -> bool
@@ -10950,8 +10776,6 @@ Community.Zabbix.ZabbixMaintenanceGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixMaintenanceGetParameters.ExcludeSearch.set -> void
 Community.Zabbix.ZabbixMaintenanceGetParameters.Filter.get -> Community.Zabbix.ZabbixMaintenanceGetFilter!
 Community.Zabbix.ZabbixMaintenanceGetParameters.Filter.set -> void
-Community.Zabbix.ZabbixMaintenanceGetParameters.GroupCount.get -> bool?
-Community.Zabbix.ZabbixMaintenanceGetParameters.GroupCount.set -> void
 Community.Zabbix.ZabbixMaintenanceGetParameters.GroupIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixMaintenanceGetParameters.GroupIds.set -> void
 Community.Zabbix.ZabbixMaintenanceGetParameters.HostIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
@@ -10962,8 +10786,6 @@ Community.Zabbix.ZabbixMaintenanceGetParameters.MaintenanceIds.get -> System.Col
 Community.Zabbix.ZabbixMaintenanceGetParameters.MaintenanceIds.set -> void
 Community.Zabbix.ZabbixMaintenanceGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixMaintenanceRecord!>?
 Community.Zabbix.ZabbixMaintenanceGetParameters.Output.set -> void
-Community.Zabbix.ZabbixMaintenanceGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixMaintenanceGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixMaintenanceGetParameters.Search.get -> Community.Zabbix.ZabbixMaintenanceGetSearch!
 Community.Zabbix.ZabbixMaintenanceGetParameters.Search.set -> void
 Community.Zabbix.ZabbixMaintenanceGetParameters.SearchByAny.get -> bool?
@@ -11570,8 +11392,6 @@ Community.Zabbix.ZabbixMapGetParameters
 Community.Zabbix.ZabbixMapGetParameters.<Clone>$() -> Community.Zabbix.ZabbixMapGetParameters!
 Community.Zabbix.ZabbixMapGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixMapGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixMapGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixMapGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixMapGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixMapGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixMapGetParameters.Equals(Community.Zabbix.ZabbixMapGetParameters? other) -> bool
@@ -11587,8 +11407,6 @@ Community.Zabbix.ZabbixMapGetParameters.MapIds.get -> System.Collections.Generic
 Community.Zabbix.ZabbixMapGetParameters.MapIds.set -> void
 Community.Zabbix.ZabbixMapGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixMap!>?
 Community.Zabbix.ZabbixMapGetParameters.Output.set -> void
-Community.Zabbix.ZabbixMapGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixMapGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixMapGetParameters.Search.get -> Community.Zabbix.ZabbixMapGetSearch!
 Community.Zabbix.ZabbixMapGetParameters.Search.set -> void
 Community.Zabbix.ZabbixMapGetParameters.SearchByAny.get -> bool?
@@ -12386,8 +12204,6 @@ Community.Zabbix.ZabbixMediaTypeGetParameters
 Community.Zabbix.ZabbixMediaTypeGetParameters.<Clone>$() -> Community.Zabbix.ZabbixMediaTypeGetParameters!
 Community.Zabbix.ZabbixMediaTypeGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixMediaTypeGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixMediaTypeGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixMediaTypeGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixMediaTypeGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixMediaTypeGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixMediaTypeGetParameters.Equals(Community.Zabbix.ZabbixMediaTypeGetParameters? other) -> bool
@@ -12395,8 +12211,6 @@ Community.Zabbix.ZabbixMediaTypeGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixMediaTypeGetParameters.ExcludeSearch.set -> void
 Community.Zabbix.ZabbixMediaTypeGetParameters.Filter.get -> Community.Zabbix.ZabbixMediaTypeGetFilter!
 Community.Zabbix.ZabbixMediaTypeGetParameters.Filter.set -> void
-Community.Zabbix.ZabbixMediaTypeGetParameters.GroupCount.get -> bool?
-Community.Zabbix.ZabbixMediaTypeGetParameters.GroupCount.set -> void
 Community.Zabbix.ZabbixMediaTypeGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixMediaTypeGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixMediaTypeGetParameters.MediaIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
@@ -12405,8 +12219,6 @@ Community.Zabbix.ZabbixMediaTypeGetParameters.MediaTypeIds.get -> System.Collect
 Community.Zabbix.ZabbixMediaTypeGetParameters.MediaTypeIds.set -> void
 Community.Zabbix.ZabbixMediaTypeGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixMediaType!>?
 Community.Zabbix.ZabbixMediaTypeGetParameters.Output.set -> void
-Community.Zabbix.ZabbixMediaTypeGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixMediaTypeGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixMediaTypeGetParameters.Search.get -> Community.Zabbix.ZabbixMediaTypeGetSearch!
 Community.Zabbix.ZabbixMediaTypeGetParameters.Search.set -> void
 Community.Zabbix.ZabbixMediaTypeGetParameters.SearchByAny.get -> bool?
@@ -12649,8 +12461,6 @@ Community.Zabbix.ZabbixMfaGetParameters
 Community.Zabbix.ZabbixMfaGetParameters.<Clone>$() -> Community.Zabbix.ZabbixMfaGetParameters!
 Community.Zabbix.ZabbixMfaGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixMfaGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixMfaGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixMfaGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixMfaGetParameters.Equals(Community.Zabbix.ZabbixMfaGetParameters? other) -> bool
 Community.Zabbix.ZabbixMfaGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixMfaGetParameters.ExcludeSearch.set -> void
@@ -12662,8 +12472,6 @@ Community.Zabbix.ZabbixMfaGetParameters.MfaIds.get -> System.Collections.Generic
 Community.Zabbix.ZabbixMfaGetParameters.MfaIds.set -> void
 Community.Zabbix.ZabbixMfaGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixMfaRecord!>?
 Community.Zabbix.ZabbixMfaGetParameters.Output.set -> void
-Community.Zabbix.ZabbixMfaGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixMfaGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixMfaGetParameters.Search.get -> Community.Zabbix.ZabbixMfaGetSearch!
 Community.Zabbix.ZabbixMfaGetParameters.Search.set -> void
 Community.Zabbix.ZabbixMfaGetParameters.SearchByAny.get -> bool?
@@ -12803,8 +12611,6 @@ Community.Zabbix.ZabbixModuleGetParameters
 Community.Zabbix.ZabbixModuleGetParameters.<Clone>$() -> Community.Zabbix.ZabbixModuleGetParameters!
 Community.Zabbix.ZabbixModuleGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixModuleGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixModuleGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixModuleGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixModuleGetParameters.Equals(Community.Zabbix.ZabbixModuleGetParameters? other) -> bool
 Community.Zabbix.ZabbixModuleGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixModuleGetParameters.ExcludeSearch.set -> void
@@ -12816,8 +12622,6 @@ Community.Zabbix.ZabbixModuleGetParameters.ModuleIds.get -> System.Collections.G
 Community.Zabbix.ZabbixModuleGetParameters.ModuleIds.set -> void
 Community.Zabbix.ZabbixModuleGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixModule!>?
 Community.Zabbix.ZabbixModuleGetParameters.Output.set -> void
-Community.Zabbix.ZabbixModuleGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixModuleGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixModuleGetParameters.Search.get -> Community.Zabbix.ZabbixModuleGetSearch!
 Community.Zabbix.ZabbixModuleGetParameters.Search.set -> void
 Community.Zabbix.ZabbixModuleGetParameters.SearchByAny.get -> bool?
@@ -12935,8 +12739,6 @@ Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters
 Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.<Clone>$() -> Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters!
 Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.DiscoveredServiceIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.DiscoveredServiceIds.set -> void
 Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.Editable.get -> bool?
@@ -12946,8 +12748,6 @@ Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.ExcludeSearch.get -> b
 Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.ExcludeSearch.set -> void
 Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.Filter.get -> Community.Zabbix.ZabbixNetworkDiscoveryCheckGetFilter!
 Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.Filter.set -> void
-Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.GroupCount.get -> bool?
-Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.GroupCount.set -> void
 Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.LimitSelects.get -> int?
@@ -12958,8 +12758,6 @@ Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.NetworkDiscoveryRuleId
 Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.NetworkDiscoveryRuleIds.set -> void
 Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixNetworkDiscoveryCheck!>?
 Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.Output.set -> void
-Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.Search.get -> Community.Zabbix.ZabbixNetworkDiscoveryCheckGetSearch!
 Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.Search.set -> void
 Community.Zabbix.ZabbixNetworkDiscoveryCheckGetParameters.SearchByAny.get -> bool?
@@ -13108,8 +12906,6 @@ Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters
 Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.<Clone>$() -> Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters!
 Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.DiscoveredHostIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.DiscoveredHostIds.set -> void
 Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.DiscoveredServiceIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
@@ -13121,8 +12917,6 @@ Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.ExcludeSearch.get -> bo
 Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.ExcludeSearch.set -> void
 Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.Filter.get -> Community.Zabbix.ZabbixNetworkDiscoveryRuleGetFilter!
 Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.Filter.set -> void
-Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.GroupCount.get -> bool?
-Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.GroupCount.set -> void
 Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.LimitSelects.get -> int?
@@ -13131,8 +12925,6 @@ Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.NetworkDiscoveryRuleIds
 Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.NetworkDiscoveryRuleIds.set -> void
 Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixNetworkDiscoveryRule!>?
 Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.Output.set -> void
-Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.Search.get -> Community.Zabbix.ZabbixNetworkDiscoveryRuleGetSearch!
 Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.Search.set -> void
 Community.Zabbix.ZabbixNetworkDiscoveryRuleGetParameters.SearchByAny.get -> bool?
@@ -13409,8 +13201,6 @@ Community.Zabbix.ZabbixProblemGetParameters.ActionUserIds.get -> System.Collecti
 Community.Zabbix.ZabbixProblemGetParameters.ActionUserIds.set -> void
 Community.Zabbix.ZabbixProblemGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixProblemGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixProblemGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixProblemGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixProblemGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixProblemGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixProblemGetParameters.Equals(Community.Zabbix.ZabbixProblemGetParameters? other) -> bool
@@ -13418,8 +13208,6 @@ Community.Zabbix.ZabbixProblemGetParameters.EvalType.get -> Community.Zabbix.Zab
 Community.Zabbix.ZabbixProblemGetParameters.EvalType.set -> void
 Community.Zabbix.ZabbixProblemGetParameters.EventIdFrom.get -> ulong?
 Community.Zabbix.ZabbixProblemGetParameters.EventIdFrom.set -> void
-Community.Zabbix.ZabbixProblemGetParameters.EventIdTill.get -> ulong?
-Community.Zabbix.ZabbixProblemGetParameters.EventIdTill.set -> void
 Community.Zabbix.ZabbixProblemGetParameters.EventIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixProblemGetParameters.EventIds.set -> void
 Community.Zabbix.ZabbixProblemGetParameters.ExcludeSearch.get -> bool?
@@ -13438,8 +13226,6 @@ Community.Zabbix.ZabbixProblemGetParameters.ObjectType.get -> Community.Zabbix.Z
 Community.Zabbix.ZabbixProblemGetParameters.ObjectType.set -> void
 Community.Zabbix.ZabbixProblemGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixProblem!>?
 Community.Zabbix.ZabbixProblemGetParameters.Output.set -> void
-Community.Zabbix.ZabbixProblemGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixProblemGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixProblemGetParameters.Recent.get -> bool?
 Community.Zabbix.ZabbixProblemGetParameters.Recent.set -> void
 Community.Zabbix.ZabbixProblemGetParameters.Search.get -> Community.Zabbix.ZabbixProblemGetSearch!
@@ -13470,8 +13256,6 @@ Community.Zabbix.ZabbixProblemGetParameters.Tags.get -> System.Collections.Gener
 Community.Zabbix.ZabbixProblemGetParameters.Tags.set -> void
 Community.Zabbix.ZabbixProblemGetParameters.TimeFrom.get -> System.DateTimeOffset?
 Community.Zabbix.ZabbixProblemGetParameters.TimeFrom.set -> void
-Community.Zabbix.ZabbixProblemGetParameters.TimeTill.get -> System.DateTimeOffset?
-Community.Zabbix.ZabbixProblemGetParameters.TimeTill.set -> void
 Community.Zabbix.ZabbixProblemGetParameters.ZabbixProblemGetParameters() -> void
 Community.Zabbix.ZabbixProblemGetSearch
 Community.Zabbix.ZabbixProblemGetSearch.Equals(Community.Zabbix.ZabbixProblemGetSearch? other) -> bool
@@ -13806,8 +13590,6 @@ Community.Zabbix.ZabbixProxyGetParameters
 Community.Zabbix.ZabbixProxyGetParameters.<Clone>$() -> Community.Zabbix.ZabbixProxyGetParameters!
 Community.Zabbix.ZabbixProxyGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixProxyGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixProxyGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixProxyGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixProxyGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixProxyGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixProxyGetParameters.Equals(Community.Zabbix.ZabbixProxyGetParameters? other) -> bool
@@ -13819,8 +13601,6 @@ Community.Zabbix.ZabbixProxyGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixProxyGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixProxyGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixProxy!>?
 Community.Zabbix.ZabbixProxyGetParameters.Output.set -> void
-Community.Zabbix.ZabbixProxyGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixProxyGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixProxyGetParameters.ProxyGroupIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixProxyGetParameters.ProxyGroupIds.set -> void
 Community.Zabbix.ZabbixProxyGetParameters.ProxyIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
@@ -13940,8 +13720,6 @@ Community.Zabbix.ZabbixProxyGroupGetParameters
 Community.Zabbix.ZabbixProxyGroupGetParameters.<Clone>$() -> Community.Zabbix.ZabbixProxyGroupGetParameters!
 Community.Zabbix.ZabbixProxyGroupGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixProxyGroupGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixProxyGroupGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixProxyGroupGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixProxyGroupGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixProxyGroupGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixProxyGroupGetParameters.Equals(Community.Zabbix.ZabbixProxyGroupGetParameters? other) -> bool
@@ -13953,8 +13731,6 @@ Community.Zabbix.ZabbixProxyGroupGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixProxyGroupGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixProxyGroupGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixProxyGroup!>?
 Community.Zabbix.ZabbixProxyGroupGetParameters.Output.set -> void
-Community.Zabbix.ZabbixProxyGroupGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixProxyGroupGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixProxyGroupGetParameters.ProxyGroupIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixProxyGroupGetParameters.ProxyGroupIds.set -> void
 Community.Zabbix.ZabbixProxyGroupGetParameters.ProxyIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
@@ -14169,8 +13945,6 @@ Community.Zabbix.ZabbixRegExpGetParameters
 Community.Zabbix.ZabbixRegExpGetParameters.<Clone>$() -> Community.Zabbix.ZabbixRegExpGetParameters!
 Community.Zabbix.ZabbixRegExpGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixRegExpGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixRegExpGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixRegExpGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixRegExpGetParameters.Equals(Community.Zabbix.ZabbixRegExpGetParameters? other) -> bool
 Community.Zabbix.ZabbixRegExpGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixRegExpGetParameters.ExcludeSearch.set -> void
@@ -14180,8 +13954,6 @@ Community.Zabbix.ZabbixRegExpGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixRegExpGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixRegExpGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixRegExp!>?
 Community.Zabbix.ZabbixRegExpGetParameters.Output.set -> void
-Community.Zabbix.ZabbixRegExpGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixRegExpGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixRegExpGetParameters.RegExpIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixRegExpGetParameters.RegExpIds.set -> void
 Community.Zabbix.ZabbixRegExpGetParameters.Search.get -> Community.Zabbix.ZabbixRegExpGetSearch!
@@ -14329,8 +14101,6 @@ Community.Zabbix.ZabbixReportGetParameters
 Community.Zabbix.ZabbixReportGetParameters.<Clone>$() -> Community.Zabbix.ZabbixReportGetParameters!
 Community.Zabbix.ZabbixReportGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixReportGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixReportGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixReportGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixReportGetParameters.Equals(Community.Zabbix.ZabbixReportGetParameters? other) -> bool
 Community.Zabbix.ZabbixReportGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixReportGetParameters.ExcludeSearch.set -> void
@@ -14342,8 +14112,6 @@ Community.Zabbix.ZabbixReportGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixReportGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixReportGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixReport!>?
 Community.Zabbix.ZabbixReportGetParameters.Output.set -> void
-Community.Zabbix.ZabbixReportGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixReportGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixReportGetParameters.ReportIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixReportGetParameters.ReportIds.set -> void
 Community.Zabbix.ZabbixReportGetParameters.Search.get -> Community.Zabbix.ZabbixReportGetSearch!
@@ -14506,8 +14274,6 @@ Community.Zabbix.ZabbixRoleGetParameters
 Community.Zabbix.ZabbixRoleGetParameters.<Clone>$() -> Community.Zabbix.ZabbixRoleGetParameters!
 Community.Zabbix.ZabbixRoleGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixRoleGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixRoleGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixRoleGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixRoleGetParameters.Current.get -> bool?
 Community.Zabbix.ZabbixRoleGetParameters.Current.set -> void
 Community.Zabbix.ZabbixRoleGetParameters.Editable.get -> bool?
@@ -14521,8 +14287,6 @@ Community.Zabbix.ZabbixRoleGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixRoleGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixRoleGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixRole!>?
 Community.Zabbix.ZabbixRoleGetParameters.Output.set -> void
-Community.Zabbix.ZabbixRoleGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixRoleGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixRoleGetParameters.RoleIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixRoleGetParameters.RoleIds.set -> void
 Community.Zabbix.ZabbixRoleGetParameters.Search.get -> Community.Zabbix.ZabbixRoleGetSearch!
@@ -14884,8 +14648,6 @@ Community.Zabbix.ZabbixScriptGetParameters
 Community.Zabbix.ZabbixScriptGetParameters.<Clone>$() -> Community.Zabbix.ZabbixScriptGetParameters!
 Community.Zabbix.ZabbixScriptGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixScriptGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixScriptGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixScriptGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixScriptGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixScriptGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixScriptGetParameters.Equals(Community.Zabbix.ZabbixScriptGetParameters? other) -> bool
@@ -14901,8 +14663,6 @@ Community.Zabbix.ZabbixScriptGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixScriptGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixScriptGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixScript!>?
 Community.Zabbix.ZabbixScriptGetParameters.Output.set -> void
-Community.Zabbix.ZabbixScriptGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixScriptGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixScriptGetParameters.ScriptIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixScriptGetParameters.ScriptIds.set -> void
 Community.Zabbix.ZabbixScriptGetParameters.Search.get -> Community.Zabbix.ZabbixScriptGetSearch!
@@ -15161,8 +14921,6 @@ Community.Zabbix.ZabbixServiceGetParameters.AdditionalFields.get -> System.Colle
 Community.Zabbix.ZabbixServiceGetParameters.AdditionalFields.set -> void
 Community.Zabbix.ZabbixServiceGetParameters.ChildIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixServiceGetParameters.ChildIds.set -> void
-Community.Zabbix.ZabbixServiceGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixServiceGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixServiceGetParameters.DeepParentIds.get -> bool?
 Community.Zabbix.ZabbixServiceGetParameters.DeepParentIds.set -> void
 Community.Zabbix.ZabbixServiceGetParameters.Editable.get -> bool?
@@ -15180,8 +14938,6 @@ Community.Zabbix.ZabbixServiceGetParameters.Output.get -> Community.Zabbix.Zabbi
 Community.Zabbix.ZabbixServiceGetParameters.Output.set -> void
 Community.Zabbix.ZabbixServiceGetParameters.ParentIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixServiceGetParameters.ParentIds.set -> void
-Community.Zabbix.ZabbixServiceGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixServiceGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixServiceGetParameters.ProblemTags.get -> System.Collections.Generic.IReadOnlyList<Community.Zabbix.ZabbixTagFilter!>?
 Community.Zabbix.ZabbixServiceGetParameters.ProblemTags.set -> void
 Community.Zabbix.ZabbixServiceGetParameters.Search.get -> Community.Zabbix.ZabbixServiceGetSearch!
@@ -15830,8 +15586,6 @@ Community.Zabbix.ZabbixSlaGetParameters
 Community.Zabbix.ZabbixSlaGetParameters.<Clone>$() -> Community.Zabbix.ZabbixSlaGetParameters!
 Community.Zabbix.ZabbixSlaGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixSlaGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixSlaGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixSlaGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixSlaGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixSlaGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixSlaGetParameters.Equals(Community.Zabbix.ZabbixSlaGetParameters? other) -> bool
@@ -15845,8 +15599,6 @@ Community.Zabbix.ZabbixSlaGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixSlaGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixSlaGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixSlaRecord!>?
 Community.Zabbix.ZabbixSlaGetParameters.Output.set -> void
-Community.Zabbix.ZabbixSlaGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixSlaGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixSlaGetParameters.Search.get -> Community.Zabbix.ZabbixSlaGetSearch!
 Community.Zabbix.ZabbixSlaGetParameters.Search.set -> void
 Community.Zabbix.ZabbixSlaGetParameters.SearchByAny.get -> bool?
@@ -16129,8 +15881,6 @@ Community.Zabbix.ZabbixTaskGetParameters.AdditionalFields.set -> void
 Community.Zabbix.ZabbixTaskGetParameters.Equals(Community.Zabbix.ZabbixTaskGetParameters? other) -> bool
 Community.Zabbix.ZabbixTaskGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixTaskRecord!>?
 Community.Zabbix.ZabbixTaskGetParameters.Output.set -> void
-Community.Zabbix.ZabbixTaskGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixTaskGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixTaskGetParameters.TaskIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixTaskGetParameters.TaskIds.set -> void
 Community.Zabbix.ZabbixTaskGetParameters.ZabbixTaskGetParameters() -> void
@@ -16485,8 +16235,6 @@ Community.Zabbix.ZabbixTemplateDashboardGetParameters
 Community.Zabbix.ZabbixTemplateDashboardGetParameters.<Clone>$() -> Community.Zabbix.ZabbixTemplateDashboardGetParameters!
 Community.Zabbix.ZabbixTemplateDashboardGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixTemplateDashboardGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixTemplateDashboardGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixTemplateDashboardGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixTemplateDashboardGetParameters.DashboardIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixTemplateDashboardGetParameters.DashboardIds.set -> void
 Community.Zabbix.ZabbixTemplateDashboardGetParameters.Editable.get -> bool?
@@ -16496,14 +16244,10 @@ Community.Zabbix.ZabbixTemplateDashboardGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixTemplateDashboardGetParameters.ExcludeSearch.set -> void
 Community.Zabbix.ZabbixTemplateDashboardGetParameters.Filter.get -> Community.Zabbix.ZabbixTemplateDashboardGetFilter!
 Community.Zabbix.ZabbixTemplateDashboardGetParameters.Filter.set -> void
-Community.Zabbix.ZabbixTemplateDashboardGetParameters.GroupCount.get -> bool?
-Community.Zabbix.ZabbixTemplateDashboardGetParameters.GroupCount.set -> void
 Community.Zabbix.ZabbixTemplateDashboardGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixTemplateDashboardGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixTemplateDashboardGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixTemplateDashboard!>?
 Community.Zabbix.ZabbixTemplateDashboardGetParameters.Output.set -> void
-Community.Zabbix.ZabbixTemplateDashboardGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixTemplateDashboardGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixTemplateDashboardGetParameters.Search.get -> Community.Zabbix.ZabbixTemplateDashboardGetSearch!
 Community.Zabbix.ZabbixTemplateDashboardGetParameters.Search.set -> void
 Community.Zabbix.ZabbixTemplateDashboardGetParameters.SearchByAny.get -> bool?
@@ -16696,8 +16440,6 @@ Community.Zabbix.ZabbixTemplateGetParameters
 Community.Zabbix.ZabbixTemplateGetParameters.<Clone>$() -> Community.Zabbix.ZabbixTemplateGetParameters!
 Community.Zabbix.ZabbixTemplateGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixTemplateGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixTemplateGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixTemplateGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixTemplateGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixTemplateGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixTemplateGetParameters.Equals(Community.Zabbix.ZabbixTemplateGetParameters? other) -> bool
@@ -16709,8 +16451,6 @@ Community.Zabbix.ZabbixTemplateGetParameters.Filter.get -> Community.Zabbix.Zabb
 Community.Zabbix.ZabbixTemplateGetParameters.Filter.set -> void
 Community.Zabbix.ZabbixTemplateGetParameters.GraphIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixTemplateGetParameters.GraphIds.set -> void
-Community.Zabbix.ZabbixTemplateGetParameters.GroupCount.get -> bool?
-Community.Zabbix.ZabbixTemplateGetParameters.GroupCount.set -> void
 Community.Zabbix.ZabbixTemplateGetParameters.GroupIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixTemplateGetParameters.GroupIds.set -> void
 Community.Zabbix.ZabbixTemplateGetParameters.HostIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
@@ -16727,8 +16467,6 @@ Community.Zabbix.ZabbixTemplateGetParameters.Output.get -> Community.Zabbix.Zabb
 Community.Zabbix.ZabbixTemplateGetParameters.Output.set -> void
 Community.Zabbix.ZabbixTemplateGetParameters.ParentTemplateIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixTemplateGetParameters.ParentTemplateIds.set -> void
-Community.Zabbix.ZabbixTemplateGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixTemplateGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixTemplateGetParameters.Search.get -> Community.Zabbix.ZabbixTemplateGetSearch!
 Community.Zabbix.ZabbixTemplateGetParameters.Search.set -> void
 Community.Zabbix.ZabbixTemplateGetParameters.SearchByAny.get -> bool?
@@ -16842,8 +16580,6 @@ Community.Zabbix.ZabbixTemplateGroupGetParameters
 Community.Zabbix.ZabbixTemplateGroupGetParameters.<Clone>$() -> Community.Zabbix.ZabbixTemplateGroupGetParameters!
 Community.Zabbix.ZabbixTemplateGroupGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixTemplateGroupGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixTemplateGroupGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixTemplateGroupGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixTemplateGroupGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixTemplateGroupGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixTemplateGroupGetParameters.Equals(Community.Zabbix.ZabbixTemplateGroupGetParameters? other) -> bool
@@ -16861,8 +16597,6 @@ Community.Zabbix.ZabbixTemplateGroupGetParameters.LimitSelects.get -> int?
 Community.Zabbix.ZabbixTemplateGroupGetParameters.LimitSelects.set -> void
 Community.Zabbix.ZabbixTemplateGroupGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixTemplateGroup!>?
 Community.Zabbix.ZabbixTemplateGroupGetParameters.Output.set -> void
-Community.Zabbix.ZabbixTemplateGroupGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixTemplateGroupGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixTemplateGroupGetParameters.Search.get -> Community.Zabbix.ZabbixTemplateGroupGetSearch!
 Community.Zabbix.ZabbixTemplateGroupGetParameters.Search.set -> void
 Community.Zabbix.ZabbixTemplateGroupGetParameters.SearchByAny.get -> bool?
@@ -17399,8 +17133,6 @@ Community.Zabbix.ZabbixTokenGetParameters
 Community.Zabbix.ZabbixTokenGetParameters.<Clone>$() -> Community.Zabbix.ZabbixTokenGetParameters!
 Community.Zabbix.ZabbixTokenGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixTokenGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixTokenGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixTokenGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixTokenGetParameters.Equals(Community.Zabbix.ZabbixTokenGetParameters? other) -> bool
 Community.Zabbix.ZabbixTokenGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixTokenGetParameters.ExcludeSearch.set -> void
@@ -17412,8 +17144,6 @@ Community.Zabbix.ZabbixTokenGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixTokenGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixTokenGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixToken!>?
 Community.Zabbix.ZabbixTokenGetParameters.Output.set -> void
-Community.Zabbix.ZabbixTokenGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixTokenGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixTokenGetParameters.Search.get -> Community.Zabbix.ZabbixTokenGetSearch!
 Community.Zabbix.ZabbixTokenGetParameters.Search.set -> void
 Community.Zabbix.ZabbixTokenGetParameters.SearchByAny.get -> bool?
@@ -17462,8 +17192,6 @@ Community.Zabbix.ZabbixTrendGetParameters
 Community.Zabbix.ZabbixTrendGetParameters.<Clone>$() -> Community.Zabbix.ZabbixTrendGetParameters!
 Community.Zabbix.ZabbixTrendGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixTrendGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixTrendGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixTrendGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixTrendGetParameters.Equals(Community.Zabbix.ZabbixTrendGetParameters? other) -> bool
 Community.Zabbix.ZabbixTrendGetParameters.ItemIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixTrendGetParameters.ItemIds.set -> void
@@ -17473,8 +17201,6 @@ Community.Zabbix.ZabbixTrendGetParameters.Output.get -> Community.Zabbix.ZabbixO
 Community.Zabbix.ZabbixTrendGetParameters.Output.set -> void
 Community.Zabbix.ZabbixTrendGetParameters.TimeFrom.get -> System.DateTimeOffset?
 Community.Zabbix.ZabbixTrendGetParameters.TimeFrom.set -> void
-Community.Zabbix.ZabbixTrendGetParameters.TimeTill.get -> System.DateTimeOffset?
-Community.Zabbix.ZabbixTrendGetParameters.TimeTill.set -> void
 Community.Zabbix.ZabbixTrendGetParameters.ZabbixTrendGetParameters() -> void
 Community.Zabbix.ZabbixTrendRecord
 Community.Zabbix.ZabbixTrendRecord.<Clone>$() -> Community.Zabbix.ZabbixTrendRecord!
@@ -17724,8 +17450,6 @@ Community.Zabbix.ZabbixTriggerGetParameters.Active.get -> bool?
 Community.Zabbix.ZabbixTriggerGetParameters.Active.set -> void
 Community.Zabbix.ZabbixTriggerGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixTriggerGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixTriggerGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixTriggerGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixTriggerGetParameters.Dependent.get -> bool?
 Community.Zabbix.ZabbixTriggerGetParameters.Dependent.set -> void
 Community.Zabbix.ZabbixTriggerGetParameters.Editable.get -> bool?
@@ -17747,8 +17471,6 @@ Community.Zabbix.ZabbixTriggerGetParameters.Functions.get -> System.Collections.
 Community.Zabbix.ZabbixTriggerGetParameters.Functions.set -> void
 Community.Zabbix.ZabbixTriggerGetParameters.Group.get -> string?
 Community.Zabbix.ZabbixTriggerGetParameters.Group.set -> void
-Community.Zabbix.ZabbixTriggerGetParameters.GroupCount.get -> bool?
-Community.Zabbix.ZabbixTriggerGetParameters.GroupCount.set -> void
 Community.Zabbix.ZabbixTriggerGetParameters.GroupIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixTriggerGetParameters.GroupIds.set -> void
 Community.Zabbix.ZabbixTriggerGetParameters.Host.get -> string?
@@ -17781,8 +17503,6 @@ Community.Zabbix.ZabbixTriggerGetParameters.OnlyTrue.get -> bool?
 Community.Zabbix.ZabbixTriggerGetParameters.OnlyTrue.set -> void
 Community.Zabbix.ZabbixTriggerGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixTrigger!>?
 Community.Zabbix.ZabbixTriggerGetParameters.Output.set -> void
-Community.Zabbix.ZabbixTriggerGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixTriggerGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixTriggerGetParameters.Search.get -> Community.Zabbix.ZabbixTriggerGetSearch!
 Community.Zabbix.ZabbixTriggerGetParameters.Search.set -> void
 Community.Zabbix.ZabbixTriggerGetParameters.SearchByAny.get -> bool?
@@ -18076,8 +17796,6 @@ Community.Zabbix.ZabbixTriggerPrototypeGetParameters.Active.get -> bool?
 Community.Zabbix.ZabbixTriggerPrototypeGetParameters.Active.set -> void
 Community.Zabbix.ZabbixTriggerPrototypeGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixTriggerPrototypeGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixTriggerPrototypeGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixTriggerPrototypeGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixTriggerPrototypeGetParameters.DiscoveryIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixTriggerPrototypeGetParameters.DiscoveryIds.set -> void
 Community.Zabbix.ZabbixTriggerPrototypeGetParameters.Editable.get -> bool?
@@ -18093,8 +17811,6 @@ Community.Zabbix.ZabbixTriggerPrototypeGetParameters.Functions.get -> System.Col
 Community.Zabbix.ZabbixTriggerPrototypeGetParameters.Functions.set -> void
 Community.Zabbix.ZabbixTriggerPrototypeGetParameters.Group.get -> string?
 Community.Zabbix.ZabbixTriggerPrototypeGetParameters.Group.set -> void
-Community.Zabbix.ZabbixTriggerPrototypeGetParameters.GroupCount.get -> bool?
-Community.Zabbix.ZabbixTriggerPrototypeGetParameters.GroupCount.set -> void
 Community.Zabbix.ZabbixTriggerPrototypeGetParameters.GroupIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixTriggerPrototypeGetParameters.GroupIds.set -> void
 Community.Zabbix.ZabbixTriggerPrototypeGetParameters.Host.get -> string?
@@ -18117,8 +17833,6 @@ Community.Zabbix.ZabbixTriggerPrototypeGetParameters.Monitored.get -> bool?
 Community.Zabbix.ZabbixTriggerPrototypeGetParameters.Monitored.set -> void
 Community.Zabbix.ZabbixTriggerPrototypeGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixTriggerPrototype!>?
 Community.Zabbix.ZabbixTriggerPrototypeGetParameters.Output.set -> void
-Community.Zabbix.ZabbixTriggerPrototypeGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixTriggerPrototypeGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixTriggerPrototypeGetParameters.Search.get -> Community.Zabbix.ZabbixTriggerPrototypeGetSearch!
 Community.Zabbix.ZabbixTriggerPrototypeGetParameters.Search.set -> void
 Community.Zabbix.ZabbixTriggerPrototypeGetParameters.SearchByAny.get -> bool?
@@ -18580,8 +18294,6 @@ Community.Zabbix.ZabbixUserDirectoryGetParameters
 Community.Zabbix.ZabbixUserDirectoryGetParameters.<Clone>$() -> Community.Zabbix.ZabbixUserDirectoryGetParameters!
 Community.Zabbix.ZabbixUserDirectoryGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixUserDirectoryGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixUserDirectoryGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixUserDirectoryGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixUserDirectoryGetParameters.Equals(Community.Zabbix.ZabbixUserDirectoryGetParameters? other) -> bool
 Community.Zabbix.ZabbixUserDirectoryGetParameters.ExcludeSearch.get -> bool?
 Community.Zabbix.ZabbixUserDirectoryGetParameters.ExcludeSearch.set -> void
@@ -18591,8 +18303,6 @@ Community.Zabbix.ZabbixUserDirectoryGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixUserDirectoryGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixUserDirectoryGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixUserDirectory!>?
 Community.Zabbix.ZabbixUserDirectoryGetParameters.Output.set -> void
-Community.Zabbix.ZabbixUserDirectoryGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixUserDirectoryGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixUserDirectoryGetParameters.Search.get -> Community.Zabbix.ZabbixUserDirectoryGetSearch!
 Community.Zabbix.ZabbixUserDirectoryGetParameters.Search.set -> void
 Community.Zabbix.ZabbixUserDirectoryGetParameters.SearchByAny.get -> bool?
@@ -18960,8 +18670,6 @@ Community.Zabbix.ZabbixUserGetParameters
 Community.Zabbix.ZabbixUserGetParameters.<Clone>$() -> Community.Zabbix.ZabbixUserGetParameters!
 Community.Zabbix.ZabbixUserGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixUserGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixUserGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixUserGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixUserGetParameters.Current.get -> bool?
 Community.Zabbix.ZabbixUserGetParameters.Current.set -> void
 Community.Zabbix.ZabbixUserGetParameters.Editable.get -> bool?
@@ -18981,8 +18689,6 @@ Community.Zabbix.ZabbixUserGetParameters.MediaTypeIds.get -> System.Collections.
 Community.Zabbix.ZabbixUserGetParameters.MediaTypeIds.set -> void
 Community.Zabbix.ZabbixUserGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixUser!>?
 Community.Zabbix.ZabbixUserGetParameters.Output.set -> void
-Community.Zabbix.ZabbixUserGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixUserGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixUserGetParameters.Search.get -> Community.Zabbix.ZabbixUserGetSearch!
 Community.Zabbix.ZabbixUserGetParameters.Search.set -> void
 Community.Zabbix.ZabbixUserGetParameters.SearchByAny.get -> bool?
@@ -19140,8 +18846,6 @@ Community.Zabbix.ZabbixUserGroupGetParameters
 Community.Zabbix.ZabbixUserGroupGetParameters.<Clone>$() -> Community.Zabbix.ZabbixUserGroupGetParameters!
 Community.Zabbix.ZabbixUserGroupGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixUserGroupGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixUserGroupGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixUserGroupGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixUserGroupGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixUserGroupGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixUserGroupGetParameters.Equals(Community.Zabbix.ZabbixUserGroupGetParameters? other) -> bool
@@ -19157,8 +18861,6 @@ Community.Zabbix.ZabbixUserGroupGetParameters.MfaStatus.get -> bool?
 Community.Zabbix.ZabbixUserGroupGetParameters.MfaStatus.set -> void
 Community.Zabbix.ZabbixUserGroupGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixUserGroup!>?
 Community.Zabbix.ZabbixUserGroupGetParameters.Output.set -> void
-Community.Zabbix.ZabbixUserGroupGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixUserGroupGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixUserGroupGetParameters.ProxyGroupIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
 Community.Zabbix.ZabbixUserGroupGetParameters.ProxyGroupIds.set -> void
 Community.Zabbix.ZabbixUserGroupGetParameters.ProxyIds.get -> System.Collections.Generic.IReadOnlyList<ulong>?
@@ -19516,8 +19218,6 @@ Community.Zabbix.ZabbixUserMacroGetParameters
 Community.Zabbix.ZabbixUserMacroGetParameters.<Clone>$() -> Community.Zabbix.ZabbixUserMacroGetParameters!
 Community.Zabbix.ZabbixUserMacroGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixUserMacroGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixUserMacroGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixUserMacroGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixUserMacroGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixUserMacroGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixUserMacroGetParameters.Equals(Community.Zabbix.ZabbixUserMacroGetParameters? other) -> bool
@@ -19541,8 +19241,6 @@ Community.Zabbix.ZabbixUserMacroGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixUserMacroGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixUserMacroGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixUserMacro!>?
 Community.Zabbix.ZabbixUserMacroGetParameters.Output.set -> void
-Community.Zabbix.ZabbixUserMacroGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixUserMacroGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixUserMacroGetParameters.Search.get -> Community.Zabbix.ZabbixUserMacroGetSearch!
 Community.Zabbix.ZabbixUserMacroGetParameters.Search.set -> void
 Community.Zabbix.ZabbixUserMacroGetParameters.SearchByAny.get -> bool?
@@ -19753,8 +19451,6 @@ Community.Zabbix.ZabbixValueMapGetParameters
 Community.Zabbix.ZabbixValueMapGetParameters.<Clone>$() -> Community.Zabbix.ZabbixValueMapGetParameters!
 Community.Zabbix.ZabbixValueMapGetParameters.AdditionalFields.get -> System.Collections.Generic.IDictionary<string!, System.Text.Json.JsonElement>?
 Community.Zabbix.ZabbixValueMapGetParameters.AdditionalFields.set -> void
-Community.Zabbix.ZabbixValueMapGetParameters.CountOutput.get -> bool?
-Community.Zabbix.ZabbixValueMapGetParameters.CountOutput.set -> void
 Community.Zabbix.ZabbixValueMapGetParameters.Editable.get -> bool?
 Community.Zabbix.ZabbixValueMapGetParameters.Editable.set -> void
 Community.Zabbix.ZabbixValueMapGetParameters.Equals(Community.Zabbix.ZabbixValueMapGetParameters? other) -> bool
@@ -19768,8 +19464,6 @@ Community.Zabbix.ZabbixValueMapGetParameters.Limit.get -> int?
 Community.Zabbix.ZabbixValueMapGetParameters.Limit.set -> void
 Community.Zabbix.ZabbixValueMapGetParameters.Output.get -> Community.Zabbix.ZabbixOutput<Community.Zabbix.ZabbixValueMap!>?
 Community.Zabbix.ZabbixValueMapGetParameters.Output.set -> void
-Community.Zabbix.ZabbixValueMapGetParameters.PreserveKeys.get -> bool?
-Community.Zabbix.ZabbixValueMapGetParameters.PreserveKeys.set -> void
 Community.Zabbix.ZabbixValueMapGetParameters.Search.get -> Community.Zabbix.ZabbixValueMapGetSearch!
 Community.Zabbix.ZabbixValueMapGetParameters.Search.set -> void
 Community.Zabbix.ZabbixValueMapGetParameters.SearchByAny.get -> bool?
@@ -26438,3 +26132,33 @@ static readonly Community.Zabbix.ZabbixValueMapMappingFields.NewValue -> Communi
 static readonly Community.Zabbix.ZabbixValueMapMappingFields.Type -> Community.Zabbix.ZabbixField<Community.Zabbix.ZabbixValueMapMapping!>
 static readonly Community.Zabbix.ZabbixValueMapMappingFields.Value -> Community.Zabbix.ZabbixField<Community.Zabbix.ZabbixValueMapMapping!>
 ~override Community.Zabbix.ZabbixPort.Equals(object obj) -> bool
+Community.Zabbix.ZabbixAlertGetParameters.TimeTo.get -> System.DateTimeOffset?
+Community.Zabbix.ZabbixAlertGetParameters.TimeTo.set -> void
+Community.Zabbix.ZabbixApmLogGetParameters.TimeTo.get -> System.DateTimeOffset
+Community.Zabbix.ZabbixApmLogGetParameters.TimeTo.set -> void
+Community.Zabbix.ZabbixApmLogGetParameters.ZabbixApmLogGetParameters(System.DateTimeOffset timeFrom, System.DateTimeOffset timeTo) -> void
+Community.Zabbix.ZabbixApmMetricGetParameters.TimeTo.get -> System.DateTimeOffset
+Community.Zabbix.ZabbixApmMetricGetParameters.TimeTo.set -> void
+Community.Zabbix.ZabbixApmMetricGetParameters.ZabbixApmMetricGetParameters(System.DateTimeOffset timeFrom, System.DateTimeOffset timeTo) -> void
+Community.Zabbix.ZabbixApmSpanGetParameters.TimeTo.get -> System.DateTimeOffset
+Community.Zabbix.ZabbixApmSpanGetParameters.TimeTo.set -> void
+Community.Zabbix.ZabbixApmSpanGetParameters.ZabbixApmSpanGetParameters(System.DateTimeOffset timeFrom, System.DateTimeOffset timeTo) -> void
+Community.Zabbix.ZabbixApmTraceGetParameters.TimeTo.get -> System.DateTimeOffset
+Community.Zabbix.ZabbixApmTraceGetParameters.TimeTo.set -> void
+Community.Zabbix.ZabbixApmTraceGetParameters.ZabbixApmTraceGetParameters(System.DateTimeOffset timeFrom, System.DateTimeOffset timeTo) -> void
+Community.Zabbix.ZabbixAuditLogGetParameters.TimeTo.get -> System.DateTimeOffset?
+Community.Zabbix.ZabbixAuditLogGetParameters.TimeTo.set -> void
+Community.Zabbix.ZabbixEventGetParameters.EventIdTo.get -> ulong?
+Community.Zabbix.ZabbixEventGetParameters.EventIdTo.set -> void
+Community.Zabbix.ZabbixEventGetParameters.ProblemTimeTo.get -> System.DateTimeOffset?
+Community.Zabbix.ZabbixEventGetParameters.ProblemTimeTo.set -> void
+Community.Zabbix.ZabbixEventGetParameters.TimeTo.get -> System.DateTimeOffset?
+Community.Zabbix.ZabbixEventGetParameters.TimeTo.set -> void
+Community.Zabbix.ZabbixHistoryGetParameters.TimeTo.get -> System.DateTimeOffset?
+Community.Zabbix.ZabbixHistoryGetParameters.TimeTo.set -> void
+Community.Zabbix.ZabbixProblemGetParameters.EventIdTo.get -> ulong?
+Community.Zabbix.ZabbixProblemGetParameters.EventIdTo.set -> void
+Community.Zabbix.ZabbixProblemGetParameters.TimeTo.get -> System.DateTimeOffset?
+Community.Zabbix.ZabbixProblemGetParameters.TimeTo.set -> void
+Community.Zabbix.ZabbixTrendGetParameters.TimeTo.get -> System.DateTimeOffset?
+Community.Zabbix.ZabbixTrendGetParameters.TimeTo.set -> void

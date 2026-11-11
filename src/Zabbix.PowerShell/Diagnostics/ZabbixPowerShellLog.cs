@@ -18,6 +18,10 @@ internal static partial class ZabbixPowerShellLog
     [LoggerMessage(EventId = 14001, Level = LogLevel.Debug, Message = "Disconnected {Name}; {InFlight} call(s) still in flight")]
     public static partial void Disconnected(ILogger logger, string name, int inFlight);
 
+    /// <summary>A connection's logoff (<c>user.logout</c>) failed; its session is left to expire on the server.</summary>
+    [LoggerMessage(EventId = 14002, Level = LogLevel.Debug, Message = "Logging {Name} off failed; its session is left to expire")]
+    public static partial void LogOffFailed(ILogger logger, string name, Exception exception);
+
     /// <summary>Name completion could not ask the server; no names are offered and nothing is cached.</summary>
     [LoggerMessage(EventId = 14100, Level = LogLevel.Warning, Message = "Completing {Entity} names on {Name} failed; no names offered")]
     public static partial void CompletionFailed(ILogger logger, string entity, string name, Exception exception);

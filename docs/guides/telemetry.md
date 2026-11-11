@@ -147,7 +147,7 @@ classified value still stays out of the message and the state, because a plain l
 
 | Class | Attribute | What it holds | What the policy does |
 | --- | --- | --- | --- |
-| `Secret` | `[ZabbixSecret]` | Tokens, passwords, and pre-shared keys: `ZabbixOptions.ApiToken`, `ZabbixListenerOptions.PreSharedKeys`, `ZabbixConnectorOptions.BearerToken` | Erases it in every environment |
+| `Secret` | `[ZabbixSecret]` | Tokens, passwords, and pre-shared keys: `ZabbixClientOptions.ApiToken`, `ZabbixListenerOptions.PreSharedKeys`, `ZabbixConnectorOptions.BearerToken` | Erases it in every environment |
 | `ItemKey` | `[ZabbixItemKeyData]` | Item keys | Keeps the name and masks the parameters (`ZabbixItemKeyRedactor`): `web.page.get[host,,user:password]` is logged as `web.page.get[***]` |
 | `PeerText` | `[ZabbixPeerText]` | A server's, proxy's, or agent's own explanation | Writes `[redacted]` (`ZabbixPeerTextRedactor`), because Zabbix echoes the request into it |
 | `Personal` | `[ZabbixPersonal]` | User names | Erases it, as it does any class without a redactor |

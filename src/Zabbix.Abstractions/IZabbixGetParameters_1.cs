@@ -3,7 +3,7 @@
 namespace Community.Zabbix;
 
 /// <summary>
-/// Represents the parameters every queryable <c>.get</c> of <typeparamref name="TRecord"/> accepts: the eight of
+/// Represents the parameters every queryable <c>.get</c> of <typeparamref name="TRecord"/> accepts: the seven of
 /// <see cref="IZabbixGetParameters"/>, and the output and the sort, which name the record's fields. A host's
 /// <c>ZabbixHostGetParameters</c> is an <c>IZabbixGetParameters&lt;ZabbixHost&gt;</c>, so its output and sort take only a
 /// host's fields.

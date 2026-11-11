@@ -25,7 +25,7 @@ namespace Community.Zabbix.PowerShell.Commands;
 /// (the certificate files are read), and the API's HTTPS is not affected by them.
 /// </para>
 /// </summary>
-/// <remarks>Composes the server through the SDK's <c>AddZabbix</c>.</remarks>
+/// <remarks>Composes the server through the SDK's <c>AddZabbixClient</c>.</remarks>
 [Cmdlet(VerbsCommunications.Connect, "ZbxServer", DefaultParameterSetName = Anonymous)]
 [OutputType(typeof(ZabbixConnection))]
 public sealed class ConnectZbxServerCommand : ZabbixCmdlet, IZabbixTlsParameters

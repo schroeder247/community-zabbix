@@ -9,13 +9,13 @@ namespace Community.Zabbix;
 
 /// <summary>
 /// Builds a <see cref="ZabbixClient"/> with more than an address and a credential to set, without a host:
-/// <see cref="ZabbixClient.CreateBuilder"/> returns one. The verbs of <see cref="ZabbixBuilderExtensions"/> set the client up,
+/// <see cref="ZabbixClient.CreateBuilder"/> returns one. The verbs of <see cref="ZabbixClientBuilderExtensions"/> set the client up,
 /// and <see cref="Build"/> validates its options and returns it. A client with only an address and a token needs no builder:
 /// <c>new ZabbixClient("https://zabbix.example/", token)</c>.
 /// </summary>
 /// <remarks>
 /// The builder holds a container of its own, <see cref="Services"/>, where it registers the client with
-/// <see cref="ZabbixServiceCollectionExtensions.AddZabbix(IServiceCollection, string)"/>, the registration an application with
+/// <see cref="ZabbixClientServiceCollectionExtensions.AddZabbixClient(IServiceCollection, string)"/>, the registration an application with
 /// a host makes, so the client has the same HTTP pipeline and resilience either way. The client it returns owns that container
 /// and disposes it.
 /// </remarks>
@@ -24,19 +24,19 @@ namespace Community.Zabbix;
 /// await using ZabbixClient zabbix = ZabbixClient.CreateBuilder()
 ///     .WithEndpoint("https://zabbix.example/")
 ///     .WithToken(token)
-///     .WithMaxConnections(20)
+///     .WithMaxConnectionsPerServer(20)
 ///     .ConfigureResilience(resilience =&gt; resilience.Retry.MaxRetryAttempts = 5)
 ///     .UseLogging(loggers)
 ///     .Build();
 /// </code>
 /// </example>
-public sealed class ZabbixClientBuilder : IZabbixBuilder
+public sealed class ZabbixClientBuilder : IZabbixClientBuilder
 {
     private readonly ServiceCollection _services = [];
     private bool _built;
 
     /// <summary>A builder with nothing set. The client it builds needs an endpoint, which <c>WithEndpoint</c> or <c>Bind</c> sets.</summary>
-    public ZabbixClientBuilder() => _services.AddZabbix(Name);
+    public ZabbixClientBuilder() => _services.AddZabbixClient(Name);
 
     /// <summary>The client's name in <see cref="Services"/>: <see cref="Options.DefaultName"/>, since it's the one client there.</summary>
     public string Name => Options.DefaultName;

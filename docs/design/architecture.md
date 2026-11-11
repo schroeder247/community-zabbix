@@ -29,14 +29,14 @@ that space and earns its surface by being honest about which axes it spans:
 | --- | --- | --- |
 | `ZabbixItemKey` | key (schema only) | `Name`, `Parameters[i]` — a key is its parameters |
 | `ZabbixValue` | one (host, key) at one instant | — (the sample; a record) |
-| `ZabbixItemNode` | key, live on one host | `Watch`, `GetLatestAsync`, `GetLastValueAsync`, `GetHistoryAsync(range)` |
-| `ZabbixHostNode` | key set, live on one host | `Item(key)`, enumeration of its items, `ExistsAsync` |
+| `ZabbixItemNode` | key, live on one host | `Watch`, `GetLatestAsync`, `GetLastValueAsync`/`FindLastValueAsync`, `GetHistoryAsync(range)` |
+| `ZabbixHostNode` | key set, live on one host | `Items[key]` and the enumeration of its items, `ExistsAsync` |
 | `ZabbixClient` (root) | host × key, live | `Host(name)`, `Group(name)` (a view) |
 
 Each axis keeps its own verb because each axis has its own geometry. The **host** axis is a flat set
 (a host is in many groups, has many templates, is placed on at most one proxy — so groups, templates
 and proxies are *selections* over the set, never rungs of a tree). The **key** axis is a set of
-structured names per host (`name[param, …]`; no tree, so no subtree verb — `Item(key)` and LINQ's `Where`
+structured names per host (`name[param, …]`; no tree, so no subtree verb — `Items[key]` and LINQ's `Where`
 are enough). The **time** axis is a stream: `Watch` for live, `GetHistoryAsync(range)` for the record.
 
 The navigation verbs are **methods that mint sub-clients** (`Host(name)`, `Group(name)`, `Item(key)`), not indexers:
@@ -67,9 +67,10 @@ ZabbixClient                 the root — one API endpoint + one credential; wha
 
 **One root.** A `ZabbixClient` is modelled on the Azure client triad (`new ZabbixClient(endpoint, credential)`, and
 `ZabbixClient.CreateBuilder()` for the rest; immutable, thread-safe, a singleton; sub-clients reached as properties share its
-pipeline and cost no call), and it is what `AddZabbix("prod")` registers and `IZabbixClientFactory.Create("prod")`
-mints. The constructor and the standalone builder run the same registration on a container of their own
-([ADR 0013](../adr/0013-builders-verbs-and-typed-values.md)). The request/reply transport beneath it is the platform's own: `IHttpClientFactory` with one
+pipeline and cost no call), and it is what `AddZabbixClient("prod")` registers and `IZabbixClientFactory.Create("prod")`
+mints. The container shares the client it builds: it holds it through an owner, which releases it when the container is
+disposed, and a caller's dispose leaves it running. The constructor and the standalone builder run the same registration on a
+container of their own, and that client is the caller's ([ADR 0013](../adr/0013-builders-verbs-and-typed-values.md)). The request/reply transport beneath it is the platform's own: `IHttpClientFactory` with one
 `SocketsHttpHandler` primary, the `DelegatingHandler` chain, `AddStandardResilienceHandler`, and one
 `JsonSerializerContext` for every model. Nothing of the SDK's own mimics them.
 `SetHandlerLifetime(Timeout.InfiniteTimeSpan)` keeps one handler, so the connection cap is not fragmented.
@@ -78,8 +79,8 @@ virtual members, and constructors without default parameters ([Azure SDK .NET
 guidelines](https://azure.github.io/azure-sdk/dotnet_introduction.html), `dotnet-client-constructor-for-mocking`,
 `dotnet-client-constructor-no-default-params`). The generated `ZabbixApi` and its clients are too: `ZabbixApi` has a
 protected constructor and a virtual client per object, and every generated client a protected constructor beside the
-public one. The builder that `AddZabbix` returns
-carries the verbs a container user needs: `WithCredential`, `ConfigureHttpClient` and `ConfigureResilience`. The wire's
+public one. The builder that `AddZabbixClient` returns
+carries the verbs a container user needs: `WithCredential`, `ConfigureHttpClientBuilder` and `ConfigureResilience`. The wire's
 real transport is public too: `ZabbixWireLink` connects to a node list and hands out the `ZabbixExchangeCallback` every wire
 façade takes, so a caller can decorate it, as an `HttpClient` takes a `DelegatingHandler` over a `SocketsHttpHandler`.
 
@@ -120,9 +121,12 @@ Every node answers the **same two interfaces**:
   carry an interval of its own that would override the plan.
 
 The tiers above the leaf also answer a structural contract, because a caller navigating needs what a
-host *is* and a leaf never has. That contract is the concrete scope types (`ZabbixHostScope`,
-`ZabbixHostNode`, each an `IAsyncEnumerable` of its children); there is no separate scope interface. A group's node
-(`ZabbixHostGroupNode`) reads and deletes the group and reaches its hosts as a scope, `HostGroups["x"].Hosts["web-01"]`.
+host *is* and a leaf never has. That contract is the concrete scope types (`ZabbixHostScope`, a set of hosts, and
+`ZabbixItemScope`, a host's `Items`, each an `IAsyncEnumerable` of its children and an indexer over them); there is no
+separate scope interface. A group's node (`ZabbixHostGroupNode`) reads, changes and deletes the group and reaches its hosts
+as a scope, `HostGroups["x"].Hosts["web-01"]`. A host's and a group's node is one type whether its id or its name reached it
+(`Hosts[10084]`, `Hosts["web-01"]`): the selection carries whichever it was, and the read filters on it
+(`hostids` or `host`).
 
 **Therefore the depth you call at is the blast radius**, and it compiles to the wire honestly:
 
@@ -130,7 +134,7 @@ host *is* and a leaf never has. That contract is the concrete scope types (`Zabb
 client.GetLatestAsync()                                // item.get { output: lastvalue }             — everything
 client.HostGroups["Linux servers"].GetLatestAsync()         // item.get { groupids: [...] }               — one group
 client.Hosts["web-01"].GetLatestAsync()                 // item.get { hostids: [...] }                — one host
-client.Hosts["web-01"].Item("system.cpu.load").GetLatestAsync()  // item.get, this key verbatim         — one item
+client.Hosts["web-01"].Items["system.cpu.load"].GetLatestAsync()  // item.get, this key verbatim         — one item
 ```
 
 One verb, four depths, no targeting parameter anywhere, and the `.get` filter *is* the node — which
@@ -236,10 +240,10 @@ where to send), proxies, trappers. It is bound by three composition roots, one p
 (`ZabbixConfigurationSections` in `Zabbix.Abstractions` names them): `AddZabbixClients` in `Zabbix.Sdk` binds servers,
 `AddZabbixAgents` in `Zabbix.Agent` binds push agents and active agents, and `AddZabbixProxies` in
 `Zabbix.Proxy` calls the agent root and adds passive agents, proxies and trappers. A host that also calls the API calls
-`AddZabbixClients` beside its hosting root. (`ZabbixOptions` is one client's options, not the document.) A fluent chain writes it, a file
+`AddZabbixClients` beside its hosting root. (`ZabbixClientOptions` is one client's options, not the document.) A fluent chain writes it, a file
 binds to it (`BindConfiguration`, the binder generator, `[OptionsValidator]`, `ValidateOnStart`), a PowerShell
 hashtable *is* it, and one composition root turns whichever wrote it into running objects — so the faces cannot drift,
-because there is no projection between two shapes to forget. Every named thing (`AddZabbix("prod")`,
+because there is no projection between two shapes to forget. Every named thing (`AddZabbixClient("prod")`,
 `AddZabbixPushAgent("edge-01")`) is a `(Name, Services)` builder whose verbs write named options; keyed DI is the veneer,
 a factory is the minting seam. An agent or proxy is a class
 ([ADR 0010](../adr/0010-agent-proxy-client-classes.md)): its registration calls the constructor from the named options,
@@ -263,9 +267,9 @@ same core, and the module adapts to the SDK, never the other way.
 ## Protection
 
 - **In front of the server.** The API is bounded by the connection pool:
-  `SocketsHttpHandler.MaxConnectionsPerServer`, from `ZabbixOptions.MaxConnectionsPerServer` (default 100), plus the
+  `SocketsHttpHandler.MaxConnectionsPerServer`, from `ZabbixClientOptions.MaxConnectionsPerServer` (default 100), plus the
   standard resilience handler's own concurrency limiter; requests beyond the pool queue in the handler. A reply is
-  bounded too: the body is buffered inside the deadline up to `ZabbixOptions.MaxResponseContentBytes` (1 GiB, the
+  bounded too: the body is buffered inside the deadline up to `ZabbixClientOptions.MaxResponseContentBytes` (1 GiB, the
   wire's `ZBX_MAX_RECV_DATA_SIZE`), and a larger one is `InvalidDataException`, sent once. A per-endpoint
   `PartitionedRateLimiter<Uri>` that would take a permit per request before it is sent is part of the design and not
   built.
@@ -356,7 +360,7 @@ span and the duration sample together (seconds, `error.type`, `server.*` where t
 | Agent | `ZabbixSendLoop` (an owned enumerator; drains within one window from the stop), `ZabbixPushAgent`, `ZabbixActiveAgent` (a due queue by `ZabbixItemDelay`, the heartbeat a notification), `ZabbixItemDictionary` (an agent's one table of keys), health; `ZabbixComponent`, the lifetime every agent and proxy shares with no host, and `ZabbixHostedComponent`, the adapter a host runs it through ([ADR 0010](../adr/0010-agent-proxy-client-classes.md)) | `Community.Zabbix.Agent` (`ZabbixAgentTelemetry`) | `AgentLog`, 30xx–33xx |
 | Listener | `ZabbixListener` (an own accept loop over `IConnectionListenerFactory`; why not Kestrel's `ConnectionHandler` is written at the type), `ZabbixConversationCallback` (a handler owns the connection), `ZabbixAllowedPeers` (fail closed), `ZabbixTlsAcceptor` (the `TlsAccept` set; the PSK server), the trapper, the passive agent, the connector | `Community.Zabbix.Listener` (`ZabbixListenerTelemetry`: `zabbix.listener.connection.duration`, `.active_connections`, `.rejected_connections`) | `ListenerLog`, 60xx–63xx |
 | Proxy | `ZabbixActiveProxy` (active), the passive proxy's conversation, `ZabbixProxyUplink`, `ZabbixProxyConfig` (merged deltas, frozen per revision), `ZabbixProxyAdmission`, `ZabbixProxyProtocol` and the internal `ZabbixComponentVersion` (the version as the server compares it; the public members take a `System.Version`), `ZabbixProxyPaging`, and the **extension-point delegates**: `ZabbixProxyDataCallback` (a page computed at send time, merged by `ZabbixProxyDataProviders` into the page leased from the stores), `ZabbixProxyTaskCallback` (a task from the server's acknowledgement), `ZabbixPassiveProxyConfigCallback` (accept or refuse a pushed config, with a `ZabbixProxyConfigVerdict`), `ZabbixProxyStatsCallback` (`zabbix.stats`). The stores stay the push surface; a delegate is the pull seam, the same shape as `ZabbixConversationCallback` | `Community.Zabbix.Proxy` (`ZabbixProxyTelemetry`; `zabbix.proxy.values` carries a `zabbix.proxy.kind` tag — history, discovery, autoregistration, interface_availability, tasks) | `ProxyLog`, 70xx |
-| Shell | `Zabbix.PowerShell`: a per-runspace context (`ConditionalWeakTable<Runspace, ZabbixContext>`) holding the session's connections and long-running sessions, each connection `AddZabbix` and each agent or passive proxy session the SDK's own class, constructed as an application constructs it with the module's logging, clock and meters (`ZabbixSessionHost`); `Connect-ZbxServer`/`Disconnect-ZbxServer`/`Get-ZbxContext`; `ZabbixScriptRunspace`, the in-process bridge that lets a hand-written agent or proxy handler cmdlet run a user's `[scriptblock]` inside the runspace, not a subprocess; the CRUD cmdlets and nested-record builders generated by `Zabbix.Generator` from the same entity contracts as the C# clients; **input binding through PowerShell's own binder**: `ZabbixRecordConverter : PSTypeConverter` is the `<TypeConverter>` of every request, parameters and nested-request record in the generated `Community.Zabbix.types.ps1xml` (loaded by the manifest's `TypesToProcess`), so `-Filter`, record-typed parameters and `[Zabbix.<Record>]@{…}` casts bind with no call site, through `ZabbixJsonBinder` on the SDK's own JSON contract; `-AdditionalProperty` merges last; **output**: `ZabbixAdditionalFieldsAdapter : PSPropertyAdapter` is the `<TypeAdapter>` of every read record, so an unmodelled wire field reads as `$obj.<field>` (`RequiredAssemblies` loads `Community.Zabbix.Api.dll` first), and a generated `Community.Zabbix.format.ps1xml` gives every read record a table, list and wide view; MAML help generated at build time from the cmdlets' XML doc comments (`Zabbix.PowerShell.HelpGen`) plus a build-derived module manifest; one `ILoggerProvider` to the PowerShell streams; `ZabbixReference<T>` (id, name, or a piped entity — the one reference currency) and `ulong : IParsable<ulong>`. [PowerShell binding](powershell-binding.md) has the research behind these seams | `Community.Zabbix.PowerShell` (`ZabbixPowerShellTelemetry`) | 14xxx |
+| Shell | `Zabbix.PowerShell`: a per-runspace context (`ConditionalWeakTable<Runspace, ZabbixContext>`) holding the session's connections and long-running sessions, each connection `AddZabbixClient` and each agent or passive proxy session the SDK's own class, constructed as an application constructs it with the module's logging, clock and meters (`ZabbixSessionHost`); `Connect-ZbxServer`/`Disconnect-ZbxServer`/`Get-ZbxContext`; `ZabbixScriptRunspace`, the in-process bridge that lets a hand-written agent or proxy handler cmdlet run a user's `[scriptblock]` inside the runspace, not a subprocess; the CRUD cmdlets and nested-record builders generated by `Zabbix.Generator` from the same entity contracts as the C# clients; **input binding through PowerShell's own binder**: `ZabbixRecordConverter : PSTypeConverter` is the `<TypeConverter>` of every request, parameters and nested-request record in the generated `Community.Zabbix.types.ps1xml` (loaded by the manifest's `TypesToProcess`), so `-Filter`, record-typed parameters and `[Zabbix.<Record>]@{…}` casts bind with no call site, through `ZabbixJsonBinder` on the SDK's own JSON contract; `-AdditionalProperty` merges last; **output**: `ZabbixAdditionalFieldsAdapter : PSPropertyAdapter` is the `<TypeAdapter>` of every read record, so an unmodelled wire field reads as `$obj.<field>` (`RequiredAssemblies` loads `Community.Zabbix.Api.dll` first), and a generated `Community.Zabbix.format.ps1xml` gives every read record a table, list and wide view; MAML help generated at build time from the cmdlets' XML doc comments (`Zabbix.PowerShell.HelpGen`) plus a build-derived module manifest; one `ILoggerProvider` to the PowerShell streams; `ZabbixReference<T>` (id, name, or a piped entity — the one reference currency) and `ulong : IParsable<ulong>`. [PowerShell binding](powershell-binding.md) has the research behind these seams | `Community.Zabbix.PowerShell` (`ZabbixPowerShellTelemetry`) | 14xxx |
 
 Every agent and proxy is a `ZabbixComponent` with the generic host's phases, which a host runs through the
 `IHostedLifecycleService` adapter, `ZabbixHostedComponent`. A trapper is a listener whose handler writes into
@@ -370,7 +374,8 @@ whose handler answers keys; an active agent is a due queue of items into the sto
 The API's objects are not the tree — they are the vocabulary the tree is written in. `ZabbixClient` carries one client per
 API object, every one generated at build time from the checked-in description (`schema/zabbix-api.json`, extracted from
 the Zabbix 7.0, 7.4 and 8.0 PHP source by `tools/ZabbixApiExtract`): `client.Hosts.GetAsync(parameters)` is
-`host.get` and returns `IReadOnlyList<T>`, `CountAsync` is `host.get` with `countOutput`,
+`host.get` and returns `IReadOnlyList<T>`, `CountAsync` is `host.get` with `countOutput` added to its parameters (a get's
+parameters leave out what changes the shape of its reply),
 `CreateAsync`/`UpdateAsync`/`DeleteAsync` return the ids the server names, and the mass verbs and the object's other
 methods are there when the API has them. A write takes a lambda as a read does (ADR 0013, section 4): a create takes the
 fields it requires and a lambda for the rest, and a node's `UpdateAsync` builds the request from the node's id and lets a

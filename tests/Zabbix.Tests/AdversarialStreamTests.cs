@@ -47,7 +47,7 @@ public sealed class AdversarialStreamTests
         services.AddSingleton<TimeProvider>(time);
         services.AddSingleton(_ => script(new ScriptedApi()));
         services.AddLogging();
-        services.AddZabbix().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
+        services.AddZabbixClient().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
         services.AddHttpClient(ZabbixHttp.GetClientName()).ConfigurePrimaryHttpMessageHandler(provider => provider.GetRequiredService<ScriptedApi>());
         ServiceProvider provider = services.BuildValidated();
         return new Tree(provider, provider.GetRequiredService<ScriptedApi>(), time);

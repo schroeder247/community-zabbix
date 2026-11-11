@@ -23,7 +23,7 @@ public sealed class OptionsGraphTests
     /// </summary>
     private static readonly IReadOnlyDictionary<string, string> DocumentSectionOf = new Dictionary<string, string>(StringComparer.Ordinal)
     {
-        ["AddZabbix"] = ZabbixConfigurationSections.Servers,                    // Zabbix
+        ["AddZabbixClient"] = ZabbixConfigurationSections.Servers,                    // Zabbix
         ["AddZabbixPushAgent"] = ZabbixConfigurationSections.PushAgents,                // Zabbix
         ["AddZabbixActiveAgent"] = ZabbixConfigurationSections.ActiveAgents,    // Zabbix
         ["AddZabbixPassiveAgent"] = ZabbixConfigurationSections.PassiveAgents,  // Zabbix.Proxy
@@ -70,12 +70,12 @@ public sealed class OptionsGraphTests
     /// <summary>
     /// Every options type a named verb writes: a member whose name says it carries a credential is classified
     /// (<see cref="ZabbixSecretAttribute"/>) — the rule that keeps it out of a log applies uniformly across
-    /// every section, not only <see cref="ZabbixOptions.ApiToken"/>.
+    /// every section, not only <see cref="ZabbixClientOptions.ApiToken"/>.
     /// </summary>
     [Fact]
     public void A_secret_in_a_document_binds_as_classified()
     {
-        Type[] sections = [typeof(ZabbixOptions), typeof(ZabbixPushAgentOptions), typeof(ZabbixActiveAgentOptions), typeof(ZabbixPassiveAgentOptions), typeof(ZabbixProxyOptions), typeof(ZabbixListenerOptions), typeof(ZabbixWireOptions)];
+        Type[] sections = [typeof(ZabbixClientOptions), typeof(ZabbixPushAgentOptions), typeof(ZabbixActiveAgentOptions), typeof(ZabbixPassiveAgentOptions), typeof(ZabbixProxyOptions), typeof(ZabbixListenerOptions), typeof(ZabbixWireClientOptions)];
         string[] secretShaped = ["Token", "Psk", "Password", "PreSharedKey", "PreSharedKeys", "Secret"];
 
         List<string> unclassified = [];
@@ -95,7 +95,7 @@ public sealed class OptionsGraphTests
 
     /// <summary>The known secret-bearing members stay classified: a locked list, not just the pattern above.</summary>
     [Theory]
-    [InlineData(typeof(ZabbixOptions), nameof(ZabbixOptions.ApiToken))]
+    [InlineData(typeof(ZabbixClientOptions), nameof(ZabbixClientOptions.ApiToken))]
     [InlineData(typeof(ZabbixListenerOptions), nameof(ZabbixListenerOptions.PreSharedKeys))]
     public void A_known_secret_member_is_classified(Type section, string property)
         => Assert.True(section.GetProperty(property)!.IsDefined(typeof(ZabbixSecretAttribute), inherit: true), $"{section.Name}.{property} lost its [ZabbixSecret] classification");

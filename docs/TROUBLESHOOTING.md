@@ -35,7 +35,7 @@ await using ZabbixWireClient wire = ZabbixWireClient.CreateBuilder().WithServer(
 | `ZabbixApiException` with `Kind` `Validation` | The server refused the request's values. | Read `Message`, which holds the server's reason. |
 | `ZabbixVersionException` | The server's version doesn't have this method or field. Nothing was sent. | Use what that version has. See [The API client](guides/api-client.md). |
 | `ZabbixNotFoundException` | A read through the tree named a host, a group, or an item that doesn't exist. | Check the name, or call `ExistsAsync` first. |
-| A credential isn't sent over `http` | The SDK sends a credential over plain `http` only to a loopback host. | Use `https`, or set `ZabbixOptions.AllowUnencryptedCredentials`. |
+| A credential isn't sent over `http` | The SDK sends a credential over plain `http` only to a loopback host. | Use `https`, or set `ZabbixClientOptions.AllowUnencryptedCredentials`. |
 
 Filter on `Kind` rather than parsing the message. In PowerShell, a failed API call is a non-terminating error whose
 `FullyQualifiedErrorId` starts with `ZabbixApi.<Kind>`.

@@ -10,51 +10,21 @@ namespace Community.Zabbix.Protocol;
 /// <summary>Sends the values of a store or a stream through a <see cref="ZabbixWireClient"/>, batched, retried and acknowledged by the send loop.</summary>
 public static class ZabbixWireClientExtensions
 {
-    /// <summary>Drains a stream of values into the server or proxy with the default batching, retry and clock, silently, until the stream ends.</summary>
-    /// <param name="wire">The client.</param>
-    /// <param name="source">The values — a store, a watcher, any stream.</param>
-    /// <returns>How many values were taken off the stream.</returns>
-    public static Task<long> DrainAsync(this ZabbixWireClient wire, IAsyncEnumerable<ZabbixValue> source)
-        => wire.DrainAsync(source, CancellationToken.None);
-
     /// <summary>Drains a stream of values into the server or proxy with the default batching, retry and clock, silently.</summary>
     /// <param name="wire">The client.</param>
     /// <param name="source">The values — a store, a watcher, any stream.</param>
     /// <param name="cancellationToken">Stops reading; the batch in flight gets the drain window.</param>
     /// <returns>How many values were taken off the stream.</returns>
-    public static Task<long> DrainAsync(this ZabbixWireClient wire, IAsyncEnumerable<ZabbixValue> source, CancellationToken cancellationToken)
+    public static Task<long> DrainAsync(this ZabbixWireClient wire, IAsyncEnumerable<ZabbixValue> source, CancellationToken cancellationToken = default)
         => wire.DrainAsync(source, new ZabbixSendLoopOptions(), cancellationToken);
-
-    /// <summary>Drains a store into the server or proxy through its acknowledged face with the default batching, retry and clock, silently, until the store is complete and empty.</summary>
-    /// <param name="wire">The client.</param>
-    /// <param name="store">The store.</param>
-    /// <returns>How many values reached a final answer.</returns>
-    public static Task<long> DrainAsync(this ZabbixWireClient wire, ZabbixStore<ZabbixValue> store)
-        => wire.DrainAsync(store, CancellationToken.None);
 
     /// <summary>Drains a store into the server or proxy through its acknowledged face with the default batching, retry and clock, silently.</summary>
     /// <param name="wire">The client.</param>
     /// <param name="store">The store.</param>
     /// <param name="cancellationToken">Stops leasing; the batch in flight gets the drain window.</param>
     /// <returns>How many values reached a final answer.</returns>
-    public static Task<long> DrainAsync(this ZabbixWireClient wire, ZabbixStore<ZabbixValue> store, CancellationToken cancellationToken)
+    public static Task<long> DrainAsync(this ZabbixWireClient wire, ZabbixStore<ZabbixValue> store, CancellationToken cancellationToken = default)
         => wire.DrainAsync(store, new ZabbixSendLoopOptions(), cancellationToken);
-
-    /// <summary>Drains a stream of values into the server or proxy, as <see cref="DrainAsync(ZabbixWireClient, IAsyncEnumerable{ZabbixValue}, ZabbixSendLoopOptions, CancellationToken)"/> does, until the stream ends.</summary>
-    /// <param name="wire">The client.</param>
-    /// <param name="source">The values — a store, a watcher, any stream.</param>
-    /// <param name="options">Batching and retry, the clock, the logger and the progress the drain reports to.</param>
-    /// <returns>How many values were taken off the stream.</returns>
-    public static Task<long> DrainAsync(this ZabbixWireClient wire, IAsyncEnumerable<ZabbixValue> source, ZabbixSendLoopOptions options)
-        => wire.DrainAsync(source, options, CancellationToken.None);
-
-    /// <summary>Drains a store into the server or proxy, as <see cref="DrainAsync(ZabbixWireClient, ZabbixStore{ZabbixValue}, ZabbixSendLoopOptions, CancellationToken)"/> does, until the store is complete and empty.</summary>
-    /// <param name="wire">The client.</param>
-    /// <param name="store">The store.</param>
-    /// <param name="options">Batching and retry, the clock, the logger and the progress the drain reports to.</param>
-    /// <returns>How many values reached a final answer.</returns>
-    public static Task<long> DrainAsync(this ZabbixWireClient wire, ZabbixStore<ZabbixValue> store, ZabbixSendLoopOptions options)
-        => wire.DrainAsync(store, options, CancellationToken.None);
 
     /// <summary>
     /// Drains a stream of values into the server or proxy: batched by size or cadence, each batch retried until acknowledged,
@@ -65,7 +35,7 @@ public static class ZabbixWireClientExtensions
     /// <param name="options">Batching and retry, the clock, the logger and the progress the drain reports to.</param>
     /// <param name="cancellationToken">Stops reading; the batch in flight gets the drain window.</param>
     /// <returns>How many values were taken off the stream.</returns>
-    public static Task<long> DrainAsync(this ZabbixWireClient wire, IAsyncEnumerable<ZabbixValue> source, ZabbixSendLoopOptions options, CancellationToken cancellationToken)
+    public static Task<long> DrainAsync(this ZabbixWireClient wire, IAsyncEnumerable<ZabbixValue> source, ZabbixSendLoopOptions options, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(wire);
         return ZabbixSendLoop.RunAsync(source, wire.DeliverAsync, options, cancellationToken);
@@ -81,7 +51,7 @@ public static class ZabbixWireClientExtensions
     /// <param name="options">Batching and retry, the clock, the logger and the progress the drain reports to.</param>
     /// <param name="cancellationToken">Stops leasing; the batch in flight gets the drain window, and is released back to the store if it is not delivered in it.</param>
     /// <returns>How many values reached a final answer.</returns>
-    public static Task<long> DrainAsync(this ZabbixWireClient wire, ZabbixStore<ZabbixValue> store, ZabbixSendLoopOptions options, CancellationToken cancellationToken)
+    public static Task<long> DrainAsync(this ZabbixWireClient wire, ZabbixStore<ZabbixValue> store, ZabbixSendLoopOptions options, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(wire);
         return ZabbixSendLoop.RunAsync(store, wire.DeliverAsync, options, cancellationToken);
@@ -94,7 +64,7 @@ public static class ZabbixWireClientExtensions
     /// that paused data collection (<see cref="ZabbixTrapperRefusedException.IsPaused"/>: it took nothing), which is a retry; an
     /// exchange that failed (a redirect that could not be followed among them) is <see cref="ZabbixSendOutcome.Retried"/>, so
     /// the batch is kept — nothing is ever delivered by mistake. The batch goes as one frame whatever
-    /// <see cref="ZabbixWireOptions.BatchSize"/> says (the loop's <see cref="ZabbixSendOptions.BatchSize"/> sized it), so one
+    /// <see cref="ZabbixWireClientOptions.BatchSize"/> says (the loop's <see cref="ZabbixSendOptions.BatchSize"/> sized it), so one
     /// answer covers all of it and a retry never sends again what an earlier frame delivered.
     /// </summary>
     /// <param name="wire">The client.</param>

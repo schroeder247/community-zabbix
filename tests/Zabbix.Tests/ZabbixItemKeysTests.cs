@@ -33,21 +33,21 @@ public sealed class ZabbixItemKeysTests
         { ZabbixItemKeys.Host.OsName.ToString(), "system.sw.os[name]" },
         { ZabbixItemKeys.Host.OsDetails.ToString(), "system.sw.os.get" },
         { ZabbixItemKeys.Host.HostName().ToString(), "system.hostname" },
-        { ZabbixItemKeys.Host.HostName(ZabbixItemKeys.Host.HostNameKind.ShortHostName).ToString(), "system.hostname[shorthost]" },
-        { ZabbixItemKeys.Host.HostName(ZabbixItemKeys.Host.HostNameKind.FullyQualifiedName, lowercase: true).ToString(), "system.hostname[fqdn,lower]" },
+        { ZabbixItemKeys.Host.HostName(ZabbixHostNameKind.ShortHostName).ToString(), "system.hostname[shorthost]" },
+        { ZabbixItemKeys.Host.HostName(ZabbixHostNameKind.FullyQualifiedName, lowercase: true).ToString(), "system.hostname[fqdn,lower]" },
         { ZabbixItemKeys.Host.HostName(lowercase: true).ToString(), "system.hostname[,lower]" },
 
         { ZabbixItemKeys.Cpu.Count.ToString(), "system.cpu.num" },
         { ZabbixItemKeys.Cpu.ConfiguredCount.ToString(), "system.cpu.num[max]" },
         { ZabbixItemKeys.Cpu.Discovery.ToString(), "system.cpu.discovery" },
         { ZabbixItemKeys.Cpu.Load().ToString(), "system.cpu.load[all,avg1]" },
-        { ZabbixItemKeys.Cpu.Load(ZabbixItemKeys.Cpu.CpuLoadScope.PerProcessor).ToString(), "system.cpu.load[percpu,avg1]" },
-        { ZabbixItemKeys.Cpu.Load(window: ZabbixItemKeys.Cpu.CpuLoadWindow.FiveMinutes).ToString(), "system.cpu.load[all,avg5]" },
-        { ZabbixItemKeys.Cpu.Load(ZabbixItemKeys.Cpu.CpuLoadScope.PerProcessor, ZabbixItemKeys.Cpu.CpuLoadWindow.FifteenMinutes).ToString(), "system.cpu.load[percpu,avg15]" },
+        { ZabbixItemKeys.Cpu.Load(ZabbixCpuLoadScope.PerProcessor).ToString(), "system.cpu.load[percpu,avg1]" },
+        { ZabbixItemKeys.Cpu.Load(window: ZabbixAverageWindow.FiveMinutes).ToString(), "system.cpu.load[all,avg5]" },
+        { ZabbixItemKeys.Cpu.Load(ZabbixCpuLoadScope.PerProcessor, ZabbixAverageWindow.FifteenMinutes).ToString(), "system.cpu.load[percpu,avg15]" },
         { ZabbixItemKeys.Cpu.UserPercent().ToString(), "system.cpu.util[,user]" },
         { ZabbixItemKeys.Cpu.SystemPercent(3).ToString(), "system.cpu.util[3,system]" },
-        { ZabbixItemKeys.Cpu.IdlePercent(window: ZabbixItemKeys.SampleWindow.FiveMinutes).ToString(), "system.cpu.util[,idle,avg5]" },
-        { ZabbixItemKeys.Cpu.GuestNicePercent(0, ZabbixItemKeys.SampleWindow.FifteenMinutes).ToString(), "system.cpu.util[0,guest_nice,avg15]" },
+        { ZabbixItemKeys.Cpu.IdlePercent(window: ZabbixAverageWindow.FiveMinutes).ToString(), "system.cpu.util[,idle,avg5]" },
+        { ZabbixItemKeys.Cpu.GuestNicePercent(0, ZabbixAverageWindow.FifteenMinutes).ToString(), "system.cpu.util[0,guest_nice,avg15]" },
         { ZabbixItemKeys.Cpu.ContextSwitches.ToString(), "system.cpu.switches" },
         { ZabbixItemKeys.Cpu.Interrupts.ToString(), "system.cpu.intr" },
         { ZabbixItemKeys.Cpu.Description().ToString(), "system.hw.cpu" },
@@ -80,15 +80,15 @@ public sealed class ZabbixItemKeysTests
         { ZabbixItemKeys.Disk.InodesTotal("/var").ToString(), "vfs.fs.inode[/var,total]" },
         { ZabbixItemKeys.Disk.DeviceDiscovery.ToString(), "vfs.dev.discovery" },
         { ZabbixItemKeys.Disk.ReadSectorsPerSecond().ToString(), "vfs.dev.read[,sps]" },
-        { ZabbixItemKeys.Disk.ReadOperationsPerSecond("sda", ZabbixItemKeys.SampleWindow.FiveMinutes).ToString(), "vfs.dev.read[sda,ops,avg5]" },
+        { ZabbixItemKeys.Disk.ReadOperationsPerSecond("sda", ZabbixAverageWindow.FiveMinutes).ToString(), "vfs.dev.read[sda,ops,avg5]" },
         { ZabbixItemKeys.Disk.WriteSectors("sda").ToString(), "vfs.dev.write[sda,sectors]" },
         { ZabbixItemKeys.Disk.WriteOperations().ToString(), "vfs.dev.write[,operations]" },
 
         { ZabbixItemKeys.File.Exists("/etc/passwd").ToString(), "vfs.file.exists[/etc/passwd]" },
-        { ZabbixItemKeys.File.Exists("/p", ZabbixItemKeys.File.FileTypes.Directory).ToString(), "vfs.file.exists[/p,dir]" },
-        { ZabbixItemKeys.File.Exists("/p", ZabbixItemKeys.File.FileTypes.File | ZabbixItemKeys.File.FileTypes.SymbolicLink).ToString(), "vfs.file.exists[/p,\"file,sym\"]" },
-        { ZabbixItemKeys.File.Exists("/p", exclude: ZabbixItemKeys.File.FileTypes.Device).ToString(), "vfs.file.exists[/p,,dev]" },
-        { ZabbixItemKeys.File.Exists("/p", ZabbixItemKeys.File.FileTypes.All).ToString(), "vfs.file.exists[/p,all]" },
+        { ZabbixItemKeys.File.Exists("/p", ZabbixFileTypes.Directory).ToString(), "vfs.file.exists[/p,dir]" },
+        { ZabbixItemKeys.File.Exists("/p", ZabbixFileTypes.File | ZabbixFileTypes.SymbolicLink).ToString(), "vfs.file.exists[/p,\"file,sym\"]" },
+        { ZabbixItemKeys.File.Exists("/p", exclude: ZabbixFileTypes.Device).ToString(), "vfs.file.exists[/p,,dev]" },
+        { ZabbixItemKeys.File.Exists("/p", ZabbixFileTypes.All).ToString(), "vfs.file.exists[/p,all]" },
         { ZabbixItemKeys.File.SizeBytes("/p").ToString(), "vfs.file.size[/p,bytes]" },
         { ZabbixItemKeys.File.LineCount("/p").ToString(), "vfs.file.size[/p,lines]" },
         { ZabbixItemKeys.File.ModifiedTime("/p").ToString(), "vfs.file.time[/p,modify]" },
@@ -106,9 +106,9 @@ public sealed class ZabbixItemKeysTests
         { ZabbixItemKeys.File.Sha256Checksum("/p").ToString(), "vfs.file.cksum[/p,sha256]" },
         { ZabbixItemKeys.File.Permissions("/p").ToString(), "vfs.file.permissions[/p]" },
         { ZabbixItemKeys.File.DirectoryEntryCount("/d").ToString(), "vfs.dir.count[/d]" },
-        { ZabbixItemKeys.File.DirectoryEntryCount("/d", includeTypes: ZabbixItemKeys.File.FileTypes.File, maxDepth: 1).ToString(), "vfs.dir.count[/d,,,file,,1]" },
+        { ZabbixItemKeys.File.DirectoryEntryCount("/d", includeTypes: ZabbixFileTypes.File, maxDepth: 1).ToString(), "vfs.dir.count[/d,,,file,,1]" },
         {
-            ZabbixItemKeys.File.DirectoryEntries("/d", "a", "b", ZabbixItemKeys.File.FileTypes.Directory, ZabbixItemKeys.File.FileTypes.Fifo, 2, 10, 20, TimeSpan.FromMinutes(1), TimeSpan.FromHours(1), "c").ToString(),
+            ZabbixItemKeys.File.DirectoryEntries("/d", "a", "b", ZabbixFileTypes.Directory, ZabbixFileTypes.Fifo, 2, 10, 20, TimeSpan.FromMinutes(1), TimeSpan.FromHours(1), "c").ToString(),
             "vfs.dir.get[/d,a,b,dir,fifo,2,10,20,60,3600,c]"
         },
         { ZabbixItemKeys.File.DirectorySizeBytes("/d").ToString(), "vfs.dir.size[/d]" },
@@ -117,22 +117,22 @@ public sealed class ZabbixItemKeysTests
 
         { ZabbixItemKeys.Process.Count().ToString(), "proc.num" },
         { ZabbixItemKeys.Process.Count("nginx").ToString(), "proc.num[nginx]" },
-        { ZabbixItemKeys.Process.Count(state: ZabbixItemKeys.Process.ProcessState.Running).ToString(), "proc.num[,,run]" },
+        { ZabbixItemKeys.Process.Count(state: ZabbixProcessState.Running).ToString(), "proc.num[,,run]" },
         { ZabbixItemKeys.Process.Count("nginx", "www", commandLine: "worker").ToString(), "proc.num[nginx,www,all,worker]" },
         { ZabbixItemKeys.Process.MemoryBytes().ToString(), "proc.mem" },
-        { ZabbixItemKeys.Process.MemoryBytes(memoryType: ZabbixItemKeys.Process.ProcessMemoryType.ResidentSet).ToString(), "proc.mem[,,sum,,rss]" },
-        { ZabbixItemKeys.Process.MemoryBytes("nginx", statistic: ZabbixItemKeys.Process.ProcessMemoryStatistic.Maximum).ToString(), "proc.mem[nginx,,max]" },
+        { ZabbixItemKeys.Process.MemoryBytes(memoryType: ZabbixProcessMemoryType.ResidentSet).ToString(), "proc.mem[,,sum,,rss]" },
+        { ZabbixItemKeys.Process.MemoryBytes("nginx", statistic: ZabbixProcessMemoryStatistic.Maximum).ToString(), "proc.mem[nginx,,max]" },
         { ZabbixItemKeys.Process.AverageMemoryBytes("nginx").ToString(), "proc.mem[nginx,,avg]" },
         { ZabbixItemKeys.Process.MemoryPercent().ToString(), "proc.mem[,,sum,,pmem]" },
         { ZabbixItemKeys.Process.AverageMemoryPercent("nginx").ToString(), "proc.mem[nginx,,avg,,pmem]" },
         { ZabbixItemKeys.Process.CpuPercent().ToString(), "proc.cpu.util" },
-        { ZabbixItemKeys.Process.CpuPercent(window: ZabbixItemKeys.SampleWindow.FiveMinutes).ToString(), "proc.cpu.util[,,total,,avg5]" },
-        { ZabbixItemKeys.Process.CpuPercent("nginx", time: ZabbixItemKeys.Process.ProcessCpuTime.Privileged).ToString(), "proc.cpu.util[nginx,,system]" },
+        { ZabbixItemKeys.Process.CpuPercent(window: ZabbixAverageWindow.FiveMinutes).ToString(), "proc.cpu.util[,,total,,avg5]" },
+        { ZabbixItemKeys.Process.CpuPercent("nginx", time: ZabbixProcessCpuTime.Privileged).ToString(), "proc.cpu.util[nginx,,system]" },
         { ZabbixItemKeys.Process.Details().ToString(), "proc.get" },
         { ZabbixItemKeys.Process.ThreadDetails().ToString(), "proc.get[,,,thread]" },
         { ZabbixItemKeys.Process.Summary("nginx").ToString(), "proc.get[nginx,,,summary]" },
         { ZabbixItemKeys.Process.Info("explorer.exe").ToString(), "proc_info[explorer.exe]" },
-        { ZabbixItemKeys.Process.Info("explorer.exe", ZabbixItemKeys.Process.ProcessInfoCounter.WorkingSetKilobytes, ZabbixItemKeys.Process.ProcessInfoStatistic.Sum).ToString(), "proc_info[explorer.exe,wkset,sum]" },
+        { ZabbixItemKeys.Process.Info("explorer.exe", ZabbixProcessInfoCounter.WorkingSetKilobytes, ZabbixProcessInfoStatistic.Sum).ToString(), "proc_info[explorer.exe,wkset,sum]" },
 
         { ZabbixItemKeys.Kernel.MaxFiles.ToString(), "kernel.maxfiles" },
         { ZabbixItemKeys.Kernel.MaxProcesses.ToString(), "kernel.maxproc" },
@@ -154,17 +154,17 @@ public sealed class ZabbixItemKeysTests
         { ZabbixItemKeys.Network.TcpSocketCount(localPort: 80, state: TcpState.Established).ToString(), "net.tcp.socket.count[,80,,,established]" },
         { ZabbixItemKeys.Network.TcpSocketCount(state: TcpState.SynReceived).ToString(), "net.tcp.socket.count[,,,,syn_recv]" },
         { ZabbixItemKeys.Network.UdpSocketCount(localPort: 68).ToString(), "net.udp.socket.count[,68]" },
-        { ZabbixItemKeys.Network.UdpSocketCount(state: ZabbixItemKeys.Network.UdpSocketState.Unconnected).ToString(), "net.udp.socket.count[,,,,unconn]" },
+        { ZabbixItemKeys.Network.UdpSocketCount(state: ZabbixUdpSocketState.Unconnected).ToString(), "net.udp.socket.count[,,,,unconn]" },
         { ZabbixItemKeys.Network.IsTcpPortOpen(80).ToString(), "net.tcp.port[,80]" },
         { ZabbixItemKeys.Network.IsTcpPortOpen(80, "10.0.0.1").ToString(), "net.tcp.port[10.0.0.1,80]" },
-        { ZabbixItemKeys.Network.IsTcpServiceUp(ZabbixItemKeys.Network.TcpService.Ssh).ToString(), "net.tcp.service[ssh]" },
-        { ZabbixItemKeys.Network.IsTcpServiceUp(ZabbixItemKeys.Network.TcpService.Tcp, port: 8080).ToString(), "net.tcp.service[tcp,,8080]" },
-        { ZabbixItemKeys.Network.TcpServiceResponseTime(ZabbixItemKeys.Network.TcpService.Https, "10.0.0.1", 8443).ToString(), "net.tcp.service.perf[https,10.0.0.1,8443]" },
+        { ZabbixItemKeys.Network.IsTcpServiceUp(ZabbixTcpService.Ssh).ToString(), "net.tcp.service[ssh]" },
+        { ZabbixItemKeys.Network.IsTcpServiceUp(ZabbixTcpService.Tcp, port: 8080).ToString(), "net.tcp.service[tcp,,8080]" },
+        { ZabbixItemKeys.Network.TcpServiceResponseTime(ZabbixTcpService.Https, "10.0.0.1", 8443).ToString(), "net.tcp.service.perf[https,10.0.0.1,8443]" },
         { ZabbixItemKeys.Network.IsNtpUp().ToString(), "net.udp.service[ntp]" },
         { ZabbixItemKeys.Network.NtpResponseTime("10.0.0.1").ToString(), "net.udp.service.perf[ntp,10.0.0.1]" },
         { ZabbixItemKeys.Network.DnsResolves("example.com").ToString(), "net.dns[,example.com]" },
-        { ZabbixItemKeys.Network.DnsResolves("example.com", recordType: ZabbixItemKeys.Network.DnsRecordType.Ipv6Address).ToString(), "net.dns[,example.com,AAAA]" },
-        { ZabbixItemKeys.Network.DnsResponseTime("example.com", "10.0.0.2", ZabbixItemKeys.Network.DnsRecordType.Address, TimeSpan.FromSeconds(2), 3, useTcp: true).ToString(), "net.dns.perf[10.0.0.2,example.com,A,2,3,tcp]" },
+        { ZabbixItemKeys.Network.DnsResolves("example.com", recordType: ZabbixDnsRecordType.Ipv6Address).ToString(), "net.dns[,example.com,AAAA]" },
+        { ZabbixItemKeys.Network.DnsResponseTime("example.com", "10.0.0.2", ZabbixDnsRecordType.Address, TimeSpan.FromSeconds(2), 3, useTcp: true).ToString(), "net.dns.perf[10.0.0.2,example.com,A,2,3,tcp]" },
         { ZabbixItemKeys.Network.DnsRecords("example.com", useTcp: true).ToString(), "net.dns.record[,example.com,SOA,,,tcp]" },
         { ZabbixItemKeys.Network.ServerStatistics().ToString(), "zabbix.stats" },
         { ZabbixItemKeys.Network.ServerStatistics("10.0.0.1", 10051).ToString(), "zabbix.stats[10.0.0.1,10051]" },
@@ -251,7 +251,7 @@ public sealed class ZabbixItemKeysTests
         Assert.Equal(4_096.5, ZabbixItemKeys.Process.AverageMemoryBytes().Parse("4096.500000"));
         Assert.Equal(1.25, ZabbixItemKeys.Process.MemoryPercent().Parse("1.250000"));
         Assert.Equal(4.0, ZabbixItemKeys.Process.Info("x.exe").Parse("4.000000"));
-        Assert.Equal(TimeSpan.FromSeconds(0.25), ZabbixItemKeys.Network.TcpServiceResponseTime(ZabbixItemKeys.Network.TcpService.Ssh).Parse("0.250000"));
+        Assert.Equal(TimeSpan.FromSeconds(0.25), ZabbixItemKeys.Network.TcpServiceResponseTime(ZabbixTcpService.Ssh).Parse("0.250000"));
         Assert.Equal(TimeSpan.Zero, ZabbixItemKeys.Network.DnsResponseTime("x").Parse("0.000000"));
         Assert.Equal("""{"response":"success","data":{"queue":3}}""", ZabbixItemKeys.Network.ServerQueue().Parse("""{"response":"success","data":{"queue":3}}"""));
         Assert.Equal(TimeSpan.FromSeconds(0.5), ZabbixItemKeys.Web.PageLoadTime("x").Parse("0.500000"));
@@ -287,11 +287,11 @@ public sealed class ZabbixItemKeysTests
         Assert.Throws<ArgumentOutOfRangeException>("startLine", () => ZabbixItemKeys.File.HasMatchingLine("/p", "x", startLine: 0));
         Assert.Throws<ArgumentOutOfRangeException>("timeout", () => ZabbixItemKeys.Network.DnsResolves("x", timeout: TimeSpan.FromMilliseconds(500)));
         Assert.Throws<ArgumentOutOfRangeException>("attempts", () => ZabbixItemKeys.Network.DnsResolves("x", attempts: 0));
-        Assert.Throws<ArgumentOutOfRangeException>("scope", () => ZabbixItemKeys.Cpu.Load((ZabbixItemKeys.Cpu.CpuLoadScope)99));
-        Assert.Throws<ArgumentOutOfRangeException>("window", () => ZabbixItemKeys.Cpu.UserPercent(window: (ZabbixItemKeys.SampleWindow)99));
+        Assert.Throws<ArgumentOutOfRangeException>("scope", () => ZabbixItemKeys.Cpu.Load((ZabbixCpuLoadScope)99));
+        Assert.Throws<ArgumentOutOfRangeException>("window", () => ZabbixItemKeys.Cpu.UserPercent(window: (ZabbixAverageWindow)99));
         Assert.Throws<ArgumentOutOfRangeException>("state", () => ZabbixItemKeys.Network.TcpSocketCount(state: TcpState.DeleteTcb));
-        Assert.Throws<ArgumentOutOfRangeException>("include", () => ZabbixItemKeys.File.Exists("/p", (ZabbixItemKeys.File.FileTypes)1024));
-        Assert.Throws<ArgumentException>("port", () => ZabbixItemKeys.Network.IsTcpServiceUp(ZabbixItemKeys.Network.TcpService.Tcp));
+        Assert.Throws<ArgumentOutOfRangeException>("include", () => ZabbixItemKeys.File.Exists("/p", (ZabbixFileTypes)1024));
+        Assert.Throws<ArgumentException>("port", () => ZabbixItemKeys.Network.IsTcpServiceUp(ZabbixTcpService.Tcp));
         Assert.Throws<FormatException>(() => ZabbixItemKeys.File.Details("C:\\a,b\\"));
     }
 

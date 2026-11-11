@@ -187,7 +187,7 @@ Console.WriteLine(frontend.UriFor(hosts[0]));                         // the hos
 Console.WriteLine(frontend.UriFor(hosts[0], ZabbixPageView.Latest));  // its latest data
 ```
 
-If the frontend isn't at the API's address, set `ZabbixOptions.FrontendUri`. In PowerShell, `Get-ZbxHost -Name gs-web-01 | Show-ZbxPage`
+If the frontend isn't at the API's address, set `ZabbixClientOptions.FrontendUri`. In PowerShell, `Get-ZbxHost -Name gs-web-01 | Show-ZbxPage`
 opens the same page.
 
 ## Watch values
@@ -297,7 +297,7 @@ using Microsoft.Extensions.Hosting;
 using Community.Zabbix;
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
-builder.Services.AddZabbix("prod")
+builder.Services.AddZabbixClient("prod")
     .WithEndpoint("https://zabbix.example/")
     .WithToken(File.ReadAllText("zabbix.token").Trim());
 builder.Logging.AddZabbixRedaction();                 // erases the token from logs
@@ -307,7 +307,7 @@ ZabbixClient zabbix = app.Services.GetRequiredService<IZabbixClientFactory>().Cr
 Console.WriteLine($"API version: {await zabbix.GetApiVersionAsync()}");
 ```
 
-To read the same options from `appsettings.json`, replace the `AddZabbix` call with `AddZabbixClients`:
+To read the same options from `appsettings.json`, replace the `AddZabbixClient` call with `AddZabbixClients`:
 
 ```csharp
 builder.Services.AddZabbixClients(builder.Configuration);
@@ -367,4 +367,4 @@ docker run -d --name zabbix-web --network zabbix -p 8080:8080 -e ZBX_SERVER_HOST
 ```
 
 The frontend is `http://localhost:8080/`, with the user `Admin` and the password `zabbix`. The trapper is `localhost:10051`. Over plain
-`http`, the SDK sends a credential only to a loopback host, unless you set `ZabbixOptions.AllowUnencryptedCredentials`.
+`http`, the SDK sends a credential only to a loopback host, unless you set `ZabbixClientOptions.AllowUnencryptedCredentials`.

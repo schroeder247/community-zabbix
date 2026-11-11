@@ -32,11 +32,12 @@ Evaluated AFTER each project body: the conditions here read what the project dec
        an intentional API change: `tools/refresh-public-api.sh` (CONTRIBUTING.md, "Build, test and the gates"). Generated members are
        included: the analyzers see generated trees like any other, so a generated surface (Zabbix.Api's records,
        Zabbix's clients) appears in Unshipped.txt too — that IS the shipped surface.
-       RS0026 ("do not add multiple public overloads with optional parameters") and RS0027 are errors, with no exemption:
-       a member alone under its name keeps an optional CancellationToken, and the overloads of one name (Zabbix.Generator's
-       GetAsync, CountAsync and the one, several and one-id forms of a write among them) each take the token as a required
-       last parameter beside an overload without it (docs/adr/0013-builders-verbs-and-typed-values.md, section 6). RS0041
-       is not suppressed: it has no occurrence. -->
+       RS0026 ("do not add multiple public overloads with optional parameters") and RS0027 are errors, except in a library
+       whose async overloads take an optional CancellationToken last, as every async member does
+       (docs/adr/0013-builders-verbs-and-typed-values.md, section 6): Zabbix.Abstractions, Zabbix.Sdk, Zabbix.Wire and
+       Zabbix.Agent suppress the two for the module, with that reason, in their GlobalSuppressions.cs, and
+       DesignConformanceTests holds the rest of what they held: no other parameter of an overload is optional unless it's on
+       the one longest overload. RS0041 is not suppressed: it has no occurrence. -->
   <ItemGroup Condition="'$(IsTestProject)' != 'true' and '$(IsRoslynComponent)' != 'true' and '$(OutputType)' != 'Exe' and '$(IsPublicApiTracked)' != 'false'">
     <!-- The package's own build/*.targets already globs PublicAPI.Shipped.txt/PublicAPI.Unshipped.txt out of
          $(MSBuildProjectDirectory) as AdditionalFiles when they exist (its workaround for

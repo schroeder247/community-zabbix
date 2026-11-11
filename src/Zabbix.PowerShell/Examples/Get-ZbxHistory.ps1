@@ -31,7 +31,7 @@ Get-ZbxHistory -Host 'web-01' -SortField clock -SortOrder Descending -Limit 2 | 
 
 #region Read text values in a time window
 # -Filter takes history.get's own parameters: History picks the value type (Float, Character, Log, Unsigned,
-# Text...), TimeFrom/TimeTill bound the window (Unix time). -ValueType, -From and -Till say the same without -Filter.
+# Text...), TimeFrom/TimeTo bound the window (Unix time). -ValueType, -From and -Till say the same without -Filter.
 $item = Get-ZbxItem -Host 'web-01' -Name 'Status'
 $filter = [Community.Zabbix.ZabbixHistoryGetParameters]@{
     History  = 'Text'

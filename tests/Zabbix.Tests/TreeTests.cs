@@ -36,7 +36,7 @@ public sealed class TreeTests
         var services = new ServiceCollection();
         services.AddSingleton(_ => (script ?? (scripted => scripted.On("item.get", Items)))(new ScriptedApi()));   // the container owns it
         services.AddFakeLogging().AddLogging(logging => logging.SetMinimumLevel(LogLevel.Trace));
-        services.AddZabbix().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
+        services.AddZabbixClient().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
         services.AddHttpClient(ZabbixHttp.GetClientName()).ConfigurePrimaryHttpMessageHandler(provider => provider.GetRequiredService<ScriptedApi>());
         ServiceProvider provider = services.BuildValidated();
         return new Tree(provider.GetRequiredService<ZabbixClient>(), provider.GetRequiredService<ScriptedApi>(), provider.GetFakeLogCollector(), provider);
@@ -50,7 +50,7 @@ public sealed class TreeTests
         await tree.Server.GetLatestAsync(TestContext.Current.CancellationToken).CountAsync(cancellationToken: TestContext.Current.CancellationToken);
         await tree.Server.HostGroups["Linux servers"].GetLatestAsync(TestContext.Current.CancellationToken).CountAsync(cancellationToken: TestContext.Current.CancellationToken);
         await tree.Server.Hosts["web-01"].GetLatestAsync(TestContext.Current.CancellationToken).CountAsync(cancellationToken: TestContext.Current.CancellationToken);
-        await tree.Server.Hosts["web-01"].Item("system.cpu.load[all,avg1]").GetLatestAsync(TestContext.Current.CancellationToken).CountAsync(cancellationToken: TestContext.Current.CancellationToken);
+        await tree.Server.Hosts["web-01"].Items["system.cpu.load[all,avg1]"].GetLatestAsync(TestContext.Current.CancellationToken).CountAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         JsonElement[] calls = [.. tree.Api.ParamsOf("item.get")];
         Assert.Equal(4, calls.Length);
@@ -67,7 +67,7 @@ public sealed class TreeTests
     {
         using Tree tree = Build();
 
-        await tree.Server.Hosts["web-01"].Item("k[\"a\"]").GetLatestAsync(TestContext.Current.CancellationToken).CountAsync(cancellationToken: TestContext.Current.CancellationToken);
+        await tree.Server.Hosts["web-01"].Items["k[\"a\"]"].GetLatestAsync(TestContext.Current.CancellationToken).CountAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal("k[\"a\"]", tree.Api.ParamsOf("item.get").Single().GetProperty("filter").GetProperty("key_").GetString());
     }
@@ -94,12 +94,12 @@ public sealed class TreeTests
             .On("hostgroup.get", """[{"groupid":"2","name":"Linux servers"}]"""));
 
         List<ZabbixHostNode> hosts = await tree.Server.HostGroups["Linux servers"].Hosts.ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
-        List<ZabbixItemNode> items = await tree.Server.Hosts["web-01"].ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
+        List<ZabbixItemNode> items = await tree.Server.Hosts["web-01"].Items.ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(["web-01", "db-01"], hosts.Select(host => host.Name));
         Assert.Equal("2", tree.Api.ParamsOf("host.get").Single().GetProperty("groupids")[0].GetString());
         Assert.Equal(3, items.Count);
-        Assert.Equal(["web-01"], items.Select(item => item.HostName).Distinct());
+        Assert.Equal(["web-01"], items.Select(item => item.Host.Name).Distinct());
     }
 
     [Fact]
@@ -273,7 +273,7 @@ public sealed class TreeTests
         // Absence is answered one way at every depth: an item node whose key the host does not have is
         // not "an item that never collected".
         using Tree tree = Build(api => api.On("item.get", "[]").On("host.get", """[{"hostid":"10"}]"""));
-        ZabbixItemNode item = tree.Server.Hosts["web-01"].Item("no.such.key");
+        ZabbixItemNode item = tree.Server.Hosts["web-01"].Items["no.such.key"];
 
         ZabbixNotFoundException read = await Assert.ThrowsAsync<ZabbixNotFoundException>(async () => await item.GetLastValueAsync(TestContext.Current.CancellationToken));
         ZabbixNotFoundException history = await Assert.ThrowsAsync<ZabbixNotFoundException>(async () => await item.GetHistoryAsync(DateTimeOffset.FromUnixTimeSeconds(S), cancellationToken: TestContext.Current.CancellationToken).ToListAsync(cancellationToken: TestContext.Current.CancellationToken));
@@ -285,12 +285,16 @@ public sealed class TreeTests
     }
 
     [Fact]
-    public async Task An_item_that_exists_and_never_collected_is_null_not_absent()
+    public async Task An_item_that_exists_and_never_collected_is_found_null_and_got_as_not_found()
     {
         const string never = """[{"itemid":"3","hostid":"11","key_":"agent.ping","value_type":"3","lastvalue":"","lastclock":"0","lastns":"0","hosts":[{"hostid":"11","host":"db-01"}]}]""";
         using Tree tree = Build(api => api.On("item.get", never));
+        ZabbixItemNode ping = tree.Server.Hosts["db-01"].Items["agent.ping"];
 
-        Assert.Null(await tree.Server.Hosts["db-01"].Item("agent.ping").GetLastValueAsync(TestContext.Current.CancellationToken));
+        Assert.Null(await ping.FindLastValueAsync(TestContext.Current.CancellationToken));
+        ZabbixNotFoundException got = await Assert.ThrowsAsync<ZabbixNotFoundException>(() => ping.GetLastValueAsync(TestContext.Current.CancellationToken));
+        Assert.Equal(("item", "agent.ping"), (got.ObjectType, got.Name));
+        Assert.Contains("never collected", got.Message, StringComparison.Ordinal);
         Assert.Empty(tree.Api.ParamsOf("host.get"));                                          // present: no second look
     }
 

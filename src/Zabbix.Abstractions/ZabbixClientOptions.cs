@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Community.Zabbix;
 
 /// <summary>
-/// Represents the options for one Zabbix server. Bound by <c>AddZabbix</c> from code, from a configuration section or
+/// Represents the options for one Zabbix server. Bound by <c>AddZabbixClient</c> from code, from a configuration section or
 /// from a hashtable, and validated before anything starts. The leaves are exactly the configuration keys. A credential
 /// handed over in code (a <see cref="ZabbixCredential"/>, given to the server's builder or constructor) and
 /// <see cref="ApiToken"/> are two ways to give the one credential: giving both fails validation.
@@ -17,7 +17,7 @@ namespace Community.Zabbix;
 /// resilience handler reads its <c>HttpStandardResilienceOptions</c> through the options monitor and rebuilds its pipeline
 /// when the bound section changes.
 /// </remarks>
-public sealed class ZabbixOptions : IValidatableObject
+public sealed class ZabbixClientOptions : IValidatableObject
 {
     /// <summary>
     /// Where the API is: the web frontend's address, e.g. <c>https://zabbix.example/</c>, or the JSON-RPC endpoint itself,

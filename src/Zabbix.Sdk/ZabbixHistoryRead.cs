@@ -34,28 +34,28 @@ internal static class ZabbixHistoryRead
     /// The one place a <c>history.get</c> is composed. Version-gated parameters join here and nowhere else: 8.0's
     /// <c>maxValueSize</c> for binary and JSON values is set to <see cref="ZabbixOptional{T}.Null"/> by <c>PageAsync</c>.
     /// </summary>
-    internal static ZabbixHistoryGetParameters Page(ZabbixItemValueType type, IReadOnlyList<ulong> itemIds, long from, long? till, int? limit) => new()
+    internal static ZabbixHistoryGetParameters Page(ZabbixItemValueType type, IReadOnlyList<ulong> itemIds, long from, long? to, int? limit) => new()
     {
         History = type,
         ItemIds = itemIds,
         Output = s_output,
         TimeFrom = DateTimeOffset.FromUnixTimeSeconds(from),
-        TimeTill = till is long t ? DateTimeOffset.FromUnixTimeSeconds(t) : null,
+        TimeTo = to is long t ? DateTimeOffset.FromUnixTimeSeconds(t) : null,
         Sort = s_sort,
         Limit = limit,
     };
 
-    /// <summary>One value type's rows with a readable clock, oldest first, from second <paramref name="from"/> to <paramref name="till"/> inclusive.</summary>
+    /// <summary>One value type's rows with a readable clock, oldest first, from second <paramref name="from"/> to <paramref name="to"/> inclusive.</summary>
     internal static async IAsyncEnumerable<(ZabbixHistoryRecord Record, ZabbixClock Clock)> ReadAsync(
         ZabbixClient client, Func<CancellationToken, Task<Version>> apiVersion, ZabbixTreeTelemetry telemetry, ILogger logger, ZabbixItemValueType type,
-        IReadOnlyList<ulong> itemIds, long from, long? till, [EnumeratorCancellation] CancellationToken cancellationToken)
+        IReadOnlyList<ulong> itemIds, long from, long? to, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         bool uncut = type is ZabbixItemValueType.Binary or ZabbixItemValueType.Json
                      && await apiVersion(cancellationToken).ConfigureAwait(false) >= s_uncutFrom;
         long cursor = from;
-        while (till is not { } end || cursor <= end)
+        while (to is not { } end || cursor <= end)
         {
-            (List<ZabbixHistoryRecord> page, List<(ZabbixHistoryRecord, ZabbixClock)> rows) = await PageAsync(client, telemetry, logger, type, Page(type, itemIds, cursor, till, PageSize), uncut, cancellationToken).ConfigureAwait(false);
+            (List<ZabbixHistoryRecord> page, List<(ZabbixHistoryRecord, ZabbixClock)> rows) = await PageAsync(client, telemetry, logger, type, Page(type, itemIds, cursor, to, PageSize), uncut, cancellationToken).ConfigureAwait(false);
             // A page answered after the caller stopped asking is not yielded: a read that was cancelled is not "nothing
             // more was there", even when the reply arrived (the transport may finish a request its caller gave up on).
             cancellationToken.ThrowIfCancellationRequested();

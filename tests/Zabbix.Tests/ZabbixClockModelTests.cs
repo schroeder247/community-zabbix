@@ -68,7 +68,7 @@ public sealed class ZabbixClockModelTests
     [Fact]
     public void A_get_takes_its_time_bounds_as_clocks()
     {
-        string sent = JsonSerializer.Serialize(new ZabbixEventGetParameters { TimeFrom = new ZabbixClock(10, 999).ToDateTimeOffset(), TimeTill = DateTimeOffset.FromUnixTimeSeconds(20) }, ZabbixJson.Options);
+        string sent = JsonSerializer.Serialize(new ZabbixEventGetParameters { TimeFrom = new ZabbixClock(10, 999).ToDateTimeOffset(), TimeTo = DateTimeOffset.FromUnixTimeSeconds(20) }, ZabbixJson.Options);
 
         Assert.Contains("\"time_from\":10", sent, StringComparison.Ordinal);
         Assert.Contains("\"time_till\":20", sent, StringComparison.Ordinal);

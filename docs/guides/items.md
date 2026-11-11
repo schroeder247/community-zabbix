@@ -138,7 +138,7 @@ public sealed class QueueItems(IQueueReader queues) : ZabbixItemProvider    // I
     public override IReadOnlyList<ZabbixItemDefinition> Items { get; } =
         [new("app.queue.depth", "Messages waiting in a queue") { TestKey = "app.queue.depth[orders]" }];
 
-    public override async ValueTask<ZabbixAgentAnswer> GetValueAsync(ZabbixItemKey key, CancellationToken cancellationToken)
+    public override async ValueTask<ZabbixAgentAnswer> GetValueAsync(ZabbixItemKey key, CancellationToken cancellationToken = default)
         => ZabbixAgentAnswer.Supported(key, (await queues.DepthAsync(key[0], cancellationToken)).ToString(CultureInfo.InvariantCulture));
 }
 ```

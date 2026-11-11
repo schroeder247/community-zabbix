@@ -16,7 +16,7 @@ namespace Community.Zabbix;
 /// not send because its circuit is open or its concurrency limit is reached; <see cref="InvalidDataException"/> for a
 /// reply that does not answer the request it was sent for; <see cref="System.Text.Json.JsonException"/> for a result
 /// the model cannot read; <see cref="TimeoutException"/> when the pipeline's attempt or total deadline passes (the
-/// headers or the body did not arrive in time; <see cref="ZabbixOptions.Timeouts"/> sets it per method); and
+/// headers or the body did not arrive in time; <see cref="ZabbixClientOptions.Timeouts"/> sets it per method); and
 /// <see cref="OperationCanceledException"/> when the caller cancels. A resilience pipeline's own exception, where there
 /// is one, is the inner exception.
 /// <para>A call returns a <see cref="Task{TResult}"/>: every call crosses the network, so a <c>ValueTask</c> would save
@@ -33,17 +33,12 @@ public interface IZabbixTransport
     /// <param name="resultInfo">The type information the <c>result</c> is read with.</param>
     /// <param name="cancellationToken">A cancellation token, which reaches the socket.</param>
     /// <returns>The call's <c>result</c>, read as <typeparamref name="TResult"/>.</returns>
-    /// <remarks>
-    /// No default on <paramref name="cancellationToken"/> (RS0026): the second overload also carries a trailing token,
-    /// and two overloads of one name each with an optional trailing parameter let a caller recompiled against a future
-    /// overload bind to a different member than before.
-    /// </remarks>
     Task<TResult> SendAsync<TParameters, TResult>(
         string method,
         TParameters parameters,
         JsonTypeInfo<TParameters> parametersInfo,
         JsonTypeInfo<TResult> resultInfo,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken = default);
 
     /// <summary>Call <paramref name="method"/> and hand back its raw <c>result</c> — the escape hatch.</summary>
     /// <typeparam name="TParameters">The parameters' type.</typeparam>
@@ -56,5 +51,5 @@ public interface IZabbixTransport
         string method,
         TParameters parameters,
         JsonTypeInfo<TParameters> parametersInfo,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken = default);
 }

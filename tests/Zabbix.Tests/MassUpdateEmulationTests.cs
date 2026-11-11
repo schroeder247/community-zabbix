@@ -15,7 +15,7 @@ public sealed class MassUpdateEmulationTests
     private static (ZabbixClient Server, ScriptedApi Api) Build(ScriptedApi api)
     {
         var services = new ServiceCollection();
-        services.AddZabbix().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
+        services.AddZabbixClient().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
         services.AddHttpClient(ZabbixHttp.GetClientName()).ConfigurePrimaryHttpMessageHandler(() => api);
         ServiceProvider provider = services.BuildValidated();
         return (provider.GetRequiredService<ZabbixClient>(), api);

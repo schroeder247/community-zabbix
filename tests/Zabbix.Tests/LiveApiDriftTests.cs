@@ -60,10 +60,10 @@ public sealed class LiveApiDriftTests(ITestOutputHelper output)
         ZabbixApi api = scope.Server.Api;
         Func<Task>[] gets =
         [
-            () => api.ApmLogs.GetAsync(new ZabbixApmLogGetParameters { TimeFrom = from.ToDateTimeOffset(), TimeTill = till.ToDateTimeOffset(), SeverityNumbers = [9], Limit = 5 }, ct),
-            () => api.ApmMetrics.GetAsync(new ZabbixApmMetricGetParameters { TimeFrom = from.ToDateTimeOffset(), TimeTill = till.ToDateTimeOffset(), Types = [ZabbixApmMetricType.Gauge], Limit = 5 }, ct),
-            () => api.ApmSpans.GetAsync(new ZabbixApmSpanGetParameters { TimeFrom = from.ToDateTimeOffset(), TimeTill = till.ToDateTimeOffset(), MinDuration = 1, Limit = 5 }, ct),
-            () => api.ApmTraces.GetAsync(new ZabbixApmTraceGetParameters { TimeFrom = from.ToDateTimeOffset(), TimeTill = till.ToDateTimeOffset(), Limit = 5 }, ct),
+            () => api.ApmLogs.GetAsync(new ZabbixApmLogGetParameters { TimeFrom = from.ToDateTimeOffset(), TimeTo = till.ToDateTimeOffset(), SeverityNumbers = [9], Limit = 5 }, ct),
+            () => api.ApmMetrics.GetAsync(new ZabbixApmMetricGetParameters { TimeFrom = from.ToDateTimeOffset(), TimeTo = till.ToDateTimeOffset(), Types = [ZabbixApmMetricType.Gauge], Limit = 5 }, ct),
+            () => api.ApmSpans.GetAsync(new ZabbixApmSpanGetParameters { TimeFrom = from.ToDateTimeOffset(), TimeTo = till.ToDateTimeOffset(), MinDuration = 1, Limit = 5 }, ct),
+            () => api.ApmTraces.GetAsync(new ZabbixApmTraceGetParameters { TimeFrom = from.ToDateTimeOffset(), TimeTo = till.ToDateTimeOffset(), Limit = 5 }, ct),
         ];
 
         foreach (Func<Task> get in gets)

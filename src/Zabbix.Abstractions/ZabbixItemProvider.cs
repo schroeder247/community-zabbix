@@ -27,7 +27,7 @@ namespace Community.Zabbix;
 ///     public override IReadOnlyList&lt;ZabbixItemDefinition&gt; Items { get; } =
 ///         [new("app.queue.depth", "Messages waiting in a queue") { TestKey = "app.queue.depth[orders]" }];
 ///
-///     public override async ValueTask&lt;ZabbixAgentAnswer&gt; GetValueAsync(ZabbixItemKey key, CancellationToken cancellationToken)
+///     public override async ValueTask&lt;ZabbixAgentAnswer&gt; GetValueAsync(ZabbixItemKey key, CancellationToken cancellationToken = default)
 ///         => ZabbixAgentAnswer.Supported(key, (await queues.DepthAsync(key[0], cancellationToken)).ToString(CultureInfo.InvariantCulture));
 /// }
 /// </code>
@@ -41,5 +41,5 @@ public abstract class ZabbixItemProvider
     /// <param name="key">The key asked for, its parameters included; its name is one of <see cref="Items"/>.</param>
     /// <param name="cancellationToken">The check's deadline.</param>
     /// <returns>The answer (<see cref="ZabbixAgentAnswer.Supported"/> or <see cref="ZabbixAgentAnswer.NotSupported"/>).</returns>
-    public abstract ValueTask<ZabbixAgentAnswer> GetValueAsync(ZabbixItemKey key, CancellationToken cancellationToken);
+    public abstract ValueTask<ZabbixAgentAnswer> GetValueAsync(ZabbixItemKey key, CancellationToken cancellationToken = default);
 }

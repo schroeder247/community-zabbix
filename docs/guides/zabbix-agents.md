@@ -189,8 +189,8 @@ generic host's 30-second `HostOptions.ShutdownTimeout`.
   answers a `ZabbixSendOutcome`, `Delivered`, `Rejected`, `Retried`, or `Held`. `DeliverAsync` on a `ZabbixWireClient` is one.
 - `ZabbixSendLoopOptions` also takes a `Logger`, a clock (`Time`), and a `Progress` that receives a `ZabbixSendProgress` (an
   outcome, a count, and a time) for every batch.
-- Each of these takes a `CancellationToken` last, which stops reading and starts the drain window; without one, the loop runs until
-  its source ends.
+- Each of these takes an optional `CancellationToken` last, which stops reading and starts the drain window; without one, the loop
+  runs until its source ends.
 
 ## Answer the server's active checks
 
@@ -409,7 +409,7 @@ await builder.Build().RunAsync();
 - **Bind from configuration** with `AddZabbixAgents(builder.Configuration)`, which registers every push agent under
   `Zabbix:PushAgents:{name}` and every active agent under `Zabbix:ActiveAgents:{name}`. `AddZabbixProxies(builder.Configuration)`
   also registers every `Zabbix:PassiveAgents:{name}`. See [Configuration](configuration.md). Sources, items, and stores are code
-  only: an `AddZabbix…` call with the same name adds them to the agent a row declares.
+  only: an `AddZabbixClient…` call with the same name adds them to the agent a row declares.
 
 ### Add a health check
 

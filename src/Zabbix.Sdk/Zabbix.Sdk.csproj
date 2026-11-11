@@ -31,7 +31,7 @@ License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2
          resilience handler (rate limiter → total timeout → retry → circuit breaker → attempt timeout). Nothing of
          ours mimics them. -->
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
-    <!-- Redaction of what the taxonomy marks Secret, registered by AddZabbix so a host that enables redaction has it. -->
+    <!-- Redaction of what the taxonomy marks Secret, registered by AddZabbixClient so a host that enables redaction has it. -->
     <PackageReference Include="Microsoft.Extensions.Compliance.Redaction" />
     <PackageReference Include="Microsoft.Extensions.Telemetry.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Telemetry" />

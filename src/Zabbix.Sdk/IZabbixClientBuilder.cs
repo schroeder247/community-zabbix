@@ -6,11 +6,11 @@ namespace Community.Zabbix;
 
 /// <summary>
 /// Represents an API client being set up, in the shape of <c>IHttpClientBuilder</c>: its name and the container it's
-/// registered in. <see cref="ZabbixBuilderExtensions"/> holds its verbs, which write the client's named registrations to
+/// registered in. <see cref="ZabbixClientBuilderExtensions"/> holds its verbs, which write the client's named registrations to
 /// <see cref="Services"/>. <see cref="ZabbixClient.CreateBuilder"/> returns one over a container of its own, and
-/// <see cref="ZabbixServiceCollectionExtensions.AddZabbix(IServiceCollection, string)"/> one over the application's.
+/// <see cref="ZabbixClientServiceCollectionExtensions.AddZabbixClient(IServiceCollection, string)"/> one over the application's.
 /// </summary>
-public interface IZabbixBuilder
+public interface IZabbixClientBuilder
 {
     /// <summary>
     /// The client's name: the name of its options, and the key it's registered under, which a configuration document binds

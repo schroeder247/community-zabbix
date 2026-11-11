@@ -52,7 +52,7 @@ public sealed class WatchZbxItemCommand : ZabbixServerCmdlet
     protected override void ProcessRecord()
     {
         IZabbixNode node = HostName is not null
-            ? Key is not null ? ZabbixClient.Hosts[HostName].Item(Key) : ZabbixClient.Hosts[HostName]
+            ? Key is not null ? ZabbixClient.Hosts[HostName].Items[Key] : ZabbixClient.Hosts[HostName]
             : Group is not null ? ZabbixClient.HostGroups[Group]
             : ZabbixClient.AllHosts;
 

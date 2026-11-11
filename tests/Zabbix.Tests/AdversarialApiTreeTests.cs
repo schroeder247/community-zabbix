@@ -47,7 +47,7 @@ public sealed class AdversarialApiTreeTests
         var time = new FakeTimeProvider(DateTimeOffset.FromUnixTimeSeconds(T0 + 5));
         var services = new ServiceCollection();
         services.AddSingleton<TimeProvider>(time);
-        services.AddZabbix().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
+        services.AddZabbixClient().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
         services.AddHttpClient(ZabbixHttp.GetClientName()).ConfigurePrimaryHttpMessageHandler(() => api);
         ServiceProvider provider = services.BuildValidated();
         return new Harness
@@ -103,7 +103,7 @@ public sealed class AdversarialApiTreeTests
         using ScriptedApi api = new ScriptedApi().On("apiinfo.version", "\"7.0.0\"").On("item.get", $"[{Item("1", "a")}]").On("history.get", History);
         using Harness harness = Build(api);
         await using IZabbixWatcher first = harness.Server.Hosts["web-01"].Watch(new ZabbixWatchPlan(TimeSpan.FromSeconds(30)));
-        await using IZabbixWatcher second = harness.Server.Hosts["web-01"].Item("a").Watch(new ZabbixWatchPlan(TimeSpan.FromSeconds(30)));
+        await using IZabbixWatcher second = harness.Server.Hosts["web-01"].Items["a"].Watch(new ZabbixWatchPlan(TimeSpan.FromSeconds(30)));
         await using IAsyncEnumerator<ZabbixValue> one = first.GetAsyncEnumerator(TestContext.Current.CancellationToken);
         await using IAsyncEnumerator<ZabbixValue> two = second.GetAsyncEnumerator(TestContext.Current.CancellationToken);
         ValueTask<bool> nextOne = one.MoveNextAsync();

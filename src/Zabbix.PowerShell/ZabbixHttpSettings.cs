@@ -8,7 +8,7 @@ namespace Community.Zabbix.PowerShell;
 /// <summary>
 /// The HTTP knobs <c>Connect-ZbxServer</c> takes as <c>Invoke-RestMethod</c> does (<c>-SkipCertificateCheck</c>,
 /// <c>-TimeoutSec</c>, <c>-Proxy</c>, <c>-ProxyCredential</c>), applied through the server's builder as an application
-/// applies its own (<c>ConfigureHttpClient</c>, <c>WithTimeout</c>): the SDK's handler is configured, never replaced, and the
+/// applies its own (<c>ConfigureHttpClientBuilder</c>, <c>WithTimeout</c>): the SDK's handler is configured, never replaced, and the
 /// deadline is the standard resilience handler's.
 /// </summary>
 /// <param name="SkipCertificateCheck">Accepts any server certificate (a self-signed frontend).</param>
@@ -18,15 +18,15 @@ namespace Community.Zabbix.PowerShell;
 internal sealed record ZabbixHttpSettings(bool SkipCertificateCheck, TimeSpan? Timeout, Uri? Proxy, NetworkCredential? ProxyCredential)
 {
     /// <summary>Applies the knobs to the server <paramref name="server"/> registers.</summary>
-    /// <param name="server">The server's builder, from <c>AddZabbix</c>.</param>
+    /// <param name="server">The server's builder, from <c>AddZabbixClient</c>.</param>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5359:Do not disable certificate validation",
         Justification = "Only with -SkipCertificateCheck, the user's explicit choice, as Invoke-RestMethod takes it; Connect-ZbxServer warns when it is given.")]
-    public void ApplyTo(IZabbixBuilder server)
+    public void ApplyTo(IZabbixClientBuilder server)
     {
         ArgumentNullException.ThrowIfNull(server);
         if (SkipCertificateCheck || Proxy is not null)
         {
-            server.ConfigureHttpClient(client => client.ConfigurePrimaryHttpMessageHandler((handler, _) =>
+            server.ConfigureHttpClientBuilder(client => client.ConfigurePrimaryHttpMessageHandler((handler, _) =>
             {
                 var sockets = (SocketsHttpHandler)handler;
                 if (SkipCertificateCheck) sockets.SslOptions.RemoteCertificateValidationCallback = (_, _, _, _) => true;

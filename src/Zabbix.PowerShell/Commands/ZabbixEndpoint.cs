@@ -6,8 +6,8 @@ namespace Community.Zabbix.PowerShell.Commands;
 internal static class ZabbixEndpoint
 {
     /// <summary>
-    /// <paramref name="uri"/> when it names a script, else <see cref="ZabbixOptions.ApiScript"/> under it: the SDK's rule
-    /// (<see cref="ZabbixOptions.GetApiEndpoint"/>), after the command line's own checks.
+    /// <paramref name="uri"/> when it names a script, else <see cref="ZabbixClientOptions.ApiScript"/> under it: the SDK's rule
+    /// (<see cref="ZabbixClientOptions.GetApiEndpoint"/>), after the command line's own checks.
     /// </summary>
     /// <param name="uri">The frontend URL or the endpoint.</param>
     /// <exception cref="ArgumentException"><paramref name="uri"/> is not an absolute http or https URL, or it carries a
@@ -20,7 +20,7 @@ internal static class ZabbixEndpoint
             throw new ArgumentException($"'{Shown(uri)}' is not an absolute http or https URL", nameof(uri));
         if (uri.UserInfo.Length > 0)
             throw new ArgumentException($"'{Shown(uri)}' carries a user name or password in the URL: give them as -Credential (or a token as -ApiToken)", nameof(uri));
-        return ZabbixOptions.GetApiEndpoint(uri);
+        return ZabbixClientOptions.GetApiEndpoint(uri);
     }
 
     /// <summary><paramref name="uri"/> as it may be shown: without its user info.</summary>

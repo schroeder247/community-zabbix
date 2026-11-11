@@ -14,13 +14,13 @@ internal sealed record ZabbixCredentialInCode(ZabbixCredential? Credential);
 
 /// <summary>
 /// Checks a client's options against the credential its builder gave in code: never beside the options' own
-/// <see cref="ZabbixOptions.ApiToken"/>, and never over plain <c>http</c> to another host unless the options allow it. Only the
+/// <see cref="ZabbixClientOptions.ApiToken"/>, and never over plain <c>http</c> to another host unless the options allow it. Only the
 /// last credential verb counts, so a later one replaces what an earlier one gave.
 /// </summary>
 /// <param name="services">The container, which holds the client's <see cref="ZabbixCredentialInCode"/> under its name.</param>
-internal sealed class ZabbixCredentialValidator(IServiceProvider services) : IValidateOptions<ZabbixOptions>
+internal sealed class ZabbixCredentialValidator(IServiceProvider services) : IValidateOptions<ZabbixClientOptions>
 {
-    public ValidateOptionsResult Validate(string? name, ZabbixOptions options)
+    public ValidateOptionsResult Validate(string? name, ZabbixClientOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
         if (services.GetKeyedService<ZabbixCredentialInCode>(name ?? Options.DefaultName) is not { } given) return ValidateOptionsResult.Skip;
@@ -29,9 +29,9 @@ internal sealed class ZabbixCredentialValidator(IServiceProvider services) : IVa
         if (!string.IsNullOrEmpty(options.ApiToken))
             failures.Add("The options carry an ApiToken beside the credential given in code; give one of them.");
         if (given.Credential is { } credential && !ReferenceEquals(credential, ZabbixCredential.Anonymous)
-            && !ZabbixOptions.AllowsCredentialsTo(options.Endpoint, options.AllowUnencryptedCredentials))
+            && !ZabbixClientOptions.AllowsCredentialsTo(options.Endpoint, options.AllowUnencryptedCredentials))
         {
-            failures.Add(ZabbixOptions.UnencryptedCredential);
+            failures.Add(ZabbixClientOptions.UnencryptedCredential);
         }
         return failures.Count == 0 ? ValidateOptionsResult.Success : ValidateOptionsResult.Fail(failures);
     }

@@ -450,7 +450,7 @@ public abstract class ZabbixGetCmdlet<TEntity, TParameters> : ZabbixServerCmdlet
             WriteError(new ErrorRecord(unbound, EngineInputNotBound, ErrorCategory.InvalidArgument, InputObject));
             return;
         }
-        if (_namesHere is not null && parameters.CountOutput == true)
+        if (_namesHere is not null && CountOutput.IsPresent)
         {
             ThrowTerminatingError(new ErrorRecord(
                 new PSArgumentException("-CountOutput counts on the server, which cannot match this -Name (a '?', an escaped '`*', or -Name with -Search); count the objects instead: (Get-... | Measure-Object).Count", nameof(CountOutput)),
@@ -463,14 +463,14 @@ public abstract class ZabbixGetCmdlet<TEntity, TParameters> : ZabbixServerCmdlet
         }
         Query(ZabbixClient, parameters);
         // -IncludeTotalCount: the count of the same selection, before -First and -Skip, as the engine's paging writes it.
-        if (PagingParameters.IncludeTotalCount.IsPresent && parameters.CountOutput != true && !LastRunFailed
+        if (PagingParameters.IncludeTotalCount.IsPresent && !CountOutput.IsPresent && !LastRunFailed
             && TryRun(cancellationToken => CountAsync(ZabbixClient, parameters, cancellationToken), out long total, parameters))
         {
             WriteObject(PagingParameters.NewTotalCount((ulong)total, 1.0));
         }
         // A name with no wildcard that matched nothing is ObjectNotFound, non-terminating, once per name — unless the
         // read failed (its error says why) or counted, or -Limit may have cut the match off.
-        if (LastRunFailed || parameters.CountOutput == true || Limit is not null) return;
+        if (LastRunFailed || CountOutput.IsPresent || Limit is not null) return;
         string noun = ZabbixEntities.Of<TEntity>().Noun;
         foreach ((string written, _) in _unfound ?? [])
         {

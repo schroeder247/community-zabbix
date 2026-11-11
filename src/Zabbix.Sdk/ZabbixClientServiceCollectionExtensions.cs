@@ -14,17 +14,18 @@ namespace Community.Zabbix;
 /// <summary>
 /// Registers a <see cref="ZabbixClient"/> in a container: its named options, validated when the host starts, the named
 /// <see cref="HttpClient"/> on one long-lived <see cref="SocketsHttpHandler"/> with the standard resilience handler, redaction,
-/// metrics, the transport, and the client, which the container builds, shares and disposes. A named client is a keyed service,
-/// which <see cref="IZabbixClientFactory"/> returns by name. <see cref="ZabbixClient.CreateBuilder"/> and the client's
-/// constructors build their client through the same registration, in a container of its own.
+/// metrics, the transport, and the client, which the container builds, shares and disposes: a caller's dispose leaves it
+/// running. A named client is a keyed service, which <see cref="IZabbixClientFactory"/> returns by name.
+/// <see cref="ZabbixClient.CreateBuilder"/> and the client's constructors build their client through the same registration,
+/// in a container of its own.
 /// </summary>
-public static class ZabbixServiceCollectionExtensions
+public static class ZabbixClientServiceCollectionExtensions
 {
     /// <summary>
     /// Registers a client for every server <paramref name="document"/> declares under <see cref="ZabbixConfigurationSections.Servers"/>, by name, bound
     /// to its own subsection. The section is read once here to learn the names, so a name added by a reload is not
     /// registered; everything under a name is bound, not copied, so its options monitor sees a reload, and what each
-    /// consumer does with that is its own contract (for a client: <see cref="ZabbixOptions"/>, where only the
+    /// consumer does with that is its own contract (for a client: <see cref="ZabbixClientOptions"/>, where only the
     /// <c>Resilience</c> words take effect live). The agents' and proxies' sections are bound by their own packages'
     /// roots (<see cref="ZabbixConfigurationSections"/>).
     /// </summary>
@@ -51,7 +52,7 @@ public static class ZabbixServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(document);
 
         foreach (IConfigurationSection server in DocumentOf(document).GetSection(ZabbixConfigurationSections.Servers).GetChildren())
-            services.AddZabbix(server.Key).Bind(server);
+            services.AddZabbixClient(server.Key).Bind(server);
 
         return services;
     }
@@ -64,29 +65,32 @@ public static class ZabbixServiceCollectionExtensions
             ? section
             : configuration;
 
-    /// <summary>Registers the unnamed client, which is also injected as plain <see cref="ZabbixClient"/>.</summary>
+    /// <summary>
+    /// Registers the unnamed client, which is also injected as plain <see cref="ZabbixClient"/>. The container shares the
+    /// client: it disposes it, and a caller's dispose leaves it running.
+    /// </summary>
     /// <param name="services">The container to register the client in.</param>
     /// <returns>The client's builder, whose verbs set it up.</returns>
     /// <example>
     /// <code language="csharp">
-    /// builder.Services.AddZabbix()
+    /// builder.Services.AddZabbixClient()
     ///     .WithEndpoint("https://zabbix.example/")
     ///     .WithToken(token);
     /// </code>
     /// </example>
-    public static IZabbixBuilder AddZabbix(this IServiceCollection services) => services.AddZabbix(Options.DefaultName);
+    public static IZabbixClientBuilder AddZabbixClient(this IServiceCollection services) => services.AddZabbixClient(Options.DefaultName);
 
     /// <summary>
     /// Registers a client named <paramref name="name"/>. Registering a name again continues setting up that client, as
     /// <c>AddHttpClient</c> does: the second call adds nothing to the HTTP pipeline, so the standard resilience handler is never
-    /// stacked.
+    /// stacked. The container shares the client: it disposes it, and a caller's dispose leaves it running.
     /// </summary>
     /// <param name="services">The container to register the client in.</param>
     /// <param name="name">The name; <see cref="Options.DefaultName"/> is the unnamed client.</param>
     /// <returns>The client's builder, whose verbs set it up.</returns>
     /// <example>
     /// <code language="csharp">
-    /// builder.Services.AddZabbix("prod")
+    /// builder.Services.AddZabbixClient("prod")
     ///     .WithEndpoint("https://zabbix.example/")
     ///     .WithToken(token)
     ///     .WithTimeout("configuration.import", TimeSpan.FromMinutes(5));
@@ -94,7 +98,7 @@ public static class ZabbixServiceCollectionExtensions
     /// ZabbixClient prod = services.GetRequiredService&lt;IZabbixClientFactory&gt;().Create("prod");
     /// </code>
     /// </example>
-    public static IZabbixBuilder AddZabbix(this IServiceCollection services, string name)
+    public static IZabbixClientBuilder AddZabbixClient(this IServiceCollection services, string name)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(name);
@@ -104,9 +108,9 @@ public static class ZabbixServiceCollectionExtensions
         if (services.Any(descriptor => descriptor.IsKeyedService && descriptor.ServiceType == typeof(ZabbixClient) && Equals(descriptor.ServiceKey, name)))
             return builder;
 
-        services.AddOptions<ZabbixOptions>(name).ValidateOnStart();
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<ZabbixOptions>, ZabbixOptionsValidator>());
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<ZabbixOptions>, ZabbixCredentialValidator>());
+        services.AddOptions<ZabbixClientOptions>(name).ValidateOnStart();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<ZabbixClientOptions>, ZabbixClientOptionsValidator>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<ZabbixClientOptions>, ZabbixCredentialValidator>());
         services.TryAddSingleton(TimeProvider.System);
         services.AddLogging();
         services.AddZabbixTelemetry();
@@ -116,7 +120,7 @@ public static class ZabbixServiceCollectionExtensions
         // The credential is a keyed service: the builder's credential verbs replace this default, a file's ApiToken, or
         // anonymous without one.
         services.TryAddKeyedSingleton<ZabbixCredential>(name, (provider, key) =>
-            provider.GetRequiredService<IOptionsMonitor<ZabbixOptions>>().Get(NameOf(key)).ApiToken is { Length: > 0 } token
+            provider.GetRequiredService<IOptionsMonitor<ZabbixClientOptions>>().Get(NameOf(key)).ApiToken is { Length: > 0 } token
                 ? new ZabbixApiTokenCredential(token)
                 : ZabbixCredential.Anonymous);
 
@@ -125,13 +129,13 @@ public static class ZabbixServiceCollectionExtensions
         services.TryAddKeyedSingleton<IZabbixTransport>(name, static (provider, key) =>
         {
             string name = NameOf(key);
-            ZabbixOptions options = provider.GetRequiredService<IOptionsMonitor<ZabbixOptions>>().Get(name);
-            Uri endpoint = ZabbixOptions.GetApiEndpoint(options.Endpoint ?? throw new OptionsValidationException(name, typeof(ZabbixOptions), ["Endpoint is required"]));
+            ZabbixClientOptions options = provider.GetRequiredService<IOptionsMonitor<ZabbixClientOptions>>().Get(name);
+            Uri endpoint = ZabbixClientOptions.GetApiEndpoint(options.Endpoint ?? throw new OptionsValidationException(name, typeof(ZabbixClientOptions), ["Endpoint is required"]));
             ZabbixCredential credential = provider.GetRequiredKeyedService<ZabbixCredential>(name);
             // Whatever registered the credential, none goes out in clear: the options' own validation sees only a file's
             // ApiToken, and this is where the credential and the endpoint first meet.
-            if (!ReferenceEquals(credential, ZabbixCredential.Anonymous) && !ZabbixOptions.AllowsCredentialsTo(endpoint, options.AllowUnencryptedCredentials))
-                throw new OptionsValidationException(name, typeof(ZabbixOptions), [ZabbixOptions.UnencryptedCredential]);
+            if (!ReferenceEquals(credential, ZabbixCredential.Anonymous) && !ZabbixClientOptions.AllowsCredentialsTo(endpoint, options.AllowUnencryptedCredentials))
+                throw new OptionsValidationException(name, typeof(ZabbixClientOptions), [ZabbixClientOptions.UnencryptedCredential]);
             return new JsonRpcTransport(
                 name,
                 ZabbixHttp.WithoutUserInfo(endpoint),
@@ -142,6 +146,8 @@ public static class ZabbixServiceCollectionExtensions
                 provider.GetRequiredService<ZabbixApiTelemetry>(),
                 provider.GetRequiredService<TimeProvider>());
         });
+        // The container holds the client through its owner, which releases it when the container is disposed; the client it
+        // hands out is shared, so a caller's dispose leaves it running.
         services.TryAddKeyedSingleton(name, static (provider, key) =>
         {
             string name = NameOf(key);
@@ -150,8 +156,9 @@ public static class ZabbixServiceCollectionExtensions
             using (provider.GetRequiredService<IHttpClientFactory>().CreateClient(ZabbixHttp.GetClientName(name)))
             {
             }
-            return new ZabbixClient(name, provider);
+            return new ZabbixClientOwner(new ZabbixClient(name, provider));
         });
+        services.TryAddKeyedSingleton(name, static (provider, key) => provider.GetRequiredKeyedService<ZabbixClientOwner>(key).Client);
 
         if (name == Options.DefaultName)
         {
@@ -176,7 +183,7 @@ public static class ZabbixServiceCollectionExtensions
             .ConfigureHttpClient(client => client.Timeout = Timeout.InfiniteTimeSpan)
             .ConfigurePrimaryHttpMessageHandler(provider =>
             {
-                ZabbixOptions options = provider.GetRequiredService<IOptionsMonitor<ZabbixOptions>>().Get(name);
+                ZabbixClientOptions options = provider.GetRequiredService<IOptionsMonitor<ZabbixClientOptions>>().Get(name);
                 return new SocketsHttpHandler
                 {
                     MaxConnectionsPerServer = options.MaxConnectionsPerServer > 0 ? options.MaxConnectionsPerServer : int.MaxValue,
@@ -217,21 +224,21 @@ public static class ZabbixServiceCollectionExtensions
                            && ZabbixTransientReply.IsTransient(response);
                 };
 
-                // A method named in ZabbixOptions.Timeouts carries its own deadline (configuration.import is not a
+                // A method named in ZabbixClientOptions.Timeouts carries its own deadline (configuration.import is not a
                 // microservice call); every other request keeps the configured ones, read when the request starts.
                 options.AttemptTimeout.TimeoutGenerator = arguments => new(DeadlineOf(arguments.Context) ?? options.AttemptTimeout.Timeout);
                 options.TotalRequestTimeout.TimeoutGenerator = arguments => new(DeadlineOf(arguments.Context) ?? options.TotalRequestTimeout.Timeout);
             });
         // Innermost: the body is read under the attempt's token, so a stalled body is a timed-out attempt.
         services.AddHttpClient(ZabbixHttp.GetClientName(name)).AddHttpMessageHandler(provider =>
-            new ZabbixResponseBufferingHandler(provider.GetRequiredService<IOptionsMonitor<ZabbixOptions>>().Get(name).MaxResponseContentBytes));
+            new ZabbixResponseBufferingHandler(provider.GetRequiredService<IOptionsMonitor<ZabbixClientOptions>>().Get(name).MaxResponseContentBytes));
     }
 
     // A keyed registration is resolved by the server's name, the key every one of these was registered under.
     private static string NameOf(object? key) => key as string ?? throw new InvalidOperationException("A Zabbix server is resolved by its name.");
 
     // The builder over the application's container: the verbs write there, and the container builds the client.
-    private sealed record Registration(string Name, IServiceCollection Services) : IZabbixBuilder;
+    private sealed record Registration(string Name, IServiceCollection Services) : IZabbixClientBuilder;
 
     private static TimeSpan? DeadlineOf(ResilienceContext context)
         => context.GetRequestMessage() is { } request && request.Options.TryGetValue(ZabbixHttp.Deadline, out TimeSpan deadline) ? deadline : null;

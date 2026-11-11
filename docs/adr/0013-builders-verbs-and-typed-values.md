@@ -156,8 +156,8 @@ A `CancellationToken` is the last parameter of every async member, and it's opti
 
 ### 7. One spelling per concept
 
-- **Names:** `HostName`, `UserName`, `LogOutAsync`, and member names without abbreviations (`DiscoveryRuleId`, not `DruleId`).
-- **Registrations:** `AddZabbixClient` and `IZabbixClientBuilder`, beside `AddZabbixWireClient` and `IZabbixWireClientBuilder`.
+- **Names:** `HostName`, `UserName`, `LogOnAsync` and `LogOffAsync` (the capitalization table's forms, not `LogIn` or `LogOut`), and member names without abbreviations (`NetworkDiscoveryRuleId`, not `DruleId`).
+- **Registrations:** `AddZabbixClient`, `IZabbixClientBuilder` and `ZabbixClientOptions`, beside `AddZabbixWireClient`, `IZabbixWireClientBuilder` and `ZabbixWireClientOptions`.
 - **Types:** a Zabbix version is a `System.Version`; a package uses the API's enums rather than copies of them; a reason is an enum, not a string constant.
 - **Parameters:** public constructors take `(options, loggers, time, meters)`, with an `ILoggerFactory`; two or more booleans are an enum.
 - **Interfaces:** no public interface is empty: a builder capability carries `Name` and `Services`.

@@ -99,7 +99,7 @@ public sealed class LiveApiAdversarialTests
         ZabbixSenderResponse response = await LiveFixtures.SendWhenKnownAsync(sender, sent);
         Assert.Equal(10_000, response.Processed);
         await LiveFixtures.HistoryAsync(scope.Server, host.Items[0], 10_000, TimeSpan.FromSeconds(90));
-        List<ZabbixValue> read = await scope.Server.Hosts[host.Host].Item("adv.history")
+        List<ZabbixValue> read = await scope.Server.Hosts[host.Host].Items["adv.history"]
             .GetHistoryAsync(DateTimeOffset.FromUnixTimeSeconds(second), DateTimeOffset.FromUnixTimeSeconds(second + 100), Cancel).ToListAsync(Cancel);
 
         Assert.Equal(sent.Select(value => (value.Clock, value.Value)), read.Select(value => (value.Clock, value.Value)));

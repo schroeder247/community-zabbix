@@ -9,7 +9,7 @@ namespace Community.Zabbix;
 
 /// <summary>
 /// Registers the API's and the pull plane's telemetry once per container, on the host's <see cref="IMeterFactory"/>.
-/// <c>AddZabbix</c>, the agents (<c>Zabbix.Agent</c>, which adds the wire's and the agents' own layers) and the
+/// <c>AddZabbixClient</c>, the agents (<c>Zabbix.Agent</c>, which adds the wire's and the agents' own layers) and the
 /// proxies call it, so a host that registers any of them gets one instance per layer, its instruments on the
 /// host's meters (and so on whatever the host exports), and the hosted components resolve them rather than build their own.
 /// </summary>

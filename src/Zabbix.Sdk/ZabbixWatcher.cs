@@ -221,7 +221,7 @@ internal sealed class ZabbixWatcher : IZabbixWatcher
         // The two views of the item set, rebuilt only when a refresh changed it, not on every tick.
         Dictionary<(string Host, ZabbixItemKey Key), WatchedItem> byKey = _byKey ??= _items.Values.ToDictionary(item => (item.Host, item.Key));
         Dictionary<ulong, (string Host, ZabbixItemKey Key, ZabbixItemValueType Type)> ids = _ids ??= _items.ToDictionary(item => item.Key, item => (item.Value.Host, item.Value.Key, item.Value.Type));
-        await foreach (ZabbixValue value in _node.ReadHistoryAsync(ids, _highWater - _lateness, till: null, stopping).ConfigureAwait(false))
+        await foreach (ZabbixValue value in _node.ReadHistoryAsync(ids, _highWater - _lateness, to: null, stopping).ConfigureAwait(false))
         {
             WatchedItem item = byKey[(value.Host, value.Key)];
             if (value.Clock <= item.LastSeen) continue;                                  // read on an earlier tick

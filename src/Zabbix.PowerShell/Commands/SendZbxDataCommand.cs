@@ -125,11 +125,11 @@ public sealed class SendZbxDataCommand : ZabbixServerWireCmdlet
                 string node = string.Join(", ", nodes.Select(ZabbixEndPoint.Format));
                 // The connection lives for the send: disposing it releases what certificate mode read.
                 using ZabbixWireLink link = ZabbixWireLinks.Open(nodes, options, time, loggers);
-                using var wire = new ZabbixWireClient(link.AsExchange(ZabbixExchangeOptions.FollowRedirects), new ZabbixWireOptions { Server = string.Join(';', nodes.Distinct().Select(ZabbixEndPoint.Format)) }, loggers, time);
-                // In the client's own frame size (ZabbixWireOptions.DefaultBatchSize, zabbix_sender's VALUES_MAX 250), a call per
+                using var wire = new ZabbixWireClient(link.AsExchange(ZabbixExchangeOptions.FollowRedirects), new ZabbixWireClientOptions { Server = string.Join(';', nodes.Distinct().Select(ZabbixEndPoint.Format)) }, loggers, time);
+                // In the client's own frame size (ZabbixWireClientOptions.DefaultBatchSize, zabbix_sender's VALUES_MAX 250), a call per
                 // frame so the progress bar moves with each answer: one bad value or one timeout fails one request, not the
                 // whole pipeline. The answers add up to the one record the command writes.
-                const int batch = ZabbixWireOptions.DefaultBatchSize;
+                const int batch = ZabbixWireClientOptions.DefaultBatchSize;
                 ZabbixSenderResponse? total = null;
                 for (int start = 0; start < _items.Count; start += batch)
                 {

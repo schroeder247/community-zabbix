@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 namespace Community.Zabbix;
 
 /// <summary>Represents the options of a <see cref="ZabbixWireClient"/>, which the client copies when it's built.</summary>
-public sealed class ZabbixWireOptions : IValidatableObject
+public sealed class ZabbixWireClientOptions : IValidatableObject
 {
     /// <summary>The most values one frame carries unless said otherwise: <c>zabbix_sender</c>'s <c>VALUES_MAX</c>, because a frame of many more takes long enough to hit the timeout.</summary>
     public const int DefaultBatchSize = ZabbixSender.DefaultBatchSize;
@@ -45,7 +45,7 @@ public sealed class ZabbixWireOptions : IValidatableObject
 
     /// <summary>A copy that changes to these options don't reach: what a client keeps.</summary>
     /// <returns>The copy, with a copy of <see cref="Connection"/>.</returns>
-    internal ZabbixWireOptions Clone() => new()
+    internal ZabbixWireClientOptions Clone() => new()
     {
         Server = Server,
         SessionId = SessionId,
@@ -87,8 +87,8 @@ public sealed class ZabbixWireOptions : IValidatableObject
     }
 }
 
-/// <summary>The generated validator for <see cref="ZabbixWireOptions"/>.</summary>
+/// <summary>The generated validator for <see cref="ZabbixWireClientOptions"/>.</summary>
 [OptionsValidator]
-internal sealed partial class ZabbixWireOptionsValidator : IValidateOptions<ZabbixWireOptions>
+internal sealed partial class ZabbixWireClientOptionsValidator : IValidateOptions<ZabbixWireClientOptions>
 {
 }

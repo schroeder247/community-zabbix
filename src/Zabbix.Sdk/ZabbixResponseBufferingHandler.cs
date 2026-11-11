@@ -11,7 +11,7 @@ namespace Community.Zabbix;
 /// of holding the caller for ever once the headers have arrived.
 /// </summary>
 /// <remarks>
-/// The body is bounded by <see cref="ZabbixOptions.MaxResponseContentBytes"/>: a larger one fails as
+/// The body is bounded by <see cref="ZabbixClientOptions.MaxResponseContentBytes"/>: a larger one fails as
 /// <see cref="InvalidDataException"/>, which the standard retry does not handle, so an oversized read is not sent again.
 /// The body is copied once into a <see cref="Pipe"/>'s pooled segments and handed on as a
 /// <see cref="ZabbixBufferedContent"/> the transport reads in place. <c>HttpClient.Timeout</c> and

@@ -190,7 +190,7 @@ Each of these gives the same client:
 | Set more than the server | `ZabbixWireClient.CreateBuilder()`, its verbs, and `Build()` |
 | Share a client in an application with a host | `AddZabbixWireClient`, with the same verbs. See [Register it in a host](#register-it-in-a-host). |
 
-The builder's verbs set what `ZabbixWireOptions` holds, in the order you call them:
+The builder's verbs set what `ZabbixWireClientOptions` holds, in the order you call them:
 
 | Verb | What it sets |
 | --- | --- |
@@ -211,7 +211,7 @@ The builder's verbs set what `ZabbixWireOptions` holds, in the order you call th
 
 ## Set options
 
-Set them with the builder's verbs, or pass `ZabbixWireOptions` to the constructor. A client's settings are fixed when it's built:
+Set them with the builder's verbs, or pass `ZabbixWireClientOptions` to the constructor. A client's settings are fixed when it's built:
 the constructor copies the options, so a later change to that object doesn't reach the client.
 
 | Option | Default | Meaning |

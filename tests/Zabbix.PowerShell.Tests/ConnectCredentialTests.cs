@@ -22,7 +22,7 @@ public sealed class ConnectCredentialTests
         Run run = shell.Invoke($"Connect-ZbxServer -Uri '{server.BaseAddress}' -ApiToken (ConvertTo-SecureString 'test-token' -AsPlainText -Force)");
 
         Assert.Empty(run.Errors);
-        Assert.Equal(server.Endpoint, shell.Context.Current!.Client.Endpoint);   // ZabbixOptions.GetApiEndpoint, as the SDK reads it
+        Assert.Equal(server.Endpoint, shell.Context.Current!.Client.Endpoint);   // ZabbixClientOptions.GetApiEndpoint, as the SDK reads it
         Assert.Contains(server.Calls, call => call.Method == "user.get");
     }
 

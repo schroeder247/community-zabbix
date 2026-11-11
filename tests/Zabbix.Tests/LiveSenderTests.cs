@@ -43,7 +43,7 @@ public sealed class LiveSenderTests
 
         // The pull plane reads the same values with the same clocks, as ZabbixClock.
         List<ZabbixValue> tree = [];
-        await foreach (ZabbixValue v in scope.Server.Hosts[host.Host].Item("zbxtest.text").GetHistoryAsync(DateTimeOffset.FromUnixTimeSeconds(second), cancellationToken: TestContext.Current.CancellationToken))
+        await foreach (ZabbixValue v in scope.Server.Hosts[host.Host].Items["zbxtest.text"].GetHistoryAsync(DateTimeOffset.FromUnixTimeSeconds(second), cancellationToken: TestContext.Current.CancellationToken))
             tree.Add(v);
         Assert.Equal([values[0].Clock, values[1].Clock], tree.Select(v => v.Clock));
         Assert.Equal([values[0].Value, values[1].Value], tree.Select(v => v.Value));

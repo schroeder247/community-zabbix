@@ -43,7 +43,7 @@ public sealed class ZabbixWebItems : ZabbixItemProvider
     public override IReadOnlyList<ZabbixItemDefinition> Items => _set.Items;
 
     /// <inheritdoc/>
-    public override ValueTask<ZabbixAgentAnswer> GetValueAsync(ZabbixItemKey key, CancellationToken cancellationToken) => _set.AnswerAsync(key, cancellationToken);
+    public override ValueTask<ZabbixAgentAnswer> GetValueAsync(ZabbixItemKey key, CancellationToken cancellationToken = default) => _set.AnswerAsync(key, cancellationToken);
 
     private static async ValueTask<string> PageAsync(ZabbixItemKey key, int parameters, CancellationToken cancellationToken)
     {

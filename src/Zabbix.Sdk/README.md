@@ -1,6 +1,6 @@
 # Community.Zabbix.Sdk
 
-The Community Zabbix SDK: `ZabbixClient` and `AddZabbix`, the JSON-RPC API over the platform's HTTP pipeline with generated
+The Community Zabbix SDK: `ZabbixClient` and `AddZabbixClient`, the JSON-RPC API over the platform's HTTP pipeline with generated
 clients for Zabbix 7.0, 7.4 and 8.0, and the host/item tree and its watcher. The framed-TCP wire (`ZabbixWireClient`, TLS and PSK) is the
 `Community.Zabbix.Wire` package.
 
@@ -19,7 +19,8 @@ await foreach (ZabbixValue value in zabbix.Hosts["web-01"].GetLatestAsync())
 
 The address is the frontend's; the client calls its `api_jsonrpc.php`. `ZabbixClient.CreateBuilder()` builds a client with
 more to set (`WithTimeout`, `ConfigureResilience`, `UseLogging`), and in an application with a host,
-`AddZabbix("prod")` registers the same client with the same verbs, and `IZabbixClientFactory.Create("prod")` returns it.
+`AddZabbixClient("prod")` registers the same client with the same verbs, and `IZabbixClientFactory.Create("prod")` returns it.
+A client from the container is shared: disposing it leaves it running, and the container disposes it.
 
 A client that logs in with a user name and password (a `NetworkCredential`) ends its session with `user.logout`
 when it is disposed with `await using` or `DisposeAsync` (a container disposed asynchronously does this for the

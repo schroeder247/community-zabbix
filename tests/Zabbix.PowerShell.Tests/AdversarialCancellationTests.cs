@@ -149,7 +149,7 @@ public sealed class AdversarialCancellationTests
         // In the Ctrl+C-during-Connect scenario on a FakeTimeProvider clock, the pipeline thread can stay in
         // Polly ResiliencePipelineRegistry.Dispose (ServiceProviderEngineScope.Dispose ← ZabbixConnection.Release) for good,
         // even after the stalled apiinfo.version request is released and answered; on the system clock the same dispose
-        // returns once the request ends. A container composed by AddZabbix on an injected clock (the SDK's own testing
+        // returns once the request ends. A container composed by AddZabbixClient on an injected clock (the SDK's own testing
         // story) must not hang whoever disposes it; it also shows as a nondeterministic hang of a Watch-ZbxItem
         // + Disconnect-ZbxServer test on a fake clock (the watcher's first tick in flight at the disconnect).
         await using FakeZabbix server = await FakeZabbix.StartAsync();

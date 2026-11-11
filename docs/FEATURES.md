@@ -26,15 +26,16 @@ What each package and module does. To choose one, see [Key concepts](../README.m
 - API tokens, or a user name and password whose session is renewed when the server ends it.
 - A client built in one line from the frontend's address
   (`new ZabbixClient("https://zabbix.example/", token)`), one with more to set from `ZabbixClient.CreateBuilder()`, or named
-  clients registered with `AddZabbix("prod")` and bound from `appsettings.json`, with the same verbs (`WithEndpoint`,
+  clients registered with `AddZabbixClient("prod")` and bound from `appsettings.json`, with the same verbs (`WithEndpoint`,
   `WithToken`, `WithTimeout`, `ConfigureResilience`) and the same HTTP pipeline either way.
 - Timeouts, a circuit breaker and a concurrency limit on every call; a read is retried with backoff on a transient
   failure, a write never is.
 - A tree of hosts, groups and items: `zabbix.Hosts["web-01"].GetLastAsync(ZabbixItemKeys.Cpu.Load())` reads a value as its
-  type, `zabbix.HostGroups["Linux"].Hosts["web-01"]` reaches a host through its group, and `GetLatestAsync` and
-  `GetHistoryAsync` read values as streams.
-- Every asynchronous method takes a `CancellationToken` last, by position (`zabbix.Hosts.GetAsync(stoppingToken)`), and one
-  with several forms has each with a token and without one.
+  type, `zabbix.Hosts[10084]` is the same host by its id, `host.Items["system.uptime"]` reaches an item,
+  `zabbix.HostGroups["Linux"].Hosts["web-01"]` reaches a host through its group, and `GetLatestAsync` and `GetHistoryAsync`
+  read values as streams. A `Get…Async` throws when there's nothing to return, and its `Find…Async` returns `null`.
+- Every asynchronous method takes an optional `CancellationToken` last, on every form: `zabbix.Hosts.GetAsync()`,
+  `GetAsync(stoppingToken)`, `GetAsync(q => q.Limit = 10, stoppingToken)`.
 - `ZabbixItemKey<T>`, a key with its type, and `ZabbixItemKeys`, Zabbix's own keys with theirs.
 - Watchers that poll a host, a group or an item and yield each new value once.
 - The mass-update methods Zabbix 8.0 removed, emulated on 8.0.

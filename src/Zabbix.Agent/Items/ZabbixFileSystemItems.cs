@@ -54,7 +54,7 @@ public sealed class ZabbixFileSystemItems : ZabbixItemProvider, IDisposable
     public override IReadOnlyList<ZabbixItemDefinition> Items => _set.Items;
 
     /// <inheritdoc/>
-    public override ValueTask<ZabbixAgentAnswer> GetValueAsync(ZabbixItemKey key, CancellationToken cancellationToken) => _set.AnswerAsync(key, cancellationToken);
+    public override ValueTask<ZabbixAgentAnswer> GetValueAsync(ZabbixItemKey key, CancellationToken cancellationToken = default) => _set.AnswerAsync(key, cancellationToken);
 
     /// <summary>Stops the block devices' sampling.</summary>
     public void Dispose() => _owned?.Dispose();

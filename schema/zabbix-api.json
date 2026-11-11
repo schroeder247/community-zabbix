@@ -7877,7 +7877,7 @@
      "summary": "Return only alerts generated strictly after the given Unix timestamp."
     },
     {
-     "name": "TimeTill",
+     "name": "TimeTo",
      "wire": "time_till",
      "kind": "clock",
      "summary": "Return only alerts generated strictly before the given Unix timestamp."
@@ -8162,7 +8162,7 @@
      "summary": "Return only log records at or after the given Unix time. Required."
     },
     {
-     "name": "TimeTill",
+     "name": "TimeTo",
      "wire": "time_till",
      "kind": "clock",
      "required": true,
@@ -8766,7 +8766,7 @@
      "summary": "Return only data points at or after the given Unix time. Required."
     },
     {
-     "name": "TimeTill",
+     "name": "TimeTo",
      "wire": "time_till",
      "kind": "clock",
      "required": true,
@@ -9190,7 +9190,7 @@
      "summary": "Keeps spans starting no earlier than the given Unix time. Required."
     },
     {
-     "name": "TimeTill",
+     "name": "TimeTo",
      "wire": "time_till",
      "kind": "clock",
      "required": true,
@@ -9654,7 +9654,7 @@
      "summary": "Return only traces at or after the given Unix time. Required."
     },
     {
-     "name": "TimeTill",
+     "name": "TimeTo",
      "wire": "time_till",
      "kind": "clock",
      "required": true,
@@ -9951,7 +9951,7 @@
      "summary": "Keeps records whose creation time, a Unix timestamp, is not earlier than this value."
     },
     {
-     "name": "TimeTill",
+     "name": "TimeTo",
      "wire": "time_till",
      "kind": "clock",
      "summary": "Keeps records whose creation time is no later than this Unix timestamp."
@@ -18966,7 +18966,7 @@
      "summary": "Return only events whose ID is greater than or equal to the given ID."
     },
     {
-     "name": "EventIdTill",
+     "name": "EventIdTo",
      "wire": "eventid_till",
      "kind": "id",
      "summary": "Return only events whose ID is less than or equal to the given ID."
@@ -18978,7 +18978,7 @@
      "summary": "Keeps events whose creation time is no earlier than this Unix time."
     },
     {
-     "name": "TimeTill",
+     "name": "TimeTo",
      "wire": "time_till",
      "kind": "clock",
      "summary": "Keeps events whose creation time is no later than the given Unix time."
@@ -18990,7 +18990,7 @@
      "summary": "Return only events that were in the problem state at some point from the given Unix time on, regardless of their current state; applies to trigger events and requires problem_time_till."
     },
     {
-     "name": "ProblemTimeTill",
+     "name": "ProblemTimeTo",
      "wire": "problem_time_till",
      "kind": "clock",
      "summary": "Return only events that were in the problem state at some point up to the given Unix time, regardless of their current state; applies to trigger events and requires problem_time_from."
@@ -21111,7 +21111,7 @@
      "summary": "Return only values received at or after the given Unix timestamp."
     },
     {
-     "name": "TimeTill",
+     "name": "TimeTo",
      "wire": "time_till",
      "kind": "clock",
      "summary": "Return only values received at or before the given Unix timestamp."
@@ -37991,7 +37991,7 @@
      "summary": "Return only problems whose event ID is greater than or equal to the given ID."
     },
     {
-     "name": "EventIdTill",
+     "name": "EventIdTo",
      "wire": "eventid_till",
      "kind": "id",
      "summary": "Return only problems whose event ID is less than or equal to the given ID."
@@ -38003,7 +38003,7 @@
      "summary": "Keeps problems whose creation time is no earlier than this Unix time."
     },
     {
-     "name": "TimeTill",
+     "name": "TimeTo",
      "wire": "time_till",
      "kind": "clock",
      "summary": "Keeps problems whose creation time is no later than the given Unix time."
@@ -47613,7 +47613,7 @@
      "summary": "Return only trends for hours starting at or after the given Unix time."
     },
     {
-     "name": "TimeTill",
+     "name": "TimeTo",
      "wire": "time_till",
      "kind": "clock",
      "summary": "Return only trends for hours starting at or before the given Unix time."
@@ -57316,7 +57316,7 @@
     },
     {
      "api": "user.login",
-     "name": "LoginAsync",
+     "name": "LogOnAsync",
      "read": false,
      "idempotent": false,
      "requiresAuthentication": false,
@@ -57328,7 +57328,7 @@
     },
     {
      "api": "user.logout",
-     "name": "LogoutAsync",
+     "name": "LogOffAsync",
      "minUserType": 1,
      "read": false,
      "idempotent": false,

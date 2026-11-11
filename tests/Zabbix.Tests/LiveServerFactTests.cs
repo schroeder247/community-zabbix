@@ -333,8 +333,8 @@ public sealed class LiveServerFactTests
         await LiveFixtures.HistoryAsync(scope.Server, host["zbxtest.saturated"], Page + 2, TimeSpan.FromMinutes(4));
 
         List<ZabbixValue> spreadRead = [], saturatedRead = [];
-        await foreach (ZabbixValue v in scope.Server.Hosts[host.Host].Item("zbxtest.spread").GetHistoryAsync(DateTimeOffset.FromUnixTimeSeconds(start), cancellationToken: Cancel)) spreadRead.Add(v);
-        await foreach (ZabbixValue v in scope.Server.Hosts[host.Host].Item("zbxtest.saturated").GetHistoryAsync(DateTimeOffset.FromUnixTimeSeconds(start), cancellationToken: Cancel)) saturatedRead.Add(v);
+        await foreach (ZabbixValue v in scope.Server.Hosts[host.Host].Items["zbxtest.spread"].GetHistoryAsync(DateTimeOffset.FromUnixTimeSeconds(start), cancellationToken: Cancel)) spreadRead.Add(v);
+        await foreach (ZabbixValue v in scope.Server.Hosts[host.Host].Items["zbxtest.saturated"].GetHistoryAsync(DateTimeOffset.FromUnixTimeSeconds(start), cancellationToken: Cancel)) saturatedRead.Add(v);
 
         Assert.Equal(spread.Select(v => (v.Value, v.Clock)), spreadRead.Select(v => (v.Value, v.Clock)));
         Assert.Equal(saturated.Select(v => (v.Value, v.Clock)), saturatedRead.Select(v => (v.Value, v.Clock)));

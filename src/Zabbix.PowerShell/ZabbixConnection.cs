@@ -9,7 +9,7 @@ namespace Community.Zabbix.PowerShell;
 
 /// <summary>
 /// Represents one server the session is connected to: the SDK's <see cref="ZabbixClient"/> and the container that composed
-/// it through <c>AddZabbix</c> — logging to the host's streams, the shell's telemetry, and OTLP export when the module
+/// it through <c>AddZabbixClient</c> — logging to the host's streams, the shell's telemetry, and OTLP export when the module
 /// was imported with <c>OTEL_EXPORTER_OTLP_ENDPOINT</c> set. A command holds a lease on it for the length of its call,
 /// so closing it (a reconnect, <c>Disconnect-ZbxServer</c>, a closing runspace) never disposes the container under a
 /// call still in flight in this or another runspace: the last lease out disposes it.
@@ -104,7 +104,7 @@ public sealed class ZabbixConnection : IDisposable
     internal ILogger Log => _log;
 
     /// <summary>
-    /// Composes a connection: <c>AddZabbix(name)</c> with its endpoint and <paramref name="credential"/>, the host's streams
+    /// Composes a connection: <c>AddZabbixClient(name)</c> with its endpoint and <paramref name="credential"/>, the host's streams
     /// as the only log provider, the shell's telemetry, and OTLP export when <paramref name="exportTelemetry"/>.
     /// </summary>
     /// <param name="name">The session's name for the server.</param>
@@ -112,9 +112,9 @@ public sealed class ZabbixConnection : IDisposable
     /// <param name="credential">How requests prove who they are.</param>
     /// <param name="exportTelemetry">Whether the module was imported with an OTLP endpoint.</param>
     /// <param name="time">The clock the connection runs on (the runspace context's).</param>
-    /// <param name="frontend">The web frontend, when it is not at the endpoint's folder (<see cref="ZabbixOptions.FrontendUri"/>).</param>
+    /// <param name="frontend">The web frontend, when it is not at the endpoint's folder (<see cref="ZabbixClientOptions.FrontendUri"/>).</param>
     /// <param name="http">The HTTP knobs that differ from the SDK's pipeline (<see cref="ZabbixHttpSettings"/>).</param>
-    /// <param name="allowUnencryptedCredentials">Whether a credential may go to a plain <c>http</c> endpoint on another host (<see cref="ZabbixOptions.AllowUnencryptedCredentials"/>).</param>
+    /// <param name="allowUnencryptedCredentials">Whether a credential may go to a plain <c>http</c> endpoint on another host (<see cref="ZabbixClientOptions.AllowUnencryptedCredentials"/>).</param>
     internal static ZabbixConnection Open(string name, Uri endpoint, ZabbixCredential credential, bool exportTelemetry, TimeProvider? time = null, Uri? frontend = null, ZabbixHttpSettings? http = null, bool allowUnencryptedCredentials = false)
     {
         ArgumentNullException.ThrowIfNull(name);
@@ -122,10 +122,10 @@ public sealed class ZabbixConnection : IDisposable
         ArgumentNullException.ThrowIfNull(credential);
 
         var services = new ServiceCollection();
-        services.AddSingleton(time ?? TimeProvider.System);            // ahead of AddZabbix's TryAdd
+        services.AddSingleton(time ?? TimeProvider.System);            // ahead of AddZabbixClient's TryAdd
         services.AddSingleton<ZabbixPowerShellLoggerProvider>();
         services.AddLogging(logging => ZabbixModuleTelemetry.AddModuleLogging(logging));
-        IZabbixBuilder server = services.AddZabbix(name)
+        IZabbixClientBuilder server = services.AddZabbixClient(name)
             .WithEndpoint(endpoint)
             .WithCredential(credential)
             .Configure(options =>
@@ -180,15 +180,15 @@ public sealed class ZabbixConnection : IDisposable
     internal Task Released { get; private set; } = Task.CompletedTask;
 
     /// <summary>
-    /// The client's own asynchronous disposal, once the last lease is out (<see cref="Task.CompletedTask"/> until then):
-    /// a login session (<c>-Credential</c>) is logged out (<c>user.logout</c>, best effort) before the container goes.
+    /// The client's logoff, once the last lease is out (<see cref="Task.CompletedTask"/> until then): a login session
+    /// (<c>-Credential</c>) is logged out (<c>user.logout</c>, best effort) before the container goes.
     /// <c>Disconnect-ZbxServer</c> waits for it, and not for the container, whose disposal can wait on a login a Ctrl+C
     /// left running.
     /// </summary>
     internal Task LoggedOut { get; private set; } = Task.CompletedTask;
 
     /// <summary>
-    /// Returns a lease; the last one out disposes the client (<see cref="LoggedOut"/>) and then the container — on a pool
+    /// Returns a lease; the last one out logs the client off (<see cref="LoggedOut"/>) and then disposes the container — on a pool
     /// thread, never the caller's: the resilience
     /// registry's dispose waits for an execution still in flight (a version probe or a login a Ctrl+C left running), and
     /// the caller is often the pipeline thread, which must return the prompt at once (otherwise Ctrl+C in
@@ -201,18 +201,26 @@ public sealed class ZabbixConnection : IDisposable
         // process that exits right after Disconnect-ZbxServer still exports what the connection recorded (a flush waits
         // on the exporters, never on the resilience registry).
         if (_exports) ZabbixModuleTelemetry.Release();
-        // The server first, on its own: its DisposeAsync ends a login session while the transport it needs is still
-        // there (the container's disposal would call it too, in no order the wait below could single out). It never throws.
-        Task loggedOut = LogOutAsync();
+        // The server first, on its own: LogOffAsync ends a login session while the transport it needs is still there. The
+        // client is the container's, shared, so the container's disposal then releases it. It never throws.
+        Task loggedOut = LogOffAsync();
         LoggedOut = loggedOut;
         Released = DisposeServicesAsync(loggedOut);
     }
 
-    // Both continue on the thread pool at once (ForceYielding), so the caller's thread returns before either runs.
-    private async Task LogOutAsync()
+    // Both continue on the thread pool at once (ForceYielding), so the caller's thread returns before either runs. A logoff
+    // that fails is logged and its session left to expire; the container's release of the client tries it once more.
+    private async Task LogOffAsync()
     {
         await Task.CompletedTask.ConfigureAwait(ConfigureAwaitOptions.ForceYielding);
-        await Client.DisposeAsync().ConfigureAwait(false);
+        try
+        {
+            await Client.LogOffAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+        catch (Exception failure) when (failure is not OutOfMemoryException)       // best effort, as the client's own disposal is
+        {
+            ZabbixPowerShellLog.LogOffFailed(_log, Name, failure);
+        }
     }
 
     private async Task DisposeServicesAsync(Task loggedOut)

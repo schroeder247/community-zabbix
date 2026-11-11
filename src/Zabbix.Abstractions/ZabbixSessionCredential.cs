@@ -99,7 +99,7 @@ public sealed class ZabbixSessionCredential : ZabbixCredential
     // Every outcome of the login reaches the waiters through the source, a failure included, as the task's own.
     private async Task CompleteLoginAsync(TaskCompletionSource<string> login, ZabbixTokenRequestContext context)
     {
-        Task<string> attempt = LoginAsync(context);
+        Task<string> attempt = LogOnAsync(context);
         await ((Task)attempt).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
         login.TrySetFromTask(attempt);
     }
@@ -148,7 +148,7 @@ public sealed class ZabbixSessionCredential : ZabbixCredential
 
     // The login's own lifetime: no caller's token reaches it (CancellationToken.None), so the first caller giving up does
     // not fail every other caller waiting on the same login. The HTTP pipeline's attempt and total timeouts bound it.
-    private async Task<string> LoginAsync(ZabbixTokenRequestContext context)
+    private async Task<string> LogOnAsync(ZabbixTokenRequestContext context)
     {
         try
         {
