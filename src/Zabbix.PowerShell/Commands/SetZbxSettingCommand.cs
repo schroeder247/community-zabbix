@@ -40,5 +40,5 @@ public sealed class SetZbxSettingCommand : ZabbixSingletonSetCmdlet<ZabbixSettin
 
     /// <inheritdoc/>
     protected override async Task<object?> GetAsync(CancellationToken cancellationToken)
-        => await ZabbixClient.Settings.GetAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+        => await ZabbixClient.Settings.GetAsync(cancellationToken).ConfigureAwait(false);
 }

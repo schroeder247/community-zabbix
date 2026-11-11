@@ -801,8 +801,9 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         code.Append("    internal ").Append(client).Append("(global::Community.Zabbix.IZabbixTransport transport, global::System.Func<global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task<global::System.Version>> apiVersion)\n    {\n");
         code.Append("        global::System.ArgumentNullException.ThrowIfNull(transport);\n        global::System.ArgumentNullException.ThrowIfNull(apiVersion);\n        Transport = transport;\n        ApiVersion = apiVersion;\n    }\n\n");
         // the Azure SDK's shape for a client a caller's test substitutes: a protected parameterless constructor beside the
-        // internal one the API builds, every call virtual (dotnet-client-constructor-for-mocking)
-        code.Append("    /// <summary>For a type that derives from this client to substitute it in a test; every call is virtual. A client built\n");
+        // internal one the API builds, every call virtual (dotnet-client-constructor-for-mocking), except an overload without a
+        // token, which calls the virtual one beside it: the Framework Design Guidelines make only the longest overload virtual
+        code.Append("    /// <summary>For a type that derives from this client to substitute it in a test; every call is virtual, or calls one that is. A client built\n");
         code.Append("    /// this way has no transport, so a call it does not override fails.</summary>\n");
         code.Append("    protected ").Append(client).Append("()\n    {\n        Transport = null!;\n        ApiVersion = null!;\n    }\n\n");
         code.Append("    /// <summary>The transport every call goes through.</summary>\n    internal global::Community.Zabbix.IZabbixTransport Transport { get; }\n\n");
@@ -897,7 +898,9 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         if (required.Length is 0 or > 5 || required.Any(f => f.Secret || f.Kind is "bool" or "apibool")) return;
         if (required is [{ Kind: var only }] && only.StartsWith("list:", StringComparison.Ordinal)) return;
         var parameters = new List<string>();
+        var names = new List<string>();
         var assignments = new List<string>();
+        int start = code.Length;
         code.Append("\n    /// <summary><c>").Append(m.Api).Append("</c> from the fields it requires").Append(Traits(m)).Append(" To set more, pass a <see cref=\"").Append(request).Append("\"/>.</summary>\n");
         foreach (FieldDescription field in required)
         {
@@ -907,16 +910,19 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
             string local = Local(member);
             code.Append("    /// <param name=\"").Append(local.TrimStart('@')).Append("\">").Append(Doc(DocSentences.Field(field.Summary, member, field.Wire), field.Wire)).Append("</param>\n");
             parameters.Add(type + " " + local);
+            names.Add(local);
             assignments.Add(member + " = " + local);
         }
-        code.Append("    /// <param name=\"cancellationToken\">Cancels the call.</param>\n");
-        code.Append("    /// <returns>The id the server answered in <c>").Append(m.Result[4..]).Append("</c>: the object the call created.</returns>\n");
-        code.Append(Versioning(m.Since, m.Removed, m.Replacement, "    "));
-        code.Append("    ").Append(Suppress("ApiDesign", "RS0026:Do not add multiple public overloads with optional parameters",
-            "Each overload of the verb takes one shape of the request and ends in the optional CancellationToken the task-based asynchronous pattern asks for; the shapes differ in their required parameters, so no call is ambiguous.")).Append('\n');
+        string returns = "    /// <returns>The id the server answered in <c>" + m.Result[4..] + "</c>: the object the call created.</returns>\n";
+        string attributes = Versioning(m.Since, m.Removed, m.Replacement, "    ");
         if (required.Any(f => f.Kind == "string" && Member(f.Name).Contains("Url")))
-            code.Append("    ").Append(Suppress("Design", "CA1054:URI-like parameters should not be strings", "The API takes this field as text: it may hold a macro, which isn't a URI.")).Append('\n');
-        code.Append("    public virtual global::System.Threading.Tasks.Task<ulong> CreateAsync(").Append(string.Join(", ", parameters)).Append(", global::System.Threading.CancellationToken cancellationToken = default)\n");
+            attributes += "    " + Suppress("Design", "CA1054:URI-like parameters should not be strings", "The API takes this field as text: it may hold a macro, which isn't a URI.") + "\n";
+        string summary = code.ToString(start, code.Length - start);
+        code.Append(returns).Append(attributes);
+        code.Append("    public global::System.Threading.Tasks.Task<ulong> CreateAsync(").Append(string.Join(", ", parameters)).Append(")\n");
+        code.Append("        => CreateAsync(").Append(string.Join(", ", names)).Append(", ").Append(Token).Append(".None);\n");
+        code.Append(summary).Append(TokenDoc).Append(returns).Append(attributes);
+        code.Append("    public virtual global::System.Threading.Tasks.Task<ulong> CreateAsync(").Append(string.Join(", ", parameters)).Append(", ").Append(Token).Append(" cancellationToken)\n");
         code.Append("        => CreateAsync(new ").Append(request).Append(" { ").Append(string.Join(", ", assignments)).Append(" }, cancellationToken);\n");
     }
 
@@ -953,23 +959,25 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
     {
         string send = "Transport.SendAsync(" + Lit(m.Api) + ", " + argument + ", " + info + (result.ResultInfo is null ? string.Empty : ", " + result.ResultInfo) + ", cancellationToken)";
         bool gated = Gated(service, m);
-        code.Append("\n    /// <summary><c>").Append(m.Api).Append("</c>").Append(many ? " for several at once" : string.Empty).Append(Traits(m)).Append("</summary>\n");
-        if (parameterType is not null) code.Append("    /// <param name=\"").Append(parameterName).Append("\">").Append(doc).Append("</param>\n");
-        code.Append("    /// <param name=\"cancellationToken\">Cancels the call.</param>\n");
-        code.Append("    /// <returns>").Append(result.Returns).Append("</returns>\n");
+        string name = CodeText.Identifier(m.Name);
+        string summary = "\n    /// <summary><c>" + m.Api + "</c>" + (many ? " for several at once" : string.Empty) + Traits(m) + "</summary>\n";
+        string parameterDoc = parameterType is null ? string.Empty : "    /// <param name=\"" + parameterName + "\">" + doc + "</param>\n";
         ImmutableArray<FieldDescription> gatedFields = parameterType is not null && (parameterName == "request" || parameterName == "requests") ? RefusedFields(m) : [];
-        code.Append(Throws(m.Api, gated && m.Emulation is null, gatedFields));
-        code.Append(Remarks(m, gated && m.Emulation is not null));
-        code.Append(Versioning(m.Since, m.Removed, m.Replacement, "    "));
-        // One, several and the one-id delete overload one verb; each ends in the optional CancellationToken the
-        // async-method guidelines ask for, so RS0026 is answered here on the overloads it names, not project-wide.
+        string details = "    /// <returns>" + result.Returns + "</returns>\n" + Throws(m.Api, gated && m.Emulation is null, gatedFields)
+            + Remarks(m, gated && m.Emulation is not null) + Versioning(m.Since, m.Removed, m.Replacement, "    ");
+        // One, several and the one-id delete overload one verb, so each takes its CancellationToken as a required last
+        // parameter, and an overload without it calls it (ADR 0013, section 6). A verb of one overload keeps the token optional.
         if (overloaded)
-            code.Append("    ").Append(Suppress("ApiDesign", "RS0026:Do not add multiple public overloads with optional parameters",
-                "Each overload of the verb takes one shape of the request and ends in the optional CancellationToken the task-based asynchronous pattern asks for; the shapes differ in their required parameter's type, so no call is ambiguous."));
-        code.Append("    public virtual async ").Append(result.ReturnType).Append(' ').Append(CodeText.Identifier(m.Name)).Append('(');
+        {
+            code.Append(summary).Append(parameterDoc).Append(details);
+            code.Append("    public ").Append(result.ReturnType).Append(' ').Append(name).Append('(').Append(parameterType).Append(' ').Append(parameterName).Append(")\n        => ")
+                .Append(name).Append('(').Append(parameterName).Append(", ").Append(Token).Append(".None);\n");
+        }
+        code.Append(summary).Append(parameterDoc).Append(TokenDoc).Append(details);
+        code.Append("    public virtual async ").Append(result.ReturnType).Append(' ').Append(name).Append('(');
         if (parameterType is not null)
             code.Append(parameterType).Append(optional ? "? " : " ").Append(parameterName).Append(optional ? " = null" : string.Empty).Append(", ");
-        code.Append("global::System.Threading.CancellationToken cancellationToken = default)\n    {\n");
+        code.Append(Token).Append(" cancellationToken").Append(overloaded ? string.Empty : " = default").Append(")\n    {\n");
         if (parameterType is not null && !optional && !parameterType.EndsWith("JsonElement", StringComparison.Ordinal) && parameterType != "ulong")
             code.Append("        global::System.ArgumentNullException.ThrowIfNull(").Append(parameterName).Append(");\n");
         ImmutableArray<FieldDescription> refused = gatedFields;
@@ -1062,66 +1070,109 @@ internal sealed partial class ZabbixApiEmitter(ApiDescription api)
         string? parameters = ClrType("object:" + record, service.Object, m.Api);
         string? result = ClrType(m.Result, service.Object, m.Api);
         if (parameters is null || result is null) return;
-        string gate = Gated(service, m) ? "        global::Community.Zabbix.ZabbixApiMethods.EnsureSupported(" + Lit(m.Api) + ", await ApiVersion(cancellationToken).ConfigureAwait(false));\n" : string.Empty;
+        bool gated = Gated(service, m);
+        string gate = gated ? "        global::Community.Zabbix.ZabbixApiMethods.EnsureSupported(" + Lit(m.Api) + ", await ApiVersion(cancellationToken).ConfigureAwait(false));\n" : string.Empty;
+        ImmutableArray<FieldDescription> refused = RefusedFields(m);
         // a .get with a required option (hostdashboard.get's hostids) has no "everything" call: the parameters are required
         bool required = _types.TryGetValue(record, out TypeDescription? described) && described.Fields.Any(f => f.Required);
-        string declared = required ? parameters + " parameters" : parameters + "? parameters = null";
-        string sent = required ? "parameters" : "parameters ?? new()";
-        string guard = required ? "        global::System.ArgumentNullException.ThrowIfNull(parameters);\n" : string.Empty;
-        code.Append("\n    /// <summary><c>").Append(m.Api).Append("</c>: ").Append(m.Shape == "get-object" ? "the object" : "the objects the parameters select, as one reply").Append(Traits(m)).Append("</summary>\n");
-        code.Append("    /// <param name=\"parameters\">What to select and what to return").Append(required ? "." : "; everything when omitted.").Append("</param>\n    /// <param name=\"cancellationToken\">Cancels the call.</param>\n");
-        code.Append("    /// <returns>").Append(m.Shape == "get-object" ? "The object, as the server answered it." : "The objects the parameters select, in the order the server answered them; empty when none matches.").Append("</returns>\n");
-        code.Append(Throws(m.Api, gate.Length > 0, RefusedFields(m)));
-        code.Append(Remarks(m, emulated: false, paged: m.Shape == "get-list"));
-        code.Append(Versioning(m.Since, m.Removed, m.Replacement, "    "));
-        bool lambda = !required && _types.ContainsKey(record);
-        if (lambda) code.Append("    ").Append(OverloadsOfOneVerb).Append('\n');
-        code.Append("    public virtual async global::System.Threading.Tasks.Task<").Append(result).Append("> GetAsync(").Append(declared).Append(", global::System.Threading.CancellationToken cancellationToken = default)\n    {\n");
-        code.Append(guard).Append(gate);
-        EmitFieldGate(code, m.Api, RefusedFields(m), "parameters", null, null, nullable: !required);
-        code.Append("        return await Transport.SendAsync(").Append(Lit(m.Api)).Append(", ").Append(sent).Append(", ").Append(Root(parameters)).Append(", ").Append(Root(result)).Append(", cancellationToken).ConfigureAwait(false);\n    }\n");
-        if (lambda) EmitConfigured(code, m, parameters, "global::System.Threading.Tasks.Task<" + result + ">", "GetAsync",
-            m.Shape == "get-object" ? "The object, as the server answered it." : "The objects the parameters select, in the order the server answered them; empty when none matches.");
+        bool one = m.Shape == "get-object";
+        string selected = one ? "The object, as the server answered it." : "The objects the parameters select, in the order the server answered them; empty when none matches.";
+        var body = new StringBuilder(gate);
+        EmitFieldGate(body, m.Api, refused, "parameters", null, null, nullable: false);
+        body.Append("        return await Transport.SendAsync(").Append(Lit(m.Api)).Append(", parameters, ").Append(Root(parameters)).Append(", ").Append(Root(result)).Append(", cancellationToken).ConfigureAwait(false);\n");
+        EmitReads(code, new Reads(
+            "GetAsync", parameters, "global::System.Threading.Tasks.Task<" + result + ">", required,
+            Everything: "<c>" + m.Api + "</c>: " + (one ? "the object" : "every object, as one reply") + Traits(m),
+            EverythingReturns: one ? "The object, as the server answered it." : "The objects, in the order the server answered them; empty when there are none.",
+            Selecting: "<c>" + m.Api + "</c>: " + (one ? "the object" : "the objects the parameters select, as one reply") + Traits(m),
+            Configured: "<c>" + m.Api + "</c>, with parameters <paramref name=\"configure\"/> fills" + Traits(m),
+            ParametersDoc: "What to select and what to return.",
+            Returns: selected,
+            Details: Throws(m.Api, gated, refused) + Remarks(m, emulated: false, paged: m.Shape == "get-list"),
+            Attributes: Versioning(m.Since, m.Removed, m.Replacement, "    ")), body.ToString());
         if (m.Shape != "get-list" || !_types.ContainsKey(record)) return;
         if (!required) EmitGetById(code, service, m, record, parameters, result);
         if (m.Count)
         {
-            code.Append("\n    /// <summary><c>").Append(m.Api).Append("</c> with <c>countOutput</c>: how many objects the parameters select.</summary>\n");
-            code.Append("    /// <param name=\"parameters\">What to select").Append(required ? "." : "; everything when omitted.").Append("</param>\n    /// <param name=\"cancellationToken\">Cancels the call.</param>\n");
-            code.Append("    /// <returns>How many objects the parameters select.</returns>\n");
-            code.Append(Throws(m.Api, gate.Length > 0, RefusedFields(m)));
-            code.Append(Remarks(m, emulated: false));
-            if (lambda) code.Append("    ").Append(OverloadsOfOneVerb).Append('\n');
-            code.Append("    public virtual async global::System.Threading.Tasks.Task<long> CountAsync(").Append(declared).Append(", global::System.Threading.CancellationToken cancellationToken = default)\n    {\n");
-            code.Append(guard).Append(gate);
-            EmitFieldGate(code, m.Api, RefusedFields(m), "parameters", null, null, nullable: !required);
-            code.Append("        return global::Community.Zabbix.ZabbixApiResults.ReadCount(await Transport.SendAsync(").Append(Lit(m.Api)).Append(", ").Append(required ? "parameters" : "(parameters ?? new())").Append(" with { CountOutput = true }, ").Append(Root(parameters)).Append(", cancellationToken).ConfigureAwait(false), ").Append(Lit(m.Api)).Append(");\n    }\n");
-            if (lambda) EmitConfigured(code, m, parameters, "global::System.Threading.Tasks.Task<long>", "CountAsync", "How many objects the parameters select.");
+            var count = new StringBuilder(gate);
+            EmitFieldGate(count, m.Api, refused, "parameters", null, null, nullable: false);
+            count.Append("        return global::Community.Zabbix.ZabbixApiResults.ReadCount(await Transport.SendAsync(").Append(Lit(m.Api)).Append(", parameters with { CountOutput = true }, ").Append(Root(parameters)).Append(", cancellationToken).ConfigureAwait(false), ").Append(Lit(m.Api)).Append(");\n");
+            EmitReads(code, new Reads(
+                "CountAsync", parameters, "global::System.Threading.Tasks.Task<long>", required,
+                Everything: "<c>" + m.Api + "</c> with <c>countOutput</c>: how many objects there are.",
+                EverythingReturns: "How many objects there are.",
+                Selecting: "<c>" + m.Api + "</c> with <c>countOutput</c>: how many objects the parameters select.",
+                Configured: "<c>" + m.Api + "</c> with <c>countOutput</c>, with parameters <paramref name=\"configure\"/> fills: how many objects they select.",
+                ParametersDoc: "What to select.",
+                Returns: "How many objects the parameters select.",
+                Details: Throws(m.Api, gated, refused) + Remarks(m, emulated: false),
+                Attributes: Versioning(m.Since, m.Removed, m.Replacement, "    ")), count.ToString());
         }
     }
 
-    private const string OverloadsOfOneVerb = "[global::System.Diagnostics.CodeAnalysis.SuppressMessage(\"ApiDesign\", \"RS0026:Do not add multiple public overloads with optional parameters\", Justification = \"One takes the parameters and the other a lambda that fills them, and each ends in the optional CancellationToken the task-based asynchronous pattern asks for.\")]";
+    /// <summary>
+    /// The words of one read verb, <c>GetAsync</c> or <c>CountAsync</c>: its types, whether its parameters are required, and
+    /// what each of its overloads says.
+    /// </summary>
+    private sealed record Reads(string Verb, string Parameters, string ReturnType, bool Required, string Everything, string EverythingReturns,
+        string Selecting, string Configured, string ParametersDoc, string Returns, string Details, string Attributes);
 
-    // A get whose parameters a lambda fills: GetAsync(q => { q.Search.VisibleName = "web"; q.Limit = 10; }), as Graph's
-    // GetAsync(config => config.QueryParameters.Select = [...]).
-    private static void EmitConfigured(StringBuilder code, MethodDescription m, string parameters, string returnType, string verb, string returns)
+    private const string Token = "global::System.Threading.CancellationToken";
+
+    private const string TokenDoc = "    /// <param name=\"cancellationToken\">Cancels the call.</param>\n";
+
+    /// <summary>
+    /// A read verb's overloads, as the task-based asynchronous pattern has them (ADR 0013, section 6): each takes a
+    /// <see cref="CancellationToken"/> last, and one without it calls the one with it. A verb whose parameters are required is
+    /// one overload, so its token is optional, as RS0026 allows. Otherwise the verb takes nothing, for everything; the
+    /// parameters; or a lambda that fills them, <c>GetAsync(q =&gt; q.Search.VisibleName = "web")</c>, as Graph's
+    /// <c>GetAsync(config =&gt; config.QueryParameters.Select = [...])</c> does. The parameters' overload with the token does
+    /// the work, and a test double overrides it.
+    /// </summary>
+    private static void EmitReads(StringBuilder code, Reads r, string body)
     {
-        code.Append("\n    /// <summary><c>").Append(m.Api).Append("</c>, with parameters <paramref name=\"configure\"/> fills").Append(Traits(m)).Append("</summary>\n");
-        code.Append("    /// <param name=\"configure\">Fills the parameters: what to select and what to return.</param>\n    /// <param name=\"cancellationToken\">Cancels the call.</param>\n");
-        code.Append("    /// <returns>").Append(returns).Append("</returns>\n");
-        code.Append("    /// <exception cref=\"global::System.ArgumentNullException\"><paramref name=\"configure\"/> is <see langword=\"null\"/>.</exception>\n");
-        code.Append(Versioning(m.Since, m.Removed, m.Replacement, "    "));
-        code.Append("    ").Append(OverloadsOfOneVerb).Append('\n');
-        code.Append("    public virtual ").Append(returnType).Append(' ').Append(verb).Append("(global::System.Action<").Append(parameters).Append("> configure, global::System.Threading.CancellationToken cancellationToken = default)\n    {\n");
+        string parameters = "    /// <param name=\"parameters\">" + r.ParametersDoc + "</param>\n";
+        string nullParameters = "    /// <exception cref=\"global::System.ArgumentNullException\"><paramref name=\"parameters\"/> is <see langword=\"null\"/>.</exception>\n";
+        string core = "    public virtual async " + r.ReturnType + " " + r.Verb + "(" + r.Parameters + " parameters, " + Token + " cancellationToken" + (r.Required ? " = default" : string.Empty) + ")\n    {\n"
+            + "        global::System.ArgumentNullException.ThrowIfNull(parameters);\n" + body + "    }\n";
+        if (r.Required)
+        {
+            ReadDoc(code, r.Selecting, parameters + TokenDoc, r.Returns, nullParameters + r.Details, r.Attributes);
+            code.Append(core);
+            return;
+        }
+
+        ReadDoc(code, r.Everything, string.Empty, r.EverythingReturns, r.Details, r.Attributes);
+        code.Append("    public ").Append(r.ReturnType).Append(' ').Append(r.Verb).Append("()\n        => ").Append(r.Verb).Append('(').Append(Token).Append(".None);\n");
+        ReadDoc(code, r.Everything, TokenDoc, r.EverythingReturns, r.Details, r.Attributes);
+        code.Append("    public ").Append(r.ReturnType).Append(' ').Append(r.Verb).Append('(').Append(Token).Append(" cancellationToken)\n        => ")
+            .Append(r.Verb).Append("(new ").Append(r.Parameters).Append("(), cancellationToken);\n");
+
+        ReadDoc(code, r.Selecting, parameters, r.Returns, nullParameters + r.Details, r.Attributes);
+        code.Append("    public ").Append(r.ReturnType).Append(' ').Append(r.Verb).Append('(').Append(r.Parameters).Append(" parameters)\n        => ")
+            .Append(r.Verb).Append("(parameters, ").Append(Token).Append(".None);\n");
+        ReadDoc(code, r.Selecting, parameters + TokenDoc, r.Returns, nullParameters + r.Details, r.Attributes);
+        code.Append(core);
+
+        string configure = "    /// <param name=\"configure\">Fills the parameters: " + char.ToLowerInvariant(r.ParametersDoc[0]) + r.ParametersDoc[1..] + "</param>\n";
+        string nullConfigure = "    /// <exception cref=\"global::System.ArgumentNullException\"><paramref name=\"configure\"/> is <see langword=\"null\"/>.</exception>\n";
+        string action = "global::System.Action<" + r.Parameters + ">";
+        ReadDoc(code, r.Configured, configure, r.Returns, nullConfigure + r.Details, r.Attributes);
+        code.Append("    public ").Append(r.ReturnType).Append(' ').Append(r.Verb).Append('(').Append(action).Append(" configure)\n        => ")
+            .Append(r.Verb).Append("(configure, ").Append(Token).Append(".None);\n");
+        ReadDoc(code, r.Configured, configure + TokenDoc, r.Returns, nullConfigure + r.Details, r.Attributes);
+        code.Append("    public virtual ").Append(r.ReturnType).Append(' ').Append(r.Verb).Append('(').Append(action).Append(" configure, ").Append(Token).Append(" cancellationToken)\n    {\n");
         code.Append("        global::System.ArgumentNullException.ThrowIfNull(configure);\n");
-        code.Append("        var parameters = new ").Append(parameters).Append("();\n        configure(parameters);\n");
-        code.Append("        return ").Append(verb).Append("(parameters, cancellationToken);\n    }\n");
+        code.Append("        var parameters = new ").Append(r.Parameters).Append("();\n        configure(parameters);\n");
+        code.Append("        return ").Append(r.Verb).Append("(parameters, cancellationToken);\n    }\n");
     }
+
+    private static void ReadDoc(StringBuilder code, string summary, string parameters, string returns, string details, string attributes)
+        => code.Append("\n    /// <summary>").Append(summary).Append("</summary>\n").Append(parameters).Append("    /// <returns>").Append(returns).Append("</returns>\n").Append(details).Append(attributes);
 
     // One object by its id, through the list get (a type that overrides that for a test serves this too): the read
     // record's own id, selected by the get's own *ids option (templateids, not filter.templateid, which template.get
-    // ignores). Named as DbSet<T>.FindAsync is, for the same answer (the object, or null): an overload of GetAsync would
-    // make GetAsync(new() { ... }) ambiguous, the target-typed parameters being the common call.
+    // ignores). Named as DbSet<T>.FindAsync is, for the same answer: the object, or null, where GetAsync answers a list.
     private void EmitGetById(StringBuilder code, ServiceDescription service, MethodDescription m, string record, string parameters, string result)
     {
         if (!m.Result.StartsWith("list:object:", StringComparison.Ordinal) || !_types.TryGetValue(m.Result[12..], out TypeDescription? read)) return;

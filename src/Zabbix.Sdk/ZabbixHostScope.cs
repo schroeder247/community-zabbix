@@ -3,8 +3,9 @@
 namespace Community.Zabbix;
 
 /// <summary>
-/// Represents a set of hosts: the server's, or a group's. Enumerate it for the hosts (one <c>host.get</c>, read whole and then
-/// yielded); descend with <see cref="Host"/> at no cost; ask it and every item beneath answers.
+/// Represents a set of hosts: the server's, <c>zabbix.AllHosts</c>, or a group's, <c>zabbix.HostGroups["Linux"].Hosts</c>.
+/// Enumerate it for the hosts (one <c>host.get</c>, read whole and then yielded); reach one by its technical name,
+/// <c>Hosts["web-01"]</c>, at no cost; ask it and every item beneath answers.
 /// </summary>
 public class ZabbixHostScope : ZabbixNode, IAsyncEnumerable<ZabbixHostNode>
 {
@@ -22,13 +23,21 @@ public class ZabbixHostScope : ZabbixNode, IAsyncEnumerable<ZabbixHostNode>
     /// <summary>The group this scope is, when it is one.</summary>
     public virtual string? Group => Selection.Group;
 
-    /// <summary>One host beneath this scope, by technical name; no call is made until it is asked.</summary>
-    /// <param name="host">The technical name.</param>
+    /// <summary>
+    /// Gets one host of this set, by technical name: <c>Hosts["web-01"]</c>. A group's host is read only while it's in the group.
+    /// No call is made until it's asked.
+    /// </summary>
+    /// <param name="host">The host's technical name.</param>
     /// <returns>The host's node.</returns>
-    public virtual ZabbixHostNode Host(string host)
+    /// <exception cref="ArgumentException"><paramref name="host"/> is empty.</exception>
+    public virtual ZabbixHostNode this[string host]
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(host);
-        return new ZabbixHostNode(Client, Selection with { Host = host });
+        get
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(host);
+            Client.ThrowIfDisposed();
+            return new ZabbixHostNode(Client, Selection with { Host = host });
+        }
     }
 
     /// <inheritdoc/>

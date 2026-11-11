@@ -47,9 +47,9 @@ public sealed class DocumentTests
     private static ServiceProvider Fluent()
     {
         var services = new ServiceCollection();
-        services.AddZabbix("prod", options => { options.Endpoint = new Uri("https://prod.example/api_jsonrpc.php"); options.ApiToken = "tok-prod"; options.MaxConnectionsPerServer = 7; });
+        services.AddZabbix("prod").Configure(options => { options.Endpoint = new Uri("https://prod.example/api_jsonrpc.php"); options.ApiToken = "tok-prod"; options.MaxConnectionsPerServer = 7; });
         services.Configure<HttpStandardResilienceOptions>(ZabbixHttp.GetResilienceName("prod"), options => options.Retry.MaxRetryAttempts = 5);
-        services.AddZabbix("staging", options => options.Endpoint = new Uri("https://staging.example/api_jsonrpc.php"));
+        services.AddZabbix("staging").Configure(options => options.Endpoint = new Uri("https://staging.example/api_jsonrpc.php"));
         services.AddZabbixPushAgent("edge-01").AddServer(new ZabbixServerNode("zbx-server-01"), new ZabbixServerNode("zbx-server-02", 10052)).Configure(options =>
         {
             options.MaxItems = 10000;

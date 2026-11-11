@@ -20,7 +20,7 @@ internal static class TransportHarness
     public static Harness Build(HttpMessageHandler primary, string? token = "tok", Action<IServiceCollection>? configure = null)
     {
         var services = new ServiceCollection();
-        services.AddZabbix(options =>
+        services.AddZabbix().Configure(options =>
         {
             options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php");
             options.ApiToken = token;

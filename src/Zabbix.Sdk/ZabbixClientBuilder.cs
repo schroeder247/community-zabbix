@@ -1,154 +1,157 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
-using System.Net;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Community.Zabbix;
 
 /// <summary>
-/// Builds a <see cref="ZabbixClient"/> with more than an address and a token to set. A simple client needs no builder:
+/// Builds a <see cref="ZabbixClient"/> with more than an address and a credential to set, without a host:
+/// <see cref="ZabbixClient.CreateBuilder"/> returns one. The verbs of <see cref="ZabbixBuilderExtensions"/> set the client up,
+/// and <see cref="Build"/> validates its options and returns it. A client with only an address and a token needs no builder:
 /// <c>new ZabbixClient("https://zabbix.example/", token)</c>.
 /// </summary>
+/// <remarks>
+/// The builder holds a container of its own, <see cref="Services"/>, where it registers the client with
+/// <see cref="ZabbixServiceCollectionExtensions.AddZabbix(IServiceCollection, string)"/>, the registration an application with
+/// a host makes, so the client has the same HTTP pipeline and resilience either way. The client it returns owns that container
+/// and disposes it.
+/// </remarks>
 /// <example>
 /// <code language="csharp">
-/// await using ZabbixClient zabbix = new ZabbixClientBuilder()
+/// await using ZabbixClient zabbix = ZabbixClient.CreateBuilder()
 ///     .WithEndpoint("https://zabbix.example/")
 ///     .WithToken(token)
 ///     .WithMaxConnections(20)
-///     .WithLogging(loggers)
+///     .ConfigureResilience(resilience =&gt; resilience.Retry.MaxRetryAttempts = 5)
+///     .UseLogging(loggers)
 ///     .Build();
 /// </code>
 /// </example>
-public sealed class ZabbixClientBuilder
+public sealed class ZabbixClientBuilder : IZabbixBuilder
 {
-    private readonly ZabbixOptions _options = new();
-    private Uri? _endpoint;
-    private ZabbixCredential? _credential;
-    private ILoggerFactory? _loggers;
-    private TimeProvider? _time;
+    private readonly ServiceCollection _services = [];
+    private bool _built;
 
-    /// <summary>Sets the server's address.</summary>
-    /// <param name="endpoint">The frontend's address, e.g. <c>https://zabbix.example/</c>, or the JSON-RPC endpoint.</param>
-    /// <returns>This builder, to chain the next call.</returns>
-    public ZabbixClientBuilder WithEndpoint(Uri endpoint)
+    /// <summary>A builder with nothing set. The client it builds needs an endpoint, which <c>WithEndpoint</c> or <c>Bind</c> sets.</summary>
+    public ZabbixClientBuilder() => _services.AddZabbix(Name);
+
+    /// <summary>The client's name in <see cref="Services"/>: <see cref="Options.DefaultName"/>, since it's the one client there.</summary>
+    public string Name => Options.DefaultName;
+
+    /// <summary>
+    /// The builder's own container. The verbs write the client's registrations here, and the application can register what
+    /// the client resolves from it, such as a service a credential reads.
+    /// </summary>
+    public IServiceCollection Services => _services;
+
+    /// <summary>
+    /// Makes the client log through <paramref name="loggers"/>. Without it, the client logs nowhere; its traces and metrics still
+    /// flow. A later call replaces it.
+    /// </summary>
+    /// <param name="loggers">The application's logger factory. The application keeps owning it.</param>
+    /// <returns>This builder.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="loggers"/> is <see langword="null"/>.</exception>
+    /// <exception cref="InvalidOperationException"><see cref="Build"/> ran.</exception>
+    public ZabbixClientBuilder UseLogging(ILoggerFactory loggers)
     {
-        ArgumentNullException.ThrowIfNull(endpoint);
-        _endpoint = endpoint;
+        ArgumentNullException.ThrowIfNull(loggers);
+        _services.Replace(ServiceDescriptor.Singleton(loggers));
         return this;
     }
 
-    /// <summary>Sets the server's address.</summary>
-    /// <param name="endpoint">The frontend's address, e.g. <c>https://zabbix.example/</c>, or the JSON-RPC endpoint.</param>
-    /// <returns>This builder, to chain the next call.</returns>
-    /// <exception cref="UriFormatException"><paramref name="endpoint"/> isn't an absolute address.</exception>
-    public ZabbixClientBuilder WithEndpoint(string endpoint)
+    /// <summary>
+    /// Makes the client read <paramref name="time"/>, not the system's clock: its deadlines, session renewals and watchers run on
+    /// it. A later call replaces it.
+    /// </summary>
+    /// <param name="time">The clock the client reads.</param>
+    /// <returns>This builder.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="time"/> is <see langword="null"/>.</exception>
+    /// <exception cref="InvalidOperationException"><see cref="Build"/> ran.</exception>
+    public ZabbixClientBuilder UseTimeProvider(TimeProvider time)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(endpoint);
-        return WithEndpoint(new Uri(endpoint, UriKind.Absolute));
-    }
-
-    /// <summary>Sends an API token (<em>Users, API tokens</em> in the frontend) with every call.</summary>
-    /// <param name="token">The API token to send.</param>
-    /// <returns>This builder, to chain the next call.</returns>
-    public ZabbixClientBuilder WithToken([ZabbixSecret] string token)
-    {
-        _credential = ZabbixCredential.FromApiToken(token);
+        ArgumentNullException.ThrowIfNull(time);
+        _services.Replace(ServiceDescriptor.Singleton(time));
         return this;
     }
 
-    /// <summary>Logs in with a user's name and password on the first call.</summary>
-    /// <param name="login">The user's name and password; only those two are read.</param>
-    /// <returns>This builder, to chain the next call.</returns>
-    public ZabbixClientBuilder WithLogin(NetworkCredential login)
-    {
-        ArgumentNullException.ThrowIfNull(login);
-        _credential = ZabbixCredential.FromLogin(login.UserName, login.Password);
-        return this;
-    }
-
-    /// <summary>Authenticates with your own credential, such as one that reads a vault.</summary>
-    /// <param name="credential">The credential to ask for each call's token.</param>
-    /// <returns>This builder, to chain the next call.</returns>
-    public ZabbixClientBuilder WithCredential(ZabbixCredential credential)
-    {
-        ArgumentNullException.ThrowIfNull(credential);
-        _credential = credential;
-        return this;
-    }
-
-    /// <summary>Lets a credential go over plain <c>http</c> to a host that isn't a loopback host.</summary>
-    /// <returns>This builder, to chain the next call.</returns>
-    public ZabbixClientBuilder AllowUnencryptedCredentials()
-    {
-        _options.AllowUnencryptedCredentials = true;
-        return this;
-    }
-
-    /// <summary>Sets how many connections the client opens to the server at once.</summary>
-    /// <param name="maxConnections">The most connections to open.</param>
-    /// <returns>This builder, to chain the next call.</returns>
-    public ZabbixClientBuilder WithMaxConnections(int maxConnections)
-    {
-        _options.MaxConnectionsPerServer = maxConnections;
-        return this;
-    }
-
-    /// <summary>Sets the longest one reply may be.</summary>
-    /// <param name="maxBytes">The most bytes to read from a reply.</param>
-    /// <returns>This builder, to chain the next call.</returns>
-    public ZabbixClientBuilder WithMaxResponseSize(long maxBytes)
-    {
-        _options.MaxResponseContentBytes = maxBytes;
-        return this;
-    }
-
-    /// <summary>Sets how long calls to one API method may take.</summary>
-    /// <param name="method">The method's name, e.g. <c>history.get</c>.</param>
-    /// <param name="timeout">The longest a call may take.</param>
-    /// <returns>This builder, to chain the next call.</returns>
-    public ZabbixClientBuilder WithTimeout(string method, TimeSpan timeout)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(method);
-        _options.Timeouts[method] = timeout;
-        return this;
-    }
-
-    /// <summary>Sets the frontend's address, where it isn't the API's.</summary>
-    /// <param name="frontend">The address the frontend's pages open at.</param>
-    /// <returns>This builder, to chain the next call.</returns>
-    public ZabbixClientBuilder WithFrontend(Uri frontend)
-    {
-        _options.FrontendUri = frontend;
-        return this;
-    }
-
-    /// <summary>Sets where the client logs.</summary>
-    /// <param name="loggers">The application's logger factory.</param>
-    /// <returns>This builder, to chain the next call.</returns>
-    public ZabbixClientBuilder WithLogging(ILoggerFactory loggers)
-    {
-        _loggers = loggers;
-        return this;
-    }
-
-    /// <summary>Sets the clock the client's deadlines run on.</summary>
-    /// <param name="time">The clock to read.</param>
-    /// <returns>This builder, to chain the next call.</returns>
-    public ZabbixClientBuilder WithTimeProvider(TimeProvider time)
-    {
-        _time = time;
-        return this;
-    }
-
-    /// <summary>Builds the client.</summary>
+    /// <summary>
+    /// Builds the client: checks its options with the rules a host checks at start, and returns it. The client owns the builder's
+    /// container and disposes it. <see cref="Build"/> runs once, and <see cref="Services"/> can't change after it.
+    /// </summary>
     /// <returns>The client, which you must dispose.</returns>
-    /// <exception cref="InvalidOperationException"><see cref="WithEndpoint(Uri)"/> wasn't called.</exception>
-    /// <exception cref="Microsoft.Extensions.Options.OptionsValidationException">What was set doesn't validate.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// <see cref="Build"/> ran before, the options don't validate, or a service <see cref="Services"/> registered can't be
+    /// built: the message says what to set, and the exception inside, an <see cref="OptionsValidationException"/> for the
+    /// options, holds each failure.
+    /// </exception>
     public ZabbixClient Build()
-        => new(
-            _endpoint ?? throw new InvalidOperationException($"Call {nameof(WithEndpoint)} before {nameof(Build)}."),
-            _credential ?? ZabbixCredential.Anonymous,
-            _options,
-            _loggers,
-            _time);
+    {
+        if (_built) throw new InvalidOperationException("This builder has built its client. Create another builder for another client.");
+        _built = true;
+        ServiceProvider container;
+        try
+        {
+            container = Compose();
+        }
+        catch (Exception unbuilt) when (unbuilt is OptionsValidationException or AggregateException)
+        {
+            throw Unbuilt(unbuilt);
+        }
+
+        bool owned = false;
+        try
+        {
+            ZabbixClient client = container.GetRequiredKeyedService<ZabbixClient>(Name);
+            client.OwnContainer(container);
+            owned = true;
+            return client;
+        }
+        catch (OptionsValidationException invalid)
+        {
+            throw Unbuilt(invalid);
+        }
+        finally
+        {
+            if (!owned) container.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// The container a constructor builds its client from: the same registration and the same verbs as a builder's, checked as
+    /// <see cref="Build"/> checks them, with the options' failures thrown as they are.
+    /// </summary>
+    /// <param name="endpoint">The frontend's address or the JSON-RPC endpoint.</param>
+    /// <param name="credential">The client's credential.</param>
+    /// <returns>The container, which the client owns.</returns>
+    /// <exception cref="OptionsValidationException">The options don't validate.</exception>
+    internal static ServiceProvider Compose(Uri endpoint, ZabbixCredential credential)
+        => new ZabbixClientBuilder().WithEndpoint(endpoint).WithCredential(credential).Compose();
+
+    // The builder's container, checked as a host checks at start: every registration it can construct, and the options it
+    // validates on start. A failure releases what the container built.
+    private ServiceProvider Compose()
+    {
+        _services.MakeReadOnly();
+        ServiceProvider container = _services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
+        try
+        {
+            container.GetService<IStartupValidator>()?.Validate();
+            return container;
+        }
+        catch
+        {
+            container.Dispose();
+            throw;
+        }
+    }
+
+    // What fails here is the builder's state: the message says what to set, and the failure inside holds each one.
+    private static InvalidOperationException Unbuilt(Exception failure)
+    {
+        string reasons = failure is AggregateException { InnerExceptions: var inner } ? string.Join("; ", inner.Select(each => each.Message)) : failure.Message;
+        return new InvalidOperationException($"The client can't be built as it's set: {reasons}", failure);
+    }
 }

@@ -571,7 +571,7 @@ public sealed class AdversarialJsonRpcTests
     private static (ServiceProvider Provider, IZabbixTransport Transport, FakeLogCollector Logs) Real(Uri endpoint)
     {
         var services = new ServiceCollection();
-        services.AddZabbix(options =>
+        services.AddZabbix().Configure(options =>
         {
             options.Endpoint = endpoint;
             options.ApiToken = Token;

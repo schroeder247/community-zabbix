@@ -85,7 +85,10 @@ public sealed class LiveApiDriftTests(ITestOutputHelper output)
             foreach (PropertyInfo property in typeof(ZabbixApi).GetProperties().Where(p => p.Name != nameof(ZabbixApi.Transport)))
             {
                 object apiClient = property.GetValue(client.Api)!;
-                MethodInfo? get = apiClient.GetType().GetMethods().FirstOrDefault(m => m.Name == "GetAsync" && !typeof(Delegate).IsAssignableFrom(m.GetParameters()[0].ParameterType));
+                // The overload that takes the parameters and a token: the one every other overload calls.
+                MethodInfo? get = apiClient.GetType().GetMethods().FirstOrDefault(m => m.Name == "GetAsync"
+                    && m.GetParameters() is [{ ParameterType: var parameters }, { ParameterType: var token }]
+                    && token == typeof(CancellationToken) && parameters != typeof(CancellationToken) && !typeof(Delegate).IsAssignableFrom(parameters));
                 if (get is null || NeedsInput.Contains(property.Name)) continue;
                 string method = apiClient.GetType().Name["Zabbix".Length..^"Client".Length].ToUpperInvariant();
                 if (get.GetCustomAttribute<ZabbixSupportedAttribute>() is { } since && version < Version.Parse(since.Version)) continue;

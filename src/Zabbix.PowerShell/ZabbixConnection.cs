@@ -104,9 +104,8 @@ public sealed class ZabbixConnection : IDisposable
     internal ILogger Log => _log;
 
     /// <summary>
-    /// Composes a connection: <c>AddZabbix(name)</c> with <paramref name="credential"/> registered ahead of it (a
-    /// credential given in code wins over a configured token), the host's streams as the only log provider, the shell's
-    /// telemetry, and OTLP export when <paramref name="exportTelemetry"/>.
+    /// Composes a connection: <c>AddZabbix(name)</c> with its endpoint and <paramref name="credential"/>, the host's streams
+    /// as the only log provider, the shell's telemetry, and OTLP export when <paramref name="exportTelemetry"/>.
     /// </summary>
     /// <param name="name">The session's name for the server.</param>
     /// <param name="endpoint">The JSON-RPC endpoint.</param>
@@ -126,12 +125,14 @@ public sealed class ZabbixConnection : IDisposable
         services.AddSingleton(time ?? TimeProvider.System);            // ahead of AddZabbix's TryAdd
         services.AddSingleton<ZabbixPowerShellLoggerProvider>();
         services.AddLogging(logging => ZabbixModuleTelemetry.AddModuleLogging(logging));
-        IZabbixBuilder server = services.AddZabbix(name, options =>
-        {
-            options.Endpoint = endpoint;
-            options.FrontendUri = frontend;
-            options.AllowUnencryptedCredentials = allowUnencryptedCredentials;
-        }).WithCredential(credential);
+        IZabbixBuilder server = services.AddZabbix(name)
+            .WithEndpoint(endpoint)
+            .WithCredential(credential)
+            .Configure(options =>
+            {
+                options.FrontendUri = frontend;
+                options.AllowUnencryptedCredentials = allowUnencryptedCredentials;
+            });
         http?.ApplyTo(server);
         services.AddSingleton<ZabbixPowerShellTelemetry>();
         if (exportTelemetry) ZabbixModuleTelemetry.AddOtlpExport(services);

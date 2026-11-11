@@ -37,7 +37,7 @@ public sealed class TreeTests
         var services = new ServiceCollection();
         services.AddSingleton(_ => (script ?? (scripted => scripted.On("item.get", Items)))(new ScriptedApi()));   // the container owns it
         services.AddFakeLogging().AddLogging(logging => logging.SetMinimumLevel(LogLevel.Trace));
-        services.AddZabbix(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
+        services.AddZabbix().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
         services.AddHttpClient(ZabbixHttp.GetClientName()).ConfigurePrimaryHttpMessageHandler(provider => provider.GetRequiredService<ScriptedApi>());
         ServiceProvider provider = services.BuildValidated();
         return new Tree(provider.GetRequiredService<ZabbixClient>(), provider.GetRequiredService<ScriptedApi>(), provider.GetFakeLogCollector(), provider);
@@ -94,7 +94,7 @@ public sealed class TreeTests
             .On("host.get", """[{"hostid":"10","host":"web-01","name":"Web 01","status":"0"},{"hostid":"11","host":"db-01","name":"DB 01","status":"0"}]""")
             .On("hostgroup.get", """[{"groupid":"2","name":"Linux servers"}]"""));
 
-        List<ZabbixHostNode> hosts = await tree.Server.HostGroups["Linux servers"].ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
+        List<ZabbixHostNode> hosts = await tree.Server.HostGroups["Linux servers"].Hosts.ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
         List<ZabbixItemNode> items = await tree.Server.Hosts["web-01"].ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(["web-01", "db-01"], hosts.Select(host => host.Name));
@@ -108,7 +108,7 @@ public sealed class TreeTests
     {
         using Tree tree = Build(api => api.On("hostgroup.get", "[]").On("item.get", "[]"));
 
-        ZabbixNotFoundException enumerated = await Assert.ThrowsAsync<ZabbixNotFoundException>(async () => await tree.Server.HostGroups["nope"].ToListAsync(cancellationToken: TestContext.Current.CancellationToken));
+        ZabbixNotFoundException enumerated = await Assert.ThrowsAsync<ZabbixNotFoundException>(async () => await tree.Server.HostGroups["nope"].Hosts.ToListAsync(cancellationToken: TestContext.Current.CancellationToken));
         ZabbixNotFoundException read = await Assert.ThrowsAsync<ZabbixNotFoundException>(async () => await tree.Server.HostGroups["nope"].GetLatestAsync(TestContext.Current.CancellationToken).ToListAsync(cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal(("hostgroup", "nope"), (enumerated.ObjectType, enumerated.Name));

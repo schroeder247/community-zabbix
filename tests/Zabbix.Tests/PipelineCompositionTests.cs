@@ -59,7 +59,7 @@ public sealed class PipelineCompositionTests
         if (time is not null) services.AddSingleton(time);
         services.AddSingleton(_ => api());
         services.AddFakeLogging().AddLogging(logging => logging.SetMinimumLevel(LogLevel.Trace));
-        services.AddZabbix(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
+        services.AddZabbix().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
         services.AddHttpClient(ZabbixHttp.GetClientName()).ConfigurePrimaryHttpMessageHandler(provider => provider.GetRequiredService<T>());
         ServiceProvider provider = services.BuildValidated();
         return new Composed<T>(provider, provider.GetFakeLogCollector());

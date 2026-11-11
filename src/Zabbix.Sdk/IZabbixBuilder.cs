@@ -5,18 +5,19 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Community.Zabbix;
 
 /// <summary>
-/// Represents a named client under construction: the <c>(Name, Services)</c> pair, in the shape of
-/// <c>IHttpClientBuilder</c>. Its verbs (<see cref="ZabbixBuilderExtensions"/>) write the client's named registrations;
-/// the container holds the state.
+/// Represents an API client being set up, in the shape of <c>IHttpClientBuilder</c>: its name and the container it's
+/// registered in. <see cref="ZabbixBuilderExtensions"/> holds its verbs, which write the client's named registrations to
+/// <see cref="Services"/>. <see cref="ZabbixClient.CreateBuilder"/> returns one over a container of its own, and
+/// <see cref="ZabbixServiceCollectionExtensions.AddZabbix(IServiceCollection, string)"/> one over the application's.
 /// </summary>
 public interface IZabbixBuilder
 {
     /// <summary>
-    /// The server's name: the options name and the keyed-service key, under which a document binds it from its
-    /// <c>Servers:{name}</c> row.
+    /// The client's name: the name of its options, and the key it's registered under, which a configuration document binds
+    /// from its <c>Servers:{name}</c> row.
     /// </summary>
     string Name { get; }
 
-    /// <summary>The container.</summary>
+    /// <summary>The container the client is registered in.</summary>
     IServiceCollection Services { get; }
 }

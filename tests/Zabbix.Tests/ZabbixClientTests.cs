@@ -28,20 +28,36 @@ public sealed class ZabbixClientTests
     }
 
     [Fact]
-    public void A_token_in_the_options_beside_the_constructor_s_credential_is_refused_rather_than_ignored()
+    public void A_token_in_the_options_beside_a_credential_given_in_code_is_refused_rather_than_ignored()
     {
-        // The options type has an ApiToken; a server built with a credential and options carrying one would hold two
+        // The options type has an ApiToken; a client built with a credential and options carrying one would hold two
         // credentials, and one of them would be silently dropped.
-        ArgumentException refused = Assert.Throws<ArgumentException>(() => new ZabbixClient(
-            new Uri("https://zbx.example/api_jsonrpc.php"), ZabbixCredential.Anonymous, new ZabbixOptions { ApiToken = "tok" }));
+        InvalidOperationException refused = Assert.Throws<InvalidOperationException>(() => ZabbixClient.CreateBuilder()
+            .WithEndpoint("https://zbx.example/api_jsonrpc.php")
+            .WithCredential(ZabbixCredential.Anonymous)
+            .Configure(options => options.ApiToken = "tok")
+            .Build()
+            .Dispose());
 
-        Assert.Equal("options", refused.ParamName);
+        Assert.Contains("ApiToken", refused.Message, StringComparison.Ordinal);
+        Assert.IsType<OptionsValidationException>(refused.InnerException);
     }
 
     [Fact]
-    public void Options_naming_another_endpoint_are_refused()
-        => Assert.Throws<ArgumentException>(() => new ZabbixClient(
-            new Uri("https://zbx.example/api_jsonrpc.php"), ZabbixCredential.Anonymous, new ZabbixOptions { Endpoint = new Uri("https://other.example/api_jsonrpc.php") }));
+    public void A_later_endpoint_replaces_an_earlier_one_whichever_verb_set_it()
+    {
+        using ZabbixClient configured = ZabbixClient.CreateBuilder()
+            .WithEndpoint("https://other.example/")
+            .Configure(options => options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"))
+            .Build();
+        using ZabbixClient named = ZabbixClient.CreateBuilder()
+            .Configure(options => options.Endpoint = new Uri("https://other.example/"))
+            .WithEndpoint("https://zbx.example/api_jsonrpc.php")
+            .Build();
+
+        Assert.Equal("https://zbx.example/api_jsonrpc.php", configured.Endpoint.AbsoluteUri);
+        Assert.Equal("https://zbx.example/api_jsonrpc.php", named.Endpoint.AbsoluteUri);
+    }
 
     [Fact]
     public async Task The_constructor_s_credential_and_options_reach_the_wire()
@@ -50,7 +66,7 @@ public sealed class ZabbixClientTests
         var authorizations = new List<string?>();
         using var recording = new Recording(api, authorizations);
         var services = new ServiceCollection();
-        services.AddZabbix(options => options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"))
+        services.AddZabbix().Configure(options => options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"))
             .WithCredential(new ZabbixApiTokenCredential("given-in-code"))
             .ConfigureHttpClient(http => http.ConfigurePrimaryHttpMessageHandler(() => recording));
         await using ServiceProvider provider = services.BuildValidated();
@@ -67,7 +83,7 @@ public sealed class ZabbixClientTests
     public void A_credential_given_in_code_beside_a_token_in_the_options_fails_validation()
     {
         var services = new ServiceCollection();
-        services.AddZabbix(options =>
+        services.AddZabbix().Configure(options =>
         {
             options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php");
             options.ApiToken = "from-a-file";
@@ -83,7 +99,7 @@ public sealed class ZabbixClientTests
     public void The_resilience_verb_writes_the_server_s_own_resilience_options()
     {
         var services = new ServiceCollection();
-        services.AddZabbix("prod", options => options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"))
+        services.AddZabbix("prod").Configure(options => options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"))
             .ConfigureResilience(resilience => resilience.Retry.MaxRetryAttempts = 7);
         using ServiceProvider provider = services.BuildServiceProvider();
         IOptionsMonitor<HttpStandardResilienceOptions> resilience = provider.GetRequiredService<IOptionsMonitor<HttpStandardResilienceOptions>>();
@@ -100,17 +116,20 @@ public sealed class ZabbixClientTests
     [InlineData("https://zbx.example/api_jsonrpc.php", false, true)]
     public void A_credential_is_never_sent_in_clear_to_another_host_unless_allowed(string endpoint, bool allow, bool built)
     {
-        ZabbixClient Build() => new(new Uri(endpoint), new ZabbixApiTokenCredential("tok"), new ZabbixOptions { AllowUnencryptedCredentials = allow });
+        ZabbixClientBuilder builder = ZabbixClient.CreateBuilder().WithEndpoint(endpoint).WithCredential(new ZabbixApiTokenCredential("tok"));
+        if (allow) builder.AllowUnencryptedCredentials();
 
         if (built)
         {
-            using ZabbixClient client = Build();
+            using ZabbixClient client = builder.Build();
             Assert.NotNull(client.Transport);
         }
         else
         {
-            OptionsValidationException refused = Assert.Throws<OptionsValidationException>(Build);
+            InvalidOperationException refused = Assert.Throws<InvalidOperationException>(() => builder.Build().Dispose());
             Assert.Contains("AllowUnencryptedCredentials", refused.Message, StringComparison.Ordinal);
+            Assert.IsType<OptionsValidationException>(refused.InnerException);
+            Assert.Throws<OptionsValidationException>(() => new ZabbixClient(new Uri(endpoint), "tok").Dispose());   // the constructor, as the builder
         }
     }
 

@@ -81,6 +81,9 @@ await using var zabbix = new ZabbixClient("https://zabbix.example/", token);
 Console.WriteLine(await zabbix.GetApiVersionAsync());
 ```
 
+To set more, such as timeouts, retries or logging, start with `ZabbixClient.CreateBuilder()`. See
+[The API client](docs/guides/api-client.md#create-a-client).
+
 For a whole program, follow [Getting started](docs/GETTING-STARTED.md), or [Getting started with PowerShell](src/Zabbix.PowerShell/GETTING-STARTED.md).
 
 ## Key concepts
@@ -249,11 +252,13 @@ See [PowerShell](docs/guides/powershell.md) and the [command reference](docs/ref
 ### Register in a host
 
 In a worker service or an ASP.NET Core application, bind named clients and hosted agents from configuration, and add in code what
-a file can't hold. `AddZabbixActiveAgent` returns the same builder `CreateBuilder` does:
+a file can't hold. `AddZabbix` and `AddZabbixActiveAgent` take the verbs their classes' `CreateBuilder` takes:
 
 ```csharp
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddZabbixClients(builder.Configuration);       // Zabbix:Servers:{name}
+builder.Services.AddZabbix("prod")                              // the server the file declares: what code adds
+    .WithTimeout("configuration.import", TimeSpan.FromMinutes(5));
 builder.Services.AddZabbixAgents(builder.Configuration);        // Zabbix:ActiveAgents:{name} and the other agents
 builder.Services.AddZabbixActiveAgent("web-01")                 // the agent the file declares: its items
     .AddItem(new ZabbixItemKey<string>("app.version"), () => "2.4.1");

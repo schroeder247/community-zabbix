@@ -17,10 +17,15 @@ its package (`Community.Zabbix.Sdk.dll`), and the namespaces and telemetry names
 
 ### Added
 
-- **The API client** (`Community.Zabbix.Sdk`). `new ZabbixClient("https://zabbix.example/", token)`, with one generated
-  client per API object (`zabbix.Hosts`, `zabbix.Items`, …), or named clients registered with `AddZabbix`
-  (`IZabbixClientFactory`); the JSON-RPC transport over `IHttpClientFactory` and the standard resilience handler (a read
-  is retried on a transient failure, a write never is); API tokens or a session login that renews itself;
+- **The API client** (`Community.Zabbix.Sdk`) ([ADR 0013](docs/adr/0013-builders-verbs-and-typed-values.md)).
+  `new ZabbixClient("https://zabbix.example/", token)` takes an address and a token, a `NetworkCredential` or a
+  `ZabbixCredential`; `ZabbixClient.CreateBuilder()` sets more (`WithEndpoint`, `WithToken`, `WithLogin`, `WithCredential`,
+  `WithTimeout`, `ConfigureResilience`, `ConfigureHttpClient`, `Configure`, `Bind`, `UseLogging`, `UseTimeProvider`) and
+  validates it in `Build()`; and `AddZabbix("prod")` registers a named client with the same verbs, written once for both
+  builders, which `IZabbixClientFactory` returns. The constructors, the builder and the registration build the client through
+  one registration, so its HTTP pipeline and resilience are the same whichever way it's made. One generated client per API
+  object (`zabbix.Hosts`, `zabbix.Items`, …); the JSON-RPC transport over `IHttpClientFactory` and the standard resilience
+  handler (a read is retried on a transient failure, a write never is); API tokens or a session login that renews itself;
   `ZabbixApiException` with a classified `Kind`.
 - **A per-version API model** (`Community.Zabbix.Api`). Every object record, enum, parameter set and request, generated at build
   time from a description extracted from the Zabbix 7.0, 7.4 and 8.0 sources. A member carries the versions that have
@@ -29,11 +34,14 @@ its package (`Community.Zabbix.Sdk.dll`), and the namespaces and telemetry names
 - **Typed items** ([ADR 0012](docs/adr/0012-typed-bcl-fluent-api.md)). `ZabbixItemKey<T>` declares a key with its type, and
   `ZabbixItemKeys` is the typed catalogue of Zabbix's own keys. Sends, reads, polls and agents' answers take them.
 - **A fluent API** ([ADR 0012](docs/adr/0012-typed-bcl-fluent-api.md)). `zabbix.Hosts.GetAsync(q => q.Search.VisibleName = "web")`,
-  `zabbix.Hosts.CreateAsync("web-02", [groupId])`, `zabbix.Items[id].DeleteAsync()` and `zabbix.Hosts["web-01"].GetAsync()`, with
-  `ZabbixClientBuilder` for a client with much to set. Public signatures use BCL types: `ulong` ids,
+  `zabbix.Hosts.CreateAsync("web-02", [groupId])`, `zabbix.Items[id].DeleteAsync()`, `zabbix.Hosts["web-01"].GetAsync()` and
+  `zabbix.HostGroups["Linux"].Hosts["web-01"]`. Every asynchronous member takes its `CancellationToken` last:
+  `zabbix.Hosts.GetAsync(stoppingToken)` passes it by position, and a member with several forms has each one with a token and
+  without one ([ADR 0013](docs/adr/0013-builders-verbs-and-typed-values.md)). Public signatures use BCL types: `ulong` ids,
   `DateTimeOffset` times, `DnsEndPoint` nodes, `Func` callbacks, and `NetworkCredential` for a login.
 - **The tree and the watcher.** `zabbix.Hosts["web-01"].Item("key")` and host groups answer `GetLatestAsync`,
-  `GetHistoryAsync` and `Watch`; `IZabbixWatcher` streams the history collected since its last read.
+  `GetHistoryAsync` and `Watch`; a group's node (`zabbix.HostGroups["Linux"]`) also reads and deletes the group, and reaches
+  its hosts by name; `IZabbixWatcher` streams the history collected since its last read.
 - **The framed-TCP wire** (`Community.Zabbix.Wire`, a package of its own: an API consumer takes no TLS stack). `ZabbixWireClient`
   sends values, reads an item from an agent and asks a server, with PSK and certificate TLS and the HA node walk.
   `new ZabbixWireClient("zbx-server-01")` takes a server; `ZabbixWireClient.CreateBuilder()` sets more (`AddServer`, `WithToken`,
@@ -82,8 +90,9 @@ its package (`Community.Zabbix.Sdk.dll`), and the namespaces and telemetry names
 - **Every entry point without a container** ([ADR 0007](docs/adr/0007-container-free-runners.md),
   [ADR 0010](docs/adr/0010-agent-proxy-client-classes.md)).
   `new ZabbixClient("https://zabbix.example/", token)` takes the frontend's address
-  (`ZabbixOptions.GetApiEndpoint` appends `api_jsonrpc.php`, in `AddZabbix` and a bound configuration too), and an
-  overload takes a logger factory and a clock; a `NetworkCredential` logs in with a session.
+  (`ZabbixOptions.GetApiEndpoint` appends `api_jsonrpc.php`, in `AddZabbix` and a bound configuration too), and
+  `ZabbixClient.CreateBuilder()` takes a logger factory and a clock (`UseLogging`, `UseTimeProvider`); a `NetworkCredential`
+  logs in with a session.
   `ZabbixWireClient`, and the agents' and the active proxy's `AddServer` read `host` or
   `host:port`. Every agent and proxy derives from `ZabbixComponent`, one lifetime with no host: `StartAsync`, `StopAsync`,
   `RunAsync`, `DisposeAsync` and `StopTimeout`. A constructor only captures and `Options` is read at start, where
@@ -164,13 +173,13 @@ its package (`Community.Zabbix.Sdk.dll`), and the namespaces and telemetry names
   fault is observed.
 - **Tests wait on signals.** The test projects have their own banned-symbol list (no sleeps, no polling delays, no
   local-clock reads), and both suites run under a hang dump.
-- **Build gates.** RS0026 (optional parameters on several overloads) is an error in every library: the generator
-  answers it on each generated client overload with its reason, and no hand-written member is exempt: where one name
-  has several overloads (the `ZabbixWireClient` constructors, `SendAsync`, `GetAgentItemAsync`,
-  `ZabbixClient.SendAsync`, the `ZabbixListener` constructors, `AddHealthCheck`, `DrainAsync`,
-  `ZabbixSendLoop.RunAsync`), the shorter constructor forms are overloads of their own that call the longest, and an
-  asynchronous overload takes its cancellation token as a required last parameter (only a member that is alone under
-  its name, or strictly the longest, keeps `= default`).
+- **Build gates.** RS0026 (optional parameters on several overloads) is an error in every library, and no member is
+  exempt, generated or hand-written: where one name has several overloads (the generated clients' `GetAsync`, `CountAsync`
+  and the one, several and one-id forms of a write, the `ZabbixWireClient` constructors, `SendAsync`, `GetAgentItemAsync`,
+  `ZabbixClient.SendAsync`, `ZabbixHostNode.GetHistoryAsync`, the `ZabbixListener` constructors, `AddHealthCheck`,
+  `DrainAsync`, `ZabbixSendLoop.RunAsync`), the shorter constructor forms are overloads of their own that call the longest,
+  and an asynchronous overload takes its cancellation token as a required last parameter beside an overload without it
+  (only a member that is alone under its name, or strictly the longest, keeps `= default`).
   CA1000, CA1720 and CA1812 are errors, answered by a `[SuppressMessage]` with its reason on each symbol a
   framework instantiates or Zabbix names; CA1307 is an error, and the CA1806/IDE0051/IDE0052 results rule covers every
   package.

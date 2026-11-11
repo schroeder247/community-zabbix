@@ -32,7 +32,7 @@ public sealed class OptionsTests
             ["Resilience:Retry:MaxRetryAttempts"] = "7",
         }).Build();
         var services = new ServiceCollection();
-        services.AddZabbix(section);
+        services.AddZabbix().Bind(section);
         using ServiceProvider provider = services.BuildValidated();
 
         ZabbixOptions options = provider.GetRequiredService<IOptions<ZabbixOptions>>().Value;
@@ -47,7 +47,7 @@ public sealed class OptionsTests
     public void The_transport_is_one_singleton()
     {
         var services = new ServiceCollection();
-        services.AddZabbix(options => options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"));
+        services.AddZabbix().Configure(options => options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"));
         using ServiceProvider provider = services.BuildValidated();
 
         Assert.Same(provider.GetRequiredService<IZabbixTransport>(), provider.GetRequiredService<IZabbixTransport>());
@@ -57,9 +57,9 @@ public sealed class OptionsTests
     public void A_token_in_the_document_becomes_the_credential_and_none_means_anonymous()
     {
         var withToken = new ServiceCollection();
-        withToken.AddZabbix(options => { options.Endpoint = new Uri("https://zbx.example/"); options.ApiToken = "tok"; });
+        withToken.AddZabbix().Configure(options => { options.Endpoint = new Uri("https://zbx.example/"); options.ApiToken = "tok"; });
         var without = new ServiceCollection();
-        without.AddZabbix(options => options.Endpoint = new Uri("https://zbx.example/"));
+        without.AddZabbix().Configure(options => options.Endpoint = new Uri("https://zbx.example/"));
 
         using ServiceProvider first = withToken.BuildValidated();
         using ServiceProvider second = without.BuildValidated();
@@ -98,9 +98,9 @@ public sealed class OptionsTests
             ["Timeouts:host.get"] = "00:00:00",
         }).Build();
         var goodServices = new ServiceCollection();
-        goodServices.AddZabbix(good);
+        goodServices.AddZabbix().Bind(good);
         var badServices = new ServiceCollection();
-        badServices.AddZabbix(bad);
+        badServices.AddZabbix().Bind(bad);
         using ServiceProvider goodProvider = goodServices.BuildValidated();
         using ServiceProvider badProvider = badServices.BuildValidated();
 

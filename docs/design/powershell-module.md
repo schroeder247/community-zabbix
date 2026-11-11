@@ -259,8 +259,8 @@ the command is decided by what failed, never by the command's mood; `SourceConfo
 
 The modules use the SDK as an application does, so whatever a script does, a C# program does with the same calls:
 
-- **A connection** is `AddZabbix(name, …).WithCredential(…)` in the connection's own container, with
-  `-SkipCertificateCheck`, `-TimeoutSec` and `-Proxy` applied through `ConfigureHttpClient` and `ConfigureResilience`.
+- **A connection** is `AddZabbix(name).WithEndpoint(…).WithCredential(…)` in the connection's own container, with
+  `-SkipCertificateCheck`, `-TimeoutSec` and `-Proxy` applied through `ConfigureHttpClient` and `WithTimeout`.
   The `sid` of `ZabbixWireClient` logs in through the keyed `IZabbixTransport` that `AddZabbix` registers under the name.
 - **A method no generated client names**, and a read-back by id after `New-` and `Set-`, go through
   `ZabbixClient.SendAsync` with the SDK's JSON contract (`ZabbixJson.Options`, which `ZabbixContracts` looks up; the

@@ -12,5 +12,5 @@ namespace Community.Zabbix.PowerShell.Commands;
 public sealed class GetZbxSettingCommand : ZabbixSingletonGetCmdlet<ZabbixSettingsRecord>
 {
     /// <inheritdoc/>
-    protected override Task<ZabbixSettingsRecord> GetAsync(CancellationToken cancellationToken) => ZabbixClient.Settings.GetAsync(cancellationToken: cancellationToken);
+    protected override Task<ZabbixSettingsRecord> GetAsync(CancellationToken cancellationToken) => ZabbixClient.Settings.GetAsync(cancellationToken);
 }

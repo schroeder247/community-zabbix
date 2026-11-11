@@ -12,5 +12,5 @@ namespace Community.Zabbix.PowerShell.Commands;
 public sealed class GetZbxHousekeepingCommand : ZabbixSingletonGetCmdlet<ZabbixHousekeepingSettings>
 {
     /// <inheritdoc/>
-    protected override Task<ZabbixHousekeepingSettings> GetAsync(CancellationToken cancellationToken) => ZabbixClient.Housekeeping.GetAsync(cancellationToken: cancellationToken);
+    protected override Task<ZabbixHousekeepingSettings> GetAsync(CancellationToken cancellationToken) => ZabbixClient.Housekeeping.GetAsync(cancellationToken);
 }

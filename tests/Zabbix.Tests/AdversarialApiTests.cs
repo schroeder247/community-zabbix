@@ -18,7 +18,7 @@ public sealed class AdversarialApiTests
     private static (ZabbixClient Server, ServiceProvider Provider) Build(ScriptedApi api)
     {
         var services = new ServiceCollection();
-        services.AddZabbix(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
+        services.AddZabbix().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
         services.AddHttpClient(ZabbixHttp.GetClientName()).ConfigurePrimaryHttpMessageHandler(() => api);
         ServiceProvider provider = services.BuildValidated();
         return (provider.GetRequiredService<ZabbixClient>(), provider);

@@ -43,8 +43,11 @@ using ILoggerFactory loggers = LoggerFactory.Create(logging => logging
     .AddZabbixRedaction()                                                             // secrets and item keys stay out
     .AddOpenTelemetry(o => o.AddOtlpExporter()));
 
-await using var client = new ZabbixClient(new Uri("https://zabbix.example/"), ZabbixCredential.FromApiToken(apiToken),
-    new ZabbixOptions(), loggers, time: null);
+await using ZabbixClient client = ZabbixClient.CreateBuilder()
+    .WithEndpoint("https://zabbix.example/")
+    .WithToken(apiToken)
+    .UseLogging(loggers)                                                              // where the client logs
+    .Build();
 await using ZabbixPushAgent agent = ZabbixPushAgent.CreateBuilder("web-01")
     .AddServer("zbx-server-01")
     .UseLogging(loggers)                                                              // where the agent logs

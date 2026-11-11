@@ -8,8 +8,8 @@ namespace Community.Zabbix.PowerShell;
 /// <summary>
 /// The HTTP knobs <c>Connect-ZbxServer</c> takes as <c>Invoke-RestMethod</c> does (<c>-SkipCertificateCheck</c>,
 /// <c>-TimeoutSec</c>, <c>-Proxy</c>, <c>-ProxyCredential</c>), applied through the server's builder as an application
-/// applies its own (<c>ConfigureHttpClient</c>, <c>ConfigureResilience</c>): the SDK's handler is configured, never
-/// replaced, and the deadline is the standard resilience handler's.
+/// applies its own (<c>ConfigureHttpClient</c>, <c>WithTimeout</c>): the SDK's handler is configured, never replaced, and the
+/// deadline is the standard resilience handler's.
 /// </summary>
 /// <param name="SkipCertificateCheck">Accepts any server certificate (a self-signed frontend).</param>
 /// <param name="Timeout">How long one request may take, retries included; the SDK's deadlines when <see langword="null"/>.</param>
@@ -37,16 +37,7 @@ internal sealed record ZabbixHttpSettings(bool SkipCertificateCheck, TimeSpan? T
                 }
             }));
         }
-        if (Timeout is { } deadline)
-        {
-            // One request may take the whole deadline: the attempt's and the total's, and a circuit breaker that samples
-            // at least two attempts (the standard options' own validation).
-            server.ConfigureResilience(options =>
-            {
-                options.AttemptTimeout.Timeout = deadline;
-                options.TotalRequestTimeout.Timeout = deadline;
-                if (options.CircuitBreaker.SamplingDuration < deadline * 2) options.CircuitBreaker.SamplingDuration = deadline * 2;
-            });
-        }
+        // One request may take the whole deadline, retries included.
+        if (Timeout is { } deadline) server.WithTimeout(deadline);
     }
 }

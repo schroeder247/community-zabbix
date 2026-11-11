@@ -26,13 +26,17 @@ await foreach (ZabbixValue value in zabbix.Hosts["web-01"].GetLatestAsync())
 | Node | Reached by | A read covers |
 | --- | --- | --- |
 | `ZabbixClient` | The root | Every item on the server |
-| `ZabbixHostScope` | `zabbix.AllHosts`, `zabbix.HostGroups["Linux servers"]` | Every item of every host in the set |
-| `ZabbixHostNode` | `zabbix.Hosts["web-01"]`, `scope.Host("web-01")` | Every item of one host |
+| `ZabbixHostScope` | `zabbix.AllHosts`, `zabbix.HostGroups["Linux servers"].Hosts` | Every item of every host in the set |
+| `ZabbixHostGroupNode` | `zabbix.HostGroups["Linux servers"]` | Every item of every host in the group |
+| `ZabbixHostNode` | `zabbix.Hosts["web-01"]`, `zabbix.HostGroups["Linux servers"].Hosts["web-01"]`, `zabbix.AllHosts["web-01"]` | Every item of one host |
 | `ZabbixItemNode` | `host.Item("key")`, `host.Item(ZabbixItemKey)` | One item |
 
 - Name a host by its technical name (the API's `host` field), a group by its name, and an item by its key.
   `Item(string)` throws `FormatException` for text that isn't an item key.
 - Building a node makes no call.
+- A host reached through its group is read only while it's in the group.
+- A host's or a group's node reads its object with `GetAsync`, or `FindAsync` for `null` when there's none, and deletes it with
+  `DeleteAsync`.
 - The level you call a read at is both the scope of the request and the size of its reply. `client.GetLatestAsync()` reads every item
   on the server.
 
@@ -73,7 +77,7 @@ List<ZabbixValue> values = await zabbix.Hosts["web-01"].GetLatestAsync().ToListA
 ## List hosts and items
 
 ```csharp
-await foreach (ZabbixHostNode host in zabbix.HostGroups["Linux servers"])
+await foreach (ZabbixHostNode host in zabbix.HostGroups["Linux servers"].Hosts)
     await foreach (ZabbixItemNode item in host)
         Console.WriteLine($"{host.Name} {item.Key}");
 ```
@@ -185,7 +189,8 @@ Every read and watch yields `ZabbixValue(Host, Key, Value, Time)`:
 
 ## Cancel a read and stop a watch
 
-Every read takes a `CancellationToken`, which reaches the socket. `WithCancellation` on the sequence passes one too.
+Every read takes a `CancellationToken` last, which reaches the socket: `host.GetHistoryAsync(requests, TimeSpan.FromHours(1),
+cancellationToken)`. `WithCancellation` on the sequence passes one too.
 
 | What you do | What happens |
 | --- | --- |
@@ -226,7 +231,7 @@ internal sealed class GroupWatch(IZabbixClientFactory clients) : BackgroundServi
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        ZabbixHostScope group = clients.Create("prod").HostGroups["Linux servers"];
+        ZabbixHostGroupNode group = clients.Create("prod").HostGroups["Linux servers"];
         await using IZabbixWatcher watcher = group.Watch(new ZabbixWatchPlan(TimeSpan.FromSeconds(30)));
 
         await foreach (ZabbixValue value in watcher.WithCancellation(stoppingToken))

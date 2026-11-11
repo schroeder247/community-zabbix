@@ -274,7 +274,7 @@ public sealed class ResilienceTests
     {
         Assert.Equal(1L << 30, new ZabbixOptions().MaxResponseContentBytes);
         var services = new ServiceCollection();
-        services.AddZabbix(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.MaxResponseContentBytes = 0; });
+        services.AddZabbix().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.MaxResponseContentBytes = 0; });
         using ServiceProvider provider = services.BuildServiceProvider();
 
         Assert.Throws<OptionsValidationException>(() => provider.GetRequiredService<IOptionsMonitor<ZabbixOptions>>().Get(Options.DefaultName));
@@ -309,7 +309,7 @@ public sealed class ResilienceTests
         };
         IConfigurationRoot configuration = new ConfigurationBuilder().AddInMemoryCollection(source).Build();
         var services = new ServiceCollection();
-        services.AddZabbix(configuration);
+        services.AddZabbix().Bind(configuration);
         services.AddHttpClient(ZabbixHttp.GetClientName()).ConfigurePrimaryHttpMessageHandler(() => flaky);
         using ServiceProvider provider = services.BuildValidated();
         IZabbixTransport transport = provider.GetRequiredService<IZabbixTransport>();

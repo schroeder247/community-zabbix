@@ -150,8 +150,8 @@ builder.Services.AddZabbixProxies(builder.Configuration);   // PushAgents with t
 
 ## Combine a document with code
 
-A row's name is the name of its options, the same name code registers: `AddZabbixClients` calls `AddZabbix(name, row)` for each server
-row. Register the name again to add what a file can't hold, such as a credential built in code, a delegating HTTP handler, an agent's
+A row's name is the name of its options, the same name code registers: `AddZabbixClients` calls `AddZabbix(name).Bind(row)` for each
+server row. Register the name again to add what a file can't hold, such as a credential built in code, a delegating HTTP handler, an agent's
 polls and item handlers ([Items](items.md)), or a store.
 
 ```csharp
@@ -172,7 +172,7 @@ builder.Services.AddZabbixPushAgent("edge-01")                         // edge-0
   the later step wins. A row's name is the agent's host name unless a step sets `Hostname`.
 - A credential given in code and an `ApiToken` in the row are two credentials for one client, and validation refuses the pair.
 - The document registers named clients only. For the unnamed client, which is also injected as plain `ZabbixClient`, bind one row
-  directly: `builder.Services.AddZabbix(builder.Configuration.GetSection("Zabbix:Servers:prod"))`.
+  directly: `builder.Services.AddZabbix().Bind(builder.Configuration.GetSection("Zabbix:Servers:prod"))`.
 
 ## Keep secrets out of the document
 

@@ -19,7 +19,7 @@ internal sealed partial class Inventory(IZabbixClientFactory clients, ILogger<In
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        IReadOnlyList<ZabbixHost> hosts = await clients.Create("prod").Hosts.GetAsync(cancellationToken: stoppingToken);
+        IReadOnlyList<ZabbixHost> hosts = await clients.Create("prod").Hosts.GetAsync(stoppingToken);
         LogHosts(logger, hosts.Count);
     }
 

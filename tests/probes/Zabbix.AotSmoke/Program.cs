@@ -18,7 +18,7 @@ using Community.Zabbix.Listening;
 // Nothing listens on port 9, so each call ends in a connection failure, which proves the code ran to the socket under
 // Native AOT.
 var services = new ServiceCollection();
-services.AddZabbix("smoke", o => o.Endpoint = new Uri("http://127.0.0.1:9/api_jsonrpc.php"));
+services.AddZabbix("smoke").WithEndpoint("http://127.0.0.1:9/api_jsonrpc.php");
 services.AddZabbixPushAgent("relay").AddTrapper(10099, o => o.AllowedPeers.Add("127.0.0.1")).AddServer("127.0.0.1:9");
 services.AddZabbixWireClient("smoke").AddServer("127.0.0.1:9").WithTimeout(TimeSpan.FromSeconds(5));
 await using ServiceProvider provider = services.BuildServiceProvider();
@@ -31,6 +31,33 @@ try
 catch (HttpRequestException e)
 {
     Console.WriteLine($"api: {e.GetType().Name}");
+}
+
+// The API client its builder binds from configuration, on a container of its own: the generated binder (its Resilience
+// subsection retries at once), the options' validator and the same HTTP pipeline as the registered client's, read with a token
+// passed by position.
+IConfiguration apiSection = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+{
+    ["Endpoint"] = "http://127.0.0.1:9/",
+    ["MaxConnectionsPerServer"] = "4",
+    ["Resilience:Retry:Delay"] = "00:00:00",
+}).Build();
+await using (ZabbixClient bound = ZabbixClient.CreateBuilder().Bind(apiSection).WithTimeout("host.get", TimeSpan.FromSeconds(30)).Build())
+{
+    if (bound.Endpoint.AbsoluteUri != "http://127.0.0.1:9/api_jsonrpc.php")
+    {
+        Console.WriteLine($"aot smoke: the builder bound the endpoint '{bound.Endpoint}'");
+        return 1;
+    }
+    try
+    {
+        var hosts = await bound.Hosts.GetAsync(CancellationToken.None).ConfigureAwait(false);
+        Console.WriteLine($"built hosts: {hosts.Count}");
+    }
+    catch (HttpRequestException e)
+    {
+        Console.WriteLine($"built api: {e.GetType().Name}");
+    }
 }
 
 using var wire = new ZabbixWireClient("127.0.0.1:9");

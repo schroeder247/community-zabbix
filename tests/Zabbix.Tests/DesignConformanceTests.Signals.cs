@@ -63,7 +63,7 @@ public sealed partial class DesignConformanceTests
     {
         var services = new ServiceCollection();
         services.AddSingleton<TimeProvider>(new Microsoft.Extensions.Time.Testing.FakeTimeProvider(DateTimeOffset.FromUnixTimeSeconds(1_700_000_000)));
-        services.AddZabbix(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
+        services.AddZabbix().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
         using ScriptedApi api = new ScriptedApi().On("item.get", "[]");
         services.AddHttpClient(ZabbixHttp.GetClientName()).ConfigurePrimaryHttpMessageHandler(() => api);
         await using ServiceProvider provider = services.BuildValidated();

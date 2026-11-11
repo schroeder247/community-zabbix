@@ -17,8 +17,9 @@ await foreach (ZabbixValue value in zabbix.Hosts["web-01"].GetLatestAsync())
     Console.WriteLine($"{value.Key} = {value.Value}");
 ```
 
-The address is the frontend's; the client calls its `api_jsonrpc.php`. In an application with a host,
-`AddZabbix("prod", o => …)` registers the same client, and `IZabbixClientFactory.Create("prod")` returns it.
+The address is the frontend's; the client calls its `api_jsonrpc.php`. `ZabbixClient.CreateBuilder()` builds a client with
+more to set (`WithTimeout`, `ConfigureResilience`, `UseLogging`), and in an application with a host,
+`AddZabbix("prod")` registers the same client with the same verbs, and `IZabbixClientFactory.Create("prod")` returns it.
 
 A client that logs in with a user name and password (a `NetworkCredential`) ends its session with `user.logout`
 when it is disposed with `await using` or `DisposeAsync` (a container disposed asynchronously does this for the

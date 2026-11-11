@@ -74,7 +74,7 @@ public sealed class WatcherTests
         var services = new ServiceCollection();
         services.AddSingleton<TimeProvider>(time);
         services.AddFakeLogging().AddLogging(logging => logging.SetMinimumLevel(LogLevel.Trace));
-        services.AddZabbix(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
+        services.AddZabbix().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
         services.AddHttpClient(ZabbixHttp.GetClientName()).ConfigurePrimaryHttpMessageHandler(() => primary?.Invoke(api) ?? api);
         ServiceProvider provider = services.BuildValidated();
         IMeterFactory meters = provider.GetRequiredService<IMeterFactory>();

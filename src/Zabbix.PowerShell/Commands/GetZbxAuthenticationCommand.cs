@@ -12,5 +12,5 @@ namespace Community.Zabbix.PowerShell.Commands;
 public sealed class GetZbxAuthenticationCommand : ZabbixSingletonGetCmdlet<ZabbixAuthenticationSettings>
 {
     /// <inheritdoc/>
-    protected override Task<ZabbixAuthenticationSettings> GetAsync(CancellationToken cancellationToken) => ZabbixClient.Authentication.GetAsync(cancellationToken: cancellationToken);
+    protected override Task<ZabbixAuthenticationSettings> GetAsync(CancellationToken cancellationToken) => ZabbixClient.Authentication.GetAsync(cancellationToken);
 }

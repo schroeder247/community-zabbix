@@ -105,5 +105,5 @@ public sealed class SetZbxHousekeepingCommand : ZabbixSingletonSetCmdlet<ZabbixH
 
     /// <inheritdoc/>
     protected override async Task<object?> GetAsync(CancellationToken cancellationToken)
-        => await ZabbixClient.Housekeeping.GetAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+        => await ZabbixClient.Housekeeping.GetAsync(cancellationToken).ConfigureAwait(false);
 }

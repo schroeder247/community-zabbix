@@ -65,10 +65,11 @@ ZabbixClient                 the root — one API endpoint + one credential; wha
       push   source → Agent → Proxy → Sender → Server    every stage takes a ZabbixValue; every edge is a bounded channel
 ```
 
-**One root.** A `ZabbixClient` is modelled on the Azure client triad (`new ZabbixClient(endpoint, credential)` and
-`new ZabbixClient(endpoint, credential, options)`; immutable, thread-safe, a singleton; sub-clients reached as properties share its pipeline
-and cost no call), and it is what `AddZabbix("prod", …)` registers and `IZabbixClientFactory.Create("prod")`
-mints. The request/reply transport beneath it is the platform's own: `IHttpClientFactory` with one
+**One root.** A `ZabbixClient` is modelled on the Azure client triad (`new ZabbixClient(endpoint, credential)`, and
+`ZabbixClient.CreateBuilder()` for the rest; immutable, thread-safe, a singleton; sub-clients reached as properties share its
+pipeline and cost no call), and it is what `AddZabbix("prod")` registers and `IZabbixClientFactory.Create("prod")`
+mints. The constructor and the standalone builder run the same registration on a container of their own
+([ADR 0013](../adr/0013-builders-verbs-and-typed-values.md)). The request/reply transport beneath it is the platform's own: `IHttpClientFactory` with one
 `SocketsHttpHandler` primary, the `DelegatingHandler` chain, `AddStandardResilienceHandler`, and one
 `JsonSerializerContext` for every model. Nothing of the SDK's own mimics them.
 `SetHandlerLifetime(Timeout.InfiniteTimeSpan)` keeps one handler, so the connection cap is not fragmented.
@@ -120,7 +121,8 @@ Every node answers the **same two interfaces**:
 
 The tiers above the leaf also answer a structural contract, because a caller navigating needs what a
 host *is* and a leaf never has. That contract is the concrete scope types (`ZabbixHostScope`,
-`ZabbixHostNode`, each an `IAsyncEnumerable` of its children); there is no separate scope interface.
+`ZabbixHostNode`, each an `IAsyncEnumerable` of its children); there is no separate scope interface. A group's node
+(`ZabbixHostGroupNode`) reads and deletes the group and reaches its hosts as a scope, `HostGroups["x"].Hosts["web-01"]`.
 
 **Therefore the depth you call at is the blast radius**, and it compiles to the wire honestly:
 
@@ -348,7 +350,7 @@ span and the duration sample together (seconds, `error.type`, `server.*` where t
 | Layer | What it is | Source and meter | Log, ids |
 | --- | --- | --- | --- |
 | API | `ZabbixClient`, `JsonRpcTransport` over `IHttpClientFactory` + the standard resilience handler + `ZabbixResponseBufferingHandler` (the body inside the deadline), the generated clients, `ZabbixSessionCredential` (logs in with `userData: true` and refuses once, with the reason, a user whose group requires MFA), `ZabbixApiErrorKind`, `ZabbixFrontend` (page links by the server's version) | `Community.Zabbix.Api` (`ZabbixApiTelemetry`: `rpc.client.call.duration`, `rpc.system.name`, `zabbix.api.error.code`/`kind`) | `ApiLog`, 40xx |
-| Tree | `ZabbixClient`/`ZabbixHostScope`/`ZabbixHostNode`/`ZabbixItemNode`, `ZabbixHistoryRead`, `ZabbixWatcher` | `Community.Zabbix.Tree` (`ZabbixTreeTelemetry`) | `TreeLog`, 50xx |
+| Tree | `ZabbixClient`/`ZabbixHostScope`/`ZabbixHostGroupNode`/`ZabbixHostNode`/`ZabbixItemNode`, `ZabbixHistoryRead`, `ZabbixWatcher` | `Community.Zabbix.Tree` (`ZabbixTreeTelemetry`) | `TreeLog`, 50xx |
 | Wire | `ZabbixHeader` (upstream's frame rules; a reply is capped at 16 MiB unless `MaxPayloadBytes` says otherwise, a proxy's configuration at upstream's 16 GiB), `ZabbixNodeLink` (the node walk; owns certificate mode's trust and is disposed by whoever built it: a wire client, the agents and proxies), `ZabbixFrames` (`Over` = exchange, `Notify` = notification, over a link nobody disposes), `ZabbixTls` (CA-only trust, `ZabbixCertificateName` pins, `ZabbixRevocationLists`, BouncyCastle PSK), `ZabbixWireClient` (over `ZabbixSender`, `ZabbixGetter` and `ZabbixServerWire`, internal: sends, reads from an agent, and the server's own trapper requests; a span per request named for it) | `Community.Zabbix.Wire` (`ZabbixWireTelemetry`) | `WireLog`, 1000–1399 |
 | Store | `ZabbixStore<T>` (a `ChannelWriter<T>`, a stream face and an acknowledged face: `WaitToLeaseAsync`/`TryLease`/`TryPeek`/`Acknowledge`/`Release`), `ZabbixMemoryStore<T>`, `ZabbixPersistentStore<T>`, `ZabbixEntityFrameworkStore<T>` (a table per store). The proxies keep a failed page in memory and re-send it rather than releasing it, because a page re-leased later could map differently against a newer config. An agent's own backing comes through its builder's `UseStore`, `(policy, services) => …` or `(provider, policy, services) => …` (`UseEntityFrameworkStore` is one), and a proxy's through `AddStore`, called once per destination | `Community.Zabbix.Store` (`zabbix.store.dropped`, `.acknowledged`, `.pending`) | `StoreLog`, 20xx, 21xx |
 | Agent | `ZabbixSendLoop` (an owned enumerator; drains within one window from the stop), `ZabbixPushAgent`, `ZabbixActiveAgent` (a due queue by `ZabbixItemDelay`, the heartbeat a notification), `ZabbixItemDictionary` (an agent's one table of keys), health; `ZabbixComponent`, the lifetime every agent and proxy shares with no host, and `ZabbixHostedComponent`, the adapter a host runs it through ([ADR 0010](../adr/0010-agent-proxy-client-classes.md)) | `Community.Zabbix.Agent` (`ZabbixAgentTelemetry`) | `AgentLog`, 30xx–33xx |

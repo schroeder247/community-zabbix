@@ -116,7 +116,7 @@ ADRs: a lower document may add to a higher one and never contradicts it. Where t
 ### Groups, templates and proxies are selections, not rungs
 
 A host is in many groups and has many templates, so neither can be a container in a tree without lying about
-cardinality. `client.HostGroups["x"]` is a view over the host set; narrowing preserves the type. *Consequence:* the tree has
+cardinality. `client.HostGroups["x"].Hosts` is a view over the host set; narrowing preserves the type. *Consequence:* the tree has
 three tiers (server, host, item) and no subtree axis.
 
 ### The `.get` grammar is the whole query language

@@ -12,5 +12,5 @@ namespace Community.Zabbix.PowerShell.Commands;
 public sealed class GetZbxAutoregistrationCommand : ZabbixSingletonGetCmdlet<ZabbixAutoregistrationSettings>
 {
     /// <inheritdoc/>
-    protected override Task<ZabbixAutoregistrationSettings> GetAsync(CancellationToken cancellationToken) => ZabbixClient.Autoregistration.GetAsync(cancellationToken: cancellationToken);
+    protected override Task<ZabbixAutoregistrationSettings> GetAsync(CancellationToken cancellationToken) => ZabbixClient.Autoregistration.GetAsync(cancellationToken);
 }

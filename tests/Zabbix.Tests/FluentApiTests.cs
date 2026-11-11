@@ -1,12 +1,14 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. Copyright (c) 2026 schroeder247. SPDX-License-Identifier: MPL-2.0
 using System.Net;
+using System.Reflection;
 using System.Text.Json;
 using Community.Zabbix.Proxy;
 using Community.Zabbix.Storage.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -24,7 +26,7 @@ public sealed class FluentApiTests
     {
         var services = new ServiceCollection();
         services.AddSingleton(_ => script(new ScriptedApi()));
-        services.AddZabbix(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
+        services.AddZabbix().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
         services.AddHttpClient(ZabbixHttp.GetClientName()).ConfigurePrimaryHttpMessageHandler(provider => provider.GetRequiredService<ScriptedApi>());
         ServiceProvider provider = services.BuildValidated();
         return new Fluent(provider.GetRequiredService<ZabbixClient>(), provider.GetRequiredService<ScriptedApi>(), provider);
@@ -198,13 +200,14 @@ public sealed class FluentApiTests
         => Assert.ThrowsAsync<ArgumentNullException>(() => new FakeHosts().GetAsync((Action<ZabbixHostGetParameters>)null!, TestContext.Current.CancellationToken));
 
     [Fact]
-    public async Task A_double_that_overrides_the_get_serves_the_lambda()
+    public async Task A_double_that_overrides_the_get_serves_the_lambda_and_every_other_overload()
     {
         var hosts = new FakeHosts();
 
         await hosts.GetAsync(q => q.Limit = 3, TestContext.Current.CancellationToken);
-
         Assert.Equal(3, hosts.Last?.Limit);
+        await hosts.GetAsync(TestContext.Current.CancellationToken);
+        Assert.Null(hosts.Last?.Limit);
     }
 
     // ----- the wire client's builder: one set of verbs, on its own container or the application's ----------------------
@@ -958,36 +961,349 @@ public sealed class FluentApiTests
         Assert.Equal(ZabbixTlsMode.Unencrypted, seen.Tls.Mode);                                // a listener's accept set decides, not Mode
     }
 
-    [Fact]
-    public async Task A_client_builder_needs_an_address_and_builds_the_client_it_describes()
-    {
-        Assert.Throws<InvalidOperationException>(() => new ZabbixClientBuilder().WithToken("t").Build());
+    // ----- the API client's builder: one set of verbs, on its own container or the application's ------------------------
 
-        await using ZabbixClient zabbix = new ZabbixClientBuilder()
+    // Every verb of an API client's builder, written once over IZabbixBuilder: one chain sets up a client of its own and a
+    // registered one.
+    private static TBuilder SetUpClient<TBuilder>(TBuilder builder) where TBuilder : IZabbixBuilder
+        => builder
             .WithEndpoint("https://zabbix.example/")
             .WithToken("token")
+            .WithFrontend(new Uri("https://frontend.example/"))
             .WithMaxConnections(20)
             .WithMaxResponseSize(1024)
-            .WithTimeout("history.get", TimeSpan.FromMinutes(1))
-            .WithFrontend(new Uri("https://frontend.example/"))
-            .WithTimeProvider(TimeProvider.System)
-            .Build();
+            .WithTimeout(TimeSpan.FromMinutes(1))
+            .WithTimeout("history.get", TimeSpan.FromMinutes(2))
+            .Configure(options => options.Timeouts["configuration.import"] = TimeSpan.FromMinutes(5))
+            .ConfigureResilience(resilience => resilience.Retry.MaxRetryAttempts = 5);
 
-        Assert.Equal(new Uri("https://zabbix.example/api_jsonrpc.php"), zabbix.Endpoint);
+    [Fact]
+    public async Task The_same_verbs_set_up_a_client_on_its_own_container_and_in_an_application_s()
+    {
+        ZabbixClientBuilder standalone = SetUpClient(ZabbixClient.CreateBuilder());
+        var services = new ServiceCollection();
+        IZabbixBuilder registered = SetUpClient(services.AddZabbix("prod"));
+        using ServiceProvider own = standalone.Services.BuildServiceProvider();
+        using ServiceProvider application = services.BuildValidated();
+
+        // What the verbs wrote, read as the client reads it: the same registrations in both containers.
+        foreach ((ServiceProvider provider, string name) in new[] { (own, Options.DefaultName), (application, "prod") })
+        {
+            ZabbixOptions options = provider.GetRequiredService<IOptionsMonitor<ZabbixOptions>>().Get(name);
+            HttpStandardResilienceOptions resilience = provider.GetRequiredService<IOptionsMonitor<HttpStandardResilienceOptions>>().Get(ZabbixHttp.GetResilienceName(name));
+            Assert.Equal((new Uri("https://zabbix.example/"), new Uri("https://frontend.example/"), 20, 1024L), (options.Endpoint, options.FrontendUri, options.MaxConnectionsPerServer, options.MaxResponseContentBytes));
+            Assert.Equal((TimeSpan.FromMinutes(2), TimeSpan.FromMinutes(5)), (options.Timeouts["history.get"], options.Timeouts["configuration.import"]));
+            Assert.Equal((TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1), 5), (resilience.AttemptTimeout.Timeout, resilience.TotalRequestTimeout.Timeout, resilience.Retry.MaxRetryAttempts));
+            Assert.True(resilience.CircuitBreaker.SamplingDuration >= TimeSpan.FromMinutes(2));   // twice an attempt, as the standard options require
+            Assert.IsType<ZabbixApiTokenCredential>(provider.GetRequiredKeyedService<ZabbixCredential>(name));
+        }
+
+        await using ZabbixClient built = standalone.Build();
+        ZabbixClient prod = application.GetRequiredService<IZabbixClientFactory>().Create("prod");
+        Assert.Equal("prod", registered.Name);
+        Assert.Equal((built.Endpoint, built.FrontendUri), (prod.Endpoint, prod.FrontendUri));
+        Assert.Equal("https://zabbix.example/api_jsonrpc.php", built.Endpoint.AbsoluteUri);
     }
 
     [Fact]
-    public async Task A_client_builder_refuses_a_credential_over_plain_http_unless_told_otherwise()
+    public void A_client_builder_builds_once_and_what_it_built_does_not_change()
     {
-        Assert.Throws<Microsoft.Extensions.Options.OptionsValidationException>(() => new ZabbixClientBuilder().WithEndpoint("http://zabbix.example/").WithToken("t").Build());
+        ZabbixClientBuilder builder = ZabbixClient.CreateBuilder().WithEndpoint("https://zabbix.example/");
+        using ZabbixClient zabbix = builder.Build();
 
-        await using ZabbixClient zabbix = new ZabbixClientBuilder()
-            .WithEndpoint(new Uri("http://zabbix.example/"))
-            .WithLogin(new System.Net.NetworkCredential("user", "password"))
-            .AllowUnencryptedCredentials()
+        Assert.Throws<InvalidOperationException>(() => builder.Build().Dispose());
+        Assert.Throws<InvalidOperationException>(() => builder.WithEndpoint("https://other.example/"));
+        Assert.Throws<InvalidOperationException>(() => builder.WithToken("token"));
+        Assert.Throws<InvalidOperationException>(() => builder.UseTimeProvider(TimeProvider.System));
+        Assert.Equal("https://zabbix.example/api_jsonrpc.php", zabbix.Endpoint.AbsoluteUri);
+    }
+
+    [Fact]
+    public void A_client_builder_checks_the_options_with_the_rules_a_host_checks_at_start()
+    {
+        InvalidOperationException nowhere = Assert.Throws<InvalidOperationException>(() => ZabbixClient.CreateBuilder().WithToken("token").Build().Dispose());
+        InvalidOperationException capped = Assert.Throws<InvalidOperationException>(() => ZabbixClient.CreateBuilder().WithEndpoint("https://zabbix.example/").WithMaxConnections(-1).Build().Dispose());
+        InvalidOperationException clear = Assert.Throws<InvalidOperationException>(() => ZabbixClient.CreateBuilder().WithEndpoint("http://zabbix.example/").WithToken("token").Build().Dispose());
+
+        Assert.Contains(nameof(ZabbixOptions.Endpoint), nowhere.Message, StringComparison.Ordinal);
+        Assert.Contains(nameof(ZabbixOptions.MaxConnectionsPerServer), capped.Message, StringComparison.Ordinal);
+        Assert.Contains(nameof(ZabbixOptions.AllowUnencryptedCredentials), clear.Message, StringComparison.Ordinal);
+        Assert.All([nowhere, capped, clear], refused => Assert.IsType<OptionsValidationException>(refused.InnerException));
+    }
+
+    [Fact]
+    public void A_verb_refuses_what_it_is_passed_where_it_is_passed()
+    {
+        ZabbixClientBuilder builder = ZabbixClient.CreateBuilder();
+
+        Assert.Equal("endpoint", Assert.Throws<ArgumentException>(() => builder.WithEndpoint(new Uri("zabbix", UriKind.Relative))).ParamName);
+        Assert.Throws<UriFormatException>(() => builder.WithEndpoint("zabbix.example"));
+        Assert.Equal("token", Assert.ThrowsAny<ArgumentException>(() => builder.WithToken("a token")).ParamName);
+        Assert.Equal("method", Assert.ThrowsAny<ArgumentException>(() => builder.WithTimeout(" ", TimeSpan.FromMinutes(1))).ParamName);
+    }
+
+    [Fact]
+    public async Task A_client_builder_binds_configuration_in_order_with_its_other_verbs()
+    {
+        IConfiguration section = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Endpoint"] = "https://configured.example/",
+            ["FrontendUri"] = "https://frontend.example/",
+        }).Build();
+
+        await using ZabbixClient zabbix = ZabbixClient.CreateBuilder()
+            .Bind(section)
+            .WithEndpoint("https://zabbix.example/")
             .Build();
 
-        Assert.Equal("http", zabbix.Endpoint.Scheme);
+        Assert.Equal("https://zabbix.example/api_jsonrpc.php", zabbix.Endpoint.AbsoluteUri);   // the later verb
+        Assert.Equal("https://frontend.example/", zabbix.FrontendUri.AbsoluteUri);            // the section
+    }
+
+    [Fact]
+    public void Configure_sets_any_option_of_a_registered_client_in_order_with_the_other_verbs()
+    {
+        var services = new ServiceCollection();
+        IZabbixBuilder prod = services.AddZabbix("prod")
+            .Configure(options =>
+            {
+                options.Endpoint = new Uri("https://other.example/");
+                options.MaxConnectionsPerServer = 7;
+            })
+            .WithEndpoint("https://zabbix.example/");
+        services.AddZabbix("prod").Configure(options => options.AllowUnencryptedCredentials = true);   // the same client, continued
+        using ServiceProvider provider = services.BuildValidated();
+
+        ZabbixOptions options = provider.GetRequiredService<IOptionsMonitor<ZabbixOptions>>().Get("prod");
+
+        Assert.Equal("prod", prod.Name);
+        Assert.Equal((new Uri("https://zabbix.example/"), 7, true), (options.Endpoint, options.MaxConnectionsPerServer, options.AllowUnencryptedCredentials));
+        Assert.Equal("https://zabbix.example/api_jsonrpc.php", provider.GetRequiredService<IZabbixClientFactory>().Create("prod").Endpoint.AbsoluteUri);
+    }
+
+    [Fact]
+    public async Task Configure_resilience_reaches_a_client_its_builder_builds()
+    {
+        using var failing = new FailingApi();
+        await using ZabbixClient zabbix = ZabbixClient.CreateBuilder()
+            .WithEndpoint("https://zabbix.example/")
+            .ConfigureResilience(resilience =>
+            {
+                resilience.Retry.MaxRetryAttempts = 1;
+                resilience.Retry.Delay = TimeSpan.FromMilliseconds(1);
+                resilience.CircuitBreaker.MinimumThroughput = 1000;
+            })
+            .ConfigureHttpClient(http => http.ConfigurePrimaryHttpMessageHandler(() => failing))
+            .Build();
+
+        await Assert.ThrowsAsync<HttpRequestException>(() => zabbix.Hosts.GetAsync(TestContext.Current.CancellationToken));
+
+        Assert.Equal(2, failing.Attempts);   // the first, and the one retry the builder allows
+    }
+
+    [Fact]
+    public async Task A_later_credential_verb_replaces_an_earlier_one()
+    {
+        using var api = new ScriptedApi().On("host.get", "[]");
+        using var bearers = new BearerProbe(api);
+        await using ZabbixClient second = ZabbixClient.CreateBuilder()
+            .WithEndpoint("https://zabbix.example/")
+            .WithToken("first")
+            .WithToken("second")
+            .ConfigureHttpClient(http => http.ConfigurePrimaryHttpMessageHandler(() => bearers))
+            .Build();
+        // Plain http to another host takes no credential; the anonymous one given last is the client's, so it builds.
+        await using ZabbixClient anonymous = ZabbixClient.CreateBuilder()
+            .WithEndpoint("http://zabbix.example/")
+            .WithToken("first")
+            .WithCredential(ZabbixCredential.Anonymous)
+            .ConfigureHttpClient(http => http.ConfigurePrimaryHttpMessageHandler(() => bearers))
+            .Build();
+
+        await second.Hosts.GetAsync(TestContext.Current.CancellationToken);
+        await anonymous.Hosts.GetAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(["second", null], bearers.Seen);
+    }
+
+    [Fact]
+    public async Task A_constructor_builds_the_client_its_builder_would()
+    {
+        await using var constructed = new ZabbixClient("https://zabbix.example/zabbix/", "token");
+        await using ZabbixClient built = ZabbixClient.CreateBuilder().WithEndpoint("https://zabbix.example/zabbix/").WithToken("token").Build();
+
+        Assert.Equal((built.Name, built.Endpoint, built.FrontendUri), (constructed.Name, constructed.Endpoint, constructed.FrontendUri));
+        Assert.Equal(built.Transport.GetType(), constructed.Transport.GetType());
+        Assert.Equal("https://zabbix.example/zabbix/api_jsonrpc.php", constructed.Endpoint.AbsoluteUri);
+    }
+
+    [Fact]
+    public void Disposing_a_built_client_disposes_its_container()
+    {
+        using var loggers = new LoggingProbe();
+        ZabbixClientBuilder builder = ZabbixClient.CreateBuilder().WithEndpoint("https://zabbix.example/");
+        builder.Services.AddSingleton<ILoggerFactory>(_ => loggers);   // the container makes it, so the container disposes it
+        ZabbixClient zabbix = builder.Build();
+
+        Assert.False(loggers.Disposed);
+        zabbix.Dispose();
+        zabbix.Dispose();
+
+        Assert.True(loggers.Disposed);
+    }
+
+    [Fact]
+    public async Task A_built_client_logs_through_the_logging_it_was_given_and_leaves_it_to_the_application()
+    {
+        using var loggers = new LoggingProbe();
+        ZabbixClient zabbix = ZabbixClient.CreateBuilder().WithEndpoint("https://zabbix.example/").UseLogging(loggers).Build();
+
+        await zabbix.DisposeAsync();
+
+        Assert.Contains(typeof(ZabbixClient).FullName, loggers.Categories);
+        Assert.False(loggers.Disposed);
+    }
+
+    // ----- a group's node, and its hosts by name ----------------------------------------------------------------------
+
+    [Fact]
+    public async Task A_group_name_indexer_reads_and_deletes_one_group_and_makes_no_call_until_asked()
+    {
+        using Fluent fluent = Build(api => api
+            .On("hostgroup.get", """[{"groupid":"7","name":"Linux"}]""")
+            .On("hostgroup.delete", """{"groupids":["7"]}"""));
+
+        ZabbixHostGroupNode linux = fluent.Zabbix.HostGroups["Linux"];
+        Assert.Empty(fluent.Api.Calls);
+
+        ZabbixHostGroup group = await linux.GetAsync(TestContext.Current.CancellationToken);
+        await linux.DeleteAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(("Linux", 7UL), (linux.Name, group.GroupId));
+        Assert.Equal("Linux", fluent.Api.ParamsOf("hostgroup.get").First().GetProperty("filter").GetProperty("name").GetString());
+        Assert.Equal("7", fluent.Api.ParamsOf("hostgroup.delete").Single()[0].ToString());
+    }
+
+    [Fact]
+    public async Task A_group_of_no_such_name_is_null_to_find_and_not_found_to_read_or_delete()
+    {
+        using Fluent fluent = Build(api => api.On("hostgroup.get", "[]"));
+
+        Assert.Null(await fluent.Zabbix.HostGroups["none"].FindAsync(TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ZabbixNotFoundException>(() => fluent.Zabbix.HostGroups["none"].GetAsync(TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ZabbixNotFoundException>(() => fluent.Zabbix.HostGroups["none"].DeleteAsync(TestContext.Current.CancellationToken));
+        Assert.Empty(fluent.Api.ParamsOf("hostgroup.delete"));
+    }
+
+    [Fact]
+    public async Task A_group_reaches_its_hosts_by_name_and_reads_a_host_only_in_the_group()
+    {
+        using Fluent fluent = Build(api => api
+            .On("item.get", "[]")
+            .On("host.get", """[{"hostid":"10084","host":"web-01"}]""")
+            .On("hostgroup.get", """[{"groupid":"7","name":"Linux"}]"""));
+
+        ZabbixHostNode web = fluent.Zabbix.HostGroups["Linux"].Hosts["web-01"];
+        List<ZabbixValue> latest = await web.GetLatestAsync(TestContext.Current.CancellationToken).ToListAsync(TestContext.Current.CancellationToken);
+        List<ZabbixHostNode> hosts = await fluent.Zabbix.HostGroups["Linux"].Hosts.ToListAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal("web-01", web.Name);
+        Assert.Empty(latest);
+        JsonElement sent = fluent.Api.ParamsOf("item.get").First();
+        Assert.Equal(("web-01", "Linux"), (sent.GetProperty("host").GetString(), sent.GetProperty("group").GetString()));
+        Assert.Equal(["web-01"], hosts.Select(host => host.Name));
+        Assert.Equal("7", fluent.Api.ParamsOf("host.get").Last().GetProperty("groupids")[0].GetString());
+    }
+
+    [Fact]
+    public void A_group_name_indexer_on_a_client_built_for_mocking_says_so()
+        => Assert.Throws<InvalidOperationException>(() => new FakeGroups()["Linux"]);
+
+    // ----- cancellation: the token last, positionally, and an overload without it --------------------------------------
+
+    [Fact]
+    public async Task A_read_takes_its_token_last_positionally_or_no_token()
+    {
+        using Fluent fluent = Build(api => api.On("host.get", """[{"hostid":"10084","host":"web-01"}]"""));
+        CancellationToken token = TestContext.Current.CancellationToken;
+
+        IReadOnlyList<ZabbixHost> all = await fluent.Zabbix.Hosts.GetAsync(token);
+        await fluent.Zabbix.Hosts.GetAsync(q => q.Limit = 1, token);
+        await fluent.Zabbix.Hosts.GetAsync(new ZabbixHostGetParameters { Limit = 2 }, token);
+        await fluent.Zabbix.Hosts.GetAsync(cancellationToken: token);
+#pragma warning disable xUnit1051 // the overloads without a token are what this pins
+        await fluent.Zabbix.Hosts.GetAsync();
+        await fluent.Zabbix.Hosts.GetAsync(q => q.Limit = 3);
+        await fluent.Zabbix.Hosts.GetAsync(new ZabbixHostGetParameters { Limit = 4 });
+#pragma warning restore xUnit1051
+
+        Assert.Equal("web-01", Assert.Single(all).TechnicalName);
+        Assert.Equal([null, 1, 2, null, null, 3, 4], fluent.Api.ParamsOf("host.get").Select(sent => sent.TryGetProperty("limit", out JsonElement limit) ? limit.GetInt32() : (int?)null));
+    }
+
+    [Fact]
+    public async Task A_cancelled_token_stops_every_overload_before_it_sends()
+    {
+        using Fluent fluent = Build(api => api.On("host.get", "[]").On("item.get", "[]"));
+        using var stop = new CancellationTokenSource();
+        await stop.CancelAsync();
+        CancellationToken cancelled = stop.Token;
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => fluent.Zabbix.Hosts.GetAsync(cancelled));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => fluent.Zabbix.Hosts.GetAsync(q => q.Limit = 1, cancelled));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => fluent.Zabbix.Hosts.CountAsync(cancelled));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => fluent.Zabbix.Hosts.CreateAsync("web-02", [1UL], cancelled));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => fluent.Zabbix.Hosts.DeleteAsync(1UL, cancelled));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => fluent.Zabbix.SendAsync("host.get", JsonDocument.Parse("{}").RootElement, cancelled));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
+            await fluent.Zabbix.Hosts["web-01"].GetHistoryAsync(ZabbixItemKeys.Cpu.Load(), TimeSpan.FromHours(1), cancelled).ToListAsync(TestContext.Current.CancellationToken));
+
+        Assert.Empty(fluent.Api.Calls);
+    }
+
+    [Fact]
+    public void Every_async_member_of_the_api_client_takes_its_token_last_and_optional_only_when_alone()
+    {
+        static bool Async(Type type) => DesignConformanceTests.ReturnsTask(type) || (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IAsyncEnumerable<>));
+        static string[] Shape(MethodInfo method) => [.. method.GetParameters().Select(parameter => parameter.ParameterType.ToString())];
+        MethodInfo[] members = [.. typeof(ZabbixClient).Assembly.GetExportedTypes()
+            .SelectMany(type => type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly))
+            .Where(method => !method.IsSpecialName && Async(method.ReturnType) && method.Name != nameof(IAsyncEnumerable<int>.GetAsyncEnumerator) && method.Name != nameof(IAsyncDisposable.DisposeAsync))];
+
+        // A member without a token has one beside it that takes the token last; one with a token takes it last, optional only
+        // when no other overload of its name has an optional parameter (RS0026).
+        IEnumerable<string> untokened = members
+            .Where(method => method.GetParameters() is not [.., { ParameterType: var last }] || last != typeof(CancellationToken))
+            .Where(method => !members.Any(other => other.DeclaringType == method.DeclaringType && other.Name == method.Name
+                && Shape(other).SequenceEqual([.. Shape(method), typeof(CancellationToken).ToString()])))
+            .Select(method => $"{method.DeclaringType!.Name}.{method.Name}({string.Join(", ", Shape(method))})");
+        IEnumerable<string> optionalBesideOthers = members
+            .Where(method => method.GetParameters().Any(parameter => parameter.IsOptional))
+            .Where(method => members.Any(other => other != method && other.DeclaringType == method.DeclaringType && other.Name == method.Name
+                && other.GetParameters().Any(parameter => parameter.IsOptional)))
+            .Select(method => $"{method.DeclaringType!.Name}.{method.Name}({string.Join(", ", Shape(method))})");
+
+        Assert.True(members.Length > 500, $"{members.Length} async members found");
+        DesignConformanceTests.AssertNone(untokened.Concat(optionalBesideOthers));
+    }
+
+    [Fact]
+    public async Task A_typed_history_takes_its_window_and_a_token_or_none()
+    {
+        using Fluent fluent = Build(api => api
+            .On("item.get", """[{"itemid":"1","hostid":"10","key_":"system.cpu.load[all,avg1]","value_type":"0","hosts":[{"hostid":"10","host":"web-01"}]}]""")
+            .On("history.get", "[]"));
+        ZabbixHostNode web = fluent.Zabbix.Hosts["web-01"];
+
+        List<ZabbixSample<double>> windowed = await web.GetHistoryAsync(ZabbixItemKeys.Cpu.Load(), TimeSpan.FromHours(1), TestContext.Current.CancellationToken).ToListAsync(TestContext.Current.CancellationToken);
+#pragma warning disable xUnit1051 // the overloads without a token are what this pins
+        List<ZabbixSample<double>> bare = await web.GetHistoryAsync(ZabbixItemKeys.Cpu.Load(), TimeSpan.FromHours(1)).ToListAsync(TestContext.Current.CancellationToken);
+        List<ZabbixSample<double>> ranged = await web.GetHistoryAsync(ZabbixItemKeys.Cpu.Load(), DateTimeOffset.UnixEpoch, null).ToListAsync(TestContext.Current.CancellationToken);
+#pragma warning restore xUnit1051
+
+        Assert.All([windowed, bare, ranged], Assert.Empty);
+        Assert.Equal(3, fluent.Api.ParamsOf("item.get").Count(sent => sent.GetProperty("filter").GetProperty("key_").GetString() == "system.cpu.load[all,avg1]"));
+        Assert.Contains(fluent.Api.ParamsOf("history.get"), sent => sent.GetProperty("time_from").ToString() == "0");
     }
 
     [Fact]
@@ -1017,10 +1333,46 @@ public sealed class FluentApiTests
     {
         public ZabbixHostGetParameters? Last { get; private set; }
 
-        public override Task<IReadOnlyList<ZabbixHost>> GetAsync(ZabbixHostGetParameters? parameters = null, CancellationToken cancellationToken = default)
+        public override Task<IReadOnlyList<ZabbixHost>> GetAsync(ZabbixHostGetParameters parameters, CancellationToken cancellationToken)
         {
             Last = parameters;
             return Task.FromResult<IReadOnlyList<ZabbixHost>>([]);
+        }
+    }
+
+    private sealed class FakeGroups : ZabbixHostGroupClient;
+
+    // Answers every request with a server error, so a read is retried as often as the resilience handler allows.
+    private sealed class FailingApi : HttpMessageHandler
+    {
+        private int _attempts;
+
+        public int Attempts => Volatile.Read(ref _attempts);
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            Interlocked.Increment(ref _attempts);
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+        }
+    }
+
+    // The bearer token each request carries, in order, before the scripted API answers it.
+    private sealed class BearerProbe(HttpMessageHandler api) : DelegatingHandler(api)
+    {
+        private readonly List<string?> _seen = [];
+
+        public IReadOnlyList<string?> Seen
+        {
+            get
+            {
+                lock (_seen) return [.. _seen];
+            }
+        }
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            lock (_seen) _seen.Add(request.Headers.Authorization?.Parameter);
+            return base.SendAsync(request, cancellationToken);
         }
     }
 }

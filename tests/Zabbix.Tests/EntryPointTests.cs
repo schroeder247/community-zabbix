@@ -46,7 +46,7 @@ public sealed class EntryPointTests
     public void A_registered_client_reads_the_frontend_s_address_the_same_way()
     {
         var services = new ServiceCollection();
-        services.AddZabbix(options => options.Endpoint = new Uri("https://zabbix.example/zabbix/"));
+        services.AddZabbix().Configure(options => options.Endpoint = new Uri("https://zabbix.example/zabbix/"));
         using ServiceProvider provider = services.BuildValidated();
 
         Assert.Equal("https://zabbix.example/zabbix/api_jsonrpc.php", provider.GetRequiredService<ZabbixClient>().Endpoint.AbsoluteUri);
@@ -57,7 +57,7 @@ public sealed class EntryPointTests
     {
         Assert.Throws<ArgumentNullException>(() => new ZabbixClient((string)null!, ZabbixCredential.Anonymous));
         Assert.Throws<UriFormatException>(() => new ZabbixClient("zabbix.example", ZabbixCredential.Anonymous));
-        using var client = new ZabbixClient("https://zabbix.example/", ZabbixCredential.Anonymous, new ZabbixOptions { MaxConnectionsPerServer = 4 });
+        using var client = new ZabbixClient("https://zabbix.example/", ZabbixCredential.Anonymous);
 
         Assert.Equal("https://zabbix.example/api_jsonrpc.php", client.Endpoint.AbsoluteUri);
     }
@@ -67,7 +67,7 @@ public sealed class EntryPointTests
     {
         var time = new FakeTimeProvider();
         using var loggers = new TrackedLoggerFactory();
-        var client = new ZabbixClient(new Uri("https://zabbix.example/"), ZabbixCredential.Anonymous, new ZabbixOptions(), loggers, time);
+        ZabbixClient client = ZabbixClient.CreateBuilder().WithEndpoint(new Uri("https://zabbix.example/")).UseLogging(loggers).UseTimeProvider(time).Build();
 
         Assert.Same(loggers, client.Loggers);
         Assert.Same(time, client.Time);

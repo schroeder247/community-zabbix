@@ -302,11 +302,9 @@ using Microsoft.Extensions.Hosting;
 using Community.Zabbix;
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
-builder.Services.AddZabbix("prod", options =>
-{
-    options.Endpoint = new Uri("https://zabbix.example/");
-    options.ApiToken = File.ReadAllText("zabbix.token").Trim();
-});
+builder.Services.AddZabbix("prod")
+    .WithEndpoint("https://zabbix.example/")
+    .WithToken(File.ReadAllText("zabbix.token").Trim());
 builder.Logging.AddZabbixRedaction();                 // erases the token from logs
 
 using IHost app = builder.Build();

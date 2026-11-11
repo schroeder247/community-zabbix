@@ -237,7 +237,9 @@ public sealed class ZabbixFrontendTests
     [InlineData("https://api.zbx.example/api_jsonrpc.php", "https://ui.zbx.example/monitoring", "https://ui.zbx.example/monitoring/")]
     public void The_base_is_the_endpoints_folder_unless_the_options_name_one(string endpoint, string? frontend, string expected)
     {
-        using var client = new ZabbixClient(new Uri(endpoint), ZabbixCredential.Anonymous, new ZabbixOptions { FrontendUri = frontend is null ? null : new Uri(frontend) });
+        ZabbixClientBuilder builder = ZabbixClient.CreateBuilder().WithEndpoint(new Uri(endpoint));
+        if (frontend is not null) builder.WithFrontend(new Uri(frontend));
+        using ZabbixClient client = builder.Build();
 
         Assert.Equal(expected, client.FrontendUri.AbsoluteUri);
     }
@@ -247,9 +249,10 @@ public sealed class ZabbixFrontendTests
     [InlineData("/zabbix/")]
     public void A_frontend_uri_that_is_not_absolute_http_fails_validation(string frontend)
     {
-        OptionsValidationException refused = Assert.Throws<OptionsValidationException>(
-            () => new ZabbixClient(new Uri("https://zbx.example/api_jsonrpc.php"), ZabbixCredential.Anonymous, new ZabbixOptions { FrontendUri = new Uri(frontend, UriKind.RelativeOrAbsolute) }));
+        InvalidOperationException refused = Assert.Throws<InvalidOperationException>(
+            () => ZabbixClient.CreateBuilder().WithEndpoint("https://zbx.example/api_jsonrpc.php").WithFrontend(new Uri(frontend, UriKind.RelativeOrAbsolute)).Build().Dispose());
         Assert.Contains("FrontendUri", refused.Message, StringComparison.Ordinal);
+        Assert.IsType<OptionsValidationException>(refused.InnerException);
         Assert.Throws<ArgumentException>(() => new ZabbixFrontend(new Uri(frontend, UriKind.RelativeOrAbsolute), new Version(7, 0)));
     }
 

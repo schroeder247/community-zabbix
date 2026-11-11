@@ -29,7 +29,7 @@ public sealed class GeneratedApiTests
     private static (ZabbixClient Server, ScriptedApi Api) Build(ScriptedApi api)
     {
         var services = new ServiceCollection();
-        services.AddZabbix(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
+        services.AddZabbix().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
         services.AddHttpClient(ZabbixHttp.GetClientName()).ConfigurePrimaryHttpMessageHandler(() => api);
         ServiceProvider provider = services.BuildValidated();
         return (provider.GetRequiredService<ZabbixClient>(), api);
@@ -612,13 +612,18 @@ public sealed class GeneratedApiTests
     {
         // hostdashboard.get refuses a call without hostids (CHostDashboard.php 8.0:33, API_REQUIRED); serverinfo.get one
         // without serverid (CServerInfo.php 8.0:46). The record cannot be built without them, and GetAsync has no
-        // "everything" overload a caller could reach for.
+        // "everything" overload a caller could reach for: it's one overload, whose token is optional.
         Assert.NotNull(typeof(ZabbixHostDashboardGetParameters).GetProperty(nameof(ZabbixHostDashboardGetParameters.HostIds))!.GetCustomAttribute<System.Runtime.CompilerServices.RequiredMemberAttribute>());
         Assert.NotNull(typeof(ZabbixServerInfoGetParameters).GetProperty(nameof(ZabbixServerInfoGetParameters.ServerId))!.GetCustomAttribute<System.Runtime.CompilerServices.RequiredMemberAttribute>());
         Assert.Null(typeof(ZabbixHostDashboardGetParameters).GetProperty(nameof(ZabbixHostDashboardGetParameters.DashboardIds))!.GetCustomAttribute<System.Runtime.CompilerServices.RequiredMemberAttribute>());
         Assert.All([typeof(ZabbixHostDashboardClient).GetMethod(nameof(ZabbixHostDashboardClient.GetAsync))!, typeof(ZabbixHostDashboardClient).GetMethod(nameof(ZabbixHostDashboardClient.CountAsync))!,
             typeof(ZabbixServerInfoClient).GetMethod(nameof(ZabbixServerInfoClient.GetAsync))!], method => Assert.False(method.GetParameters()[0].IsOptional));
-        Assert.True(typeof(ZabbixHostClient).GetMethod(nameof(ZabbixHostClient.GetAsync), [typeof(ZabbixHostGetParameters), typeof(CancellationToken)])!.GetParameters()[0].IsOptional);   // the others stay optional
+        Assert.All([typeof(ZabbixHostDashboardClient).GetMethod(nameof(ZabbixHostDashboardClient.GetAsync))!, typeof(ZabbixServerInfoClient).GetMethod(nameof(ZabbixServerInfoClient.GetAsync))!],
+            method => Assert.True(method.GetParameters()[^1].IsOptional));
+        // The others take everything, the parameters or a lambda, each with a token and without one.
+        Assert.NotNull(typeof(ZabbixHostClient).GetMethod(nameof(ZabbixHostClient.GetAsync), System.Type.EmptyTypes));
+        Assert.NotNull(typeof(ZabbixHostClient).GetMethod(nameof(ZabbixHostClient.GetAsync), [typeof(CancellationToken)]));
+        Assert.False(typeof(ZabbixHostClient).GetMethod(nameof(ZabbixHostClient.GetAsync), [typeof(ZabbixHostGetParameters), typeof(CancellationToken)])!.GetParameters()[0].IsOptional);
     }
 
     [Fact]
@@ -1486,7 +1491,7 @@ public sealed class GeneratedApiTests
 
     private sealed class FakeHosts : ZabbixHostClient
     {
-        public override Task<IReadOnlyList<ZabbixHost>> GetAsync(ZabbixHostGetParameters? parameters = null, CancellationToken cancellationToken = default)
+        public override Task<IReadOnlyList<ZabbixHost>> GetAsync(ZabbixHostGetParameters parameters, CancellationToken cancellationToken)
             => Task.FromResult<IReadOnlyList<ZabbixHost>>([new ZabbixHost { HostId = 1, TechnicalName = "web-01" }]);
     }
 

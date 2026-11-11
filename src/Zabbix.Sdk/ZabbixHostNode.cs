@@ -37,22 +37,53 @@ public class ZabbixHostNode : ZabbixNode, IAsyncEnumerable<ZabbixItemNode>
             ? new ZabbixSample<T>(value.Time, item.Parse(value.Value))
             : null;
 
-    /// <summary>Reads a typed item's history over the last <paramref name="window"/>, oldest first. To cancel it, call <c>WithCancellation</c> on the sequence.</summary>
+    /// <summary>
+    /// Reads a typed item's history over the last <paramref name="window"/>, oldest first, as
+    /// <see cref="GetHistoryAsync{T}(ZabbixItemKey{T}, TimeSpan, CancellationToken)"/> does.
+    /// </summary>
     /// <typeparam name="T">The item's value type.</typeparam>
     /// <param name="item">The item to read.</param>
     /// <param name="window">How far back to read.</param>
     /// <returns>The values and their times.</returns>
     /// <exception cref="ZabbixNotFoundException">The host or the item doesn't exist.</exception>
-    public virtual IAsyncEnumerable<ZabbixSample<T>> GetHistoryAsync<T>(ZabbixItemKey<T> item, TimeSpan window)
+    public IAsyncEnumerable<ZabbixSample<T>> GetHistoryAsync<T>(ZabbixItemKey<T> item, TimeSpan window)
         where T : ISpanParsable<T>
-        => GetHistoryAsync(item, Client.Time.GetUtcNow() - window, null, CancellationToken.None);
+        => GetHistoryAsync(item, window, CancellationToken.None);
+
+    /// <summary>
+    /// Reads a typed item's history over the last <paramref name="window"/>, oldest first: from <paramref name="window"/> before
+    /// the call, on the client's clock, up to now.
+    /// </summary>
+    /// <typeparam name="T">The item's value type.</typeparam>
+    /// <param name="item">The item to read.</param>
+    /// <param name="window">How far back to read.</param>
+    /// <param name="cancellationToken">A cancellation token, which reaches the socket.</param>
+    /// <returns>The values and their times.</returns>
+    /// <exception cref="ZabbixNotFoundException">The host or the item doesn't exist.</exception>
+    public virtual IAsyncEnumerable<ZabbixSample<T>> GetHistoryAsync<T>(ZabbixItemKey<T> item, TimeSpan window, CancellationToken cancellationToken)
+        where T : ISpanParsable<T>
+        => GetHistoryAsync(item, Client.Time.GetUtcNow() - window, null, cancellationToken);
+
+    /// <summary>
+    /// Reads a typed item's history from <paramref name="from"/> to <paramref name="till"/>, oldest first, as
+    /// <see cref="GetHistoryAsync{T}(ZabbixItemKey{T}, DateTimeOffset, DateTimeOffset?, CancellationToken)"/> does.
+    /// </summary>
+    /// <typeparam name="T">The item's value type.</typeparam>
+    /// <param name="item">The item to read.</param>
+    /// <param name="from">The earliest time to read.</param>
+    /// <param name="till">The latest time to read; now when <see langword="null"/>.</param>
+    /// <returns>The values and their times.</returns>
+    /// <exception cref="ZabbixNotFoundException">The host or the item doesn't exist.</exception>
+    public IAsyncEnumerable<ZabbixSample<T>> GetHistoryAsync<T>(ZabbixItemKey<T> item, DateTimeOffset from, DateTimeOffset? till)
+        where T : ISpanParsable<T>
+        => GetHistoryAsync(item, from, till, CancellationToken.None);
 
     /// <summary>Reads a typed item's history from <paramref name="from"/> to <paramref name="till"/>, oldest first.</summary>
     /// <typeparam name="T">The item's value type.</typeparam>
     /// <param name="item">The item to read.</param>
     /// <param name="from">The earliest time to read.</param>
     /// <param name="till">The latest time to read; now when <see langword="null"/>.</param>
-    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <param name="cancellationToken">A cancellation token, which reaches the socket.</param>
     /// <returns>The values and their times.</returns>
     /// <exception cref="ZabbixNotFoundException">The host or the item doesn't exist.</exception>
     public virtual async IAsyncEnumerable<ZabbixSample<T>> GetHistoryAsync<T>(ZabbixItemKey<T> item, DateTimeOffset from, DateTimeOffset? till, [EnumeratorCancellation] CancellationToken cancellationToken)

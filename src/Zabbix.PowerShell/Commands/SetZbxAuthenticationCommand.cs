@@ -97,5 +97,5 @@ public sealed class SetZbxAuthenticationCommand : ZabbixSingletonSetCmdlet<Zabbi
 
     /// <inheritdoc/>
     protected override async Task<object?> GetAsync(CancellationToken cancellationToken)
-        => await ZabbixClient.Authentication.GetAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+        => await ZabbixClient.Authentication.GetAsync(cancellationToken).ConfigureAwait(false);
 }

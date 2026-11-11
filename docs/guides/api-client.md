@@ -42,41 +42,60 @@ Pass the frontend's address and an API token. You must dispose a client you cons
   `https://zabbix.example/zabbix/api_jsonrpc.php`.
 - An address that names a script is used as given. `ZabbixOptions.GetApiEndpoint` returns what an address becomes.
 
-To set options, logging, or the clock, use `ZabbixClientBuilder`:
+To set more than the address and the credential, use the builder:
 
 ```csharp
 using ILoggerFactory loggers = LoggerFactory.Create(logging => logging.AddConsole().AddZabbixRedaction());
 
-await using ZabbixClient zabbix = new ZabbixClientBuilder()
+await using ZabbixClient zabbix = ZabbixClient.CreateBuilder()
     .WithEndpoint("https://zabbix.example/")
     .WithToken(token)
     .WithMaxConnections(20)
-    .WithLogging(loggers)
+    .UseLogging(loggers)
     .Build();
 ```
 
-The builder sets what `ZabbixOptions` holds. You can also pass the options yourself, to the longest constructor:
+Each of these gives the same client, with the same HTTP pipeline and resilience:
 
-| Parameter | What it does |
+| To | Use |
 | --- | --- |
-| `options` | Copied, so later changes don't reach the client. Naming another `Endpoint`, or carrying an `ApiToken` beside the credential, throws `ArgumentException`. [Configuration](configuration.md) lists the options. |
-| `loggers` | Where the client logs. You own it, and the client doesn't dispose it. Without one, the client logs nowhere. Its traces and metrics still flow, because activity sources and meters are process-wide. |
-| `time` | The clock its watchers and session renewals read. |
+| Pass the address and a credential | `new ZabbixClient(endpoint, token)`, with a `NetworkCredential` or a `ZabbixCredential` in place of the token if you need one |
+| Set more | `ZabbixClient.CreateBuilder()`, its verbs, and `Build()` |
+| Share a client in an application with a host | `AddZabbix`, with the same verbs. See [In an application with a host](#in-an-application-with-a-host). |
 
+The builder's verbs apply in the order you call them:
+
+| Verb | What it sets |
+| --- | --- |
+| `WithEndpoint` | The frontend's address or the JSON-RPC endpoint, as a `Uri` or as text. |
+| `WithToken`, `WithLogin`, `WithCredential` | The credential: an API token, a user's name and password, or a `ZabbixCredential`. A later one replaces an earlier one. See [Authenticate](#authenticate). |
+| `AllowUnencryptedCredentials` | Lets the credential go over plain `http` to another host. |
+| `WithFrontend` | Where the web frontend is, when it isn't at the endpoint's folder. |
+| `WithMaxConnections`, `WithMaxResponseSize` | The most connections to the server, and the largest reply the client reads. |
+| `WithTimeout` | How long a call may take, retries included, or how long one method's calls may take. See [Change retries and timeouts](#change-retries-and-timeouts). |
+| `ConfigureResilience`, `ConfigureHttpClient` | The standard resilience handler's options, and the client's `HttpClient`. |
+| `Configure` | Any option, through a delegate. [Configuration](configuration.md) lists the options. |
+| `Bind` | The options in a configuration section, keyed by their names. |
+| `UseLogging`, `UseTimeProvider` | Where the client logs, and the clock it reads. Only the builder from `CreateBuilder()` has these: in a host, the client uses the host's. |
+
+- `Build()` checks the options with the rules a host checks at start. If they don't validate, it throws `InvalidOperationException`,
+  with each failure in the `OptionsValidationException` inside. A constructor throws the `OptionsValidationException` itself.
+- `Build()` runs once. To build another client, create another builder.
+- You must dispose the client you build. The logger factory you pass to `UseLogging` stays yours.
+- Without `UseLogging`, the client logs nowhere. Its traces and metrics still flow, because activity sources and meters are
+  process-wide.
 - `AddConsole` comes from the `Microsoft.Extensions.Logging.Console` package.
-- Options that don't validate throw `OptionsValidationException`.
-- To change the resilience pipeline, register the client with `AddZabbix` instead.
 
 ## Authenticate
 
 | Pass | How it authenticates |
 | --- | --- |
-| A `string` token | Sends an API token (*Users → API tokens*) as `Authorization: Bearer`. `ZabbixOptions.ApiToken` does the same. |
-| A `NetworkCredential` | Calls `user.login` with its user name and password on the first request that needs it. The session id is the token from then on. |
-| A `ZabbixCredential` | Your own, such as one that reads a vault, or `ZabbixCredential.FromApiToken`, `FromLogin`, or `Anonymous`, which sends no token, so only the methods that need no authentication answer. `Anonymous` is the default when you give neither a token nor a credential. |
+| A `string` token, or `WithToken` | Sends an API token (*Users → API tokens*) as `Authorization: Bearer`. `ZabbixOptions.ApiToken` does the same. |
+| A `NetworkCredential`, or `WithLogin` | Calls `user.login` with its user name and password on the first request that needs it. The session id is the token from then on. |
+| A `ZabbixCredential`, or `WithCredential` | Your own, such as one that reads a vault, or `ZabbixCredential.FromApiToken`, `FromLogin`, or `Anonymous`, which sends no token, so only the methods that need no authentication answer. `Anonymous` is the default when you give neither a token nor a credential. |
 
-A credential goes only over `https` or to a loopback host. To send one over plain `http`, set
-`ZabbixOptions.AllowUnencryptedCredentials`. The client never follows an HTTP redirect, so the token goes only to the configured
+A credential goes only over `https` or to a loopback host. To send one over plain `http`, call `AllowUnencryptedCredentials`, or
+set `ZabbixOptions.AllowUnencryptedCredentials`. The client never follows an HTTP redirect, so the token goes only to the configured
 endpoint ([SECURITY.md](../../SECURITY.md)).
 
 ### Log in with a user name and password
@@ -149,14 +168,17 @@ await zabbix.Hosts.CreateAsync(new ZabbixHostCreateRequest            // or any 
 
 | Method | What it does | What it returns |
 | --- | --- | --- |
-| `GetAsync` | Reads the objects its parameters select. Pass a lambda that sets them, or a `*GetParameters` record. | The records |
+| `GetAsync` | Reads the objects its parameters select. Pass a lambda that sets them, a `*GetParameters` record, or nothing for every object. | The records |
 | `FindAsync` | Reads one object by id | The record, or `null` when there's none you may read |
 | `CountAsync` | Counts objects, with the same parameters | The count |
 | `CreateAsync`, `UpdateAsync` | Changes one object or several | The ids the server answered |
 | `DeleteAsync` | Deletes one object or several | For several, the ids the server answered. For one, nothing. |
 | `this[id]` | One object: `GetAsync`, `FindAsync`, and `DeleteAsync` where the API deletes it. It makes no call until you ask. | A node |
 
-- `Hosts["name"]` and `HostGroups["name"]` also take a name. See [The tree and the watcher](tree-and-watcher.md).
+- `Hosts["web-01"]` takes a host's name, and `HostGroups["Linux servers"]` a group's. Each node reads, finds, and deletes its object,
+  and a group's reaches its hosts: `HostGroups["Linux servers"].Hosts["web-01"]`. See [The tree and the watcher](tree-and-watcher.md).
+- Every method takes a `CancellationToken` last: `await zabbix.Hosts.GetAsync(cancellationToken)`. A method with several forms has
+  each one with a token and without one.
 - A request's `required` members are the fields the API requires. A request that's only an id converts from that id, so
   `Groups = [groupId]` needs no wrapper.
 
@@ -227,21 +249,22 @@ Filter on `Kind` (`ZabbixApiErrorKind`) instead of parsing the message. It comes
 
 ## Change retries and timeouts
 
-Change the pipeline per server, on a [registered client](#in-an-application-with-a-host):
+Change the pipeline per client, with the verbs of a builder or of a [registered client](#in-an-application-with-a-host):
 
 ```csharp
-builder.Services.AddZabbix("prod", options =>
-    {
-        options.Endpoint = new Uri("https://zabbix.example/");
-        options.ApiToken = token;
-        options.Timeouts["configuration.import"] = TimeSpan.FromMinutes(5);   // this method's attempt and total timeout
-    })
+builder.Services.AddZabbix("prod")
+    .WithEndpoint("https://zabbix.example/")
+    .WithToken(token)
+    .WithTimeout("configuration.import", TimeSpan.FromMinutes(5))   // this method's attempt and total timeout
     .ConfigureResilience(resilience =>
     {
         resilience.Retry.MaxRetryAttempts = 5;
         resilience.TotalRequestTimeout.Timeout = TimeSpan.FromMinutes(1);
     });
 ```
+
+`WithTimeout(TimeSpan)` sets how long any call may take, retries included: the attempt and the total timeout together, with the
+circuit breaker's sampling duration widened to match. A method `WithTimeout(method, timeout)` names keeps its own.
 
 The pipeline keeps the standard handler's defaults:
 
@@ -303,23 +326,22 @@ using Microsoft.Extensions.Hosting;
 using Community.Zabbix;
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
-builder.Services.AddZabbix("prod", options =>
-{
-    options.Endpoint = new Uri("https://zabbix.example/");
-    options.ApiToken = builder.Configuration["Zabbix:ApiToken"];
-});
+builder.Services.AddZabbix("prod")
+    .WithEndpoint("https://zabbix.example/")
+    .Bind(builder.Configuration.GetSection("Zabbix:Servers:prod"));   // the token, kept out of the source
 builder.Logging.AddZabbixRedaction();          // erases [ZabbixSecret] values from logs
 
 using IHost app = builder.Build();
 ZabbixClient zabbix = app.Services.GetRequiredService<IZabbixClientFactory>().Create("prod");
 ```
 
-- `AddZabbix` registers one client under a name, with its options written in code or bound from a configuration section
-  (`AddZabbix("prod", section)`, see [Configuration](configuration.md)).
-- The overloads without a name register the unnamed client, which is also injected as plain `ZabbixClient`.
-- Registering a name again continues configuring the same client. It never adds a second pipeline.
-- Each call returns an `IZabbixBuilder`, whose verbs write that client's registrations: `WithCredential`, `ConfigureResilience`,
-  `ConfigureHttpClient`, and `Bind`. Giving both `ZabbixOptions.ApiToken` and `WithCredential` fails validation.
+- `AddZabbix("prod")` registers one client under a name and returns an `IZabbixBuilder`, which takes the verbs of
+  [Create a client](#create-a-client) except `UseLogging` and `UseTimeProvider`.
+- `AddZabbix()` without a name registers the unnamed client, which is also injected as plain `ZabbixClient`.
+- Registering a name again continues setting up the same client. It never adds a second pipeline.
+- `Bind` reads the options from a section, keyed by their names. `AddZabbixClients` registers every server a configuration
+  declares. See [Configuration](configuration.md).
+- Giving both `ZabbixOptions.ApiToken` and a credential verb fails validation.
 - `IZabbixClientFactory.Create(name)` returns the client registered under the name, built once and shared. It throws
   `KeyNotFoundException` for a name nobody registered, and `TryCreate` asks first.
 - The client is also a keyed singleton: `[FromKeyedServices("prod")] ZabbixClient zabbix`.

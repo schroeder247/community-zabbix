@@ -14,8 +14,8 @@ public sealed class NamedServerTests
     public void A_named_server_resolves_through_keyed_di_and_the_factory_alike()
     {
         var services = new ServiceCollection();
-        services.AddZabbix("prod", options => options.Endpoint = new Uri("https://prod.example/api_jsonrpc.php"));
-        services.AddZabbix("staging", options => options.Endpoint = new Uri("https://staging.example/api_jsonrpc.php"));
+        services.AddZabbix("prod").Configure(options => options.Endpoint = new Uri("https://prod.example/api_jsonrpc.php"));
+        services.AddZabbix("staging").Configure(options => options.Endpoint = new Uri("https://staging.example/api_jsonrpc.php"));
         using ServiceProvider provider = services.BuildValidated();
 
         ZabbixClient prod = provider.GetRequiredService<IZabbixClientFactory>().Create("prod");
@@ -32,8 +32,8 @@ public sealed class NamedServerTests
     public void Registering_a_name_twice_continues_configuring_that_server()
     {
         var services = new ServiceCollection();
-        services.AddZabbix("prod", options => options.Endpoint = new Uri("https://prod.example/api_jsonrpc.php"));
-        services.AddZabbix("prod", options => options.MaxConnectionsPerServer = 7);
+        services.AddZabbix("prod").Configure(options => options.Endpoint = new Uri("https://prod.example/api_jsonrpc.php"));
+        services.AddZabbix("prod").Configure(options => options.MaxConnectionsPerServer = 7);
         using ServiceProvider provider = services.BuildValidated();
 
         ZabbixOptions options = provider.GetRequiredService<IOptionsMonitor<ZabbixOptions>>().Get("prod");
@@ -47,7 +47,7 @@ public sealed class NamedServerTests
     public void The_unnamed_server_is_also_the_plain_service()
     {
         var services = new ServiceCollection();
-        services.AddZabbix(options => options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"));
+        services.AddZabbix().Configure(options => options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"));
         using ServiceProvider provider = services.BuildValidated();
 
         Assert.Same(provider.GetRequiredService<ZabbixClient>(), provider.GetRequiredKeyedService<ZabbixClient>(Options.DefaultName));
@@ -89,7 +89,7 @@ public sealed class NamedServerTests
         using var failing = new AlwaysFailing();
         using Harness harness = TransportHarness.Build(failing, configure: services =>
         {
-            services.AddZabbix(options => options.MaxConnectionsPerServer = 7);
+            services.AddZabbix().Configure(options => options.MaxConnectionsPerServer = 7);
             services.Configure<Microsoft.Extensions.Http.Resilience.HttpStandardResilienceOptions>(ZabbixHttp.GetResilienceName(), options =>
             {
                 options.Retry.Delay = TimeSpan.FromMilliseconds(1);
@@ -108,7 +108,7 @@ public sealed class NamedServerTests
     public void The_factory_answers_an_unknown_name_with_KeyNotFoundException_and_TryCreate_with_false()
     {
         var services = new ServiceCollection();
-        services.AddZabbix("prod", options => options.Endpoint = new Uri("https://prod.example/api_jsonrpc.php"));
+        services.AddZabbix("prod").Configure(options => options.Endpoint = new Uri("https://prod.example/api_jsonrpc.php"));
         using ServiceProvider provider = services.BuildValidated();
         IZabbixClientFactory factory = provider.GetRequiredService<IZabbixClientFactory>();
 

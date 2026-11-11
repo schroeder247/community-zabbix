@@ -47,7 +47,7 @@ public sealed class AdversarialApiTreeTests
         var time = new FakeTimeProvider(DateTimeOffset.FromUnixTimeSeconds(T0 + 5));
         var services = new ServiceCollection();
         services.AddSingleton<TimeProvider>(time);
-        services.AddZabbix(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
+        services.AddZabbix().Configure(options => { options.Endpoint = new Uri("https://zbx.example/api_jsonrpc.php"); options.ApiToken = "tok"; });
         services.AddHttpClient(ZabbixHttp.GetClientName()).ConfigurePrimaryHttpMessageHandler(() => api);
         ServiceProvider provider = services.BuildValidated();
         return new Harness
