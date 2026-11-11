@@ -71,15 +71,16 @@ extension<TBuilder>(TBuilder builder) where TBuilder : IZabbixPushAgentBuilder
 - `Build()` validates the options with the validator that DI uses, and runs once, as `HostApplicationBuilder.Build()` does.
 - A built component's settings don't change. What a component exists to change at run time, such as an agent's items, keeps its own members.
 - The name is the component's identity: an agent's host name, or a proxy's name. `Configure` can set a different one.
+- A component from the container, or from a factory by its name, is shared: the container owns it and disposes it, and a caller's `Dispose` leaves it running, as disposing an `HttpClient` from `IHttpClientFactory` leaves its handler.
 - The classes keep 0010's constructors `()`, `(options)` and `(options, loggers, time, meters)`, for an application that sets `Options` itself. The positional ones go, and so do the instance `Add…` methods: the builders are the fluent path, so there's one copy of each verb.
 
 ### 2. One meaning per verb
 
 | Verb | Means | Examples |
 | --- | --- | --- |
-| `Add…` | One more, never a replacement | `AddServer`, `AddPoll`, `AddItem`, `AddItems<T>`, `AddSource`, `AddMeter`, `AddTrapper`, `AddPlugins`, `AddHealthCheck` |
+| `Add…` | One more, never a replacement | `AddServer` (an agent's destinations), `AddPoll`, `AddItem`, `AddItems<T>`, `AddSource`, `AddMeter`, `AddTrapper`, `AddPlugins`, `AddHealthCheck` |
 | `Use…` | The one component of its kind; a later call replaces an earlier one | `UseStore`, `UseMemoryStore`, `UseEntityFrameworkStore`, `UseSocketTransport`, `UseLogging`, `UseTimeProvider` |
-| `With…` | One attribute of what's built | `WithEndpoint`, `WithToken`, `WithCredential`, `WithPsk`, `WithCertificate`, `WithTimeout`, `WithCompression`, `WithVersion` |
+| `With…` | One attribute of what's built | `WithServer` (the one server of the wire client or an active proxy), `WithEndpoint`, `WithToken`, `WithCredential`, `WithPsk`, `WithCertificate`, `WithTimeout`, `WithCompression`, `WithVersion` |
 | `Allow…` | Who may connect | `AllowPeer`, `AllowPsk`, `AllowUnencryptedCredentials` |
 | `On…` | What answers a request the component receives | `OnTask`, `OnConfig`, `OnStats`, `OnRequest` |
 | `Configure` | Any option, through a delegate, applied in order | `Configure(o => o.Send.BatchSize = 100)` |
@@ -87,7 +88,7 @@ extension<TBuilder>(TBuilder builder) where TBuilder : IZabbixPushAgentBuilder
 
 | Was | Is |
 | --- | --- |
-| `WithServer(...)`, `SendTo(...)` | `AddServer(...)` |
+| `WithServer(...)`, `SendTo(...)` | `AddServer(...)` on an agent, which sends to every server it has; `WithServer(...)` on the wire client and an active proxy, which have one. Several nodes in one call are one HA cluster either way |
 | `AddStore(...)` | `UseStore(...)`, `UseMemoryStore()` or `UseEntityFrameworkStore(db => ...)` |
 | `WithSession(token)` | `WithToken(token)` |
 | `WithLogging(...)`, `WithTimeProvider(...)` | `UseLogging(...)`, `UseTimeProvider(...)` |
@@ -109,7 +110,7 @@ A typed key is `ZabbixItemKey<T>`, beside the untyped `ZabbixItemKey` as `Task<T
 
 A standalone builder resolves a service from its own `Services`, where the application can register one, as with `AddZabbix…`.
 
-`AddPoll` takes the same shapes without the key, since a poll reads the key it was given. The active and the passive agent's builders are both `IZabbixItemsBuilder`, the plugin contract, so each `AddItem` is written once for both. Items belong to the agent's name: an active and a passive agent of one name answer the same items, as one Zabbix agent answers both kinds of check. More than one service, or state kept between reads, is a `ZabbixItemProvider` class, added with `AddItems<TProvider>()`.
+`AddPoll` takes the same shapes without the key, since a poll reads the key it was given. The API's item key is a `ZabbixItemKey` too, and an item created from a typed key takes its value type from `T`: `zabbix.Items.CreateAsync(hostId, Pending, ZabbixItemType.Trapper, i => i.Name = "Pending")`. The active and the passive agent's builders are both `IZabbixItemsBuilder`, the plugin contract, so each `AddItem` is written once for both. Items belong to the agent's name: an active and a passive agent of one name answer the same items, as one Zabbix agent answers both kinds of check. More than one service, or state kept between reads, is a `ZabbixItemProvider` class, added with `AddItems<TProvider>()`.
 
 ### 4. Writes take a lambda, as reads do
 
@@ -126,7 +127,9 @@ await zabbix.Hosts["web-02"].UpdateAsync(h => h.Status = ZabbixHostStatus.Disabl
 - A create with a short overload also takes a lambda for the optional fields. A node's `UpdateAsync` takes one, and fills in the id.
 - A request's required fields are `required`, and its constructor takes them. Its optional fields have setters, as the Azure guidelines have them, so `CreateAsync(new("web-02", [linux]) { Tags = [("env", "prod")] })` works too.
 - Nested values have factories and conversions: `ZabbixInterface.Agent(address)`, a tag from a `(string, string)` tuple, and a group or template from its id.
-- A group's node reaches its hosts by indexer, `zabbix.HostGroups["Linux"].Hosts["web-01"]`. A typed read takes its key, `host.GetHistoryAsync(ZabbixItemKeys.Cpu.Load(), TimeSpan.FromHours(1))`, because C# has no generic indexers.
+- A group's node reaches its hosts by indexer, `zabbix.HostGroups["Linux"].Hosts["web-01"]`, and a host's node its items, `host.Items["system.uptime"]`. A typed read takes its key, `host.GetHistoryAsync(ZabbixItemKeys.Cpu.Load(), TimeSpan.FromHours(1))`, because C# has no generic indexers. A host reached by id or by name is the same node type.
+- `Get…` throws when there's nothing to return and `Find…` returns `null`, everywhere.
+- A get's parameters leave out what changes the shape of the reply (`countOutput`, `preservekeys`): `CountAsync` counts.
 
 ### 5. Types for what was text
 
@@ -138,14 +141,26 @@ await zabbix.Hosts["web-02"].UpdateAsync(h => h.Status = ZabbixHostStatus.Disabl
 | An item's trapper hosts as text | A list of `ZabbixPeer`, which converts from an `IPAddress` or an `IPNetwork`; `ZabbixPeer.Parse` takes a host name or a macro |
 | An item's delay as text | `ZabbixInterval`, which converts from a `TimeSpan`; `ZabbixInterval.Parse` takes a macro or a flexible interval |
 | An interface's port as text | `ZabbixPort`, which converts from an `int`; `ZabbixPort.Parse` takes a macro |
-| Output and sort fields as strings | `ZabbixField<TRecord>`, so a host's field doesn't compile in an item's query |
+| Output and sort fields as strings | `ZabbixField<TRecord>`, so a host's field doesn't compile in an item's query; a sort is one list of fields with their directions |
+| History, trends and timeouts as text | `ZabbixDuration`, which converts from a `TimeSpan` |
+| A reply as `JsonElement` where its schema is known | A model type |
+| An API method named by a string: `WithTimeout("configuration.import", ...)` | A `ZabbixApiMethod` value |
+| A certificate as file paths only | An `X509Certificate2`, or the paths |
 
 - Options keep the text that configuration spells, because the configuration binder fills them from `appsettings.json` and can't make a `DnsEndPoint` or an `IPNetwork`. The verbs take the .NET types, and write that text.
 - A value in a request that Zabbix also accepts as a macro converts implicitly from its .NET type, and its `Parse` takes Zabbix's spelling.
 
 ### 6. Every async member can be cancelled
 
-A `CancellationToken` is the last parameter of every async member. It's optional when the member is the only overload with optional parameters, as RS0026 requires. Otherwise an overload without the token calls the one with it.
+A `CancellationToken` is the last parameter of every async member, and it's optional on every overload (`cancellationToken = default`), as the Azure guidelines and Microsoft.Extensions.AI have it. RS0026 is suppressed for these overloads: an extra overload without the token for each shape doubled the surface, six `GetAsync` overloads where three say the same.
+
+### 7. One spelling per concept
+
+- **Names:** `HostName`, `UserName`, `LogOutAsync`, and member names without abbreviations (`DiscoveryRuleId`, not `DruleId`).
+- **Registrations:** `AddZabbixClient` and `IZabbixClientBuilder`, beside `AddZabbixWireClient` and `IZabbixWireClientBuilder`.
+- **Types:** a Zabbix version is a `System.Version`; a package uses the API's enums rather than copies of them; a reason is an enum, not a string constant.
+- **Parameters:** public constructors take `(options, loggers, time, meters)`, with an `ILoggerFactory`; two or more booleans are an enum.
+- **Interfaces:** no public interface is empty: a builder capability carries `Name` and `Services`.
 
 ### The SDK, end to end
 
